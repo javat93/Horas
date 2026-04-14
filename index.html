@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PercuManager Pro - La Galeta Percussió</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAdf5ltXokEUNvM01jNlESvXMGGu28G0W0&libraries=places" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        :root { --brand-blue: #2563eb; --brand-dark: #1e40af; --brand-light: #eff6ff; --bg-main: #f8fafc; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: #1e293b; }
+        .header-modern { background: white; border-bottom: 1px solid #e2e8f0; }
+        .tab-active { color: var(--brand-blue); background-color: var(--brand-light); font-weight: 700; }
+        .card-modern { background: white; border-radius: 1.25rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.2s; }
+        .card-modern:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+        .btn-blue { background-color: var(--brand-blue); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .input-modern { border: 2px solid #f1f5f9; background-color: #f8fafc; transition: all 0.2s; }
+        .input-modern:focus { border-color: var(--brand-blue); background-color: white; outline: none; }
+        .glass-modal { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
+        .pac-container { border-radius: 1rem; border: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); font-family: inherit; z-index: 9999 !important; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <header class="header-modern pt-4 pb-4 px-4 mb-8 sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center">
+                    <img src="https://ui-avatars.com/api/?name=La+Galeta&background=2563eb&color=fff&rounded=true&bold=true" alt="Logo La Galeta" class="w-12 h-12 shadow-sm rounded-full border-2 border-white">
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight text-slate-900 leading-none">PercuManager</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Sincronizado con Sheets</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button id="sync-btn" onclick="syncData()" class="hidden bg-emerald-50 text-emerald-600 font-bold px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-all flex items-center gap-2 text-sm">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Sincronizar</span>
+                </button>
+                <button id="auth-btn" onclick="handleAuthClick()" class="bg-white border-2 border-slate-100 text-slate-700 font-bold px-5 py-2.5 rounded-xl hover:border-blue-200 hover:text-blue-600 transition-all flex items-center gap-2 text-sm shadow-sm">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> 
+                    <span id="auth-text" class="hidden sm:inline">Conectar Google</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4">
+        <div class="flex p-1.5 bg-white rounded-2xl shadow-sm border border-slate-100 mb-8 max-w-md mx-auto">
+            <button onclick="switchTab('eventos')" id="btn-eventos" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 tab-active">
+                <i data-lucide="layout-list" class="w-4 h-4"></i> Lista
+            </button>
+            <button onclick="switchTab('calendario')" id="btn-calendario" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2">
+                <i data-lucide="calendar" class="w-4 h-4"></i> Calendario
+            </button>
+            <button onclick="switchTab('maestros')" id="btn-maestros" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2">
+                <i data-lucide="users" class="w-4 h-4"></i> Grupos
+            </button>
+        </div>
+
+        <div id="tab-eventos" class="space-y-6">
+            <div class="flex justify-between items-end px-1">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900">Sesiones</h2>
+                    <p class="text-sm text-slate-500" id="stats-info">Cargando datos...</p>
+                </div>
+                <button onclick="openNewSesionModal()" class="btn-blue px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2">
+                    <i data-lucide="plus" class="w-5 h-5"></i> Nueva Sesión
+                </button>
+            </div>
+            
+            <div class="flex flex-wrap gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+                    <span class="text-xs font-bold text-slate-400 uppercase">Filtros:</span>
+                </div>
+                <select id="filter-cobrados" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700 outline-none focus:border-blue-400">
+                    <option value="all">Estado: Todos</option>
+                    <option value="cobrado">Solo Cobrados</option>
+                    <option value="pendiente">Solo Pendientes</option>
+                </select>
+                <select id="filter-realizados" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700 outline-none focus:border-blue-400">
+                    <option value="all">Fecha: Todas</option>
+                    <option value="realizado">Realizados (Pasados)</option>
+                    <option value="futuro">Futuros</option>
+                </select>
+            </div>
+
+            <div id="lista-eventos" class="grid gap-4"></div>
+        </div>
+
+        <div id="tab-calendario" class="hidden">
+            <div class="card-modern p-6 h-[650px]">
+                <div id="calendar" class="h-full"></div>
+            </div>
+        </div>
+
+        <div id="tab-maestros" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end px-1 gap-4">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900">Grupos (Coles)</h2>
+                    <p class="text-sm text-slate-500">Gestión de entidades y ubicaciones</p>
+                </div>
+                <button onclick="openNewGrupoModal()" class="bg-slate-900 text-white px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2">
+                    <i data-lucide="plus" class="w-5 h-5"></i> Nuevo Grupo
+                </button>
+            </div>
+            
+            <div class="relative">
+                <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="search-grupos" oninput="renderGrupos()" placeholder="Buscar por nombre o ubicación..." class="w-full pl-12 pr-4 py-4 rounded-2xl input-modern text-sm font-medium shadow-sm">
+            </div>
+
+            <div id="lista-maestros" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </main>
+
+    <div id="modal-evento" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2rem] w-full max-w-lg p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-evento-title" class="text-2xl font-extrabold text-slate-900">Registrar Sesión</h3>
+                <button type="button" onclick="closeModal('modal-evento')" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-evento" class="space-y-4">
+                <input type="hidden" id="ev-rowIdx">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Grupo / Colegio</label>
+                    <select id="ev-grupo" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required onchange="autoFillGrupo(this.value)"></select>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Fecha</label>
+                    <input type="date" id="ev-fecha" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Hora Inicio</label>
+                        <input type="time" id="ev-hora-inicio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Hora Fin</label>
+                        <input type="time" id="ev-hora-fin" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio/Hora (€)</label>
+                    <input type="number" id="ev-precio" value="20" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sitio / Ubicación</label>
+                    <div class="relative">
+                        <input type="text" id="ev-sitio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Dirección o nombre del lugar">
+                        <div id="maracuya-gps-hint" class="hidden absolute right-4 top-4 text-blue-500">
+                             <i data-lucide="map" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="sync-calendar-wrapper" class="space-y-3 mt-6">
+                    <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                        <input type="checkbox" id="ev-calendar" checked class="w-5 h-5 accent-blue-600 rounded">
+                        <label for="ev-calendar" class="text-sm font-bold text-blue-800">Crear evento en Google Calendar</label>
+                    </div>
+
+                    <div id="recurrence-panel" class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex items-center gap-2 mb-3">
+                            <input type="checkbox" id="ev-repite" onchange="toggleRecurrence()" class="w-4 h-4 accent-slate-800">
+                            <label for="ev-repite" class="text-sm font-bold text-slate-700">Se repite (Recursivo)</label>
+                        </div>
+                        
+                        <div id="recurrence-options" class="hidden grid grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Frecuencia</label>
+                                <select id="ev-freq" class="w-full rounded-xl p-3 input-modern text-sm">
+                                    <option value="DAILY">Cada día</option>
+                                    <option value="WEEKLY" selected>Cada semana</option>
+                                    <option value="MONTHLY">Cada mes</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Termina el (Fecha)</label>
+                                <input type="date" id="ev-until" class="w-full rounded-xl p-3 input-modern text-sm">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Intervalo</label>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-slate-600">Repetir cada</span>
+                                    <input type="number" id="ev-interval" value="1" min="1" class="w-20 rounded-xl p-2 border border-slate-200 text-center text-sm">
+                                    <span class="text-sm text-slate-600">periodos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 btn-blue py-4 rounded-2xl font-bold text-lg shadow-lg">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-grupo" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2rem] w-full max-w-lg p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-grupo-title" class="text-2xl font-extrabold text-slate-900">Editar Grupo</h3>
+                <button type="button" onclick="closeModal('modal-grupo')" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-grupo" class="space-y-4">
+                <input type="hidden" id="gr-rowIdx">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Nombre del Grupo</label>
+                    <input type="text" id="gr-nombre" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio por Defecto (€)</label>
+                    <input type="number" id="gr-precio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Dirección / Sitio (Ayuda Maps)</label>
+                    <input type="text" id="gr-sitio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Empieza a escribir para buscar...">
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-lg">Guardar Grupo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SPREADSHEET_ID = '1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60';
+        const CLIENT_ID = '367465910816-1epkiok8ntvrphrv08b4g6amh0u9knpv.apps.googleusercontent.com';
+        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/calendar.events';
+        
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+        let eventos = [];
+        let grupos = [];
+        let calendar;
+        let autocompleteSesion;
+        let autocompleteGrupo;
+
+        function gapiLoaded() {
+            gapi.load('client', async () => {
+                await gapi.client.init({
+                    discoveryDocs: [
+                        'https://sheets.googleapis.com/$discovery/rest?version=v4',
+                        'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'
+                    ],
+                });
+                gapiInited = true;
+                checkAuth();
+            });
+        }
+
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', 
+            });
+            gisInited = true;
+            checkAuth();
+        }
+
+        async function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) throw (resp);
+                document.getElementById('auth-text').innerText = "Conectado";
+                document.getElementById('sync-btn').classList.remove('hidden');
+                localStorage.setItem('g_token', resp.access_token);
+                await syncData();
+            };
+            tokenClient.requestAccessToken({prompt: gapi.client.getToken() === null ? 'consent' : ''});
+        }
+
+        function checkAuth() {
+            if (gapiInited && gisInited) {
+                const token = localStorage.getItem('g_token');
+                if (token) {
+                    gapi.client.setToken({access_token: token});
+                    document.getElementById('sync-btn').classList.remove('hidden');
+                    document.getElementById('auth-text').innerText = "Conectado";
+                    syncData();
+                }
+            }
+        }
+
+        async function syncData() {
+            try {
+                // 1. Grupos
+                const resColes = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: SPREADSHEET_ID, range: 'Coles!A2:C', 
+                });
+                grupos = (resColes.result.values || []).map((row, index) => ({
+                    rowIdx: index + 2,
+                    nombre: row[0],
+                    sitio: row[1] || '',
+                    precio: row[2] || 20
+                }));
+
+                // 2. Sesiones
+                const resDetalle = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: SPREADSHEET_ID, range: 'Detalle!A2:J',
+                });
+                
+                const rawRows = resDetalle.result.values || [];
+                const hoy = new Date().setHours(0,0,0,0);
+
+                eventos = rawRows.map((row, index) => {
+                    const fParts = (row[5] || "").split("/");
+                    const fObj = fParts.length === 3 ? new Date(fParts[2], fParts[1]-1, fParts[0]) : null;
+                    let realizado = row[1] === 'X';
+                    if (fObj && fObj < hoy && !realizado) realizado = true;
+
+                    return {
+                        rowIdx: index + 2,
+                        pagado: row[0] === 'X',
+                        realizado: realizado,
+                        boloCole: row[2] || '', // Lo mantenemos de lectura por compatibilidad con la hoja
+                        clase: row[3] || '',
+                        precioHora: parseFloat(row[4]) || 0,
+                        fechaStr: row[5],
+                        fechaObj: fObj,
+                        total: parseFloat((row[6] || "0").replace("€","").replace(",",".").trim()) || 0,
+                        horas: parseFloat(row[7]) || 0,
+                        grupo: row[8],
+                        sitio: row[9] || ''
+                    };
+                }).sort((a,b) => (b.fechaObj - a.fechaObj));
+
+                renderAll();
+                document.getElementById('stats-info').innerText = `${eventos.length} sesiones sincronizadas.`;
+            } catch (err) { console.error("Error sync:", err); }
+        }
+
+        function renderAll() {
+            renderEventos();
+            renderGrupos();
+            renderCalendar();
+            populateSelects();
+            initGoogleMapsUI();
+            lucide.createIcons();
+        }
+
+        function initGoogleMapsUI() {
+            if (!autocompleteSesion) {
+                autocompleteSesion = new google.maps.places.Autocomplete(document.getElementById('ev-sitio'));
+            }
+            if (!autocompleteGrupo) {
+                autocompleteGrupo = new google.maps.places.Autocomplete(document.getElementById('gr-sitio'));
+            }
+        }
+
+        function renderEventos() {
+            const container = document.getElementById('lista-eventos');
+            const fCobrados = document.getElementById('filter-cobrados').value;
+            const fRealizados = document.getElementById('filter-realizados').value;
+            
+            const filtered = eventos.filter(ev => {
+                let pasaCobro = true;
+                if (fCobrados === 'cobrado') pasaCobro = ev.pagado;
+                if (fCobrados === 'pendiente') pasaCobro = !ev.pagado;
+                
+                let pasaRealizado = true;
+                if (fRealizados === 'realizado') pasaRealizado = ev.realizado;
+                if (fRealizados === 'futuro') pasaRealizado = !ev.realizado;
+                
+                return pasaCobro && pasaRealizado;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="text-center py-10 text-slate-400 font-medium">No hay sesiones que coincidan con los filtros.</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(ev => `
+                <div class="card-modern p-5 flex flex-wrap md:flex-nowrap justify-between items-center gap-4 ${ev.pagado ? 'bg-emerald-50/30' : ''}">
+                    <div class="flex items-center gap-4 cursor-pointer flex-1" onclick="openEditSesionModal(${ev.rowIdx})">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${ev.pagado ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}">
+                            <i data-lucide="${ev.pagado ? 'check-circle' : 'clock'}"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-slate-900">${ev.grupo}</h4>
+                            <div class="flex gap-3 mt-1">
+                                <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${ev.fechaStr}</span>
+                                <span class="text-xs font-bold ${ev.realizado ? 'text-blue-500' : 'text-slate-400'} flex items-center gap-1">
+                                    <i data-lucide="${ev.realizado ? 'flag' : 'hourglass'}" class="w-3 h-3"></i> 
+                                    ${ev.realizado ? 'Realizado' : 'Pendiente'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase">Total</p>
+                            <p class="text-lg font-black text-slate-800">${ev.total.toFixed(2)}€</p>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="togglePago(${ev.rowIdx}, ${!ev.pagado})" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'} hover:scale-110 transition-all">
+                                <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                            </button>
+                            <button onclick="borrarFila(${ev.rowIdx})" class="p-2.5 rounded-xl bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
+                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`).join('');
+            lucide.createIcons();
+        }
+
+        function renderGrupos() {
+            const container = document.getElementById('lista-maestros');
+            const term = document.getElementById('search-grupos').value.toLowerCase();
+            
+            const filtered = grupos.filter(g => 
+                g.nombre.toLowerCase().includes(term) || 
+                (g.sitio && g.sitio.toLowerCase().includes(term))
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 font-medium">No se han encontrado grupos.</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(g => `
+                <div class="card-modern p-5 flex justify-between items-center gap-4">
+                    <div class="flex items-center gap-4 cursor-pointer flex-1" onclick="openEditGrupoModal(${g.rowIdx})">
+                        <div class="bg-slate-900 text-white p-3 rounded-xl"><i data-lucide="users"></i></div>
+                        <div>
+                            <h4 class="font-bold text-slate-900">${g.nombre}</h4>
+                            <p class="text-xs text-slate-500">${g.sitio || 'Sin ubicación'}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Precio Base</p>
+                        <p class="font-bold text-slate-700">${g.precio}€</p>
+                    </div>
+                </div>`).join('');
+            lucide.createIcons();
+        }
+
+        function renderCalendar() {
+            const el = document.getElementById('calendar');
+            const source = eventos.map(e => ({ 
+                title: e.grupo, 
+                start: e.fechaObj, 
+                color: e.pagado ? '#10b981' : '#2563eb', 
+                extendedProps: { rowIdx: e.rowIdx } 
+            }));
+            if (!calendar) {
+                calendar = new FullCalendar.Calendar(el, {
+                    initialView: 'dayGridMonth', locale: 'es',
+                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
+                    events: source,
+                    eventClick: (info) => openEditSesionModal(info.event.extendedProps.rowIdx)
+                });
+                calendar.render();
+            } else {
+                calendar.removeAllEvents();
+                calendar.addEventSource(source);
+            }
+        }
+
+        function toggleRecurrence() {
+            const isChecked = document.getElementById('ev-repite').checked;
+            const options = document.getElementById('recurrence-options');
+            if (isChecked) {
+                options.classList.remove('hidden');
+            } else {
+                options.classList.add('hidden');
+            }
+        }
+
+        function openNewSesionModal() {
+            document.getElementById('modal-evento-title').innerText = "Nueva Sesión";
+            document.getElementById('form-evento').reset();
+            document.getElementById('ev-rowIdx').value = "";
+            document.getElementById('sync-calendar-wrapper').classList.remove('hidden');
+            document.getElementById('recurrence-options').classList.add('hidden');
+            autoFillGrupo("");
+            openModal('modal-evento');
+        }
+
+        function openEditSesionModal(rowIdx) {
+            const ev = eventos.find(e => e.rowIdx === rowIdx);
+            if (!ev) return;
+            document.getElementById('modal-evento-title').innerText = "Editar Sesión";
+            document.getElementById('ev-rowIdx').value = ev.rowIdx;
+            document.getElementById('ev-grupo').value = ev.grupo;
+            document.getElementById('ev-fecha').value = ev.fechaObj ? ev.fechaObj.toISOString().split('T')[0] : '';
+            
+            // Asignar horas por defecto si estamos editando (ya que en sheets solo guardamos total de horas)
+            document.getElementById('ev-hora-inicio').value = '10:00';
+            let horaFin = 10 + ev.horas;
+            let mFin = (horaFin % 1) * 60;
+            document.getElementById('ev-hora-fin').value = `${String(Math.floor(horaFin)).padStart(2, '0')}:${String(mFin).padStart(2, '0')}`;
+            
+            document.getElementById('ev-precio').value = ev.precioHora;
+            document.getElementById('ev-sitio').value = ev.sitio;
+            
+            // Ocultamos opciones de calendario al editar para simplificar el flujo (Google no permite actualizar fácilmente sin eventId)
+            document.getElementById('sync-calendar-wrapper').classList.add('hidden'); 
+            
+            autoFillGrupo(ev.grupo);
+            openModal('modal-evento');
+        }
+
+        function openNewGrupoModal() {
+            document.getElementById('modal-grupo-title').innerText = "Nuevo Grupo";
+            document.getElementById('form-grupo').reset();
+            document.getElementById('gr-rowIdx').value = "";
+            openModal('modal-grupo');
+        }
+
+        function openEditGrupoModal(rowIdx) {
+            const g = grupos.find(x => x.rowIdx === rowIdx);
+            if (!g) return;
+            document.getElementById('modal-grupo-title').innerText = "Editar Grupo";
+            document.getElementById('gr-rowIdx').value = g.rowIdx;
+            document.getElementById('gr-nombre').value = g.nombre;
+            document.getElementById('gr-precio').value = g.precio;
+            document.getElementById('gr-sitio').value = g.sitio;
+            openModal('modal-grupo');
+        }
+
+        function autoFillGrupo(nombre) {
+            const isMaracuya = nombre.toLowerCase().includes('maracuyá') || nombre.toLowerCase().includes('maracuya');
+            const g = grupos.find(x => x.nombre === nombre);
+            
+            if (isMaracuya) {
+                document.getElementById('maracuya-gps-hint').classList.remove('hidden');
+            } else {
+                document.getElementById('maracuya-gps-hint').classList.add('hidden');
+            }
+
+            if (g && !document.getElementById('ev-rowIdx').value) {
+                document.getElementById('ev-precio').value = g.precio;
+                document.getElementById('ev-sitio').value = g.sitio;
+            }
+        }
+
+        document.getElementById('form-evento').onsubmit = async (e) => {
+            e.preventDefault();
+            const rowIdx = document.getElementById('ev-rowIdx').value;
+            const grupo = document.getElementById('ev-grupo').value;
+            const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
+            
+            const fecha = document.getElementById('ev-fecha').value;
+            const horaInicio = document.getElementById('ev-hora-inicio').value;
+            const horaFin = document.getElementById('ev-hora-fin').value;
+            const precio = parseFloat(document.getElementById('ev-precio').value);
+            const sitio = document.getElementById('ev-sitio').value;
+            
+            // Mantenemos string vacio para la columna Bolo que hemos quitado para no romper Google Sheets
+            const boloCole = ""; 
+            const clase = isMaracuya ? "" : "X";
+
+            // Calculamos las horas usando las horas de inicio y fin introducidas
+            const [h1, m1] = horaInicio.split(':').map(Number);
+            const [h2, m2] = horaFin.split(':').map(Number);
+            let horasCalc = (h2 + m2/60) - (h1 + m1/60);
+            if (horasCalc < 0) horasCalc += 24; // Por si pasa de medianoche
+            if (isNaN(horasCalc) || horasCalc <= 0) horasCalc = 1;
+
+            const fParts = fecha.split("-");
+            const fFormat = `${fParts[2]}/${fParts[1]}/${fParts[0]}`;
+            const totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " €";
+
+            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasCalc, grupo, sitio];
+
+            try {
+                if (rowIdx) {
+                    const old = eventos.find(ev => ev.rowIdx == rowIdx);
+                    fila[0] = old.pagado ? 'X' : '';
+                    fila[1] = old.realizado ? 'X' : '';
+                    await gapi.client.sheets.spreadsheets.values.update({
+                        spreadsheetId: SPREADSHEET_ID, range: `Detalle!A${rowIdx}:J${rowIdx}`,
+                        valueInputOption: 'USER_ENTERED', resource: { values: [fila] }
+                    });
+                } else {
+                    await gapi.client.sheets.spreadsheets.values.append({
+                        spreadsheetId: SPREADSHEET_ID, range: 'Detalle!A:J',
+                        valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS', resource: { values: [fila] }
+                    });
+                    
+                    // Lógica de Google Calendar
+                    if (document.getElementById('ev-calendar').checked) {
+                        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                        const startDT = `${fecha}T${horaInicio}:00`;
+                        const endDT = `${fecha}T${horaFin}:00`;
+
+                        let eventResource = { 
+                            summary: grupo, 
+                            location: sitio, 
+                            start: { dateTime: startDT, timeZone: tz }, 
+                            end: { dateTime: endDT, timeZone: tz }, 
+                            description: `Sesión de ${horasCalc.toFixed(2)}h generada desde PercuManager.` 
+                        };
+
+                        // Reglas de Recursividad
+                        if (document.getElementById('ev-repite').checked) {
+                            const freq = document.getElementById('ev-freq').value;
+                            const interval = document.getElementById('ev-interval').value;
+                            const untilDate = document.getElementById('ev-until').value;
+                            
+                            let rrule = `RRULE:FREQ=${freq};INTERVAL=${interval}`;
+                            if (untilDate) {
+                                const formattedUntil = untilDate.replace(/-/g, '') + 'T235959Z';
+                                rrule += `;UNTIL=${formattedUntil}`;
+                            }
+                            eventResource.recurrence = [rrule];
+                        }
+
+                        await gapi.client.calendar.events.insert({
+                            calendarId: 'primary',
+                            resource: eventResource
+                        });
+                    }
+                }
+                closeModal('modal-evento');
+                syncData();
+            } catch (err) { console.error("Error sesión:", err); }
+        };
+
+        document.getElementById('form-grupo').onsubmit = async (e) => {
+            e.preventDefault();
+            const rowIdx = document.getElementById('gr-rowIdx').value;
+            const nombre = document.getElementById('gr-nombre').value;
+            const precio = document.getElementById('gr-precio').value;
+            const sitio = document.getElementById('gr-sitio').value;
+            const fila = [nombre, sitio, precio];
+
+            try {
+                if (rowIdx) {
+                    await gapi.client.sheets.spreadsheets.values.update({
+                        spreadsheetId: SPREADSHEET_ID, range: `Coles!A${rowIdx}:C${rowIdx}`,
+                        valueInputOption: 'USER_ENTERED', resource: { values: [fila] }
+                    });
+                } else {
+                    await gapi.client.sheets.spreadsheets.values.append({
+                        spreadsheetId: SPREADSHEET_ID, range: 'Coles!A:C',
+                        valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS', resource: { values: [fila] }
+                    });
+                }
+                closeModal('modal-grupo');
+                syncData();
+            } catch (err) { console.error("Error grupo:", err); }
+        };
+
+        async function togglePago(rowIdx, newState) {
+            await gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: SPREADSHEET_ID, range: `Detalle!A${rowIdx}`,
+                valueInputOption: 'USER_ENTERED', resource: { values: [[newState ? 'X' : '']] }
+            });
+            syncData();
+        }
+
+        async function borrarFila(rowIdx) {
+            if(confirm("¿Seguro que quieres borrar esta fila?")) {
+                await gapi.client.sheets.spreadsheets.batchUpdate({
+                    spreadsheetId: SPREADSHEET_ID,
+                    resource: { requests: [{ deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIdx - 1, endIndex: rowIdx } } }] }
+                });
+                syncData();
+            }
+        }
+
+        function switchTab(tabId) {
+            ['eventos', 'calendario', 'maestros'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                document.getElementById('btn-' + t).className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2";
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 tab-active";
+            if(tabId === 'calendario') setTimeout(() => calendar.render(), 50);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function populateSelects() {
+            const sel = document.getElementById('ev-grupo');
+            sel.innerHTML = '<option value="">Selecciona grupo...</option>' + 
+                grupos.map(g => `<option value="${g.nombre}">${g.nombre}</option>`).join('');
+        }
+
+        window.onload = () => {
+            gapiLoaded();
+            gisLoaded();
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
