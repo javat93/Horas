@@ -10,7 +10,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAdf5ltXokEUNvM01jNlESvXMGGu28G0W0&libraries=places" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-    
+    <link rel="icon" type="image/png" href="favicon.ico">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         :root { --brand-blue: #2563eb; --brand-dark: #1e40af; --brand-light: #eff6ff; --bg-main: #f8fafc; }
@@ -462,9 +462,15 @@
             }));
             if (!calendar) {
                 calendar = new FullCalendar.Calendar(el, {
-                    initialView: 'dayGridMonth', locale: 'es',
+                    initialView: 'dayGridMonth',
+					locale: 'es',
+					buttonText: {
+        today: 'Hoy',
+        month: 'Mes'
+    },
                     headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
                     events: source,
+					firstDay: 1,
                     eventClick: (info) => openEditSesionModal(info.event.extendedProps.rowIdx)
                 });
                 calendar.render();
