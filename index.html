@@ -551,11 +551,21 @@
                     throw new Error(`URL del proxy no configurada para ${apiType}`);
                 }
                 
+                // Obtener token de OAuth si está disponible
+                const token = gapi.client?.getToken()?.access_token || localStorage.getItem('g_token');
+                
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+                
+                // Añadir token de OAuth si existe
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
                 const response = await fetch(proxyUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         method: method,
                         params: params,
