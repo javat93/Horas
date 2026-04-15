@@ -1,5 +1,11 @@
 // Google Sheets proxy endpoint
 module.exports = async (req, res) => {
+  // Test simple para verificar que el endpoint se está ejecutando
+  console.log('=== SHEETS ENDPOINT CALLED ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('Headers:', Object.keys(req.headers));
+  
   // Configurar CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -7,6 +13,7 @@ module.exports = async (req, res) => {
   
   // Manejar preflight request
   if (req.method === 'OPTIONS') {
+    console.log('OPTIONS request handled');
     res.status(200).end();
     return;
   }
@@ -119,13 +126,46 @@ module.exports = async (req, res) => {
 
     // Hacer request a Google Sheets API
     const response = await fetch(url, fetchOptions);
-    const data = await response.json();
-
+    
     console.log('Sheets proxy response:', { 
       status: response.status, 
       ok: response.ok,
-      hasData: !!data
+      contentType: response.headers.get('content-type')
     });
+
+    // Verificar si la respuesta es HTML (error 404 o página de error)
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('text/html')) {
+      console.error('Received HTML instead of JSON - possible routing error');
+      return res.status(500).json({ 
+        error: 'Proxy routing error - received HTML instead of JSON',
+        details: 'The endpoint may not be properly configured in Vercel',
+        url: url
+      });
+    }
+
+    // Intentar parsear JSON solo si es JSON
+    let data;
+    try {
+      const responseText = await response.text();
+      console.log('Response text preview:', responseText.substring(0, 200));
+      
+      if (!responseText.trim()) {
+        return res.status(500).json({ 
+          error: 'Empty response from Google Sheets API',
+          url: url
+        });
+      }
+      
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError);
+      return res.status(500).json({ 
+        error: 'Invalid JSON response from Google Sheets API',
+        details: parseError.message,
+        url: url
+      });
+    }
 
     if (!response.ok) {
       console.error('Google Sheets API error:', data);
