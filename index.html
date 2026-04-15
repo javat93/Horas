@@ -601,6 +601,24 @@
                 }
             }
         }
+		// Callback para Google Maps API
+        function initMap() {
+            console.log('initMap callback called');
+            // Llamar a initializeMap si está disponible
+            if (typeof initializeMap === 'function') {
+                initializeMap();
+            } else {
+                console.warn('initializeMap function not found, checking map_functions.js');
+                // Intentar inicialización básica si initializeMap no está disponible
+                const mapContainer = document.getElementById('map-container');
+                const loading = document.getElementById('map-loading');
+                if (mapContainer && loading) {
+                    loading.classList.add('hidden');
+                    console.log('Map loading hidden (basic initialization)');
+                }
+            }
+        }
+
 		// Limpia tildes y caracteres especiales para comparaciones robustas
         function limpiarTexto(texto) {
             if (!texto) return '';
@@ -1081,57 +1099,79 @@
                     }, {
                         values: [fila]
                     });
+                    
                     // Extraemos el número de fila del rango actualizado, ej: "Detalle!A5:L5" -> 5
-                    const updatedRange = appendResponse.result.updates.updatedRange;
-                    const insertedRow = parseInt(updatedRange.match(/\d+/)[0]);
+                    // Manejar diferentes estructuras de respuesta (proxy vs gapi directo)
+                    let updatedRange;
+                    let insertedRow;
+                    
+                    if (appendResponse.result && appendResponse.result.updates) {
+                        updatedRange = appendResponse.result.updates.updatedRange;
+                    } else if (appendResponse.updates) {
+                        updatedRange = appendResponse.updates.updatedRange;
+                    } else if (appendResponse.tableRange) {
+                        updatedRange = appendResponse.tableRange;
+                    } else {
+                        // Fallback: buscar en la respuesta el rango actualizado
+                        console.warn('Estructura de respuesta inesperada:', appendResponse);
+                        // Intentar obtener la última fila del spreadsheet como fallback
+                        const lastRowResponse = await proxyGoogleAPI('sheets', 'get', {
+                            spreadsheetId: CONFIG.SPREADSHEET_ID,
+                            range: 'Detalle!A2:A'
+                        });
+                        insertedRow = (lastRowResponse.values || []).length + 2;
+                        console.log('Usando fallback row:', insertedRow);
+                    }
+                    
+                    if (updatedRange) {
+                        insertedRow = parseInt(updatedRange.match(/\d+/)[0]);
+                    }
                     
                     // Lógica de Google Calendar
-                        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                        const startDT = `${fecha}T${horaInicio}:00`;
-                        const endDT = `${fecha}T${horaFin}:00`;
+                    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    const startDT = `${fecha}T${horaInicio}:00`;
+                    const endDT = `${fecha}T${horaFin}:00`;
 
-                        let eventResource = { 
-                            summary: grupo, 
-                            location: sitio, 
-                            start: { dateTime: startDT, timeZone: tz }, 
-                            end: { dateTime: endDT, timeZone: tz },
-							colorId: '5',
-                            description: `Sesión de ${horasCalc.toFixed(2)}h generada desde PercuManager.`,
-                            'reminders': {
-    'useDefault': false, // Esto desactiva los recordatorios por defecto de la cuenta
-    'overrides': []      // Al dejarlo vacío, no se aplicará ningún recordatorio específico
-  } 
-                        };
-
-                        // Reglas de Recursividad
-                        if (document.getElementById('ev-repite').checked) {
-                            const freq = document.getElementById('ev-freq').value;
-                            const interval = document.getElementById('ev-interval').value;
-                            const untilDate = document.getElementById('ev-until').value;
-                            
-                            let rrule = `RRULE:FREQ=${freq};INTERVAL=${interval}`;
-                            if (untilDate) {
-                                const formattedUntil = untilDate.replace(/-/g, '') + 'T235959Z';
-                                rrule += `;UNTIL=${formattedUntil}`;
-                            }
-                            eventResource.recurrence = [rrule];
-							
+                    let eventResource = { 
+                        summary: grupo, 
+                        location: sitio, 
+                        start: { dateTime: startDT, timeZone: tz }, 
+                        end: { dateTime: endDT, timeZone: tz },
+                        colorId: '5',
+                        description: `Sesión de ${horasCalc.toFixed(2)}h generada desde PercuManager.`,
+                        reminders: {
+                            useDefault: false,
+                            overrides: []
                         }
+                    };
 
-                        const calResponse = await proxyGoogleAPI('calendar', 'insert', {
-                            calendarId: 'primary'
-                        }, eventResource);
-                        const calEventId = calResponse.result.id;
+                    // Reglas de Recursividad
+                    if (document.getElementById('ev-repite').checked) {
+                        const freq = document.getElementById('ev-freq').value;
+                        const interval = document.getElementById('ev-interval').value;
+                        const untilDate = document.getElementById('ev-until').value;
+                        
+                        let rrule = `RRULE:FREQ=${freq};INTERVAL=${interval}`;
+                        if (untilDate) {
+                            const formattedUntil = untilDate.replace(/-/g, '') + 'T235959Z';
+                            rrule += `;UNTIL=${formattedUntil}`;
+                        }
+                        eventResource.recurrence = [rrule];
+                    }
 
-                        // Guardamos el eventId en la columna K usando la fila exacta del append
-                        await proxyGoogleAPI('sheets', 'update', {
-                            spreadsheetId: CONFIG.SPREADSHEET_ID,
-                            range: `Detalle!K${insertedRow}`,
-                            valueInputOption: 'USER_ENTERED'
-                        }, {
-                            values: [[calEventId]]
-                        });
-                    
+                    const calResponse = await proxyGoogleAPI('calendar', 'insert', {
+                        calendarId: 'primary'
+                    }, eventResource);
+                    const calEventId = calResponse.result.id;
+
+                    // Guardamos el eventId en la columna K usando la fila exacta del append
+                    await proxyGoogleAPI('sheets', 'update', {
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
+                        range: `Detalle!K${insertedRow}`,
+                        valueInputOption: 'USER_ENTERED'
+                    }, {
+                        values: [[calEventId]]
+                    });
                 }
                 closeModal('modal-evento');
                 syncData();
