@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PercuManager Pro - La Galeta Percussió</title>
-    <!-- Tailwind CSS CDN - Uso intencional para Vercel deployment (compilado no necesario para este caso) -->
-<script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS compilado para producción (17KB minificado, sin CDN) -->
+<link rel="stylesheet" href="dist/output.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
@@ -469,13 +469,18 @@
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.3',
+            version: '2.1.7',
             date: '2026-04-16',
             changes: [
+                'Tailwind CSS compilado para producción (sin CDN)',
+                'Node.js v24.14.1 detectado y configurado',
+                'CSS optimizado de 17KB minificado',
+                'Sistema de build automatizado implementado',
                 'Popup de error moderno y bonito para reemplazar alerts',
                 'Diseño con iconos dinámicos según tipo (error, warning, info, success)',
                 'Focus automático en campo con error',
                 'Reemplazo completo de alerts del sistema',
+                'Google Maps con carga asíncrona optimizada',
                 'Columna H siempre con valor 1 independientemente de duración real',
                 'Validación completa de campos obligatorios en formulario de clase',
                 'Validación de hora fin posterior a hora inicio',

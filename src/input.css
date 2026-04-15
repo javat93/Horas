@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos personalizados */
+.glass-modal {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.input-modern {
+  @apply border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all;
+}
+
+.btn-blue {
+  @apply bg-blue-600 text-white hover:bg-blue-700 transition-all;
+}
+
+.card-modern {
+  @apply bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all;
+}
+
+.tab-active {
+  @apply bg-blue-600 text-white;
+}
+
+/* Estilos para FullCalendar */
+.fc {
+  @apply font-sans;
+}
+
+.fc .fc-button-primary {
+  @apply bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all;
+}
+
+.fc .fc-button-primary:hover {
+  @apply bg-slate-50 border-slate-300;
+}
+
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  @apply bg-blue-600 text-white border-blue-600;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  @apply bg-blue-50;
+}
+
+.fc .fc-daygrid-day-number {
+  @apply text-sm font-medium;
+}
+
+.fc .fc-col-header-cell {
+  @apply text-xs font-bold text-slate-600 uppercase;
+}
+
+.fc .fc-event-title {
+  @apply font-medium text-xs;
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceGentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-bounce-gentle {
+  animation: bounceGentle 0.6s ease-in-out;
+}
+
+/* Estilos para el mapa */
+#map-container {
+  @apply rounded-2xl overflow-hidden;
+}
+
+/* Optimizaciones de rendimiento */
+.will-change-transform {
+  will-change: transform;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Responsive mejorado */
+@media (max-width: 640px) {
+  .glass-modal {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+/* Dark mode support (futuro) */
+@media (prefers-color-scheme: dark) {
+  .glass-modal {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
