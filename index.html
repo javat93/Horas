@@ -339,6 +339,10 @@
                     <input type="number" id="gr-precio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                 </div>
                 <div>
+    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Ubicación</label>
+    <input type="text" id="gr-ubicacion" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Ej: Centro Cívico, Parque, etc.">
+</div>
+                <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Dirección / Sitio (Ayuda Maps)</label>
                     <input type="text" id="gr-sitio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Empieza a escribir para buscar...">
                 </div>
@@ -515,18 +519,19 @@
             try {
                 // 1. Grupos
                 const resColes = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Coles!A2:C', 
+                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Coles!A2:D', 
                 });
                 grupos = (resColes.result.values || []).map((row, index) => ({
                     rowIdx: index + 2,
                     nombre: row[0],
                     sitio: row[1] || '',
-                    precio: row[2] || 20
+                    precio: row[2] || 20,
+                    ubicacion: row[3] || ''
                 }));
 
-                // 2. Sesiones (leemos hasta columna K para incluir calEventId guardado)
+                // 2. Sesiones (leemos hasta columna L para incluir calEventId y dirección guardados)
                 const resDetalle = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A2:K',
+                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A2:L',
                 });
                 
                 const rawRows = resDetalle.result.values || [];
@@ -552,7 +557,8 @@
                         horas: parseFloat(row[7]) || 0,
                         grupo: row[8],
                         sitio: row[9] || '',
-                        calEventId: row[10] || ''
+                        calEventId: row[10] || '',
+                        direccion: row[11] || ''
                     };
                 });
 
@@ -852,6 +858,7 @@
             document.getElementById('gr-nombre').value = g.nombre;
             document.getElementById('gr-precio').value = g.precio;
             document.getElementById('gr-sitio').value = g.sitio;
+            document.getElementById('gr-ubicacion').value = g.ubicacion;
             openModal('modal-grupo');
         }
 
@@ -898,7 +905,12 @@
             const fFormat = `${fParts[2]}/${fParts[1]}/${fParts[0]}`;
             const totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " €";
 
-            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasCalc, grupo, sitio];
+            // Obtener ubicación del grupo y dirección del formulario
+            const g = grupos.find(x => x.nombre === grupo);
+            const ubicacion = g ? g.ubicacion : '';
+            const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
+            
+            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasCalc, grupo, ubicacion, "", direccion];
 
             try {
                 if (rowIdx) {
@@ -906,16 +918,16 @@
                     fila[0] = old.pagado ? 'X' : '';
                     fila[1] = old.realizado ? 'X' : '';
                     await gapi.client.sheets.spreadsheets.values.update({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Detalle!A${rowIdx}:J${rowIdx}`,
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Detalle!A${rowIdx}:L${rowIdx}`,
                         valueInputOption: 'USER_ENTERED', resource: { values: [fila] }
                     });
                 } else {
-                    // El append devuelve el rango donde insertó, ej: "Detalle!A5:J5"
+                    // El append devuelve el rango donde insertó, ej: "Detalle!A5:L5"
                     const appendResponse = await gapi.client.sheets.spreadsheets.values.append({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A:J',
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A:L',
                         valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS', resource: { values: [fila] }
                     });
-                    // Extraemos el número de fila del rango actualizado, ej: "Detalle!A5:J5" -> 5
+                    // Extraemos el número de fila del rango actualizado, ej: "Detalle!A5:L5" -> 5
                     const updatedRange = appendResponse.result.updates.updatedRange;
                     const insertedRow = parseInt(updatedRange.match(/\d+/)[0]);
                     
@@ -930,7 +942,11 @@
                             start: { dateTime: startDT, timeZone: tz }, 
                             end: { dateTime: endDT, timeZone: tz },
 							colorId: '5',
-                            description: `Sesión de ${horasCalc.toFixed(2)}h generada desde PercuManager.` 
+                            description: `Sesión de ${horasCalc.toFixed(2)}h generada desde PercuManager.`,
+                            'reminders': {
+    'useDefault': false, // Esto desactiva los recordatorios por defecto de la cuenta
+    'overrides': []      // Al dejarlo vacío, no se aplicará ningún recordatorio específico
+  } 
                         };
 
                         // Reglas de Recursividad
@@ -974,17 +990,18 @@
             const nombre = document.getElementById('gr-nombre').value;
             const precio = document.getElementById('gr-precio').value;
             const sitio = document.getElementById('gr-sitio').value;
-            const fila = [nombre, sitio, precio];
+            const ubicacion = document.getElementById('gr-ubicacion').value;
+            const fila = [nombre, sitio, precio, ubicacion];
 
             try {
                 if (rowIdx) {
                     await gapi.client.sheets.spreadsheets.values.update({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Coles!A${rowIdx}:C${rowIdx}`,
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Coles!A${rowIdx}:D${rowIdx}`,
                         valueInputOption: 'USER_ENTERED', resource: { values: [fila] }
                     });
                 } else {
                     await gapi.client.sheets.spreadsheets.values.append({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Coles!A:C',
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Coles!A:D',
                         valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS', resource: { values: [fila] }
                     });
                 }
