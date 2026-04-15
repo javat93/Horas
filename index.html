@@ -806,6 +806,12 @@
         async function actualizarRealizados() {
             try {
                 const hoy = new Date().setHours(0,0,0,0);
+                const hoyFecha = new Date(hoy);
+                console.log('=== DEBUG actualizarRealizados ===');
+                console.log('Fecha actual (hoy):', hoyFecha.toISOString());
+                console.log('Timestamp hoy:', hoy);
+                console.log('Total eventos en memoria:', eventos.length);
+                
                 const updates = [];
                 
                 // Volver a leer los datos originales del spreadsheet para comparar correctamente
@@ -815,6 +821,7 @@
                 });
                 
                 const rawRows = resDetalle.values || [];
+                console.log('Total filas leídas del spreadsheet:', rawRows.length);
                 
                 // Buscar clases que deberían estar realizadas pero no lo están en el spreadsheet
                 for (let i = 0; i < rawRows.length; i++) {
@@ -830,9 +837,21 @@
                     
                     // Revisar cada evento en esta fila
                     for (const ev of eventosEnFila) {
-                        if (!ev.fechaObj) continue;
+                        if (!ev.fechaObj) {
+                            console.log(`Fila ${rowIdx}: Sin fechaObj - fechaStr: "${ev.fechaStr}"`);
+                            continue;
+                        }
                         
                         const deberiaEstarRealizado = ev.fechaObj < hoy;
+                        const evFecha = new Date(ev.fechaObj);
+                        
+                        console.log(`Fila ${rowIdx} - "${ev.grupo}":`);
+                        console.log(`  fechaStr: "${ev.fechaStr}"`);
+                        console.log(`  fechaObj: ${evFecha.toISOString()}`);
+                        console.log(`  timestamp: ${ev.fechaObj}`);
+                        console.log(`  fueRealizadoOriginalmente: ${fueRealizadoOriginalmente}`);
+                        console.log(`  deberiaEstarRealizado: ${deberiaEstarRealizado} (${ev.fechaObj} < ${hoy})`);
+                        console.log(`  es pasado: ${evFecha < hoyFecha}`);
                         
                         // Si debería estar realizado pero no estaba marcado como X en la columna B
                         if (deberiaEstarRealizado && !fueRealizadoOriginalmente) {
@@ -841,8 +860,10 @@
                                 grupo: ev.grupo,
                                 fechaStr: ev.fechaStr
                             });
-                            console.log(`Clase "${ev.grupo}" del ${ev.fechaStr} marcada como realizada automáticamente.`);
+                            console.log(`  >>> AÑADIDO A UPDATES: Clase "${ev.grupo}" del ${ev.fechaStr} marcada como realizada automáticamente.`);
                             break; // Solo actualizar una vez por fila
+                        } else {
+                            console.log(`  >>> NO AÑADIDO: ya estaba realizado o no es pasado`);
                         }
                     }
                 }
