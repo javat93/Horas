@@ -1041,6 +1041,21 @@
             document.getElementById('ev-rowIdx').value = "";
             document.getElementById('sync-calendar-wrapper').classList.remove('hidden');
             document.getElementById('recurrence-options').classList.add('hidden');
+            
+            // Establecer duración por defecto de 1 hora
+            const now = new Date();
+            const horaActual = now.getHours().toString().padStart(2, '0');
+            const minutosActuales = Math.floor(now.getMinutes() / 15) * 15; // Redondear a 15 minutos
+            const minutosStr = minutosActuales.toString().padStart(2, '0');
+            
+            document.getElementById('ev-fecha').value = now.toISOString().split('T')[0];
+            document.getElementById('ev-hora-inicio').value = `${horaActual}:${minutosStr}`;
+            
+            // Calcular hora fin (1 hora después)
+            let horaFin = parseInt(horaActual) + 1;
+            if (horaFin >= 24) horaFin = horaFin - 24;
+            document.getElementById('ev-hora-fin').value = `${horaFin.toString().padStart(2, '0')}:${minutosStr}`;
+            
             autoFillGrupo("");
             openModal('modal-evento');
         }
@@ -1104,8 +1119,96 @@
             }
         }
 
+        // Función de validación para el formulario de clase
+        function validarFormularioClase() {
+            const grupo = document.getElementById('ev-grupo').value.trim();
+            const fecha = document.getElementById('ev-fecha').value;
+            const horaInicio = document.getElementById('ev-hora-inicio').value;
+            const horaFin = document.getElementById('ev-hora-fin').value;
+            const precio = parseFloat(document.getElementById('ev-precio').value);
+            const sitio = document.getElementById('ev-sitio').value.trim();
+
+            // Validar campos obligatorios
+            if (!grupo) {
+                alert('Por favor, selecciona un grupo.');
+                document.getElementById('ev-grupo').focus();
+                return false;
+            }
+
+            if (!fecha) {
+                alert('Por favor, selecciona una fecha.');
+                document.getElementById('ev-fecha').focus();
+                return false;
+            }
+
+            if (!horaInicio) {
+                alert('Por favor, introduce la hora de inicio.');
+                document.getElementById('ev-hora-inicio').focus();
+                return false;
+            }
+
+            if (!horaFin) {
+                alert('Por favor, introduce la hora de fin.');
+                document.getElementById('ev-hora-fin').focus();
+                return false;
+            }
+
+            if (!sitio) {
+                alert('Por favor, introduce el sitio o ubicación.');
+                document.getElementById('ev-sitio').focus();
+                return false;
+            }
+
+            if (isNaN(precio) || precio <= 0) {
+                alert('Por favor, introduce un precio válido mayor que 0.');
+                document.getElementById('ev-precio').focus();
+                return false;
+            }
+
+            // Validar formato de horas
+            const horaRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+            if (!horaRegex.test(horaInicio)) {
+                alert('La hora de inicio debe tener formato HH:MM (ej: 10:00).');
+                document.getElementById('ev-hora-inicio').focus();
+                return false;
+            }
+
+            if (!horaRegex.test(horaFin)) {
+                alert('La hora de fin debe tener formato HH:MM (ej: 11:00).');
+                document.getElementById('ev-hora-fin').focus();
+                return false;
+            }
+
+            // Validar que hora fin sea posterior a hora inicio
+            const [h1, m1] = horaInicio.split(':').map(Number);
+            const [h2, m2] = horaFin.split(':').map(Number);
+            const minutosInicio = h1 * 60 + m1;
+            const minutosFin = h2 * 60 + m2;
+
+            if (minutosFin <= minutosInicio) {
+                alert('La hora de fin debe ser posterior a la hora de inicio.');
+                document.getElementById('ev-hora-fin').focus();
+                return false;
+            }
+
+            // Validar que la fecha no sea en el pasado (para nuevas clases)
+            const fechaSeleccionada = new Date(fecha);
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            if (fechaSeleccionada < hoy && !document.getElementById('ev-rowIdx').value) {
+                if (!confirm('La fecha seleccionada es anterior a hoy. ¿Deseas continuar?')) {
+                    document.getElementById('ev-fecha').focus();
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         document.getElementById('form-evento').onsubmit = async (e) => {
             e.preventDefault();
+            if (!validarFormularioClase()) return;
             const rowIdx = document.getElementById('ev-rowIdx').value;
             const grupo = document.getElementById('ev-grupo').value;
             const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
@@ -1123,20 +1226,22 @@
             // Calculamos las horas usando las horas de inicio y fin introducidas
             const [h1, m1] = horaInicio.split(':').map(Number);
             const [h2, m2] = horaFin.split(':').map(Number);
-            /*let horasCalc = (h2 + m2/60) - (h1 + m1/60);
+            let horasCalc = (h2 + m2/60) - (h1 + m1/60);
             if (horasCalc < 0) horasCalc += 24; // Por si pasa de medianoche
-            if (isNaN(horasCalc) || horasCalc <= 0) horasCalc = 1;*/
-			let horasCalc = 1;
+            if (isNaN(horasCalc) || horasCalc <= 0) horasCalc = 1;
+            
+            // Para la columna H siempre guardamos 1, pero calculamos el total con las horas reales
+            const horasParaColumnaH = 1;
             const fParts = fecha.split("-");
             const fFormat = `${fParts[2]}/${fParts[1]}/${fParts[0]}`;
-            const totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " €";
+            const totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " ";
 
             // Obtener ubicación del grupo y dirección del formulario
             const g = grupos.find(x => x.nombre === grupo);
             const ubicacion = g ? g.ubicacion : '';
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
-            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasCalc, grupo, ubicacion, "", direccion];
+            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, "", direccion];
 
             try {
                 if (rowIdx) {
