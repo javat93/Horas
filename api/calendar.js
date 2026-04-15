@@ -88,9 +88,31 @@ module.exports = async (req, res) => {
 
     // Hacer request a Google Calendar API
     const response = await fetch(url, fetchOptions);
-    const data = await response.json();
-
+    
     console.log('Calendar proxy response:', { status: response.status, ok: response.ok });
+
+    // Para DELETE, Calendar API devuelve 204 No Content sin cuerpo
+    if (method === 'delete') {
+      if (!response.ok) {
+        // Intentar leer el error si hay cuerpo
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          errorData = { error: 'Delete operation failed' };
+        }
+        console.error('Google Calendar API delete error:', errorData);
+        return res.status(response.status).json({ 
+          error: errorData.error || errorData.message || 'Google Calendar API delete error',
+          details: errorData
+        });
+      }
+      // DELETE exitoso: devolver respuesta vacía con status 204
+      return res.status(204).end();
+    }
+
+    // Para otros métodos, parsear JSON
+    const data = await response.json();
 
     if (!response.ok) {
       console.error('Google Calendar API error:', data);
