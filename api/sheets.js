@@ -12,15 +12,45 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Logging para depuración
+    console.log('Sheets proxy request:', { method: req.method, body: req.body });
+    
     // Configuración desde variables de entorno
     const { GOOGLE_API_KEY, SPREADSHEET_ID } = process.env;
     
+    console.log('Environment check:', { 
+      hasApiKey: !!GOOGLE_API_KEY, 
+      hasSpreadsheetId: !!SPREADSHEET_ID,
+      spreadsheetId: SPREADSHEET_ID
+    });
+    
     if (!GOOGLE_API_KEY || !SPREADSHEET_ID) {
+      console.error('Missing environment variables:', { GOOGLE_API_KEY: !!GOOGLE_API_KEY, SPREADSHEET_ID: !!SPREADSHEET_ID });
       return res.status(500).json({ error: 'Missing required environment variables' });
     }
 
+    // Validar que req.body exista
+    if (!req.body) {
+      console.error('Request body is missing');
+      return res.status(400).json({ error: 'Request body is required' });
+    }
+
     // Obtener método y parámetros del request body
-    const { method, params, body } = req.body || {};
+    const { method, params, body } = req.body;
+
+    console.log('Parsed request data:', { method, hasParams: !!params, hasBody: !!body });
+
+    // Validar método
+    if (!method) {
+      console.error('Method is missing from request');
+      return res.status(400).json({ error: 'Method is required' });
+    }
+
+    // Validar params para métodos que lo requieren
+    if (!params && (method === 'get' || method === 'update' || method === 'append')) {
+      console.error('Params are missing for method:', method);
+      return res.status(400).json({ error: 'Params are required for this method' });
+    }
 
     // Construir URL para Google Sheets API
     const baseUrl = 'https://sheets.googleapis.com/v4/spreadsheets';
@@ -28,13 +58,24 @@ module.exports = async (req, res) => {
 
     // Añadir método específico
     if (method === 'get') {
+      if (!params.range) {
+        return res.status(400).json({ error: 'Range is required for get method' });
+      }
       url += `/values/${params.range}`;
     } else if (method === 'update') {
+      if (!params.range) {
+        return res.status(400).json({ error: 'Range is required for update method' });
+      }
       url += `/values/${params.range}`;
     } else if (method === 'append') {
+      if (!params.range) {
+        return res.status(400).json({ error: 'Range is required for append method' });
+      }
       url += `/values/${params.range}:append`;
     } else if (method === 'batchUpdate') {
       url += `:batchUpdate`;
+    } else {
+      return res.status(400).json({ error: `Unsupported method: ${method}` });
     }
 
     // Construir query parameters
@@ -69,17 +110,37 @@ module.exports = async (req, res) => {
       fetchOptions.body = JSON.stringify(body);
     }
 
+    console.log('Sheets proxy fetching:', { 
+      url, 
+      method: fetchOptions.method, 
+      hasBody: !!body,
+      hasAuth: !!req.headers.authorization
+    });
+
     // Hacer request a Google Sheets API
     const response = await fetch(url, fetchOptions);
     const data = await response.json();
 
+    console.log('Sheets proxy response:', { 
+      status: response.status, 
+      ok: response.ok,
+      hasData: !!data
+    });
+
     if (!response.ok) {
-      return res.status(response.status).json({ error: data.error || 'Google Sheets API error' });
+      console.error('Google Sheets API error:', data);
+      return res.status(response.status).json({ 
+        error: data.error?.message || data.message || 'Google Sheets API error',
+        details: data
+      });
     }
 
     res.json(data);
   } catch (error) {
     console.error('Sheets proxy error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      error: 'Internal server error', 
+      details: error.message 
+    });
   }
 };
