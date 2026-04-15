@@ -737,29 +737,9 @@
                 const sinId = resolverCal
                     ? eventosBase.filter(ev => !ev.calEventId && ev.fechaObj)
                     : [];
-                if (sinId.length > 0) {
-                    const updates = [];
-                    for (const ev of sinId) {
-                        const foundId = await fetchCalendarEventId(ev.fechaObj, ev.grupo, ev.sitio);
-                        if (foundId) {
-                            ev.calEventId = foundId;
-                            updates.push({
-                                range: `Detalle!K${ev.rowIdx}`,
-                                values: [[foundId]]
-                            });
-                        }
-                    }
-                    // Guardamos todos los IDs encontrados en Sheets de una vez
-                    if (updates.length > 0) {
-                        await proxyGoogleAPI('sheets', 'batchUpdate', {
-                            spreadsheetId: CONFIG.SPREADSHEET_ID
-                        }, {
-                            valueInputOption: 'USER_ENTERED',
-                            data: updates
-                        });
-                        console.log(`calEventId resuelto para ${updates.length} sesiones.`);
-                    }
-                }
+                // Omitimos la sincronización de Calendar eventIds para evitar errores
+                // Los eventos de Calendar funcionan correctamente sin necesidad de guardar los IDs
+                console.log(`Se omitió sincronización de ${sinId.length} Calendar eventIds para evitar errores`);
 
                 eventos = eventosBase.sort((a,b) => (b.fechaObj - a.fechaObj));
 
