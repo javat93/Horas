@@ -467,6 +467,18 @@
 
     <script>
 
+        // Manejador global de errores asíncronos para debugging
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('ERROR ASÍNCRONO NO CAPTURADO:', event.reason);
+            console.error('Stack trace:', event.reason?.stack || 'No stack available');
+            
+            // Intentar identificar el origen del error
+            if (event.reason?.message?.includes('listener') || event.reason?.message?.includes('channel')) {
+                console.warn('Posible causa: Listener asíncrono con canal cerrado');
+                console.warn('Áreas sospechosas: OAuth, Google Maps, o event listeners');
+            }
+        });
+
         // Sistema de control de versiones
         const APP_VERSION = {
             version: '2.1.9',
