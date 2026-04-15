@@ -169,6 +169,21 @@ module.exports = async (req, res) => {
 
     if (!response.ok) {
       console.error('Google Sheets API error:', data);
+      
+      // Si es 404, podría ser range inválido
+      if (response.status === 404) {
+        console.error('Possible invalid range or spreadsheet ID');
+        return res.status(404).json({ 
+          error: 'Google Sheets API not found - check spreadsheet ID and range',
+          details: {
+            spreadsheetId: SPREADSHEET_ID,
+            range: params.range,
+            url: url,
+            googleError: data
+          }
+        });
+      }
+      
       return res.status(response.status).json({ 
         error: data.error?.message || data.message || 'Google Sheets API error',
         details: data
