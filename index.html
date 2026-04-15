@@ -10,17 +10,121 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAdf5ltXokEUNvM01jNlESvXMGGu28G0W0&libraries=places" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-    <link rel="manifest" href="manifest.json">
-
-<meta name="theme-color" content="#1E90FF">
-
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-
-<link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" href="favicon.ico">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        :root { --brand-blue: #2563eb; --brand-dark: #1e40af; --brand-light: #eff6ff; --bg-main: #f8fafc; }
+        :root { --brand-blue: #2563eb; --brand-dark: #1e40af; --brand-light: #eff6ff; --bg-main: #f8fafc; 
+		/* FullCalendar Google Style Overrides */
+            --fc-border-color: #e2e8f0;
+            --fc-button-bg-color: #ffffff;
+            --fc-button-border-color: #e2e8f0;
+            --fc-button-text-color: #475569;
+            --fc-button-active-bg-color: #f1f5f9;
+            --fc-today-bg-color: transparent !important;
+            --fc-event-bg-color: #2563eb;
+            --fc-event-border-color: transparent;}
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: #1e293b; }
+        
+        .tab-active { background: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); color: var(--brand-blue) !important; }
+        
+        /* FullCalendar Custom CSS */
+        #calendar {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.25rem !important;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .fc .fc-button {
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            font-size: 0.875rem !important;
+            padding: 8px 16px !important;
+            text-transform: capitalize !important;
+            transition: all 0.2s;
+        }
+
+        .fc .fc-button-primary {
+            background-color: white !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #475569 !important;
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: #f8fafc !important;
+            color: var(--brand-blue) !important;
+        }
+
+        .fc .fc-button-primary:not(:disabled).fc-button-active {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            color: var(--brand-blue) !important;
+        }
+
+        /* Indicador de hoy estilo Google */
+        .fc .fc-day-today {
+            background-color: transparent !important;
+        }
+
+        .fc .fc-day-today .fc-daygrid-day-number {
+            background-color: var(--brand-blue);
+            color: white !important;
+            border-radius: 9999px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;
+        }
+
+        .fc .fc-daygrid-day-number {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #64748b;
+            padding: 8px !important;
+        }
+
+        /* Estilo de los eventos */
+        .fc-event {
+            border-radius: 6px !important;
+            padding: 3px 6px !important;
+            font-size: 0.75rem !important;
+            font-weight: 500 !important;
+            margin-bottom: 2px !important;
+            border: none !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .fc-col-header-cell {
+            padding-bottom: 12px !important;
+            border: none !important;
+        }
+
+        .fc-col-header-cell-cushion {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            font-weight: 700;
+            text-decoration: none !important;
+        }
+
+        .fc-theme-standard td, .fc-theme-standard th {
+            border-color: #f1f5f9 !important;
+        }
+
+        .fc-scrollgrid {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #f1f5f9 !important;
+        }
         .header-modern { background: white; border-bottom: 1px solid #e2e8f0; }
         .tab-active { color: var(--brand-blue); background-color: var(--brand-light); font-weight: 700; }
         .card-modern { background: white; border-radius: 1.25rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.2s; }
@@ -46,7 +150,7 @@
                 </div>
             </div>
             <div class="flex gap-2">
-                <button id="sync-btn" onclick="syncData()" class="hidden bg-emerald-50 text-emerald-600 font-bold px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-all flex items-center gap-2 text-sm">
+                <button id="sync-btn" onclick="syncData(true)" class="hidden bg-emerald-50 text-emerald-600 font-bold px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-all flex items-center gap-2 text-sm">
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">Sincronizar</span>
                 </button>
@@ -103,9 +207,9 @@
         </div>
 
         <div id="tab-calendario" class="hidden">
-            <div class="card-modern p-6 h-[650px]">
+            <!--<div class="card-modern p-6 h-[650px]">-->
                 <div id="calendar" class="h-full"></div>
-            </div>
+            <!--</div>-->
         </div>
 
         <div id="tab-maestros" class="hidden space-y-6">
@@ -303,8 +407,81 @@
                 }
             }
         }
+		// FUNCIÓN CLAVE: Implementación de Exponential Backoff para evitar el error 403
+        async function fetchWithBackoff(apiCall, maxRetries = 5) {
+            for (let n = 0; n < maxRetries; n++) {
+                try {
+                    return await apiCall();
+                } catch (err) {
+                    const isRateLimit = err.status === 403 || err.status === 429;
+                    if (isRateLimit && n < maxRetries - 1) {
+                        const waitTime = Math.pow(2, n) * 1000 + (Math.random() * 1000);
+                        console.warn(`Límite excedido. Reintentando en ${Math.round(waitTime)}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, waitTime));
+                        continue;
+                    }
+                    throw err;
+                }
+            }
+        }
+		// Limpia tildes y caracteres especiales para comparaciones robustas
+        function limpiarTexto(texto) {
+            if (!texto) return '';
+            return texto.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "") // Elimina tildes
+                .replace(/[^a-z0-9\s]/g, "")     // Elimina caracteres especiales
+                .trim();
+        }
 
-        async function syncData() {
+        // Busca en Google Calendar el eventId para una fila de Sheets que no lo tenga todavía.
+        // Reglas: si hay un solo evento ese día → asigna directo.
+        // Si hay varios → busca color amarillo (colorId "5") que contenga el nombre del grupo.
+        // Si no encaja ninguno → deja vacío.
+        async function fetchCalendarEventId(fechaObj, grupoNombre, sitioNombre) {
+            if (!fechaObj) return '';
+            try {
+                const timeMin = new Date(fechaObj);
+                timeMin.setHours(0, 0, 0, 0);
+                const timeMax = new Date(fechaObj);
+                timeMax.setHours(23, 59, 59, 999);
+
+                const res = await fetchWithBackoff(() => gapi.client.calendar.events.list({
+                    calendarId: 'primary',
+                    timeMin: timeMin.toISOString(),
+                    timeMax: timeMax.toISOString(),
+                    singleEvents: true,
+                    orderBy: 'startTime'
+					}));
+
+                const items = res.result.items || [];
+                if (items.length === 0) return '';
+
+                // Un solo evento ese día → asignamos directamente
+                if (items.length === 1) return items[0].id;
+
+                // Helper: comprueba si el título del evento coincide con nombre o sitio
+                const nombreLower = limpiarTexto(grupoNombre || '').toLowerCase();
+                const sitioLower = limpiarTexto(sitioNombre || '').toLowerCase();
+                function coincide(ev) {
+                    const titulo = limpiarTexto(ev.summary || '').toLowerCase();
+                    const matchNombre = nombreLower && (titulo.includes(nombreLower) || nombreLower.includes(titulo));
+                    const matchSitio = sitioLower && (titulo.includes(sitioLower) || sitioLower.includes(titulo));
+                    return matchNombre || matchSitio;
+                }
+
+                // Varios eventos → buscamos amarillo (colorId "5") + nombre o sitio coincide
+                const match = items.find(ev => ev.colorId === '5' && coincide(ev));
+                if (match) return match.id;
+
+                return '';
+            } catch (e) {
+                console.warn('Error buscando evento en Calendar:', e);
+                return '';
+            }
+        }
+
+        async function syncData(resolverCal = false) {
             try {
                 // 1. Grupos
                 const resColes = await gapi.client.sheets.spreadsheets.values.get({
@@ -317,15 +494,16 @@
                     precio: row[2] || 20
                 }));
 
-                // 2. Sesiones
+                // 2. Sesiones (leemos hasta columna K para incluir calEventId guardado)
                 const resDetalle = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: SPREADSHEET_ID, range: 'Detalle!A2:J',
+                    spreadsheetId: SPREADSHEET_ID, range: 'Detalle!A2:K',
                 });
                 
                 const rawRows = resDetalle.result.values || [];
                 const hoy = new Date().setHours(0,0,0,0);
 
-                eventos = rawRows.map((row, index) => {
+                // Mapeamos primero sin calEventId para tener los objetos base
+                let eventosBase = rawRows.map((row, index) => {
                     const fParts = (row[5] || "").split("/");
                     const fObj = fParts.length === 3 ? new Date(fParts[2], fParts[1]-1, fParts[0]) : null;
                     let realizado = row[1] === 'X';
@@ -335,7 +513,7 @@
                         rowIdx: index + 2,
                         pagado: row[0] === 'X',
                         realizado: realizado,
-                        boloCole: row[2] || '', // Lo mantenemos de lectura por compatibilidad con la hoja
+                        boloCole: row[2] || '',
                         clase: row[3] || '',
                         precioHora: parseFloat(row[4]) || 0,
                         fechaStr: row[5],
@@ -343,9 +521,41 @@
                         total: parseFloat((row[6] || "0").replace("€","").replace(",",".").trim()) || 0,
                         horas: parseFloat(row[7]) || 0,
                         grupo: row[8],
-                        sitio: row[9] || ''
+                        sitio: row[9] || '',
+                        calEventId: row[10] || ''
                     };
-                }).sort((a,b) => (b.fechaObj - a.fechaObj));
+                });
+
+                // 3. Resolvemos calEventId desde Calendar solo si se pidió explícitamente
+                const sinId = resolverCal
+                    ? eventosBase.filter(ev => !ev.calEventId && ev.fechaObj)
+                    : [];
+                if (sinId.length > 0) {
+                    const updates = [];
+                    for (const ev of sinId) {
+                        const foundId = await fetchCalendarEventId(ev.fechaObj, ev.grupo, ev.sitio);
+                        if (foundId) {
+                            ev.calEventId = foundId;
+                            updates.push({
+                                range: `Detalle!K${ev.rowIdx}`,
+                                values: [[foundId]]
+                            });
+                        }
+                    }
+                    // Guardamos todos los IDs encontrados en Sheets de una vez
+                    if (updates.length > 0) {
+                        await gapi.client.sheets.spreadsheets.values.batchUpdate({
+                            spreadsheetId: SPREADSHEET_ID,
+                            resource: {
+                                valueInputOption: 'USER_ENTERED',
+                                data: updates
+                            }
+                        });
+                        console.log(`calEventId resuelto para ${updates.length} sesiones.`);
+                    }
+                }
+
+                eventos = eventosBase.sort((a,b) => (b.fechaObj - a.fechaObj));
 
                 renderAll();
                 document.getElementById('stats-info').innerText = `${eventos.length} clases sincronizadas.`;
@@ -603,10 +813,14 @@
                         valueInputOption: 'USER_ENTERED', resource: { values: [fila] }
                     });
                 } else {
-                    await gapi.client.sheets.spreadsheets.values.append({
+                    // El append devuelve el rango donde insertó, ej: "Detalle!A5:J5"
+                    const appendResponse = await gapi.client.sheets.spreadsheets.values.append({
                         spreadsheetId: SPREADSHEET_ID, range: 'Detalle!A:J',
                         valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS', resource: { values: [fila] }
                     });
+                    // Extraemos el número de fila del rango actualizado, ej: "Detalle!A5:J5" -> 5
+                    const updatedRange = appendResponse.result.updates.updatedRange;
+                    const insertedRow = parseInt(updatedRange.match(/\d+/)[0]);
                     
                     // Lógica de Google Calendar
                         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -635,9 +849,18 @@
                             eventResource.recurrence = [rrule];
                         }
 
-                        await gapi.client.calendar.events.insert({
+                        const calResponse = await gapi.client.calendar.events.insert({
                             calendarId: 'primary',
                             resource: eventResource
+                        });
+                        const calEventId = calResponse.result.id;
+
+                        // Guardamos el eventId en la columna K usando la fila exacta del append
+                        await gapi.client.sheets.spreadsheets.values.update({
+                            spreadsheetId: SPREADSHEET_ID,
+                            range: `Detalle!K${insertedRow}`,
+                            valueInputOption: 'USER_ENTERED',
+                            resource: { values: [[calEventId]] }
                         });
                     
                 }
@@ -681,6 +904,20 @@
 
         async function borrarFila(rowIdx) {
             if(confirm("¿Seguro que quieres borrar esta fila?")) {
+                // 1. Borrar evento de Google Calendar si existe
+                const ev = eventos.find(e => e.rowIdx === rowIdx);
+                if (ev && ev.calEventId) {
+                    try {
+                        await gapi.client.calendar.events.delete({
+                            calendarId: 'primary',
+                            eventId: ev.calEventId
+                        });
+                    } catch(calErr) {
+                        console.warn("No se pudo borrar el evento del calendario:", calErr);
+                        // Continuamos aunque falle Calendar (puede que el evento ya no exista)
+                    }
+                }
+                // 2. Borrar fila de Sheets
                 await gapi.client.sheets.spreadsheets.batchUpdate({
                     spreadsheetId: SPREADSHEET_ID,
                     resource: { requests: [{ deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIdx - 1, endIndex: rowIdx } } }] }
