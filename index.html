@@ -838,7 +838,8 @@
                             summary: grupo, 
                             location: sitio, 
                             start: { dateTime: startDT, timeZone: tz }, 
-                            end: { dateTime: endDT, timeZone: tz }, 
+                            end: { dateTime: endDT, timeZone: tz },
+							colorId: '5',
                             description: `Sesión de ${horasCalc.toFixed(2)}h generada desde PercuManager.` 
                         };
 
@@ -854,6 +855,7 @@
                                 rrule += `;UNTIL=${formattedUntil}`;
                             }
                             eventResource.recurrence = [rrule];
+							
                         }
 
                         const calResponse = await gapi.client.calendar.events.insert({
