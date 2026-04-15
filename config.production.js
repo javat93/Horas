@@ -4,8 +4,8 @@
 const CONFIG = {
     // En producción, API_KEY NO se expone - se maneja en el backend
     API_KEY: null, // Nunca exponer en producción
-    // CLIENT_ID se obtendrá dinámicamente del proxy para mayor seguridad
-    CLIENT_ID: null, // Se cargará desde /api/oauth-config
+    // CLIENT_ID sí es necesario para OAuth en el frontend (no es secreto)
+    CLIENT_ID: '367465910816-1epkiok8ntvrphrv08b4g6amh0u9knpv.apps.googleusercontent.com',
     SPREADSHEET_ID: '1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60',
     SCOPES: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/spreadsheets',
     DISCOVERY_DOCS: [

@@ -102,7 +102,6 @@ module.exports = async (req, res) => {
         queryParams.append('insertDataOption', params.insertDataOption || 'INSERT_ROWS');
       }
     }
-    // batchUpdate no usa query parameters, todo va en el body
 
     if (queryParams.toString()) {
       url += `?${queryParams.toString()}`;
