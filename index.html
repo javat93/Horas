@@ -771,8 +771,7 @@
                         await proxyGoogleAPI('sheets', 'batchUpdate', {
                             spreadsheetId: CONFIG.SPREADSHEET_ID
                         }, {
-                            valueInputOption: 'USER_ENTERED',
-                            data: updates
+                            requests: updates
                         });
                         console.log(`Sincronizados ${updates.length} Calendar eventIds`);
                     }
@@ -825,20 +824,14 @@
                         console.log(`Clase "${ev.grupo}" del ${ev.fechaStr} marcada como realizada automáticamente.`);
                     }
                 }
-                
-                // Actualizar todas las clases realizadas en una sola llamada
+                // Guardamos todos los IDs encontrados en Sheets de una vez
                 if (updates.length > 0) {
                     await proxyGoogleAPI('sheets', 'batchUpdate', {
                         spreadsheetId: CONFIG.SPREADSHEET_ID
                     }, {
-                        valueInputOption: 'USER_ENTERED',
-                        data: updates
+                        requests: updates
                     });
-                    console.log(`Marcadas ${updates.length} clases como realizadas automáticamente.`);
-                    // Volvemos a sincronizar para reflejar los cambios
-                    await syncData(false);
-                } else {
-                    console.log("No hay clases pasadas sin marcar como realizadas.");
+                    console.log(`Sincronizados ${updates.length} Calendar eventIds`);
                 }
             } catch (err) {
                 console.error("Error actualizando realizados:", err);
