@@ -1,5 +1,5 @@
 // Google Maps proxy endpoint
-module.exports = async (req, res) => {
+module.exports = (req, res) => {
   try {
     // Configuración CORS para permitir acceso desde GitHub Pages
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,19 +19,8 @@ module.exports = async (req, res) => {
     // Construir URL para Google Maps API
     const url = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=${libraries || 'places'}&callback=${callback || ''}`;
 
-    // Fetch del script de Google Maps API
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      return res.status(response.status).send('Error loading Google Maps API');
-    }
-
-    // Obtener el contenido del script
-    const scriptContent = await response.text();
-    
-    // Servir el contenido con el content-type apropiado
-    res.setHeader('Content-Type', 'application/javascript');
-    res.send(scriptContent);
+    // Redirigir a Google Maps API (con CORS headers)
+    res.redirect(302, url);
   } catch (error) {
     console.error('Maps proxy error:', error);
     res.status(500).json({ error: 'Internal server error' });
