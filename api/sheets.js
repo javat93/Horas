@@ -81,6 +81,10 @@ module.exports = async (req, res) => {
       url += `/values/${params.range}:append`;
     } else if (method === 'batchUpdate') {
       url += `:batchUpdate`;
+      // Para batchUpdate, los parámetros van en el body, no en query string
+      if (!body || !body.requests) {
+        return res.status(400).json({ error: 'Requests array is required for batchUpdate method' });
+      }
     } else {
       return res.status(400).json({ error: `Unsupported method: ${method}` });
     }
@@ -98,6 +102,7 @@ module.exports = async (req, res) => {
         queryParams.append('insertDataOption', params.insertDataOption || 'INSERT_ROWS');
       }
     }
+    // batchUpdate no usa query parameters, todo va en el body
 
     if (queryParams.toString()) {
       url += `?${queryParams.toString()}`;
