@@ -673,11 +673,27 @@
                     return matchNombre || matchSitio;
                 }
 
-                // Varios eventos → buscamos amarillo (colorId "5") + nombre o sitio coincide
-                const match = items.find(ev => ev.colorId === '5' && coincide(ev));
-                if (match) return match.id;
+                // Varios eventos → priorizamos búsqueda por coincidencia exacta
+                // 1. Primero buscamos coincidencia exacta de nombre o sitio
+                const exactMatch = items.find(ev => coincide(ev));
+                if (exactMatch) return exactMatch.id;
 
-                return '';
+                // 2. Si no hay coincidencia exacta, buscamos eventos con color amarillo (colorId "5")
+                const yellowMatch = items.find(ev => ev.colorId === '5');
+                if (yellowMatch) {
+                    console.log('Usando evento amarillo como fallback para:', grupoNombre);
+                    return yellowMatch.id;
+                }
+
+                // 3. Si no hay amarillo, usamos el primer evento creado por nuestra app (buscar en descripción)
+                const appMatch = items.find(ev => 
+                    ev.description && ev.description.includes('PercuManager')
+                );
+                if (appMatch) return appMatch.id;
+
+                // 4. Último recurso: el primer evento del día
+                console.log('Usando primer evento del día como último fallback para:', grupoNombre);
+                return items[0].id;
             } catch (e) {
                 console.warn('Error buscando evento en Calendar:', e);
                 return '';
