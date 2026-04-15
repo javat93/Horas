@@ -773,7 +773,8 @@
                                         values: [{
                                             userEnteredValue: { stringValue: foundId }
                                         }]
-                                    }]
+                                    }],
+                                    fields: '*'
                                 }
                             });
                         }
@@ -842,7 +843,8 @@
                                     values: [{
                                         userEnteredValue: { stringValue: 'X' }
                                     }]
-                                }]
+                                }],
+                                fields: '*'
                             }
                         });
                         console.log(`Clase "${ev.grupo}" del ${ev.fechaStr} marcada como realizada automáticamente.`);
