@@ -563,21 +563,29 @@
                     headers['Authorization'] = `Bearer ${token}`;
                 }
                 
+                const requestData = {
+                    method: method,
+                    params: params,
+                    body: body
+                };
+                
+                console.log('Proxy API request:', { apiType, method, params, hasBody: !!body });
+                
                 const response = await fetch(proxyUrl, {
                     method: 'POST',
                     headers: headers,
-                    body: JSON.stringify({
-                        method: method,
-                        params: params,
-                        body: body
-                    })
+                    body: JSON.stringify(requestData)
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Error del proxy: ${response.status} ${response.statusText}`);
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Proxy API error response:', errorData);
+                    throw new Error(`Error del proxy: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
                 }
                 
-                return await response.json();
+                const result = await response.json();
+                console.log('Proxy API success:', { apiType, result });
+                return result;
             } else {
                 // En desarrollo, usar gapi directamente
                 return await gapi.client[apiType.toLowerCase()][method](params);

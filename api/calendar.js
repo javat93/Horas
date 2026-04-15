@@ -22,17 +22,39 @@ module.exports = async (req, res) => {
     // Obtener método y parámetros del request body
     const { method, params, body } = req.body || {};
 
+    // Logging para depuración
+    console.log('Calendar proxy request:', { method, params, body: body ? 'present' : 'missing' });
+
+    // Validar que se proporcionó un método
+    if (!method) {
+      return res.status(400).json({ error: 'Missing method parameter' });
+    }
+
     // Construir URL para Google Calendar API
     const baseUrl = 'https://www.googleapis.com/calendar/v3';
     let url = '';
 
     // Añadir método específico
     if (method === 'list') {
+      if (!params || !params.calendarId) {
+        return res.status(400).json({ error: 'Missing calendarId for list method' });
+      }
       url = `${baseUrl}/calendars/${params.calendarId}/events`;
     } else if (method === 'insert') {
+      if (!params || !params.calendarId) {
+        return res.status(400).json({ error: 'Missing calendarId for insert method' });
+      }
+      if (!body) {
+        return res.status(400).json({ error: 'Missing body for insert method' });
+      }
       url = `${baseUrl}/calendars/${params.calendarId}/events`;
     } else if (method === 'delete') {
+      if (!params || !params.calendarId || !params.eventId) {
+        return res.status(400).json({ error: 'Missing calendarId or eventId for delete method' });
+      }
       url = `${baseUrl}/calendars/${params.calendarId}/events/${params.eventId}`;
+    } else {
+      return res.status(400).json({ error: `Unsupported method: ${method}` });
     }
 
     // Construir query parameters
@@ -62,17 +84,25 @@ module.exports = async (req, res) => {
       fetchOptions.body = JSON.stringify(body);
     }
 
+    console.log('Calendar proxy fetching:', { url, method: fetchOptions.method, hasBody: !!body });
+
     // Hacer request a Google Calendar API
     const response = await fetch(url, fetchOptions);
     const data = await response.json();
 
+    console.log('Calendar proxy response:', { status: response.status, ok: response.ok });
+
     if (!response.ok) {
-      return res.status(response.status).json({ error: data.error || 'Google Calendar API error' });
+      console.error('Google Calendar API error:', data);
+      return res.status(response.status).json({ 
+        error: data.error || data.message || 'Google Calendar API error',
+        details: data
+      });
     }
 
     res.json(data);
   } catch (error) {
     console.error('Calendar proxy error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 };
