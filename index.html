@@ -10,7 +10,17 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 	<!-- Carga del archivo de configuración -->
-    <script src="config.js"></script>
+    <!-- Configuración segura según entorno -->
+<script>
+    // Detectar si estamos en producción
+    const isProduction = window.location.hostname !== 'localhost' && 
+                         window.location.hostname !== '127.0.0.1';
+    
+    // Cargar configuración adecuada
+    const configScript = document.createElement('script');
+    configScript.src = isProduction ? 'config.production.js' : 'config.secure.js';
+    document.head.appendChild(configScript);
+</script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -271,10 +281,13 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sitio / Ubicación</label>
                     <div class="relative">
-                        <input type="text" id="ev-sitio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Dirección o nombre del lugar">
+                        <input type="text" id="ev-sitio" class="w-full rounded-2xl p-4 pr-12 input-modern text-sm font-medium" placeholder="Dirección o nombre del lugar">
                         <div id="maracuya-gps-hint" class="hidden absolute right-4 top-4 text-blue-500">
                              <i data-lucide="map" class="w-5 h-5"></i>
                         </div>
+                        <button type="button" onclick="openMapModal('ev-sitio')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600">
+    <i data-lucide="map-pin" class="w-5 h-5"></i>
+</button>
                     </div>
                 </div>
                 
@@ -344,12 +357,64 @@
 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Dirección / Sitio (Ayuda Maps)</label>
-                    <input type="text" id="gr-sitio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Empieza a escribir para buscar...">
+                    <div class="relative">
+                        <input type="text" id="gr-sitio" class="w-full rounded-2xl p-4 pr-12 input-modern text-sm font-medium" placeholder="Empieza a escribir para buscar...">
+                        <button type="button" onclick="openMapModal('gr-sitio')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600">
+    <i data-lucide="map-pin" class="w-5 h-5"></i>
+</button>
+                    </div>
                 </div>
                 <div class="flex gap-4 pt-4">
                     <button type="submit" class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-lg">Guardar Grupo</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de Mapa Interactivo -->
+    <div id="modal-mapa" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2rem] w-full max-w-4xl h-[600px] flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h3 class="text-2xl font-extrabold text-slate-900">Seleccionar Ubicación</h3>
+                <button type="button" onclick="closeModal('modal-mapa')" class="text-slate-400 hover:text-red-500">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="flex-1 flex">
+                <div class="w-1/3 p-4 border-r">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Buscar Dirección</label>
+                            <div class="relative">
+                                <input type="text" id="map-search" class="w-full rounded-xl p-3 pr-10 input-modern text-sm" placeholder="Escribe una dirección...">
+                                <button onclick="searchOnMap()" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                    <i data-lucide="search" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Dirección Seleccionada</label>
+                            <textarea id="map-selected-address" class="w-full rounded-xl p-3 input-modern text-sm h-20 resize-none" readonly placeholder="Selecciona una ubicación en el mapa..."></textarea>
+                        </div>
+                        <button onclick="getCurrentLocation()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                            Usar Ubicación Actual
+                        </button>
+                        <button onclick="confirmMapSelection()" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">
+                            Confirmar Selección
+                        </button>
+                    </div>
+                </div>
+                <div class="w-2/3 relative">
+                    <div id="map-container" class="w-full h-full rounded-r-[2rem]"></div>
+                    <div id="map-loading" class="absolute inset-0 bg-white/80 flex items-center justify-center rounded-r-[2rem]">
+                        <div class="text-center">
+                            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                            <p class="text-slate-600 font-medium">Cargando mapa...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -386,16 +451,30 @@
         let calendar;
         let autocompleteSesion;
         let autocompleteGrupo;
+        
+        // Variables para el Mapa Interactivo
+        let map;
+        let marker;
+        let geocoder;
+        let currentTargetField = null;
 		
-		// --- 1. CARGA DINÁMICA DE GOOGLE MAPS UTILIZANDO CONFIG.API_KEY ---
+		// --- 1. CARGA DINÁMICA DE GOOGLE MAPS UTILIZANDO PROXY EN PRODUCCIÓN ---
         function loadGoogleMaps() {
-            if (typeof CONFIG !== 'undefined' && CONFIG.API_KEY) {
+            if (typeof CONFIG !== 'undefined') {
                 const script = document.createElement('script');
-                script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.API_KEY}&libraries=places`;
+                
+                // En producción, usar el proxy; en desarrollo, usar API key directo
+                if (CONFIG.ENVIRONMENT === 'production' && CONFIG.GOOGLE_MAPS_API_URL) {
+                    script.src = `${CONFIG.GOOGLE_MAPS_API_URL}?libraries=places&callback=initMap`;
+                    console.log("Google Maps API cargada a través del proxy.");
+                } else if (CONFIG.API_KEY) {
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.API_KEY}&libraries=places&callback=initMap`;
+                    console.log("Google Maps API cargada con API key directa (desarrollo).");
+                }
+                
                 script.async = true;
                 script.defer = true;
                 document.head.appendChild(script);
-                console.log("Google Maps API cargada con éxito.");
             }
         }
 		
@@ -441,7 +520,39 @@
                 }
             }
         }
-		// FUNCIÓN CLAVE: Implementación de Exponential Backoff para evitar el error 403
+		// FUNCIÓN CLAVE: Proxy para llamadas a Google APIs en producción
+        async function proxyGoogleAPI(apiType, method, params = {}, body = null) {
+            if (CONFIG.ENVIRONMENT === 'production' && CONFIG.USE_PROXY) {
+                // En producción, usar el proxy
+                const proxyUrl = CONFIG[`GOOGLE_${apiType.toUpperCase()}_API_URL`];
+                if (!proxyUrl) {
+                    throw new Error(`URL del proxy no configurada para ${apiType}`);
+                }
+                
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        method: method,
+                        params: params,
+                        body: body
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Error del proxy: ${response.status} ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } else {
+                // En desarrollo, usar gapi directamente
+                return await gapi.client[apiType.toLowerCase()][method](params);
+            }
+        }
+
+        // FUNCIÓN CLAVE: Implementación de Exponential Backoff para evitar el error 403
         async function fetchWithBackoff(apiCall, maxRetries = 5) {
             for (let n = 0; n < maxRetries; n++) {
                 try {
@@ -480,15 +591,15 @@
                 const timeMax = new Date(fechaObj);
                 timeMax.setHours(23, 59, 59, 999);
 
-                const res = await fetchWithBackoff(() => gapi.client.calendar.events.list({
+                const res = await proxyGoogleAPI('calendar', 'list', {
                     calendarId: 'primary',
                     timeMin: timeMin.toISOString(),
                     timeMax: timeMax.toISOString(),
                     singleEvents: true,
                     orderBy: 'startTime'
-					}));
+                });
 
-                const items = res.result.items || [];
+                const items = res.items || [];
                 if (items.length === 0) return '';
 
                 // Un solo evento ese día → asignamos directamente
@@ -518,10 +629,11 @@
         async function syncData(resolverCal = false, actualizarRealizadosFlag = true) {
             try {
                 // 1. Grupos
-                const resColes = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Coles!A2:D', 
+                const resColes = await proxyGoogleAPI('sheets', 'get', {
+                    spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                    range: 'Coles!A2:D'
                 });
-                grupos = (resColes.result.values || []).map((row, index) => ({
+                grupos = (resColes.values || []).map((row, index) => ({
                     rowIdx: index + 2,
                     nombre: row[0],
                     sitio: row[1] || '',
@@ -530,13 +642,14 @@
                 }));
 
                 // 2. Sesiones (leemos hasta columna L para incluir calEventId y dirección guardados)
-                const resDetalle = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A2:L',
+                const resDetalle = await proxyGoogleAPI('sheets', 'get', {
+                    spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                    range: 'Detalle!A2:L'
                 });
                 
-                const rawRows = resDetalle.result.values || [];
+                const rawRows = resDetalle.values || [];
                 const hoy = new Date().setHours(0,0,0,0);
-
+                
                 // Mapeamos primero sin calEventId para tener los objetos base
                 let eventosBase = rawRows.map((row, index) => {
                     const fParts = (row[5] || "").split("/");
@@ -580,12 +693,11 @@
                     }
                     // Guardamos todos los IDs encontrados en Sheets de una vez
                     if (updates.length > 0) {
-                        await gapi.client.sheets.spreadsheets.values.batchUpdate({
-                            spreadsheetId: CONFIG.SPREADSHEET_ID,
-                            resource: {
-                                valueInputOption: 'USER_ENTERED',
-                                data: updates
-                            }
+                        await proxyGoogleAPI('sheets', 'batchUpdate', {
+                            spreadsheetId: CONFIG.SPREADSHEET_ID
+                        }, {
+                            valueInputOption: 'USER_ENTERED',
+                            data: updates
                         });
                         console.log(`calEventId resuelto para ${updates.length} sesiones.`);
                     }
@@ -610,11 +722,12 @@
                 const updates = [];
                 
                 // Volver a leer los datos originales del spreadsheet para comparar correctamente
-                const resDetalle = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A2:B',
+                const resDetalle = await proxyGoogleAPI('sheets', 'get', {
+                    spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                    range: 'Detalle!A2:B'
                 });
                 
-                const rawRows = resDetalle.result.values || [];
+                const rawRows = resDetalle.values || [];
                 
                 // Buscar clases que deberían estar realizadas pero no lo están en el spreadsheet
                 for (let i = 0; i < rawRows.length; i++) {
@@ -640,12 +753,11 @@
                 
                 // Actualizar todas las clases realizadas en una sola llamada
                 if (updates.length > 0) {
-                    await gapi.client.sheets.spreadsheets.values.batchUpdate({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID,
-                        resource: {
-                            valueInputOption: 'USER_ENTERED',
-                            data: updates
-                        }
+                    await proxyGoogleAPI('sheets', 'batchUpdate', {
+                        spreadsheetId: CONFIG.SPREADSHEET_ID
+                    }, {
+                        valueInputOption: 'USER_ENTERED',
+                        data: updates
                     });
                     console.log(`Marcadas ${updates.length} clases como realizadas automáticamente.`);
                     // Volvemos a sincronizar para reflejar los cambios
@@ -793,9 +905,12 @@
         }
         // Helpers UI Finales
         async function togglePago(rowIdx, newState) {
-            await gapi.client.sheets.spreadsheets.values.update({
-                spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Detalle!A${rowIdx}`,
-                valueInputOption: 'USER_ENTERED', resource: { values: [[newState ? 'X' : '']] }
+            await proxyGoogleAPI('sheets', 'update', {
+                spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                range: `Detalle!A${rowIdx}`,
+                valueInputOption: 'USER_ENTERED'
+            }, {
+                values: [[newState ? 'X' : '']]
             });
             syncData();
         }
@@ -917,15 +1032,22 @@
                     const old = eventos.find(ev => ev.rowIdx == rowIdx);
                     fila[0] = old.pagado ? 'X' : '';
                     fila[1] = old.realizado ? 'X' : '';
-                    await gapi.client.sheets.spreadsheets.values.update({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Detalle!A${rowIdx}:L${rowIdx}`,
-                        valueInputOption: 'USER_ENTERED', resource: { values: [fila] }
+                    await proxyGoogleAPI('sheets', 'update', {
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                        range: `Detalle!A${rowIdx}:L${rowIdx}`,
+                        valueInputOption: 'USER_ENTERED'
+                    }, {
+                        values: [fila]
                     });
                 } else {
                     // El append devuelve el rango donde insertó, ej: "Detalle!A5:L5"
-                    const appendResponse = await gapi.client.sheets.spreadsheets.values.append({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A:L',
-                        valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS', resource: { values: [fila] }
+                    const appendResponse = await proxyGoogleAPI('sheets', 'append', {
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                        range: 'Detalle!A:L',
+                        valueInputOption: 'USER_ENTERED', 
+                        insertDataOption: 'INSERT_ROWS'
+                    }, {
+                        values: [fila]
                     });
                     // Extraemos el número de fila del rango actualizado, ej: "Detalle!A5:L5" -> 5
                     const updatedRange = appendResponse.result.updates.updatedRange;
@@ -964,18 +1086,18 @@
 							
                         }
 
-                        const calResponse = await gapi.client.calendar.events.insert({
-                            calendarId: 'primary',
-                            resource: eventResource
-                        });
+                        const calResponse = await proxyGoogleAPI('calendar', 'insert', {
+                            calendarId: 'primary'
+                        }, eventResource);
                         const calEventId = calResponse.result.id;
 
                         // Guardamos el eventId en la columna K usando la fila exacta del append
-                        await gapi.client.sheets.spreadsheets.values.update({
+                        await proxyGoogleAPI('sheets', 'update', {
                             spreadsheetId: CONFIG.SPREADSHEET_ID,
                             range: `Detalle!K${insertedRow}`,
-                            valueInputOption: 'USER_ENTERED',
-                            resource: { values: [[calEventId]] }
+                            valueInputOption: 'USER_ENTERED'
+                        }, {
+                            values: [[calEventId]]
                         });
                     
                 }
@@ -995,14 +1117,21 @@
 
             try {
                 if (rowIdx) {
-                    await gapi.client.sheets.spreadsheets.values.update({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Coles!A${rowIdx}:D${rowIdx}`,
-                        valueInputOption: 'USER_ENTERED', resource: { values: [fila] }
+                    await proxyGoogleAPI('sheets', 'update', {
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                        range: `Coles!A${rowIdx}:D${rowIdx}`,
+                        valueInputOption: 'USER_ENTERED'
+                    }, {
+                        values: [fila]
                     });
                 } else {
-                    await gapi.client.sheets.spreadsheets.values.append({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Coles!A:D',
-                        valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS', resource: { values: [fila] }
+                    await proxyGoogleAPI('sheets', 'append', {
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                        range: 'Coles!A:D',
+                        valueInputOption: 'USER_ENTERED', 
+                        insertDataOption: 'INSERT_ROWS'
+                    }, {
+                        values: [fila]
                     });
                 }
                 closeModal('modal-grupo');
@@ -1037,7 +1166,7 @@
                     // 1. Borrar evento de Google Calendar si existe
                     if (ev && ev.calEventId) {
                         try {
-                            await gapi.client.calendar.events.delete({
+                            await proxyGoogleAPI('calendar', 'delete', {
                                 calendarId: 'primary',
                                 eventId: ev.calEventId
                             });
@@ -1047,9 +1176,10 @@
                         }
                     }
                     // 2. Borrar fila de Sheets
-                    await gapi.client.sheets.spreadsheets.batchUpdate({
-                        spreadsheetId: CONFIG.SPREADSHEET_ID,
-                        resource: { requests: [{ deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIdx - 1, endIndex: rowIdx } } }] }
+                    await proxyGoogleAPI('sheets', 'batchUpdate', {
+                        spreadsheetId: CONFIG.SPREADSHEET_ID
+                    }, {
+                        requests: [{ deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIdx - 1, endIndex: rowIdx } } }]
                     });
                     syncData();
                 }
@@ -1075,12 +1205,156 @@
                 grupos.map(g => `<option value="${g.nombre}">${g.nombre}</option>`).join('');
         }
 
-        window.onload = () => {
-			loadGoogleMaps();
-            gapiLoaded();
-            gisLoaded();
+        // Funciones para el Mapa Interactivo
+        function openMapModal(targetFieldId) {
+            currentTargetField = targetFieldId;
+            document.getElementById('modal-mapa').classList.remove('hidden');
+            document.getElementById('map-search').value = '';
+            document.getElementById('map-selected-address').value = '';
+            
+            // Inicializar mapa si no está creado
+            if (!map) {
+                initializeMap();
+            } else {
+                // Centrar en ubicación actual o predeterminada
+                getCurrentLocation();
+            }
+            
             lucide.createIcons();
-        };
-    </script>
-</body>
+        }
+
+        function initializeMap() {
+            const mapContainer = document.getElementById('map-container');
+            const loading = document.getElementById('map-loading');
+            
+            // Crear mapa centrado en una ubicación por defecto (España)
+            map = new google.maps.Map(mapContainer, {
+                center: { lat: 40.4168, lng: -3.7038 }, // Madrid
+                zoom: 13,
+                mapTypeControl: true,
+                streetViewControl: true,
+                fullscreenControl: true
+            });
+            
+            // Crear geocoder
+            geocoder = new google.maps.Geocoder();
+            
+            // Añadir evento de clic en el mapa
+            map.addListener('click', function(event) {
+                placeMarker(event.latLng);
+                getAddressFromLatLng(event.latLng);
+            });
+            
+            // Ocultar loading
+            loading.classList.add('hidden');
+            
+            // Obtener ubicación actual
+            getCurrentLocation();
+        }
+
+        function placeMarker(location) {
+            if (marker) {
+                marker.setMap(null);
+            }
+            
+            marker = new google.maps.Marker({
+                position: location,
+                map: map,
+                draggable: true,
+                animation: google.maps.Animation.DROP
+            });
+            
+            // Actualizar dirección cuando se arrastra el marcador
+            marker.addListener('dragend', function(event) {
+                getAddressFromLatLng(event.latLng);
+            });
+        }
+
+        function getAddressFromLatLng(latlng) {
+            geocoder.geocode({ location: latlng }, function(results, status) {
+                if (status === 'OK' && results[0]) {
+                    const address = results[0].formatted_address;
+                    document.getElementById('map-selected-address').value = address;
+                } else {
+                    console.error('Error obteniendo dirección:', status);
+                }
+            });
+        }
+
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        
+                        map.setCenter(pos);
+                        placeMarker(pos);
+                        getAddressFromLatLng(pos);
+                    },
+                    function(error) {
+                        console.error('Error obteniendo ubicación:', error);
+                        // En caso de error, centrar en Madrid
+                        map.setCenter({ lat: 40.4168, lng: -3.7038 });
+                    }
+                );
+            } else {
+                console.error('Geolocalización no soportada');
+            }
+        }
+
+        function searchOnMap() {
+            const address = document.getElementById('map-search').value;
+            if (!address) return;
+            
+            geocoder.geocode({ address: address }, function(results, status) {
+                if (status === 'OK' && results[0]) {
+                    const location = results[0].geometry.location;
+                    map.setCenter(location);
+                    map.setZoom(16);
+                    placeMarker(location);
+                    document.getElementById('map-selected-address').value = results[0].formatted_address;
+                } else {
+                    alert('No se encontró la dirección: ' + status);
+                }
+            });
+        }
+
+        function confirmMapSelection() {
+            const selectedAddress = document.getElementById('map-selected-address').value;
+            if (!selectedAddress) {
+                alert('Por favor, selecciona una ubicación en el mapa');
+                return;
+            }
+            
+            if (currentTargetField) {
+                document.getElementById(currentTargetField).value = selectedAddress;
+            }
+            
+            closeModal('modal-mapa');
+        }
+
+        // Manejar Enter en el campo de búsqueda
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('map-search');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        searchOnMap();
+                    }
+                });
+            }
+        });
+
+            window.onload = () => {
+				loadGoogleMaps();
+                gapiLoaded();
+                gisLoaded();
+                lucide.createIcons();
+            };
+        </script>
+    </body>
 </html>

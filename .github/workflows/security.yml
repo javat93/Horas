@@ -1,0 +1,51 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Check for exposed API keys
+      run: |
+        echo "Checking for exposed API keys..."
+        if grep -r "AIzaSy" --include="*.js" --include="*.html" --include="*.json" .; then
+          echo "ERROR: Found potential Google API key in code!"
+          exit 1
+        fi
+        if grep -r "sk-" --include="*.js" --include="*.html" --include="*.json" .; then
+          echo "ERROR: Found potential OpenAI API key in code!"
+          exit 1
+        fi
+        echo "No exposed API keys found"
+    
+    - name: Check security headers
+      run: |
+        echo "Verifying security configuration..."
+        if [ ! -f "security-headers.json" ]; then
+          echo "WARNING: security-headers.json not found"
+        fi
+        if [ ! -f ".gitignore" ] || ! grep -q "config.secure.js" .gitignore; then
+          echo "ERROR: config.secure.js not in .gitignore"
+          exit 1
+        fi

@@ -1,0 +1,27 @@
+{
+  "name": "percu-manager-proxy",
+  "version": "1.0.0",
+  "description": "Backend proxy seguro para PercuManager",
+  "main": "proxy.js",
+  "scripts": {
+    "start": "node proxy.js",
+    "dev": "nodemon proxy.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "googleapis": "^126.0.1",
+    "google-auth-library": "^9.6.3",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": ["proxy", "google-apis", "security", "backend"],
+  "author": "PercuManager",
+  "license": "MIT"
+}
