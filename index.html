@@ -443,6 +443,30 @@
 
     <script>
 
+        // Sistema de control de versiones
+        const APP_VERSION = {
+            version: '2.1.0',
+            date: '2026-04-16',
+            changes: [
+                'Corregido proxy calendar.delete para manejar 204 No Content',
+                'Corregido guardado de Calendar Event ID en nuevas sesiones',
+                'Limpiado logging detallado de actualizarRealizados',
+                'Corregida lógica para procesar TODAS las filas del spreadsheet',
+                'Corregido proxy sheets.update (método PUT)',
+                'Sistema de control de versiones añadido'
+            ]
+        };
+        
+        // Mostrar versión en consola al cargar
+        console.log('%c=== PERCU MANAGER ===', 'color: #2563eb; font-weight: bold; font-size: 14px');
+        console.log(`%cVersión: ${APP_VERSION.version}`, 'color: #10b981; font-weight: bold');
+        console.log(`%cFecha: ${APP_VERSION.date}`, 'color: #6366f1; font-weight: bold');
+        console.log('%cCambios recientes:', 'color: #f59e0b; font-weight: bold');
+        APP_VERSION.changes.forEach((change, i) => {
+            console.log(`%c${i + 1}. ${change}`, 'color: #64748b; font-size: 12px');
+        });
+        console.log('%c========================', 'color: #2563eb; font-weight: bold; font-size: 14px');
+
         let tokenClient;
         let gapiInited = false;
         let gisInited = false;
@@ -466,10 +490,8 @@
                 // En producción, usar el proxy; en desarrollo, usar API key directo
                 if (CONFIG.ENVIRONMENT === 'production' && CONFIG.GOOGLE_MAPS_API_URL) {
                     script.src = `${CONFIG.GOOGLE_MAPS_API_URL}?libraries=places&callback=initMap`;
-                    console.log("Google Maps API cargada a través del proxy.");
                 } else if (CONFIG.API_KEY) {
                     script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.API_KEY}&libraries=places&callback=initMap`;
-                    console.log("Google Maps API cargada con API key directa (desarrollo).");
                 }
                 
                 script.async = true;
@@ -569,7 +591,6 @@
                     body: body
                 };
                 
-                console.log('Proxy API request:', { apiType, method, params, hasBody: !!body });
                 
                 const response = await fetch(proxyUrl, {
                     method: 'POST',
@@ -584,7 +605,6 @@
                 }
                 
                 const result = await response.json();
-                console.log('Proxy API success:', { apiType, result });
                 return result;
             } else {
                 // En desarrollo, usar gapi directamente
@@ -611,18 +631,15 @@
         }
 		// Callback para Google Maps API
         function initMap() {
-            console.log('initMap callback called');
             // Llamar a initializeMap si está disponible
             if (typeof initializeMap === 'function') {
                 initializeMap();
             } else {
-                console.warn('initializeMap function not found, checking map_functions.js');
                 // Intentar inicialización básica si initializeMap no está disponible
                 const mapContainer = document.getElementById('map-container');
                 const loading = document.getElementById('map-loading');
                 if (mapContainer && loading) {
                     loading.classList.add('hidden');
-                    console.log('Map loading hidden (basic initialization)');
                 }
             }
         }
@@ -786,7 +803,6 @@
                         }, {
                             requests: updates
                         });
-                        console.log(`Sincronizados ${updates.length} Calendar eventIds`);
                     }
                 }
 
@@ -844,7 +860,6 @@
                             grupo: grupo,
                             fechaStr: fechaStr
                         });
-                        console.log(`Clase "${grupo}" del ${fechaStr} marcada como realizada automáticamente.`);
                     }
                 }
                 
@@ -860,9 +875,6 @@
                             values: [['X']]
                         });
                     }
-                    console.log(`Sincronizados ${updates.length} clases como realizadas`);
-                } else {
-                    console.log('No hay clases pasadas sin marcar como realizadas');
                 }
             } catch (err) {
                 console.error("Error actualizando realizados:", err);
@@ -1260,16 +1272,12 @@
                                         }
                                     }]
                                 });
-                                console.log('Calendar eventId guardado correctamente en fila', insertedRow);
                             } else {
-                                console.warn('No se pudo determinar la fila insertada para guardar el eventId');
-                            }
+                                }
                         } catch (updateError) {
                             console.warn('No se pudo actualizar el eventId en la columna K:', updateError.message);
-                            console.log('La sesión se guardó correctamente, solo falta el eventId');
                         }
                     } catch (calendarError) {
-                        console.warn('Calendar API tuvo un problema, pero la sesión se guardó en Sheets:', calendarError.message);
                         // No mostramos alerta para no interrumpir el flujo si funciona
                     }
                 }
@@ -1343,8 +1351,7 @@
                                 eventId: ev.calEventId
                             });
                         } catch(calErr) {
-                            console.warn("No se pudo borrar el evento del calendario:", calErr);
-                            // Continuamos aunque falle Calendar (puede que el evento ya no exista)
+                                // Continuamos aunque falle Calendar (puede que el evento ya no exista)
                         }
                     }
                     // 2. Borrar fila de Sheets
@@ -1432,7 +1439,6 @@
                     const address = results[0].formatted_address;
                     document.getElementById('map-selected-address').value = address;
                 } else {
-                    console.error('Error obteniendo dirección:', status);
                 }
             });
         }
@@ -1451,13 +1457,11 @@
                         getAddressFromLatLng(pos);
                     },
                     function(error) {
-                        console.error('Error obteniendo ubicación:', error);
                         // En caso de error, centrar en Madrid
                         map.setCenter({ lat: 40.4168, lng: -3.7038 });
                     }
                 );
             } else {
-                console.error('Geolocalización no soportada');
             }
         }
 
