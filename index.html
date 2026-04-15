@@ -8,8 +8,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAdf5ltXokEUNvM01jNlESvXMGGu28G0W0&libraries=places" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+	<!-- Carga del archivo de configuración -->
+    <script src="config.js"></script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -349,10 +350,7 @@
     </div>
 
     <script>
-        const SPREADSHEET_ID = '1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60';
-        const CLIENT_ID = '367465910816-1epkiok8ntvrphrv08b4g6amh0u9knpv.apps.googleusercontent.com';
-        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/calendar.events';
-        
+
         let tokenClient;
         let gapiInited = false;
         let gisInited = false;
@@ -361,14 +359,23 @@
         let calendar;
         let autocompleteSesion;
         let autocompleteGrupo;
-
+		
+		// --- 1. CARGA DINÁMICA DE GOOGLE MAPS UTILIZANDO CONFIG.API_KEY ---
+        function loadGoogleMaps() {
+            if (typeof CONFIG !== 'undefined' && CONFIG.API_KEY) {
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.API_KEY}&libraries=places`;
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
+                console.log("Google Maps API cargada con éxito.");
+            }
+        }
+		
         function gapiLoaded() {
             gapi.load('client', async () => {
                 await gapi.client.init({
-                    discoveryDocs: [
-                        'https://sheets.googleapis.com/$discovery/rest?version=v4',
-                        'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'
-                    ],
+                    discoveryDocs: CONFIG.DISCOVERY_DOCS,
                 });
                 gapiInited = true;
                 checkAuth();
@@ -377,8 +384,8 @@
 
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
+                client_id: CONFIG.CLIENT_ID,
+                scope: CONFIG.SCOPES,
                 callback: '', 
             });
             gisInited = true;
@@ -485,7 +492,7 @@
             try {
                 // 1. Grupos
                 const resColes = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: SPREADSHEET_ID, range: 'Coles!A2:C', 
+                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Coles!A2:C', 
                 });
                 grupos = (resColes.result.values || []).map((row, index) => ({
                     rowIdx: index + 2,
@@ -496,7 +503,7 @@
 
                 // 2. Sesiones (leemos hasta columna K para incluir calEventId guardado)
                 const resDetalle = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: SPREADSHEET_ID, range: 'Detalle!A2:K',
+                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A2:K',
                 });
                 
                 const rawRows = resDetalle.result.values || [];
@@ -545,7 +552,7 @@
                     // Guardamos todos los IDs encontrados en Sheets de una vez
                     if (updates.length > 0) {
                         await gapi.client.sheets.spreadsheets.values.batchUpdate({
-                            spreadsheetId: SPREADSHEET_ID,
+                            spreadsheetId: CONFIG.SPREADSHEET_ID,
                             resource: {
                                 valueInputOption: 'USER_ENTERED',
                                 data: updates
@@ -809,13 +816,13 @@
                     fila[0] = old.pagado ? 'X' : '';
                     fila[1] = old.realizado ? 'X' : '';
                     await gapi.client.sheets.spreadsheets.values.update({
-                        spreadsheetId: SPREADSHEET_ID, range: `Detalle!A${rowIdx}:J${rowIdx}`,
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Detalle!A${rowIdx}:J${rowIdx}`,
                         valueInputOption: 'USER_ENTERED', resource: { values: [fila] }
                     });
                 } else {
                     // El append devuelve el rango donde insertó, ej: "Detalle!A5:J5"
                     const appendResponse = await gapi.client.sheets.spreadsheets.values.append({
-                        spreadsheetId: SPREADSHEET_ID, range: 'Detalle!A:J',
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A:J',
                         valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS', resource: { values: [fila] }
                     });
                     // Extraemos el número de fila del rango actualizado, ej: "Detalle!A5:J5" -> 5
@@ -857,7 +864,7 @@
 
                         // Guardamos el eventId en la columna K usando la fila exacta del append
                         await gapi.client.sheets.spreadsheets.values.update({
-                            spreadsheetId: SPREADSHEET_ID,
+                            spreadsheetId: CONFIG.SPREADSHEET_ID,
                             range: `Detalle!K${insertedRow}`,
                             valueInputOption: 'USER_ENTERED',
                             resource: { values: [[calEventId]] }
@@ -880,12 +887,12 @@
             try {
                 if (rowIdx) {
                     await gapi.client.sheets.spreadsheets.values.update({
-                        spreadsheetId: SPREADSHEET_ID, range: `Coles!A${rowIdx}:C${rowIdx}`,
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Coles!A${rowIdx}:C${rowIdx}`,
                         valueInputOption: 'USER_ENTERED', resource: { values: [fila] }
                     });
                 } else {
                     await gapi.client.sheets.spreadsheets.values.append({
-                        spreadsheetId: SPREADSHEET_ID, range: 'Coles!A:C',
+                        spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Coles!A:C',
                         valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS', resource: { values: [fila] }
                     });
                 }
@@ -896,7 +903,7 @@
 
         async function togglePago(rowIdx, newState) {
             await gapi.client.sheets.spreadsheets.values.update({
-                spreadsheetId: SPREADSHEET_ID, range: `Detalle!A${rowIdx}`,
+                spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Detalle!A${rowIdx}`,
                 valueInputOption: 'USER_ENTERED', resource: { values: [[newState ? 'X' : '']] }
             });
             syncData();
@@ -919,7 +926,7 @@
                 }
                 // 2. Borrar fila de Sheets
                 await gapi.client.sheets.spreadsheets.batchUpdate({
-                    spreadsheetId: SPREADSHEET_ID,
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
                     resource: { requests: [{ deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIdx - 1, endIndex: rowIdx } } }] }
                 });
                 syncData();
@@ -946,6 +953,7 @@
         }
 
         window.onload = () => {
+			loadGoogleMaps();
             gapiLoaded();
             gisLoaded();
             lucide.createIcons();
