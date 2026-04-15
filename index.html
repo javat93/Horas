@@ -737,9 +737,30 @@
                 const sinId = resolverCal
                     ? eventosBase.filter(ev => !ev.calEventId && ev.fechaObj)
                     : [];
-                // Omitimos la sincronización de Calendar eventIds para evitar errores
-                // Los eventos de Calendar funcionan correctamente sin necesidad de guardar los IDs
-                console.log(`Se omitió sincronización de ${sinId.length} Calendar eventIds para evitar errores`);
+                // Sincronizamos Calendar eventIds si hay eventos sin ID
+                if (sinId.length > 0) {
+                    const updates = [];
+                    for (const ev of sinId) {
+                        const foundId = await fetchCalendarEventId(ev.fechaObj, ev.grupo, ev.sitio);
+                        if (foundId) {
+                            ev.calEventId = foundId;
+                            updates.push({
+                                range: `Detalle!K${ev.rowIdx}`,
+                                values: [[foundId]]
+                            });
+                        }
+                    }
+                    // Guardamos todos los IDs encontrados en Sheets de una vez
+                    if (updates.length > 0) {
+                        await proxyGoogleAPI('sheets', 'batchUpdate', {
+                            spreadsheetId: CONFIG.SPREADSHEET_ID
+                        }, {
+                            valueInputOption: 'USER_ENTERED',
+                            data: updates
+                        });
+                        console.log(`Sincronizados ${updates.length} Calendar eventIds`);
+                    }
+                }
 
                 eventos = eventosBase.sort((a,b) => (b.fechaObj - a.fechaObj));
 
@@ -1172,11 +1193,43 @@
                             return; // Salimos del try si no hay ID, pero la sesión ya se guardó
                         }
 
-                        // Omitimos guardado de eventId para evitar errores de fila
-                        console.log('Calendar eventId:', calEventId);
-                        console.log('La sesión se guardó correctamente en Sheets y Calendar');
-                        // Nota: El guardado del eventId en la columna K se omite para evitar errores
-                        // La aplicación funciona perfectamente sin esta funcionalidad
+                        // Guardamos el eventId en la columna K usando batchUpdate
+                        try {
+                            // Obtener la última fila real donde se insertaron los datos
+                            const lastRowResponse = await proxyGoogleAPI('sheets', 'get', {
+                                spreadsheetId: CONFIG.SPREADSHEET_ID,
+                                range: 'Detalle!A2:A'
+                            });
+                            const realInsertedRow = (lastRowResponse.values || []).length + 2;
+                            
+                            console.log('Guardando eventId en fila:', realInsertedRow);
+                            
+                            // Usar batchUpdate para actualizar la celda específica
+                            await proxyGoogleAPI('sheets', 'batchUpdate', {
+                                spreadsheetId: CONFIG.SPREADSHEET_ID
+                            }, {
+                                requests: [{
+                                    updateCells: {
+                                        range: {
+                                            sheetId: 0,
+                                            startRowIndex: realInsertedRow - 1,
+                                            endRowIndex: realInsertedRow,
+                                            startColumnIndex: 10, // Columna K (0-indexed)
+                                            endColumnIndex: 11
+                                        },
+                                        rows: [{
+                                            values: [{
+                                                userEnteredValue: { stringValue: calEventId }
+                                            }]
+                                        }]
+                                    }
+                                }]
+                            });
+                            console.log('Calendar eventId guardado correctamente en fila', realInsertedRow);
+                        } catch (updateError) {
+                            console.warn('No se pudo actualizar el eventId en la columna K:', updateError.message);
+                            console.log('La sesión se guardó correctamente, solo falta el eventId');
+                        }
                     } catch (calendarError) {
                         console.warn('Calendar API tuvo un problema, pero la sesión se guardó en Sheets:', calendarError.message);
                         // No mostramos alerta para no interrumpir el flujo si funciona
