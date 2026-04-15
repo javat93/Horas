@@ -831,48 +831,27 @@
                     // Si debería estar realizado pero no estaba marcado como X en la columna B
                     if (deberiaEstarRealizado && !fueRealizadoOriginalmente) {
                         updates.push({
-                            updateCells: {
-                                range: {
-                                    sheetId: 0,
-                                    startRowIndex: rowIdx - 1,
-                                    endRowIndex: rowIdx,
-                                    startColumnIndex: 1, // Columna B (0-indexed)
-                                    endColumnIndex: 2
-                                },
-                                rows: [{
-                                    values: [{
-                                        userEnteredValue: { stringValue: 'X' }
-                                    }]
-                                }],
-                                fields: 'userEnteredValue'
-                            }
+                            rowIdx: rowIdx,
+                            grupo: ev.grupo,
+                            fechaStr: ev.fechaStr
                         });
                         console.log(`Clase "${ev.grupo}" del ${ev.fechaStr} marcada como realizada automáticamente.`);
                     }
                 }
-                // Debug: mostrar qué se encontró
-                console.log('Debug actualizarRealizados:', {
-                    totalRows: rawRows.length,
-                    updatesLength: updates.length,
-                    updates: updates,
-                    hoy: new Date(hoy).toISOString(),
-                    eventos: eventos.map(e => ({ 
-                        rowIdx: e.rowIdx, 
-                        fecha: e.fechaStr, 
-                        fechaObj: e.fechaObj, 
-                        fechaObjISO: e.fechaObj ? e.fechaObj.toISOString() : null,
-                        esPasado: e.fechaObj ? e.fechaObj < hoy : 'N/A'
-                    }))
-                });
                 
-                // Guardamos todos los IDs encontrados en Sheets de una vez
+                // Actualizar celdas individualmente para preservar formato de checkbox
                 if (updates.length > 0) {
-                    await proxyGoogleAPI('sheets', 'batchUpdate', {
-                        spreadsheetId: CONFIG.SPREADSHEET_ID
-                    }, {
-                        requests: updates
-                    });
-                    console.log(`Sincronizados ${updates.length} Calendar eventIds`);
+                    for (const update of updates) {
+                        // Usar método update para preservar formato de checkbox
+                        await proxyGoogleAPI('sheets', 'update', {
+                            spreadsheetId: CONFIG.SPREADSHEET_ID,
+                            range: `Detalle!B${update.rowIdx}`,
+                            valueInputOption: 'USER_ENTERED'
+                        }, {
+                            values: [['X']]
+                        });
+                    }
+                    console.log(`Sincronizados ${updates.length} clases como realizadas`);
                 } else {
                     console.log('No hay clases pasadas sin marcar como realizadas');
                 }
