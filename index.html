@@ -817,7 +817,7 @@
                 // Volver a leer los datos originales del spreadsheet para comparar correctamente
                 const resDetalle = await proxyGoogleAPI('sheets', 'get', {
                     spreadsheetId: CONFIG.SPREADSHEET_ID, 
-                    range: 'Detalle!A2:B'
+                    range: 'Detalle!A2:I'  // Incluir hasta columna I para obtener fecha y grupo
                 });
                 
                 const rawRows = resDetalle.values || [];
@@ -828,43 +828,47 @@
                     const row = rawRows[i];
                     const rowIdx = i + 2; // +2 porque empieza en A2
                     
-                    // Obtener todas las clases para este rowIdx (puede haber múltiples por día)
-                    const eventosEnFila = eventos.filter(e => e.rowIdx === rowIdx);
+                    // Extraer fecha directamente del spreadsheet (columna F = index 5)
+                    const fechaStr = row[5] || '';
+                    if (!fechaStr) {
+                        console.log(`Fila ${rowIdx}: Sin fecha en spreadsheet`);
+                        continue;
+                    }
                     
-                    if (eventosEnFila.length === 0) continue;
+                    // Parsear fecha del spreadsheet
+                    const fParts = fechaStr.split("/");
+                    const fechaObj = fParts.length === 3 ? new Date(fParts[2], fParts[1]-1, fParts[0]) : null;
+                    
+                    if (!fechaObj) {
+                        console.log(`Fila ${rowIdx}: Fecha inválida - "${fechaStr}"`);
+                        continue;
+                    }
                     
                     const fueRealizadoOriginalmente = row[1] === 'X'; // Valor original del spreadsheet
+                    const deberiaEstarRealizado = fechaObj < hoy;
+                    const evFecha = new Date(fechaObj);
                     
-                    // Revisar cada evento en esta fila
-                    for (const ev of eventosEnFila) {
-                        if (!ev.fechaObj) {
-                            console.log(`Fila ${rowIdx}: Sin fechaObj - fechaStr: "${ev.fechaStr}"`);
-                            continue;
-                        }
-                        
-                        const deberiaEstarRealizado = ev.fechaObj < hoy;
-                        const evFecha = new Date(ev.fechaObj);
-                        
-                        console.log(`Fila ${rowIdx} - "${ev.grupo}":`);
-                        console.log(`  fechaStr: "${ev.fechaStr}"`);
-                        console.log(`  fechaObj: ${evFecha.toISOString()}`);
-                        console.log(`  timestamp: ${ev.fechaObj}`);
-                        console.log(`  fueRealizadoOriginalmente: ${fueRealizadoOriginalmente}`);
-                        console.log(`  deberiaEstarRealizado: ${deberiaEstarRealizado} (${ev.fechaObj} < ${hoy})`);
-                        console.log(`  es pasado: ${evFecha < hoyFecha}`);
-                        
-                        // Si debería estar realizado pero no estaba marcado como X en la columna B
-                        if (deberiaEstarRealizado && !fueRealizadoOriginalmente) {
-                            updates.push({
-                                rowIdx: rowIdx,
-                                grupo: ev.grupo,
-                                fechaStr: ev.fechaStr
-                            });
-                            console.log(`  >>> AÑADIDO A UPDATES: Clase "${ev.grupo}" del ${ev.fechaStr} marcada como realizada automáticamente.`);
-                            break; // Solo actualizar una vez por fila
-                        } else {
-                            console.log(`  >>> NO AÑADIDO: ya estaba realizado o no es pasado`);
-                        }
+                    // Obtener nombre del grupo si está disponible
+                    const grupo = row[8] || 'Sin nombre';
+                    
+                    console.log(`Fila ${rowIdx} - "${grupo}":`);
+                    console.log(`  fechaStr: "${fechaStr}"`);
+                    console.log(`  fechaObj: ${evFecha.toISOString()}`);
+                    console.log(`  timestamp: ${fechaObj.getTime()}`);
+                    console.log(`  fueRealizadoOriginalmente: ${fueRealizadoOriginalmente}`);
+                    console.log(`  deberiaEstarRealizado: ${deberiaEstarRealizado} (${fechaObj.getTime()} < ${hoy})`);
+                    console.log(`  es pasado: ${evFecha < hoyFecha}`);
+                    
+                    // Si debería estar realizado pero no estaba marcado como X en la columna B
+                    if (deberiaEstarRealizado && !fueRealizadoOriginalmente) {
+                        updates.push({
+                            rowIdx: rowIdx,
+                            grupo: grupo,
+                            fechaStr: fechaStr
+                        });
+                        console.log(`  >>> AÑADIDO A UPDATES: Clase "${grupo}" del ${fechaStr} marcada como realizada automáticamente.`);
+                    } else {
+                        console.log(`  >>> NO AÑADIDO: ya estaba realizado o no es pasado`);
                     }
                 }
                 
