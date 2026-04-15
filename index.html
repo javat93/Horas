@@ -1170,7 +1170,18 @@
                     const calResponse = await proxyGoogleAPI('calendar', 'insert', {
                         calendarId: 'primary'
                     }, eventResource);
-                    const calEventId = calResponse.result.id;
+                    
+                    // Validar la respuesta y obtener el eventId de forma segura
+                    let calEventId;
+                    if (calResponse && calResponse.result && calResponse.result.id) {
+                        calEventId = calResponse.result.id;
+                    } else if (calResponse && calResponse.id) {
+                        // Algunas respuestas pueden tener el id directamente
+                        calEventId = calResponse.id;
+                    } else {
+                        console.error('Respuesta inesperada de Calendar API:', calResponse);
+                        throw new Error('No se pudo obtener el ID del evento creado');
+                    }
 
                     // Guardamos el eventId en la columna K usando la fila exacta del append
                     await proxyGoogleAPI('sheets', 'update', {
