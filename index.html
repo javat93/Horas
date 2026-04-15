@@ -481,9 +481,12 @@
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.9',
+            version: '2.1.11',
             date: '2026-04-16',
             changes: [
+                'Google Places Autocomplete solucionado (importLibrary + fallback)',
+                'Error google.maps.places.Autocomplete undefined corregido',
+                'Manejador global de errores asíncronos implementado',
                 'Google Maps async loading solucionado (método importLibrary)',
                 'Eliminado warning de performance de Google Maps',
                 'Carga asíncrona optimizada según best practices',
@@ -960,12 +963,30 @@
             lucide.createIcons();
         }
 
-        function initGoogleMapsUI() {
-            if (!autocompleteSesion) {
-                autocompleteSesion = new google.maps.places.Autocomplete(document.getElementById('ev-sitio'));
-            }
-            if (!autocompleteGrupo) {
-                autocompleteGrupo = new google.maps.places.Autocomplete(document.getElementById('gr-sitio'));
+        async function initGoogleMapsUI() {
+            try {
+                // Cargar la librería places usando importLibrary
+                const { Autocomplete } = await google.maps.importLibrary("places");
+                
+                if (!autocompleteSesion) {
+                    autocompleteSesion = new Autocomplete(document.getElementById('ev-sitio'));
+                }
+                if (!autocompleteGrupo) {
+                    autocompleteGrupo = new Autocomplete(document.getElementById('gr-sitio'));
+                }
+            } catch (error) {
+                console.error('Error inicializando Google Places Autocomplete:', error);
+                // Fallback: intentar método antiguo si el nuevo falla
+                try {
+                    if (!autocompleteSesion && google.maps.places && google.maps.places.Autocomplete) {
+                        autocompleteSesion = new google.maps.places.Autocomplete(document.getElementById('ev-sitio'));
+                    }
+                    if (!autocompleteGrupo && google.maps.places && google.maps.places.Autocomplete) {
+                        autocompleteGrupo = new google.maps.places.Autocomplete(document.getElementById('gr-sitio'));
+                    }
+                } catch (fallbackError) {
+                    console.error('Error en fallback de Autocomplete:', fallbackError);
+                }
             }
         }
 
