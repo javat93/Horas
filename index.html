@@ -441,13 +441,40 @@
         </div>
     </div>
 
+    <!-- Modal de Error/Notificación Moderno -->
+    <div id="modal-error" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl transform transition-all">
+            <div class="flex justify-center mb-6">
+                <div id="error-icon" class="w-16 h-16 rounded-full flex items-center justify-center">
+                    <!-- Icono dinámico según tipo de error -->
+                </div>
+            </div>
+            <div class="text-center mb-8">
+                <h3 id="error-title" class="text-2xl font-extrabold text-slate-900 mb-3">Error</h3>
+                <p id="error-message" class="text-slate-600 font-medium">Mensaje de error</p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="closeErrorModal()" class="flex-1 bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all">
+                    Entendido
+                </button>
+                <button id="error-action-btn" onclick="closeErrorModal()" class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all hidden">
+                    Acción
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.2',
+            version: '2.1.3',
             date: '2026-04-16',
             changes: [
+                'Popup de error moderno y bonito para reemplazar alerts',
+                'Diseño con iconos dinámicos según tipo (error, warning, info, success)',
+                'Focus automático en campo con error',
+                'Reemplazo completo de alerts del sistema',
                 'Columna H siempre con valor 1 independientemente de duración real',
                 'Validación completa de campos obligatorios en formulario de clase',
                 'Validación de hora fin posterior a hora inicio',
@@ -1124,6 +1151,71 @@
             }
         }
 
+        // Funciones para popup de error moderno
+        function showErrorModal(title, message, type = 'error', focusField = null) {
+            const modal = document.getElementById('modal-error');
+            const iconContainer = document.getElementById('error-icon');
+            const titleElement = document.getElementById('error-title');
+            const messageElement = document.getElementById('error-message');
+            const actionBtn = document.getElementById('error-action-btn');
+
+            // Configurar título y mensaje
+            titleElement.textContent = title;
+            messageElement.textContent = message;
+
+            // Configurar icono y colores según tipo
+            let iconHtml, bgColor, textColor;
+            switch(type) {
+                case 'error':
+                    iconHtml = '<i data-lucide="alert-circle" class="w-8 h-8"></i>';
+                    bgColor = 'bg-red-100';
+                    textColor = 'text-red-600';
+                    break;
+                case 'warning':
+                    iconHtml = '<i data-lucide="alert-triangle" class="w-8 h-8"></i>';
+                    bgColor = 'bg-amber-100';
+                    textColor = 'text-amber-600';
+                    break;
+                case 'info':
+                    iconHtml = '<i data-lucide="info" class="w-8 h-8"></i>';
+                    bgColor = 'bg-blue-100';
+                    textColor = 'text-blue-600';
+                    break;
+                case 'success':
+                    iconHtml = '<i data-lucide="check-circle" class="w-8 h-8"></i>';
+                    bgColor = 'bg-emerald-100';
+                    textColor = 'text-emerald-600';
+                    break;
+                default:
+                    iconHtml = '<i data-lucide="alert-circle" class="w-8 h-8"></i>';
+                    bgColor = 'bg-red-100';
+                    textColor = 'text-red-600';
+            }
+
+            iconContainer.className = `w-16 h-16 ${bgColor} rounded-full flex items-center justify-center ${textColor}`;
+            iconContainer.innerHTML = iconHtml;
+
+            // Ocultar botón de acción por defecto
+            actionBtn.classList.add('hidden');
+
+            // Mostrar modal
+            modal.classList.remove('hidden');
+            
+            // Hacer focus en campo si se especifica
+            if (focusField) {
+                setTimeout(() => {
+                    focusField.focus();
+                }, 100);
+            }
+
+            // Recrear iconos de Lucide
+            lucide.createIcons();
+        }
+
+        function closeErrorModal() {
+            document.getElementById('modal-error').classList.add('hidden');
+        }
+
         // Función de validación para el formulario de clase
         function validarFormularioClase() {
             const grupo = document.getElementById('ev-grupo').value.trim();
@@ -1135,52 +1227,44 @@
 
             // Validar campos obligatorios
             if (!grupo) {
-                alert('Por favor, selecciona un grupo.');
-                document.getElementById('ev-grupo').focus();
+                showErrorModal('Campo Requerido', 'Por favor, selecciona un grupo.', 'error', document.getElementById('ev-grupo'));
                 return false;
             }
 
             if (!fecha) {
-                alert('Por favor, selecciona una fecha.');
-                document.getElementById('ev-fecha').focus();
+                showErrorModal('Campo Requerido', 'Por favor, selecciona una fecha.', 'error', document.getElementById('ev-fecha'));
                 return false;
             }
 
             if (!horaInicio) {
-                alert('Por favor, introduce la hora de inicio.');
-                document.getElementById('ev-hora-inicio').focus();
+                showErrorModal('Campo Requerido', 'Por favor, introduce la hora de inicio.', 'error', document.getElementById('ev-hora-inicio'));
                 return false;
             }
 
             if (!horaFin) {
-                alert('Por favor, introduce la hora de fin.');
-                document.getElementById('ev-hora-fin').focus();
+                showErrorModal('Campo Requerido', 'Por favor, introduce la hora de fin.', 'error', document.getElementById('ev-hora-fin'));
                 return false;
             }
 
             if (!sitio) {
-                alert('Por favor, introduce el sitio o ubicación.');
-                document.getElementById('ev-sitio').focus();
+                showErrorModal('Campo Requerido', 'Por favor, introduce el sitio o ubicación.', 'error', document.getElementById('ev-sitio'));
                 return false;
             }
 
             if (isNaN(precio) || precio <= 0) {
-                alert('Por favor, introduce un precio válido mayor que 0.');
-                document.getElementById('ev-precio').focus();
+                showErrorModal('Precio Inválido', 'Por favor, introduce un precio válido mayor que 0.', 'error', document.getElementById('ev-precio'));
                 return false;
             }
 
             // Validar formato de horas
             const horaRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
             if (!horaRegex.test(horaInicio)) {
-                alert('La hora de inicio debe tener formato HH:MM (ej: 10:00).');
-                document.getElementById('ev-hora-inicio').focus();
+                showErrorModal('Formato Inválido', 'La hora de inicio debe tener formato HH:MM (ej: 10:00).', 'warning', document.getElementById('ev-hora-inicio'));
                 return false;
             }
 
             if (!horaRegex.test(horaFin)) {
-                alert('La hora de fin debe tener formato HH:MM (ej: 11:00).');
-                document.getElementById('ev-hora-fin').focus();
+                showErrorModal('Formato Inválido', 'La hora de fin debe tener formato HH:MM (ej: 11:00).', 'warning', document.getElementById('ev-hora-fin'));
                 return false;
             }
 
@@ -1191,8 +1275,7 @@
             const minutosFin = h2 * 60 + m2;
 
             if (minutosFin <= minutosInicio) {
-                alert('La hora de fin debe ser posterior a la hora de inicio.');
-                document.getElementById('ev-hora-fin').focus();
+                showErrorModal('Hora Inválida', 'La hora de fin debe ser posterior a la hora de inicio.', 'warning', document.getElementById('ev-hora-fin'));
                 return false;
             }
 
@@ -1579,15 +1662,12 @@
             const address = document.getElementById('map-search').value;
             if (!address) return;
             
-            geocoder.geocode({ address: address }, function(results, status) {
-                if (status === 'OK' && results[0]) {
-                    const location = results[0].geometry.location;
-                    map.setCenter(location);
-                    map.setZoom(16);
-                    placeMarker(location);
+            geocoder.geocode({ 'address': address }, (results, status) => {
+                if (status === 'OK') {
+                    placeMarker(results[0].geometry.location);
                     document.getElementById('map-selected-address').value = results[0].formatted_address;
                 } else {
-                    alert('No se encontró la dirección: ' + status);
+                    showErrorModal('Dirección No Encontrada', 'No se encontró la dirección. Por favor, intenta con otra búsqueda.', 'warning', document.getElementById('map-search'));
                 }
             });
         }
@@ -1595,7 +1675,7 @@
         function confirmMapSelection() {
             const selectedAddress = document.getElementById('map-selected-address').value;
             if (!selectedAddress) {
-                alert('Por favor, selecciona una ubicación en el mapa');
+                showErrorModal('Ubicación No Seleccionada', 'Por favor, selecciona una ubicación en el mapa antes de continuar.', 'warning');
                 return;
             }
             
