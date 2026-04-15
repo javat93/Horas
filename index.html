@@ -469,9 +469,12 @@
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.8',
+            version: '2.1.9',
             date: '2026-04-16',
             changes: [
+                'Google Maps async loading solucionado (método importLibrary)',
+                'Eliminado warning de performance de Google Maps',
+                'Carga asíncrona optimizada según best practices',
                 'Error 404 CSS solucionado para GitHub Pages',
                 'CSS compilado movido a raíz (styles.css)',
                 'HTML actualizado para usar CSS accesible',
@@ -483,7 +486,6 @@
                 'Diseño con iconos dinámicos según tipo (error, warning, info, success)',
                 'Focus automático en campo con error',
                 'Reemplazo completo de alerts del sistema',
-                'Google Maps con carga asíncrona optimizada',
                 'Columna H siempre con valor 1 independientemente de duración real',
                 'Validación completa de campos obligatorios en formulario de clase',
                 'Validación de hora fin posterior a hora inicio',
@@ -526,18 +528,33 @@
 		// --- 1. CARGA DINÁMICA DE GOOGLE MAPS UTILIZANDO PROXY EN PRODUCCIÓN ---
         function loadGoogleMaps() {
             if (typeof CONFIG !== 'undefined') {
-                const script = document.createElement('script');
-                
-                // En producción, usar el proxy; en desarrollo, usar API key directo
-                if (CONFIG.ENVIRONMENT === 'production' && CONFIG.GOOGLE_MAPS_API_URL) {
-                    script.src = `${CONFIG.GOOGLE_MAPS_API_URL}?libraries=places&callback=initMap&loading=async`;
-                } else if (CONFIG.API_KEY) {
-                    script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.API_KEY}&libraries=places&callback=initMap&loading=async`;
-                }
-                
-                script.async = true;
-                script.defer = true;
-                document.head.appendChild(script);
+                // Usar el método async recomendado por Google Maps API
+                (g => {
+                    var h, a, k, p = "The Google Maps JavaScript API",
+                        c = "google",
+                        l = "importLibrary",
+                        q = "__ib__",
+                        m = document,
+                        b = window;
+                    b = b[c] || (b[c] = {});
+                    var d = b.maps || (b.maps = {}),
+                        r = new Set,
+                        e = new URLSearchParams,
+                        u = () => h || (h = new Promise(async (f, n) => {
+                            await (a = m.createElement("script"));
+                            e.set("libraries", [...r] + "");
+                            e.set("callback", g);
+                            a.src = CONFIG.ENVIRONMENT === 'production' && CONFIG.GOOGLE_MAPS_API_URL 
+                                ? `${CONFIG.GOOGLE_MAPS_API_URL}?` + e 
+                                : `https://maps.googleapis.com/maps/api/js?` + e;
+                            d[q] = f;
+                            a.onerror = () => h = n(Error(p + " could not load."));
+                            a.type = "module";
+                            a.dataset.async = "";
+                            m.head.append(a)
+                        }));
+                    d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))
+                })(initMap);
             }
         }
 		
