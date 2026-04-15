@@ -1252,22 +1252,6 @@
                 getCurrentLocation();
             }
             
-            lucide.createIcons();
-        }
-
-        function initializeMap() {
-            const mapContainer = document.getElementById('map-container');
-            const loading = document.getElementById('map-loading');
-            
-            // Crear mapa centrado en una ubicación por defecto (España)
-            map = new google.maps.Map(mapContainer, {
-                center: { lat: 40.4168, lng: -3.7038 }, // Madrid
-                zoom: 13,
-                mapTypeControl: true,
-                streetViewControl: true,
-                fullscreenControl: true
-            });
-            
             // Crear geocoder
             geocoder = new google.maps.Geocoder();
             
