@@ -1167,30 +1167,34 @@
                         eventResource.recurrence = [rrule];
                     }
 
-                    const calResponse = await proxyGoogleAPI('calendar', 'insert', {
-                        calendarId: 'primary'
-                    }, eventResource);
-                    
-                    // Validar la respuesta y obtener el eventId de forma segura
-                    let calEventId;
-                    if (calResponse && calResponse.result && calResponse.result.id) {
-                        calEventId = calResponse.result.id;
-                    } else if (calResponse && calResponse.id) {
-                        // Algunas respuestas pueden tener el id directamente
-                        calEventId = calResponse.id;
-                    } else {
-                        console.error('Respuesta inesperada de Calendar API:', calResponse);
-                        throw new Error('No se pudo obtener el ID del evento creado');
-                    }
+                    try {
+                        const calResponse = await proxyGoogleAPI('calendar', 'insert', {
+                            calendarId: 'primary'
+                        }, eventResource);
+                        
+                        // Obtener eventId de forma segura
+                        let calEventId;
+                        if (calResponse && calResponse.result && calResponse.result.id) {
+                            calEventId = calResponse.result.id;
+                        } else if (calResponse && calResponse.id) {
+                            calEventId = calResponse.id;
+                        } else {
+                            console.warn('No se pudo obtener el ID del evento, pero la operación pudo haber funcionado');
+                            return; // Salimos del try si no hay ID, pero la sesión ya se guardó
+                        }
 
-                    // Guardamos el eventId en la columna K usando la fila exacta del append
-                    await proxyGoogleAPI('sheets', 'update', {
-                        spreadsheetId: CONFIG.SPREADSHEET_ID,
-                        range: `Detalle!K${insertedRow}`,
-                        valueInputOption: 'USER_ENTERED'
-                    }, {
-                        values: [[calEventId]]
-                    });
+                        // Guardamos el eventId en la columna K
+                        await proxyGoogleAPI('sheets', 'update', {
+                            spreadsheetId: CONFIG.SPREADSHEET_ID,
+                            range: `Detalle!K${insertedRow}`,
+                            valueInputOption: 'USER_ENTERED'
+                        }, {
+                            values: [[calEventId]]
+                        });
+                    } catch (calendarError) {
+                        console.warn('Calendar API tuvo un problema, pero la sesión se guardó en Sheets:', calendarError.message);
+                        // No mostramos alerta para no interrumpir el flujo si funciona
+                    }
                 }
                 closeModal('modal-evento');
                 syncData();
