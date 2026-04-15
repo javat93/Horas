@@ -349,6 +349,29 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación Moderno -->
+    <div id="modal-confirm" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl">
+            <div class="flex justify-center mb-6">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="trash-2" class="w-8 h-8 text-red-600"></i>
+                </div>
+            </div>
+            <div class="text-center mb-8">
+                <h3 class="text-2xl font-extrabold text-slate-900 mb-3">¿Confirmar eliminación?</h3>
+                <p class="text-slate-600 font-medium" id="confirm-message">Esta acción no se puede deshacer</p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="closeConfirmModal(false)" class="flex-1 bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold text-lg hover:bg-slate-200 transition-all">
+                    Cancelar
+                </button>
+                <button onclick="closeConfirmModal(true)" class="flex-1 bg-red-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-red-700 transition-all">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
 
         let tokenClient;
@@ -488,7 +511,7 @@
             }
         }
 
-        async function syncData(resolverCal = false) {
+        async function syncData(resolverCal = false, actualizarRealizadosFlag = true) {
             try {
                 // 1. Grupos
                 const resColes = await gapi.client.sheets.spreadsheets.values.get({
@@ -525,7 +548,7 @@
                         precioHora: parseFloat(row[4]) || 0,
                         fechaStr: row[5],
                         fechaObj: fObj,
-                        total: parseFloat((row[6] || "0").replace("€","").replace(",",".").trim()) || 0,
+                        total: parseFloat((row[6] || "0").replace("","").replace(",",".").trim()) || 0,
                         horas: parseFloat(row[7]) || 0,
                         grupo: row[8],
                         sitio: row[9] || '',
@@ -566,7 +589,67 @@
 
                 renderAll();
                 document.getElementById('stats-info').innerText = `${eventos.length} clases sincronizadas.`;
+                
+                // 4. Actualizar automáticamente las clases realizadas (solo en la carga inicial)
+                if (actualizarRealizadosFlag) {
+                    await actualizarRealizados();
+                }
             } catch (err) { console.error("Error sync:", err); }
+        }
+
+        // Función para actualizar automáticamente las clases realizadas en el spreadsheet
+        async function actualizarRealizados() {
+            try {
+                const hoy = new Date().setHours(0,0,0,0);
+                const updates = [];
+                
+                // Volver a leer los datos originales del spreadsheet para comparar correctamente
+                const resDetalle = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: CONFIG.SPREADSHEET_ID, range: 'Detalle!A2:B',
+                });
+                
+                const rawRows = resDetalle.result.values || [];
+                
+                // Buscar clases que deberían estar realizadas pero no lo están en el spreadsheet
+                for (let i = 0; i < rawRows.length; i++) {
+                    const row = rawRows[i];
+                    const rowIdx = i + 2; // +2 porque empieza en A2
+                    
+                    // Obtener fecha y datos de la clase desde el array eventos
+                    const ev = eventos.find(e => e.rowIdx === rowIdx);
+                    if (!ev || !ev.fechaObj) continue;
+                    
+                    const fueRealizadoOriginalmente = row[1] === 'X'; // Valor original del spreadsheet
+                    const deberiaEstarRealizado = ev.fechaObj < hoy;
+                    
+                    // Si debería estar realizado pero no estaba marcado como X en la columna B
+                    if (deberiaEstarRealizado && !fueRealizadoOriginalmente) {
+                        updates.push({
+                            range: `Detalle!B${rowIdx}`,
+                            values: [['X']]
+                        });
+                        console.log(`Clase "${ev.grupo}" del ${ev.fechaStr} marcada como realizada automáticamente.`);
+                    }
+                }
+                
+                // Actualizar todas las clases realizadas en una sola llamada
+                if (updates.length > 0) {
+                    await gapi.client.sheets.spreadsheets.values.batchUpdate({
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
+                        resource: {
+                            valueInputOption: 'USER_ENTERED',
+                            data: updates
+                        }
+                    });
+                    console.log(`Marcadas ${updates.length} clases como realizadas automáticamente.`);
+                    // Volvemos a sincronizar para reflejar los cambios
+                    await syncData(false);
+                } else {
+                    console.log("No hay clases pasadas sin marcar como realizadas.");
+                }
+            } catch (err) {
+                console.error("Error actualizando realizados:", err);
+            }
         }
 
         function renderAll() {
@@ -610,10 +693,10 @@
             }
 
             container.innerHTML = filtered.map(ev => `
-                <div class="card-modern p-5 flex flex-wrap md:flex-nowrap justify-between items-center gap-4 ${ev.pagado ? 'bg-emerald-50/30' : ''}">
+                <div class="card-modern p-5 flex flex-wrap md:flex-nowrap justify-between items-center gap-4 ${ev.realizado ? 'bg-emerald-50/30' : ''}">
                     <div class="flex items-center gap-4 cursor-pointer flex-1" onclick="openEditSesionModal(${ev.rowIdx})">
-                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${ev.pagado ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}">
-                            <i data-lucide="${ev.pagado ? 'check-circle' : 'clock'}"></i>
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${ev.realizado ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}">
+                            <i data-lucide="${ev.realizado ? 'check-circle' : 'clock'}"></i>
                         </div>
                         <div>
                             <h4 class="font-extrabold text-slate-900">${ev.grupo}</h4>
@@ -635,7 +718,7 @@
                             <button onclick="togglePago(${ev.rowIdx}, ${!ev.pagado})" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'} hover:scale-110 transition-all">
                                 <i data-lucide="euro" class="w-5 h-5"></i>
                             </button>
-                            <button onclick="borrarFila(${ev.rowIdx})" class="p-2.5 rounded-xl bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
+                            <button onclick="confirmarBorrar(${ev.rowIdx})" class="p-2.5 rounded-xl bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
                                 <i data-lucide="trash-2" class="w-5 h-5"></i>
                             </button>
                         </div>
@@ -702,7 +785,14 @@
                 calendar.addEventSource(source);
             }
         }
-
+        // Helpers UI Finales
+        async function togglePago(rowIdx, newState) {
+            await gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Detalle!A${rowIdx}`,
+                valueInputOption: 'USER_ENTERED', resource: { values: [[newState ? 'X' : '']] }
+            });
+            syncData();
+        }
         function toggleRecurrence() {
             const isChecked = document.getElementById('ev-repite').checked;
             const options = document.getElementById('recurrence-options');
@@ -903,36 +993,50 @@
             } catch (err) { console.error("Error grupo:", err); }
         };
 
-        async function togglePago(rowIdx, newState) {
-            await gapi.client.sheets.spreadsheets.values.update({
-                spreadsheetId: CONFIG.SPREADSHEET_ID, range: `Detalle!A${rowIdx}`,
-                valueInputOption: 'USER_ENTERED', resource: { values: [[newState ? 'X' : '']] }
-            });
-            syncData();
+        let confirmCallback = null;
+
+        function showConfirmModal(message, callback) {
+            document.getElementById('confirm-message').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('modal-confirm').classList.remove('hidden');
         }
 
-        async function borrarFila(rowIdx) {
-            if(confirm("¿Seguro que quieres borrar esta fila?")) {
-                // 1. Borrar evento de Google Calendar si existe
-                const ev = eventos.find(e => e.rowIdx === rowIdx);
-                if (ev && ev.calEventId) {
-                    try {
-                        await gapi.client.calendar.events.delete({
-                            calendarId: 'primary',
-                            eventId: ev.calEventId
-                        });
-                    } catch(calErr) {
-                        console.warn("No se pudo borrar el evento del calendario:", calErr);
-                        // Continuamos aunque falle Calendar (puede que el evento ya no exista)
-                    }
-                }
-                // 2. Borrar fila de Sheets
-                await gapi.client.sheets.spreadsheets.batchUpdate({
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    resource: { requests: [{ deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIdx - 1, endIndex: rowIdx } } }] }
-                });
-                syncData();
+        function closeConfirmModal(confirmed) {
+            document.getElementById('modal-confirm').classList.add('hidden');
+            if (confirmCallback) {
+                confirmCallback(confirmed);
+                confirmCallback = null;
             }
+        }
+
+        function confirmarBorrar(rowIdx) {
+            const ev = eventos.find(e => e.rowIdx === rowIdx);
+            const mensaje = ev ? 
+                `¿Seguro que quieres borrar la clase "${ev.grupo}" del ${ev.fechaStr}? Esta acción no se puede deshacer.` :
+                "¿Seguro que quieres borrar esta fila? Esta acción no se puede deshacer.";
+            
+            showConfirmModal(mensaje, async (confirmed) => {
+                if (confirmed) {
+                    // 1. Borrar evento de Google Calendar si existe
+                    if (ev && ev.calEventId) {
+                        try {
+                            await gapi.client.calendar.events.delete({
+                                calendarId: 'primary',
+                                eventId: ev.calEventId
+                            });
+                        } catch(calErr) {
+                            console.warn("No se pudo borrar el evento del calendario:", calErr);
+                            // Continuamos aunque falle Calendar (puede que el evento ya no exista)
+                        }
+                    }
+                    // 2. Borrar fila de Sheets
+                    await gapi.client.sheets.spreadsheets.batchUpdate({
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
+                        resource: { requests: [{ deleteDimension: { range: { sheetId: 0, dimension: "ROWS", startIndex: rowIdx - 1, endIndex: rowIdx } } }] }
+                    });
+                    syncData();
+                }
+            });
         }
 
         function switchTab(tabId) {
