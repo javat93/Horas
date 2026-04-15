@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PercuManager Pro - La Galeta Percussió</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS CDN - Uso intencional para Vercel deployment (compilado no necesario para este caso) -->
+<script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
@@ -521,9 +522,9 @@
                 
                 // En producción, usar el proxy; en desarrollo, usar API key directo
                 if (CONFIG.ENVIRONMENT === 'production' && CONFIG.GOOGLE_MAPS_API_URL) {
-                    script.src = `${CONFIG.GOOGLE_MAPS_API_URL}?libraries=places&callback=initMap`;
+                    script.src = `${CONFIG.GOOGLE_MAPS_API_URL}?libraries=places&callback=initMap&loading=async`;
                 } else if (CONFIG.API_KEY) {
-                    script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.API_KEY}&libraries=places&callback=initMap`;
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${CONFIG.API_KEY}&libraries=places&callback=initMap&loading=async`;
                 }
                 
                 script.async = true;
