@@ -806,12 +806,6 @@
         async function actualizarRealizados() {
             try {
                 const hoy = new Date().setHours(0,0,0,0);
-                const hoyFecha = new Date(hoy);
-                console.log('=== DEBUG actualizarRealizados ===');
-                console.log('Fecha actual (hoy):', hoyFecha.toISOString());
-                console.log('Timestamp hoy:', hoy);
-                console.log('Total eventos en memoria:', eventos.length);
-                
                 const updates = [];
                 
                 // Volver a leer los datos originales del spreadsheet para comparar correctamente
@@ -821,7 +815,6 @@
                 });
                 
                 const rawRows = resDetalle.values || [];
-                console.log('Total filas leídas del spreadsheet:', rawRows.length);
                 
                 // Buscar clases que deberían estar realizadas pero no lo están en el spreadsheet
                 for (let i = 0; i < rawRows.length; i++) {
@@ -830,34 +823,19 @@
                     
                     // Extraer fecha directamente del spreadsheet (columna F = index 5)
                     const fechaStr = row[5] || '';
-                    if (!fechaStr) {
-                        console.log(`Fila ${rowIdx}: Sin fecha en spreadsheet`);
-                        continue;
-                    }
+                    if (!fechaStr) continue;
                     
                     // Parsear fecha del spreadsheet
                     const fParts = fechaStr.split("/");
                     const fechaObj = fParts.length === 3 ? new Date(fParts[2], fParts[1]-1, fParts[0]) : null;
                     
-                    if (!fechaObj) {
-                        console.log(`Fila ${rowIdx}: Fecha inválida - "${fechaStr}"`);
-                        continue;
-                    }
+                    if (!fechaObj) continue;
                     
                     const fueRealizadoOriginalmente = row[1] === 'X'; // Valor original del spreadsheet
                     const deberiaEstarRealizado = fechaObj < hoy;
-                    const evFecha = new Date(fechaObj);
                     
                     // Obtener nombre del grupo si está disponible
                     const grupo = row[8] || 'Sin nombre';
-                    
-                    console.log(`Fila ${rowIdx} - "${grupo}":`);
-                    console.log(`  fechaStr: "${fechaStr}"`);
-                    console.log(`  fechaObj: ${evFecha.toISOString()}`);
-                    console.log(`  timestamp: ${fechaObj.getTime()}`);
-                    console.log(`  fueRealizadoOriginalmente: ${fueRealizadoOriginalmente}`);
-                    console.log(`  deberiaEstarRealizado: ${deberiaEstarRealizado} (${fechaObj.getTime()} < ${hoy})`);
-                    console.log(`  es pasado: ${evFecha < hoyFecha}`);
                     
                     // Si debería estar realizado pero no estaba marcado como X en la columna B
                     if (deberiaEstarRealizado && !fueRealizadoOriginalmente) {
@@ -866,9 +844,7 @@
                             grupo: grupo,
                             fechaStr: fechaStr
                         });
-                        console.log(`  >>> AÑADIDO A UPDATES: Clase "${grupo}" del ${fechaStr} marcada como realizada automáticamente.`);
-                    } else {
-                        console.log(`  >>> NO AÑADIDO: ya estaba realizado o no es pasado`);
+                        console.log(`Clase "${grupo}" del ${fechaStr} marcada como realizada automáticamente.`);
                     }
                 }
                 
@@ -1259,37 +1235,35 @@
 
                         // Guardamos el eventId en la columna K usando batchUpdate
                         try {
-                            // Obtener la última fila real donde se insertaron los datos
-                            const lastRowResponse = await proxyGoogleAPI('sheets', 'get', {
-                                spreadsheetId: CONFIG.SPREADSHEET_ID,
-                                range: 'Detalle!A2:A'
-                            });
-                            const realInsertedRow = (lastRowResponse.values || []).length + 2;
-                            
-                            console.log('Guardando eventId en fila:', realInsertedRow);
-                            
-                            // Usar batchUpdate para actualizar la celda específica
-                            await proxyGoogleAPI('sheets', 'batchUpdate', {
-                                spreadsheetId: CONFIG.SPREADSHEET_ID
-                            }, {
-                                requests: [{
-                                    updateCells: {
-                                        range: {
-                                            sheetId: 0,
-                                            startRowIndex: realInsertedRow - 1,
-                                            endRowIndex: realInsertedRow,
-                                            startColumnIndex: 10, // Columna K (0-indexed)
-                                            endColumnIndex: 11
-                                        },
-                                        rows: [{
-                                            values: [{
-                                                userEnteredValue: { stringValue: calEventId }
-                                            }]
-                                        }]
-                                    }
-                                }]
-                            });
-                            console.log('Calendar eventId guardado correctamente en fila', realInsertedRow);
+                            if (insertedRow) {
+                                console.log('Guardando eventId en fila:', insertedRow);
+                                
+                                // Usar batchUpdate para actualizar la celda específica
+                                await proxyGoogleAPI('sheets', 'batchUpdate', {
+                                    spreadsheetId: CONFIG.SPREADSHEET_ID
+                                }, {
+                                    requests: [{
+                                        updateCells: {
+                                            range: {
+                                                sheetId: 0,
+                                                startRowIndex: insertedRow - 1,
+                                                endRowIndex: insertedRow,
+                                                startColumnIndex: 10, // Columna K (0-indexed)
+                                                endColumnIndex: 11
+                                            },
+                                            rows: [{
+                                                values: [{
+                                                    userEnteredValue: { stringValue: calEventId }
+                                                }]
+                                            }],
+                                            fields: 'userEnteredValue'
+                                        }
+                                    }]
+                                });
+                                console.log('Calendar eventId guardado correctamente en fila', insertedRow);
+                            } else {
+                                console.warn('No se pudo determinar la fila insertada para guardar el eventId');
+                            }
                         } catch (updateError) {
                             console.warn('No se pudo actualizar el eventId en la columna K:', updateError.message);
                             console.log('La sesión se guardó correctamente, solo falta el eventId');
