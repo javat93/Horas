@@ -1132,8 +1132,17 @@
                     }
                     
                     if (updatedRange) {
-                        insertedRow = parseInt(updatedRange.match(/\d+/)[0]);
+                        const match = updatedRange.match(/\d+/);
+                        if (match) {
+                            insertedRow = parseInt(match[0]);
+                        } else {
+                            console.error('No se pudo extraer número de fila del rango:', updatedRange);
+                        }
                     }
+                    
+                    console.log('Debug - insertedRow calculado:', insertedRow);
+                    console.log('Debug - updatedRange:', updatedRange);
+                    console.log('Debug - appendResponse:', appendResponse);
                     
                     // Lógica de Google Calendar
                     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -1183,14 +1192,21 @@
                             return; // Salimos del try si no hay ID, pero la sesión ya se guardó
                         }
 
-                        // Guardamos el eventId en la columna K
-                        await proxyGoogleAPI('sheets', 'update', {
-                            spreadsheetId: CONFIG.SPREADSHEET_ID,
-                            range: `Detalle!K${insertedRow}`,
-                            valueInputOption: 'USER_ENTERED'
-                        }, {
-                            values: [[calEventId]]
-                        });
+                        // Guardamos el eventId en la columna K con fallback
+                        try {
+                            await proxyGoogleAPI('sheets', 'update', {
+                                spreadsheetId: CONFIG.SPREADSHEET_ID,
+                                range: `Detalle!K${insertedRow}`,
+                                valueInputOption: 'USER_ENTERED'
+                            }, {
+                                values: [[calEventId]]
+                            });
+                            console.log('Calendar eventId guardado en fila', insertedRow);
+                        } catch (updateError) {
+                            console.warn('No se pudo actualizar el eventId en la columna K:', updateError.message);
+                            // Continuamos aunque falle el guardado del eventId
+                            console.log('La sesión se guardó correctamente, solo falta el eventId');
+                        }
                     } catch (calendarError) {
                         console.warn('Calendar API tuvo un problema, pero la sesión se guardó en Sheets:', calendarError.message);
                         // No mostramos alerta para no interrumpir el flujo si funciona
