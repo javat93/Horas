@@ -488,14 +488,36 @@
             });
         }
 
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CONFIG.CLIENT_ID,
-                scope: CONFIG.SCOPES,
-                callback: '', 
-            });
-            gisInited = true;
-            checkAuth();
+        async function loadOAuthConfig() {
+            try {
+                if (CONFIG.ENVIRONMENT === 'production' && CONFIG.USE_PROXY) {
+                    const response = await fetch(`${CONFIG.PROXY_URL}/api/oauth-config`);
+                    const config = await response.json();
+                    CONFIG.CLIENT_ID = config.client_id;
+                    CONFIG.SCOPES = config.scopes;
+                }
+            } catch (error) {
+                console.error('Error loading OAuth config:', error);
+                // Fallback: usar valores por defecto si el proxy falla
+                if (!CONFIG.CLIENT_ID) {
+                    CONFIG.CLIENT_ID = '367465910816-1epkiok8ntvrphrv08b4g6amh0u9knpv.apps.googleusercontent.com';
+                }
+            }
+        }
+
+        async function gisLoaded() {
+            await loadOAuthConfig();
+            if (CONFIG.CLIENT_ID) {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CONFIG.CLIENT_ID,
+                    scope: CONFIG.SCOPES,
+                    callback: '', 
+                });
+                gisInited = true;
+                checkAuth();
+            } else {
+                console.error('CLIENT_ID no disponible para OAuth');
+            }
         }
 
         async function handleAuthClick() {

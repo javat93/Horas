@@ -220,6 +220,14 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// OAuth config endpoint
+app.get('/api/oauth-config', (req, res) => {
+  res.json({ 
+    client_id: GOOGLE_CLIENT_ID,
+    scopes: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/spreadsheets'
+  });
+});
+
 // Servir archivos estáticos (para producción)
 if (NODE_ENV === 'production') {
   app.use(express.static('dist'));

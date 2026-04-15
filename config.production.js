@@ -1,10 +1,11 @@
 // CONFIGURACIÓN PARA PRODUCCIÓN - SEGURO
-// Este archivo no contiene claves API - usa proxy
+// Este archivo no contiene claves API sensibles - usa proxy para llamadas a APIs
 
 const CONFIG = {
-    // En producción, estas claves NO se exponen - se manejan en el backend
+    // En producción, API_KEY NO se expone - se maneja en el backend
     API_KEY: null, // Nunca exponer en producción
-    CLIENT_ID: null, // Nunca exponer en producción
+    // CLIENT_ID se obtendrá dinámicamente del proxy para mayor seguridad
+    CLIENT_ID: null, // Se cargará desde /api/oauth-config
     SPREADSHEET_ID: '1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60',
     SCOPES: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/spreadsheets',
     DISCOVERY_DOCS: [
