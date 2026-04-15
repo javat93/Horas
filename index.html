@@ -1192,16 +1192,25 @@
                             return; // Salimos del try si no hay ID, pero la sesión ya se guardó
                         }
 
-                        // Guardamos el eventId en la columna K con fallback
+                        // Guardamos el eventId en la columna K - usar la última fila real
                         try {
+                            // Obtener la última fila real donde se insertaron los datos
+                            const lastRowResponse = await proxyGoogleAPI('sheets', 'get', {
+                                spreadsheetId: CONFIG.SPREADSHEET_ID,
+                                range: 'Detalle!A2:A'
+                            });
+                            const realInsertedRow = (lastRowResponse.values || []).length + 2;
+                            
+                            console.log('Usando fila real para eventId:', realInsertedRow);
+                            
                             await proxyGoogleAPI('sheets', 'update', {
                                 spreadsheetId: CONFIG.SPREADSHEET_ID,
-                                range: `Detalle!K${insertedRow}`,
+                                range: `Detalle!K${realInsertedRow}`,
                                 valueInputOption: 'USER_ENTERED'
                             }, {
                                 values: [[calEventId]]
                             });
-                            console.log('Calendar eventId guardado en fila', insertedRow);
+                            console.log('Calendar eventId guardado en fila', realInsertedRow);
                         } catch (updateError) {
                             console.warn('No se pudo actualizar el eventId en la columna K:', updateError.message);
                             // Continuamos aunque falle el guardado del eventId
