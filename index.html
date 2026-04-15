@@ -761,8 +761,20 @@
                         if (foundId) {
                             ev.calEventId = foundId;
                             updates.push({
-                                range: `Detalle!K${ev.rowIdx}`,
-                                values: [[foundId]]
+                                updateCells: {
+                                    range: {
+                                        sheetId: 0,
+                                        startRowIndex: ev.rowIdx - 1,
+                                        endRowIndex: ev.rowIdx,
+                                        startColumnIndex: 10, // Columna K (0-indexed)
+                                        endColumnIndex: 11
+                                    },
+                                    rows: [{
+                                        values: [{
+                                            userEnteredValue: { stringValue: foundId }
+                                        }]
+                                    }]
+                                }
                             });
                         }
                     }
@@ -818,8 +830,20 @@
                     // Si debería estar realizado pero no estaba marcado como X en la columna B
                     if (deberiaEstarRealizado && !fueRealizadoOriginalmente) {
                         updates.push({
-                            range: `Detalle!B${rowIdx}`,
-                            values: [['X']]
+                            updateCells: {
+                                range: {
+                                    sheetId: 0,
+                                    startRowIndex: rowIdx - 1,
+                                    endRowIndex: rowIdx,
+                                    startColumnIndex: 1, // Columna B (0-indexed)
+                                    endColumnIndex: 2
+                                },
+                                rows: [{
+                                    values: [{
+                                        userEnteredValue: { stringValue: 'X' }
+                                    }]
+                                }]
+                            }
                         });
                         console.log(`Clase "${ev.grupo}" del ${ev.fechaStr} marcada como realizada automáticamente.`);
                     }
