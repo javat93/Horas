@@ -1317,12 +1317,18 @@
                     
                     endDateTime = new Date(e.fechaObj);
                     endDateTime.setHours(endHour, endMin, 0, 0);
+                    
+                    // Debug: verificar eventos con horas
+                    console.log(`✅ Evento CON horas: ${e.grupo} - ${e.horaInicio}→${e.horaFin} -> ${startDateTime.toISOString()} a ${endDateTime.toISOString()}`);
                 } else {
                     startDateTime = new Date(e.fechaObj);
                     startDateTime.setHours(0, 0, 0, 0);
                     
                     endDateTime = new Date(e.fechaObj);
                     endDateTime.setHours(23, 59, 59, 999);
+                    
+                    // Debug: verificar eventos sin horas
+                    console.log(`❌ Evento SIN horas: ${e.grupo} -> ${startDateTime.toISOString()} a ${endDateTime.toISOString()}`);
                 }
                 
                 return { 
