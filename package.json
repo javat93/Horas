@@ -1,6 +1,6 @@
 {
   "name": "percu-manager-proxy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Backend proxy seguro para PercuManager",
   "main": "proxy.js",
   "scripts": {

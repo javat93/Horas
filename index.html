@@ -581,6 +581,7 @@
         </div>
     </div>
 
+    <script src="app-version.js"></script>
     <script>
 
         // Manejador global de errores asíncronos para debugging
@@ -595,78 +596,8 @@
             }
         });
 
-        // Sistema de control de versiones
-        const APP_VERSION = {
-            version: '2.1.22',
-            date: '2026-04-16',
-            changes: [
-                'Calendario optimizado para móviles - texto más grande y legible',
-                'Eventos del calendario ahora más grandes en dispositivos móviles',
-                'Espaciado mejorado entre elementos del calendario en móvil',
-                'Botones del toolbar del calendario más grandes en táctil',
-                'Altura mínima de celdas aumentada para mejor usabilidad',
-                'Búsqueda de direcciones solucionado - mapa ahora se mueve al marcador',
-                'map.setCenter() añadido a searchOnMap para centrar mapa en resultados',
-                'Experiencia de usuario mejorada al buscar direcciones',
-                'Mapa ahora se centra automáticamente en ubicaciones encontradas',
-                'Error AdvancedMarkerElement - mapa sin ID válido solucionado',
-                'Map ID configurado correctamente para AdvancedMarkerElement',
-                'mapId: PERCU_MANAGER_MAP asignado al mapa',
-                'ID de contenedor map-container actualizado',
-                'AdvancedMarkerElement ahora funciona sin errores',
-                'Migración completa a AdvancedMarkerElement (google.maps.Marker deprecated)',
-                'API moderna de Google Maps implementada con fallback robusto',
-                'Warning de deprecated eliminado completamente',
-                'Manejo de permisos de geolocalización denegados mejorado',
-                'Mensajes informativos para permisos bloqueados por usuario',
-                'Geolocalización con fallback elegante y UX mejorada',
-                'Error loading is not defined al usar ubicación actual solucionado',
-                'Variable loading correctamente obtenida del DOM en openMapModal',
-                'Ubicación actual ahora funciona sin errores',
-                'Error initializeMap is not defined al abrir mapa solucionado',
-                'Función initializeMap creada para mapa interactivo',
-                'Mapa interactivo ahora funciona correctamente',
-                'Error 500 persistente en proxy api/maps solucionado definitivamente',
-                'Proxy simplificado para usar callback simple (initMap)',
-                'Eliminado problema de callback codificado complejo',
-                'Google Maps API ahora carga sin errores 500',
-                'Error 500 en proxy api/maps con callback codificado solucionado',
-                'Callback URL-decodificado correctamente en proxy',
-                'SyntaxError en callback de Google Maps solucionado',
-                'Proxy api/maps.js revertido a redirección con CORS',
-                'Error de sintaxis en JavaScript de Google Maps corregido',
-                'CORS entre GitHub Pages y Vercel solucionado',
-                'Endpoint api/maps.js actualizado con headers CORS',
-                'Google Places Autocomplete solucionado (importLibrary + fallback)',
-                'Error google.maps.places.Autocomplete undefined corregido',
-                'Manejador global de errores asíncronos implementado',
-                'Google Maps async loading solucionado (método importLibrary)',
-                'Eliminado warning de performance de Google Maps',
-                'Carga asíncrona optimizada según best practices',
-                'Error 404 CSS solucionado para GitHub Pages',
-                'CSS compilado movido a raíz (styles.css)',
-                'HTML actualizado para usar CSS accesible',
-                'Tailwind CSS compilado para producción (sin CDN)',
-                'Node.js v24.14.1 detectado y configurado',
-                'CSS optimizado de 17KB minificado',
-                'Sistema de build automatizado implementado',
-                'Popup de error moderno y bonito para reemplazar alerts',
-                'Diseño con iconos dinámicos según tipo (error, warning, info, success)',
-                'Focus automático en campo con error',
-                'Reemplazo completo de alerts del sistema',
-                'Columna H siempre con valor 1 independientemente de duración real',
-                'Validación completa de campos obligatorios en formulario de clase',
-                'Validación de hora fin posterior a hora inicio',
-                'Duración por defecto de 1 hora al abrir popup',
-                'Limpieza automática del formulario al reabrir',
-                'Corregido proxy calendar.delete para manejar 204 No Content',
-                'Corregido guardado de Calendar Event ID en nuevas sesiones',
-                'Limpiado logging detallado de actualizarRealizados',
-                'Corregida lógica para procesar TODAS las filas del spreadsheet',
-                'Corregido proxy sheets.update (método PUT)',
-                'Sistema de control de versiones añadido'
-            ]
-        };
+        // Sistema de control de versiones (definido en app-version.js)
+        const APP_VERSION = window.APP_VERSION || { version: 'dev', date: '', changes: [] };
         
         // Mostrar versión en consola al cargar
         console.log('%c=== PERCU MANAGER ===', 'color: #2563eb; font-weight: bold; font-size: 14px');
@@ -943,8 +874,26 @@
         // Reglas: si hay un solo evento ese día → asigna directo.
         // Si hay varios → busca color amarillo (colorId "5") que contenga el nombre del grupo.
         // Si no encaja ninguno → deja vacío.
-        async function fetchCalendarEventId(fechaObj, grupoNombre, sitioNombre) {
-            if (!fechaObj) return '';
+        function formatHoraHHMM(isoDateTime) {
+            if (!isoDateTime) return '';
+            const d = new Date(isoDateTime);
+            if (Number.isNaN(d.getTime())) return '';
+            return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+
+        function extractHorasFromCalendarEvent(ev) {
+            // Para eventos "all-day" (start.date), no hay hora útil → dejamos vacío.
+            const startDT = ev?.start?.dateTime || '';
+            const endDT = ev?.end?.dateTime || '';
+            if (!startDT || !endDT) return { horaInicio: '', horaFin: '' };
+            return {
+                horaInicio: formatHoraHHMM(startDT),
+                horaFin: formatHoraHHMM(endDT)
+            };
+        }
+
+        async function fetchCalendarEventInfo(fechaObj, grupoNombre, sitioNombre) {
+            if (!fechaObj) return { id: '', horaInicio: '', horaFin: '' };
             try {
                 const timeMin = new Date(fechaObj);
                 timeMin.setHours(0, 0, 0, 0);
@@ -960,10 +909,14 @@
                 });
 
                 const items = res.items || [];
-                if (items.length === 0) return '';
+                if (items.length === 0) return { id: '', horaInicio: '', horaFin: '' };
 
                 // Un solo evento ese día → asignamos directamente
-                if (items.length === 1) return items[0].id;
+                if (items.length === 1) {
+                    const one = items[0];
+                    const horas = extractHorasFromCalendarEvent(one);
+                    return { id: one.id || '', ...horas };
+                }
 
                 // Helper: comprueba si el título del evento coincide con nombre o sitio
                 const nombreLower = limpiarTexto(grupoNombre || '').toLowerCase();
@@ -977,28 +930,37 @@
 
                 // Varios eventos → priorizamos búsqueda por coincidencia exacta
                 // 1. Primero buscamos coincidencia exacta de nombre o sitio
-                const exactMatch = items.find(ev => coincide(ev));
-                if (exactMatch) return exactMatch.id;
+                let selected = items.find(ev => coincide(ev));
+                if (selected) {
+                    const horas = extractHorasFromCalendarEvent(selected);
+                    return { id: selected.id || '', ...horas };
+                }
 
                 // 2. Si no hay coincidencia exacta, buscamos eventos con color amarillo (colorId "5")
-                const yellowMatch = items.find(ev => ev.colorId === '5');
-                if (yellowMatch) {
+                selected = items.find(ev => ev.colorId === '5');
+                if (selected) {
                     console.log('Usando evento amarillo como fallback para:', grupoNombre);
-                    return yellowMatch.id;
+                    const horas = extractHorasFromCalendarEvent(selected);
+                    return { id: selected.id || '', ...horas };
                 }
 
                 // 3. Si no hay amarillo, usamos el primer evento creado por nuestra app (buscar en descripción)
-                const appMatch = items.find(ev => 
+                selected = items.find(ev => 
                     ev.description && ev.description.includes('PercuManager')
                 );
-                if (appMatch) return appMatch.id;
+                if (selected) {
+                    const horas = extractHorasFromCalendarEvent(selected);
+                    return { id: selected.id || '', ...horas };
+                }
 
                 // 4. Último recurso: el primer evento del día
                 console.log('Usando primer evento del día como último fallback para:', grupoNombre);
-                return items[0].id;
+                selected = items[0];
+                const horas = extractHorasFromCalendarEvent(selected);
+                return { id: selected?.id || '', ...horas };
             } catch (e) {
                 console.warn('Error buscando evento en Calendar:', e);
-                return '';
+                return { id: '', horaInicio: '', horaFin: '' };
             }
         }
 
@@ -1017,10 +979,10 @@
                     ubicacion: row[3] || ''
                 }));
 
-                // 2. Sesiones (leemos hasta columna L para incluir calEventId y dirección guardados)
+                // 2. Sesiones (leemos hasta columna N para incluir calEventId, dirección y horas guardadas)
                 const resDetalle = await proxyGoogleAPI('sheets', 'get', {
                     spreadsheetId: CONFIG.SPREADSHEET_ID, 
-                    range: 'Detalle!A2:L'
+                    range: 'Detalle!A2:N'
                 });
                 
                 const rawRows = resDetalle.values || [];
@@ -1047,7 +1009,9 @@
                         grupo: row[8],
                         sitio: row[9] || '',
                         calEventId: row[10] || '',
-                        direccion: row[11] || ''
+                        direccion: row[11] || '',
+                        horaInicio: row[12] || '',
+                        horaFin: row[13] || ''
                     };
                 });
 
@@ -1059,9 +1023,11 @@
                 if (sinId.length > 0) {
                     const updates = [];
                     for (const ev of sinId) {
-                        const foundId = await fetchCalendarEventId(ev.fechaObj, ev.grupo, ev.sitio);
-                        if (foundId) {
-                            ev.calEventId = foundId;
+                        const info = await fetchCalendarEventInfo(ev.fechaObj, ev.grupo, ev.sitio);
+                        if (info && info.id) {
+                            ev.calEventId = info.id;
+                            if (info.horaInicio) ev.horaInicio = info.horaInicio;
+                            if (info.horaFin) ev.horaFin = info.horaFin;
                             updates.push({
                                 updateCells: {
                                     range: {
@@ -1073,12 +1039,53 @@
                                     },
                                     rows: [{
                                         values: [{
-                                            userEnteredValue: { stringValue: foundId }
+                                            userEnteredValue: { stringValue: info.id }
                                         }]
                                     }],
                                     fields: 'userEnteredValue'
                                 }
                             });
+
+                            // Guardar también hora inicio (M) y hora fin (N) si las tenemos
+                            if (info.horaInicio) {
+                                updates.push({
+                                    updateCells: {
+                                        range: {
+                                            sheetId: 0,
+                                            startRowIndex: ev.rowIdx - 1,
+                                            endRowIndex: ev.rowIdx,
+                                            startColumnIndex: 12, // Columna M (0-indexed)
+                                            endColumnIndex: 13
+                                        },
+                                        rows: [{
+                                            values: [{
+                                                userEnteredValue: { stringValue: info.horaInicio }
+                                            }]
+                                        }],
+                                        fields: 'userEnteredValue'
+                                    }
+                                });
+                            }
+
+                            if (info.horaFin) {
+                                updates.push({
+                                    updateCells: {
+                                        range: {
+                                            sheetId: 0,
+                                            startRowIndex: ev.rowIdx - 1,
+                                            endRowIndex: ev.rowIdx,
+                                            startColumnIndex: 13, // Columna N (0-indexed)
+                                            endColumnIndex: 14
+                                        },
+                                        rows: [{
+                                            values: [{
+                                                userEnteredValue: { stringValue: info.horaFin }
+                                            }]
+                                        }],
+                                        fields: 'userEnteredValue'
+                                    }
+                                });
+                            }
                         }
                     }
                     // Guardamos todos los IDs encontrados en Sheets de una vez
@@ -1384,11 +1391,16 @@
             document.getElementById('ev-grupo').value = ev.grupo;
             document.getElementById('ev-fecha').value = ev.fechaObj ? ev.fechaObj.toISOString().split('T')[0] : '';
             
-            // Asignar horas por defecto si estamos editando (ya que en sheets solo guardamos total de horas)
-            document.getElementById('ev-hora-inicio').value = '10:00';
-            let horaFin = 10 + ev.horas;
-            let mFin = (horaFin % 1) * 60;
-            document.getElementById('ev-hora-fin').value = `${String(Math.floor(horaFin)).padStart(2, '0')}:${String(mFin).padStart(2, '0')}`;
+            // Usar las horas reales guardadas en Sheets; si faltan, mantenemos el fallback anterior.
+            const horaInicioGuardada = ev.horaInicio || '10:00';
+            let horaFinGuardada = ev.horaFin || '';
+            if (!horaFinGuardada) {
+                let horaFin = 10 + ev.horas;
+                let mFin = (horaFin % 1) * 60;
+                horaFinGuardada = `${String(Math.floor(horaFin)).padStart(2, '0')}:${String(mFin).padStart(2, '0')}`;
+            }
+            document.getElementById('ev-hora-inicio').value = horaInicioGuardada;
+            document.getElementById('ev-hora-fin').value = horaFinGuardada;
             
             document.getElementById('ev-precio').value = ev.precioHora;
             document.getElementById('ev-sitio').value = ev.sitio;
@@ -1613,7 +1625,7 @@
             const ubicacion = g ? g.ubicacion : '';
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
-            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, "", direccion];
+            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, "", direccion, horaInicio, horaFin];
 
             try {
                 if (rowIdx) {
@@ -1622,23 +1634,23 @@
                     fila[1] = old.realizado ? 'X' : '';
                     await proxyGoogleAPI('sheets', 'update', {
                         spreadsheetId: CONFIG.SPREADSHEET_ID, 
-                        range: `Detalle!A${rowIdx}:L${rowIdx}`,
+                        range: `Detalle!A${rowIdx}:N${rowIdx}`,
                         valueInputOption: 'USER_ENTERED'
                     }, {
                         values: [fila]
                     });
                 } else {
-                    // El append devuelve el rango donde insertó, ej: "Detalle!A5:L5"
+                    // El append devuelve el rango donde insertó, ej: "Detalle!A5:N5"
                     const appendResponse = await proxyGoogleAPI('sheets', 'append', {
                         spreadsheetId: CONFIG.SPREADSHEET_ID, 
-                        range: 'Detalle!A:L',
+                        range: 'Detalle!A:N',
                         valueInputOption: 'USER_ENTERED', 
                         insertDataOption: 'INSERT_ROWS'
                     }, {
                         values: [fila]
                     });
                     
-                    // Extraemos el número de fila del rango actualizado, ej: "Detalle!A5:L5" -> 5
+                    // Extraemos el número de fila del rango actualizado, ej: "Detalle!A5:N5" -> 5
                     // Manejar diferentes estructuras de respuesta (proxy vs gapi directo)
                     let updatedRange;
                     let insertedRow;
