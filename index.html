@@ -1368,6 +1368,10 @@
                     },
                     displayEventTime: true,
                     displayEventEnd: true,
+                    eventMaxStack: 2,
+                    dayMaxEvents: 4,
+                    height: 'auto',
+                    aspectRatio: 1.35,
                     eventClick: (info) => openEditSesionModal(info.event.extendedProps.rowIdx),
                     windowResize: function() {
                         const nowMobile = window.innerWidth <= 768;
