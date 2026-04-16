@@ -72,7 +72,7 @@ module.exports = async (req, res) => {
 
     // Configurar request - usar token de OAuth del header Authorization
     const fetchOptions = {
-      method: method === 'delete' ? 'DELETE' : 'POST',
+      method: method === 'list' ? 'GET' : method === 'delete' ? 'DELETE' : 'POST',
       headers: {
         'Authorization': req.headers.authorization || `Bearer ${GOOGLE_API_KEY}`,
         'Content-Type': 'application/json'
