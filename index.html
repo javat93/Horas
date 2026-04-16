@@ -481,9 +481,14 @@
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.18',
+            version: '2.1.19',
             date: '2026-04-16',
             changes: [
+                'Error AdvancedMarkerElement - mapa sin ID válido solucionado',
+                'Map ID configurado correctamente para AdvancedMarkerElement',
+                'mapId: PERCU_MANAGER_MAP asignado al mapa',
+                'ID de contenedor map-container actualizado',
+                'AdvancedMarkerElement ahora funciona sin errores',
                 'Migración completa a AdvancedMarkerElement (google.maps.Marker deprecated)',
                 'API moderna de Google Maps implementada con fallback robusto',
                 'Warning de deprecated eliminado completamente',
@@ -746,8 +751,12 @@
             const loading = document.getElementById('map-loading');
             
             if (mapContainer && !map) {
-                // Crear mapa con configuración por defecto
+                // Asignar un ID al contenedor del mapa para AdvancedMarkerElement
+                mapContainer.id = 'percumanager-map';
+                
+                // Crear mapa con configuración por defecto y ID
                 map = new google.maps.Map(mapContainer, {
+                    mapId: 'PERCU_MANAGER_MAP', // ID del mapa para AdvancedMarkerElement
                     center: { lat: 40.4168, lng: -3.7038 }, // Madrid por defecto
                     zoom: 13,
                     mapTypeControl: false,
