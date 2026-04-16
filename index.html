@@ -1337,8 +1337,23 @@
                     console.log(`❌ Evento SIN horas: ${e.grupo} -> ${startDateTime.toISOString()} a ${endDateTime.toISOString()}`);
                 }
                 
+                // Personalizar título según dispositivo
+                let eventTitle;
+                const isMobile = window.innerWidth <= 768;
+                if (isMobile) {
+                    // En móvil: mantener formato actual (solo grupo)
+                    eventTitle = (e.grupo && e.grupo.trim() !== '') ? e.grupo : (e.sitio && e.sitio.trim() !== '' ? e.sitio : 'Sesión');
+                } else {
+                    // En PC: mostrar grupo + horas si están disponibles
+                    if (e.horaInicio && e.horaFin && e.horaInicio.trim() !== '' && e.horaFin.trim() !== '') {
+                        eventTitle = `${e.grupo || e.sitio || 'Sesión'} (${e.horaInicio}-${e.horaFin})`;
+                    } else {
+                        eventTitle = (e.grupo && e.grupo.trim() !== '') ? e.grupo : (e.sitio && e.sitio.trim() !== '' ? e.sitio : 'Sesión');
+                    }
+                }
+                
                 return { 
-                    title: (e.grupo && e.grupo.trim() !== '') ? e.grupo : (e.sitio && e.sitio.trim() !== '' ? e.sitio : 'Sesión'),
+                    title: eventTitle,
                     start: startDateTime, 
                     end: endDateTime,
                     color: e.pagado ? '#10b981' : '#2563eb', 
