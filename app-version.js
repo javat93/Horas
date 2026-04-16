@@ -1,8 +1,10 @@
 // Version de la app (cargado antes de index.html inline script)
 window.APP_VERSION = {
-  version: '2.1.23',
+  version: '1.5.5',
   date: '2026-04-16',
   changes: [
+    'Calendario ahora muestra horas de inicio y fin de los eventos',
+    'Limpiados logs de depuración del Calendar API y spreadsheet',
     'Sincronización Calendar -> Sheets ahora guarda hora inicio y fin (columnas M y N)',
     'Sesiones en Sheets ahora guardan hora inicio y fin (columnas M y N)',
     'Proxy de Calendar corregido: list usa GET (evita error "Missing end time")',

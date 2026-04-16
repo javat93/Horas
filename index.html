@@ -597,7 +597,7 @@
         });
 
         // Sistema de control de versiones (definido en app-version.js)
-        const APP_VERSION = window.APP_VERSION || { version: 'dev', date: '', changes: [] };
+        const APP_VERSION = window.APP_VERSION || { version: '1.5.5', date: '', changes: [] };
         
         // Mostrar versión en consola al cargar
         console.log('%c=== PERCU MANAGER ===', 'color: #2563eb; font-weight: bold; font-size: 14px');
@@ -1015,10 +1015,10 @@
                     };
                 });
 
-                // 3. Resolvemos calEventId desde Calendar solo si se pidió explícitamente
                 const sinId = resolverCal
                     ? eventosBase.filter(ev => !ev.calEventId && ev.fechaObj)
                     : [];
+                
                 // Sincronizamos Calendar eventIds si hay eventos sin ID
                 if (sinId.length > 0) {
                     const updates = [];
@@ -1299,12 +1299,31 @@
 
         function renderCalendar() {
             const el = document.getElementById('calendar');
-            const source = eventos.map(e => ({ 
-                title: (e.grupo && e.grupo.trim() !== '') ? e.grupo : (e.sitio && e.sitio.trim() !== '' ? e.sitio : 'Sesión'),
-                start: e.fechaObj, 
-                color: e.pagado ? '#10b981' : '#2563eb', 
-                extendedProps: { rowIdx: e.rowIdx } 
-            }));
+            const source = eventos.map(e => {
+                // Crear objeto de evento con horas si están disponibles
+                let startDateTime = e.fechaObj;
+                let endDateTime = e.fechaObj;
+                
+                // Si tenemos horas de inicio y fin, aplicarlas
+                if (e.horaInicio && e.horaFin) {
+                    const [startHour, startMin] = e.horaInicio.split(':').map(Number);
+                    const [endHour, endMin] = e.horaFin.split(':').map(Number);
+                    
+                    startDateTime = new Date(e.fechaObj);
+                    startDateTime.setHours(startHour, startMin, 0, 0);
+                    
+                    endDateTime = new Date(e.fechaObj);
+                    endDateTime.setHours(endHour, endMin, 0, 0);
+                }
+                
+                return { 
+                    title: (e.grupo && e.grupo.trim() !== '') ? e.grupo : (e.sitio && e.sitio.trim() !== '' ? e.sitio : 'Sesión'),
+                    start: startDateTime, 
+                    end: endDateTime,
+                    color: e.pagado ? '#10b981' : '#2563eb', 
+                    extendedProps: { rowIdx: e.rowIdx } 
+                };
+            });
             const isMobile = window.innerWidth <= 768;
             if (!calendar) {
                 calendar = new FullCalendar.Calendar(el, {
