@@ -16,11 +16,11 @@ module.exports = (req, res) => {
     // Obtener parámetros de la query
     const { libraries, callback } = req.query;
 
-    // Decodificar el callback si está codificado
-    const decodedCallback = callback ? decodeURIComponent(callback) : '';
+    // Para evitar problemas con el callback codificado, usar un callback simple
+    const simpleCallback = 'initMap';
 
-    // Construir URL para Google Maps API con callback decodificado
-    const url = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=${libraries || 'places'}&callback=${decodedCallback}`;
+    // Construir URL para Google Maps API con callback simple
+    const url = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=${libraries || 'places'}&callback=${simpleCallback}`;
 
     // Redirigir a Google Maps API (con CORS headers)
     res.redirect(302, url);
