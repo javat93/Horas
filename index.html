@@ -1361,6 +1361,13 @@
                     events: source,
                     firstDay: 1,
                     noEventsText: 'No hay eventos este mes',
+                    eventTimeFormat: {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    },
+                    displayEventTime: true,
+                    displayEventEnd: true,
                     eventClick: (info) => openEditSesionModal(info.event.extendedProps.rowIdx),
                     windowResize: function() {
                         const nowMobile = window.innerWidth <= 768;
