@@ -481,9 +481,12 @@
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.16',
+            version: '2.1.17',
             date: '2026-04-16',
             changes: [
+                'Error loading is not defined al usar ubicación actual solucionado',
+                'Variable loading correctamente obtenida del DOM en openMapModal',
+                'Ubicación actual ahora funciona sin errores',
                 'Error initializeMap is not defined al abrir mapa solucionado',
                 'Función initializeMap creada para mapa interactivo',
                 'Mapa interactivo ahora funciona correctamente',
@@ -1709,7 +1712,10 @@
             });
             
             // Ocultar loading
-            loading.classList.add('hidden');
+            const loading = document.getElementById('map-loading');
+            if (loading) {
+                loading.classList.add('hidden');
+            }
             
             // Obtener ubicación actual
             getCurrentLocation();
