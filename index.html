@@ -481,9 +481,15 @@
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.17',
+            version: '2.1.18',
             date: '2026-04-16',
             changes: [
+                'Migración completa a AdvancedMarkerElement (google.maps.Marker deprecated)',
+                'API moderna de Google Maps implementada con fallback robusto',
+                'Warning de deprecated eliminado completamente',
+                'Manejo de permisos de geolocalización denegados mejorado',
+                'Mensajes informativos para permisos bloqueados por usuario',
+                'Geolocalización con fallback elegante y UX mejorada',
                 'Error loading is not defined al usar ubicación actual solucionado',
                 'Variable loading correctamente obtenida del DOM en openMapModal',
                 'Ubicación actual ahora funciona sin errores',
@@ -735,7 +741,7 @@
         }
 
         // Función para inicializar el mapa interactivo
-        function initializeMap() {
+        async function initializeMap() {
             const mapContainer = document.getElementById('map-container');
             const loading = document.getElementById('map-loading');
             
@@ -749,17 +755,38 @@
                     fullscreenControl: false
                 });
                 
-                // Crear marcador inicial
-                marker = new google.maps.Marker({
-                    map: map,
-                    draggable: true,
-                    position: { lat: 40.4168, lng: -3.7038 }
-                });
-                
-                // Añadir evento de arrastre al marcador
-                marker.addListener('dragend', function(event) {
-                    getAddressFromLatLng(event.latLng);
-                });
+                // Cargar la librería de marcadores avanzados
+                try {
+                    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+                    
+                    // Crear marcador inicial con AdvancedMarkerElement
+                    marker = new AdvancedMarkerElement({
+                        map: map,
+                        position: { lat: 40.4168, lng: -3.7038 },
+                        gmpDraggable: true
+                    });
+                    
+                    // Añadir evento de arrastre al marcador
+                    marker.addEventListener('dragend', function(event) {
+                        const position = event.latLng || event.position;
+                        if (position) {
+                            getAddressFromLatLng(position);
+                        }
+                    });
+                } catch (error) {
+                    // Fallback a Marker tradicional si AdvancedMarkerElement falla
+                    console.warn('AdvancedMarkerElement no disponible, usando Marker tradicional:', error);
+                    marker = new google.maps.Marker({
+                        map: map,
+                        draggable: true,
+                        position: { lat: 40.4168, lng: -3.7038 }
+                    });
+                    
+                    // Añadir evento de arrastre al marcador tradicional
+                    marker.addListener('dragend', function(event) {
+                        getAddressFromLatLng(event.latLng);
+                    });
+                }
                 
                 // Ocultar loading
                 if (loading) {
@@ -1721,22 +1748,48 @@
             getCurrentLocation();
         }
 
-        function placeMarker(location) {
+        async function placeMarker(location) {
+            // Eliminar marcador existente
             if (marker) {
-                marker.setMap(null);
+                if (marker.setMap) {
+                    marker.setMap(null); // Marker tradicional
+                } else if (marker.map) {
+                    marker.map = null; // AdvancedMarkerElement
+                }
             }
             
-            marker = new google.maps.Marker({
-                position: location,
-                map: map,
-                draggable: true,
-                animation: google.maps.Animation.DROP
-            });
-            
-            // Actualizar dirección cuando se arrastra el marcador
-            marker.addListener('dragend', function(event) {
-                getAddressFromLatLng(event.latLng);
-            });
+            // Intentar usar AdvancedMarkerElement primero
+            try {
+                const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+                
+                marker = new AdvancedMarkerElement({
+                    map: map,
+                    position: location,
+                    gmpDraggable: true
+                });
+                
+                // Añadir evento de arrastre al marcador avanzado
+                marker.addEventListener('dragend', function(event) {
+                    const position = event.latLng || event.position;
+                    if (position) {
+                        getAddressFromLatLng(position);
+                    }
+                });
+            } catch (error) {
+                // Fallback a Marker tradicional si AdvancedMarkerElement falla
+                console.warn('AdvancedMarkerElement no disponible en placeMarker, usando Marker tradicional:', error);
+                marker = new google.maps.Marker({
+                    position: location,
+                    map: map,
+                    draggable: true,
+                    animation: google.maps.Animation.DROP
+                });
+                
+                // Añadir evento de arrastre al marcador tradicional
+                marker.addListener('dragend', function(event) {
+                    getAddressFromLatLng(event.latLng);
+                });
+            }
         }
 
         function getAddressFromLatLng(latlng) {
