@@ -146,7 +146,7 @@
         .input-modern:focus { border-color: var(--brand-blue); background-color: white; outline: none; }
         .glass-modal { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
         .pac-container { border-radius: 1rem; border: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); font-family: inherit; z-index: 9999 !important; }
-    /* Estilos específicos para móviles - Calendario */
+    /* Estilos específicos para móviles - Vista Lista */
         @media (max-width: 768px) {
             #calendar {
                 padding: 10px !important;
@@ -164,51 +164,7 @@
                 border-radius: 6px !important;
             }
 
-            .fc .fc-daygrid-day-number {
-                font-size: 0.9rem !important;
-                font-weight: 600 !important;
-                padding: 6px !important;
-            }
-
-            .fc .fc-day-today .fc-daygrid-day-number {
-                width: 32px !important;
-                height: 32px !important;
-                margin: 2px !important;
-            }
-
-            /* Eventos más grandes y legibles en móvil */
-            .fc-event {
-                font-size: 0.85rem !important;
-                font-weight: 600 !important;
-                padding: 4px 8px !important;
-                margin-bottom: 3px !important;
-                border-radius: 8px !important;
-                line-height: 1.3 !important;
-                min-height: 24px !important;
-                display: flex !important;
-                align-items: center !important;
-            }
-
-            .fc-col-header-cell {
-                padding-bottom: 8px !important;
-            }
-
-            .fc-col-header-cell-cushion {
-                font-size: 0.7rem !important;
-                font-weight: 700 !important;
-            }
-
-            /* Más espacio entre celdas */
-            .fc-theme-standard td, .fc-theme-standard th {
-                border-color: #f1f5f9 !important;
-                border-width: 1px !important;
-            }
-
-            .fc-daygrid-day-frame {
-                min-height: 60px !important;
-            }
-
-            /* Toolbar más compacto */
+            /* Toolbar compacto */
             .fc .fc-toolbar {
                 margin-bottom: 12px !important;
                 flex-wrap: wrap !important;
@@ -216,14 +172,86 @@
             }
 
             .fc .fc-toolbar-chunk {
-                margin-bottom: 8px !important;
+                margin-bottom: 4px !important;
             }
 
-            /* Ocultar botones menos importantes en móvil */
+            /* Ocultar botones de vista en móvil */
             .fc .fc-dayGridMonth-button,
             .fc .fc-timeGridWeek-button,
             .fc .fc-timeGridDay-button {
                 display: none !important;
+            }
+
+            /* ===== VISTA LISTA - estilos ===== */
+            .fc-list {
+                border: none !important;
+            }
+
+            .fc-list-day-cushion {
+                background: linear-gradient(135deg, #eff6ff, #dbeafe) !important;
+                padding: 10px 14px !important;
+                border-radius: 10px !important;
+                margin-bottom: 4px !important;
+            }
+
+            .fc-list-day-text,
+            .fc-list-day-side-text {
+                font-size: 0.85rem !important;
+                font-weight: 700 !important;
+                color: #2563eb !important;
+                text-decoration: none !important;
+            }
+
+            .fc-list-event {
+                border-radius: 10px !important;
+                margin-bottom: 6px !important;
+                cursor: pointer !important;
+                transition: background 0.15s !important;
+            }
+
+            .fc-list-event:hover td {
+                background-color: #f1f5f9 !important;
+            }
+
+            .fc-list-event td {
+                padding: 10px 12px !important;
+                border: none !important;
+                border-bottom: 1px solid #f1f5f9 !important;
+            }
+
+            .fc-list-event-dot {
+                border-width: 8px !important;
+                border-radius: 50% !important;
+            }
+
+            .fc-list-event-time {
+                font-size: 0.78rem !important;
+                font-weight: 600 !important;
+                color: #64748b !important;
+                white-space: nowrap !important;
+            }
+
+            .fc-list-event-title a {
+                font-size: 0.95rem !important;
+                font-weight: 700 !important;
+                color: #1e293b !important;
+                text-decoration: none !important;
+            }
+
+            .fc-list-empty {
+                background: white !important;
+            }
+
+            .fc-list-empty-cushion {
+                font-size: 0.9rem !important;
+                color: #94a3b8 !important;
+                padding: 40px 20px !important;
+                text-align: center !important;
+            }
+
+            /* Scrollgrid en móvil */
+            .fc-scrollgrid {
+                border: none !important;
             }
         }
 
@@ -1265,23 +1293,36 @@
         function renderCalendar() {
             const el = document.getElementById('calendar');
             const source = eventos.map(e => ({ 
-                title: e.grupo, 
+                title: (e.grupo && e.grupo.trim() !== '') ? e.grupo : (e.sitio && e.sitio.trim() !== '' ? e.sitio : 'Sesión'),
                 start: e.fechaObj, 
                 color: e.pagado ? '#10b981' : '#2563eb', 
                 extendedProps: { rowIdx: e.rowIdx } 
             }));
+            const isMobile = window.innerWidth <= 768;
             if (!calendar) {
                 calendar = new FullCalendar.Calendar(el, {
-                    initialView: 'dayGridMonth',
-					locale: 'es',
-					buttonText: {
-        today: 'Hoy',
-        month: 'Mes'
-    },
-                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
+                    initialView: isMobile ? 'listMonth' : 'dayGridMonth',
+                    locale: 'es',
+                    buttonText: {
+                        today: 'Hoy',
+                        month: 'Mes',
+                        list: 'Lista'
+                    },
+                    headerToolbar: isMobile
+                        ? { left: 'prev,next today', center: 'title', right: '' }
+                        : { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
                     events: source,
-					firstDay: 1,
-                    eventClick: (info) => openEditSesionModal(info.event.extendedProps.rowIdx)
+                    firstDay: 1,
+                    noEventsText: 'No hay eventos este mes',
+                    eventClick: (info) => openEditSesionModal(info.event.extendedProps.rowIdx),
+                    windowResize: function() {
+                        const nowMobile = window.innerWidth <= 768;
+                        calendar.changeView(nowMobile ? 'listMonth' : 'dayGridMonth');
+                        calendar.setOption('headerToolbar', nowMobile
+                            ? { left: 'prev,next today', center: 'title', right: '' }
+                            : { left: 'prev,next today', center: 'title', right: 'dayGridMonth' }
+                        );
+                    }
                 });
                 calendar.render();
             } else {
