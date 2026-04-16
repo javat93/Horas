@@ -1,6 +1,6 @@
 // Version de la app (cargado antes de index.html inline script)
 window.APP_VERSION = {
-  version: '1.5.7',
+  version: '1.5.8',
   date: '2026-04-16',
   changes: [
     'Calendario ahora muestra horas de inicio y fin de los eventos',
@@ -18,6 +18,10 @@ window.APP_VERSION = {
     'Altura mínima de celdas aumentada para mejor usabilidad',
     'Fix: Problema de timezone en FullCalendar - ahora muestra horas locales correctas',
     'Corregida conversión UTC que mostraba 1-2 horas menos en eventos',
+    'Fix: Formato de tiempo en FullCalendar - ahora muestra HH:mm completo',
+    'Mejor visualización de horas en PC con configuración optimizada',
+    'Personalización de títulos por dispositivo: PC muestra grupo+horas, móvil solo grupo',
+    'Eliminados logs de depuración del calendario para producción',
     'Búsqueda de direcciones solucionado - mapa ahora se mueve al marcador',
     'map.setCenter() añadido a searchOnMap para centrar mapa en resultados',
     'Experiencia de usuario mejorada al buscar direcciones',

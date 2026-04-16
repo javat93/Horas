@@ -597,7 +597,7 @@
         });
 
         // Sistema de control de versiones (definido en app-version.js)
-        const APP_VERSION = window.APP_VERSION || { version: '1.5.7', date: '', changes: [] };
+        const APP_VERSION = window.APP_VERSION || { version: '1.5.8', date: '', changes: [] };
         
         // Mostrar versión en consola al cargar
         console.log('%c=== PERCU MANAGER ===', 'color: #2563eb; font-weight: bold; font-size: 14px');
@@ -1304,9 +1304,6 @@
                 let startDateTime = e.fechaObj;
                 let endDateTime = e.fechaObj;
                 
-                // Debug: verificar eventos con horas
-                console.log(`renderCalendar - Evento: ${e.grupo} - horaInicio="${e.horaInicio}" - horaFin="${e.horaFin}"`);
-                
                 // Si tenemos horas de inicio y fin, aplicarlas
                 if (e.horaInicio && e.horaFin && e.horaInicio.trim() !== '' && e.horaFin.trim() !== '') {
                     const [startHour, startMin] = e.horaInicio.split(':').map(Number);
@@ -1320,9 +1317,6 @@
                     
                     startDateTime = new Date(year, month, day, startHour, startMin, 0, 0);
                     endDateTime = new Date(year, month, day, endHour, endMin, 0, 0);
-                    
-                    // Debug: verificar eventos con horas
-                    console.log(`✅ Evento CON horas: ${e.grupo} - ${e.horaInicio}→${e.horaFin} -> ${startDateTime.toISOString()} a ${endDateTime.toISOString()}`);
                 } else {
                     // Eventos sin horas: día completo en hora local
                     const fechaLocal = new Date(e.fechaObj);
@@ -1332,9 +1326,6 @@
                     
                     startDateTime = new Date(year, month, day, 0, 0, 0, 0);
                     endDateTime = new Date(year, month, day, 23, 59, 59, 999);
-                    
-                    // Debug: verificar eventos sin horas
-                    console.log(`❌ Evento SIN horas: ${e.grupo} -> ${startDateTime.toISOString()} a ${endDateTime.toISOString()}`);
                 }
                 
                 // Personalizar título según dispositivo
