@@ -1,6 +1,6 @@
 // Version de la app (cargado antes de index.html inline script)
 window.APP_VERSION = {
-  version: '1.5.5',
+  version: '1.5.6',
   date: '2026-04-16',
   changes: [
     'Calendario ahora muestra horas de inicio y fin de los eventos',
@@ -11,6 +11,9 @@ window.APP_VERSION = {
     'Calendario optimizado para móviles - texto más grande y legible',
     'Eventos del calendario ahora más grandes en dispositivos móviles',
     'Espaciado mejorado entre elementos del calendario en móvil',
+    'Fix: Eventos sin horas ahora se muestran como eventos de día completo en FullCalendar',
+    'Mejor validación de horas vacías para evitar mostrar 00:00 incorrectamente',
+    'Logs de depuración añadidos para identificar problemas con horas en FullCalendar',
     'Botones del toolbar del calendario más grandes en táctil',
     'Altura mínima de celdas aumentada para mejor usabilidad',
     'Búsqueda de direcciones solucionado - mapa ahora se mueve al marcador',
