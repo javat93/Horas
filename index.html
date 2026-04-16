@@ -1304,11 +1304,8 @@
                 let startDateTime = e.fechaObj;
                 let endDateTime = e.fechaObj;
                 
-                // Debug: verificar si tenemos horas
-                console.log(`Evento ${e.grupo}: horaInicio="${e.horaInicio}", horaFin="${e.horaFin}"`);
-                
                 // Si tenemos horas de inicio y fin, aplicarlas
-                if (e.horaInicio && e.horaFin) {
+                if (e.horaInicio && e.horaFin && e.horaInicio.trim() !== '' && e.horaFin.trim() !== '') {
                     const [startHour, startMin] = e.horaInicio.split(':').map(Number);
                     const [endHour, endMin] = e.horaFin.split(':').map(Number);
                     
@@ -1317,6 +1314,12 @@
                     
                     endDateTime = new Date(e.fechaObj);
                     endDateTime.setHours(endHour, endMin, 0, 0);
+                } else {
+                    startDateTime = new Date(e.fechaObj);
+                    startDateTime.setHours(0, 0, 0, 0);
+                    
+                    endDateTime = new Date(e.fechaObj);
+                    endDateTime.setHours(23, 59, 59, 999);
                 }
                 
                 return { 
