@@ -481,9 +481,13 @@
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.19',
+            version: '2.1.20',
             date: '2026-04-16',
             changes: [
+                'Búsqueda de direcciones solucionado - mapa ahora se mueve al marcador',
+                'map.setCenter() añadido a searchOnMap para centrar mapa en resultados',
+                'Experiencia de usuario mejorada al buscar direcciones',
+                'Mapa ahora se centra automáticamente en ubicaciones encontradas',
                 'Error AdvancedMarkerElement - mapa sin ID válido solucionado',
                 'Map ID configurado correctamente para AdvancedMarkerElement',
                 'mapId: PERCU_MANAGER_MAP asignado al mapa',
@@ -1839,7 +1843,9 @@
             
             geocoder.geocode({ 'address': address }, (results, status) => {
                 if (status === 'OK') {
-                    placeMarker(results[0].geometry.location);
+                    const location = results[0].geometry.location;
+                    placeMarker(location);
+                    map.setCenter(location); // Mover el mapa al marcador
                     document.getElementById('map-selected-address').value = results[0].formatted_address;
                 } else {
                     showErrorModal('Dirección No Encontrada', 'No se encontró la dirección. Por favor, intenta con otra búsqueda.', 'warning', document.getElementById('map-search'));
