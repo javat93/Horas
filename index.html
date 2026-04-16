@@ -146,6 +146,94 @@
         .input-modern:focus { border-color: var(--brand-blue); background-color: white; outline: none; }
         .glass-modal { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
         .pac-container { border-radius: 1rem; border: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); font-family: inherit; z-index: 9999 !important; }
+    /* Estilos específicos para móviles - Calendario */
+        @media (max-width: 768px) {
+            #calendar {
+                padding: 10px !important;
+                border-radius: 12px !important;
+            }
+
+            .fc .fc-toolbar-title {
+                font-size: 1.1rem !important;
+                font-weight: 700 !important;
+            }
+
+            .fc .fc-button {
+                font-size: 0.75rem !important;
+                padding: 6px 12px !important;
+                border-radius: 6px !important;
+            }
+
+            .fc .fc-daygrid-day-number {
+                font-size: 0.9rem !important;
+                font-weight: 600 !important;
+                padding: 6px !important;
+            }
+
+            .fc .fc-day-today .fc-daygrid-day-number {
+                width: 32px !important;
+                height: 32px !important;
+                margin: 2px !important;
+            }
+
+            /* Eventos más grandes y legibles en móvil */
+            .fc-event {
+                font-size: 0.85rem !important;
+                font-weight: 600 !important;
+                padding: 4px 8px !important;
+                margin-bottom: 3px !important;
+                border-radius: 8px !important;
+                line-height: 1.3 !important;
+                min-height: 24px !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+
+            .fc-col-header-cell {
+                padding-bottom: 8px !important;
+            }
+
+            .fc-col-header-cell-cushion {
+                font-size: 0.7rem !important;
+                font-weight: 700 !important;
+            }
+
+            /* Más espacio entre celdas */
+            .fc-theme-standard td, .fc-theme-standard th {
+                border-color: #f1f5f9 !important;
+                border-width: 1px !important;
+            }
+
+            .fc-daygrid-day-frame {
+                min-height: 60px !important;
+            }
+
+            /* Toolbar más compacto */
+            .fc .fc-toolbar {
+                margin-bottom: 12px !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+
+            .fc .fc-toolbar-chunk {
+                margin-bottom: 8px !important;
+            }
+
+            /* Ocultar botones menos importantes en móvil */
+            .fc .fc-dayGridMonth-button,
+            .fc .fc-timeGridWeek-button,
+            .fc .fc-timeGridDay-button {
+                display: none !important;
+            }
+        }
+
+        /* Mejoras adicionales para tablets */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .fc-event {
+                font-size: 0.8rem !important;
+                padding: 3px 7px !important;
+            }
+        }
     </style>
 </head>
 <body class="pb-20">
@@ -481,9 +569,14 @@
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.20',
+            version: '2.1.22',
             date: '2026-04-16',
             changes: [
+                'Calendario optimizado para móviles - texto más grande y legible',
+                'Eventos del calendario ahora más grandes en dispositivos móviles',
+                'Espaciado mejorado entre elementos del calendario en móvil',
+                'Botones del toolbar del calendario más grandes en táctil',
+                'Altura mínima de celdas aumentada para mejor usabilidad',
                 'Búsqueda de direcciones solucionado - mapa ahora se mueve al marcador',
                 'map.setCenter() añadido a searchOnMap para centrar mapa en resultados',
                 'Experiencia de usuario mejorada al buscar direcciones',
