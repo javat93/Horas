@@ -481,9 +481,12 @@
 
         // Sistema de control de versiones
         const APP_VERSION = {
-            version: '2.1.15',
+            version: '2.1.16',
             date: '2026-04-16',
             changes: [
+                'Error initializeMap is not defined al abrir mapa solucionado',
+                'Función initializeMap creada para mapa interactivo',
+                'Mapa interactivo ahora funciona correctamente',
                 'Error 500 persistente en proxy api/maps solucionado definitivamente',
                 'Proxy simplificado para usar callback simple (initMap)',
                 'Eliminado problema de callback codificado complejo',
@@ -723,6 +726,40 @@
                 const mapContainer = document.getElementById('map-container');
                 const loading = document.getElementById('map-loading');
                 if (mapContainer && loading) {
+                    loading.classList.add('hidden');
+                }
+            }
+        }
+
+        // Función para inicializar el mapa interactivo
+        function initializeMap() {
+            const mapContainer = document.getElementById('map-container');
+            const loading = document.getElementById('map-loading');
+            
+            if (mapContainer && !map) {
+                // Crear mapa con configuración por defecto
+                map = new google.maps.Map(mapContainer, {
+                    center: { lat: 40.4168, lng: -3.7038 }, // Madrid por defecto
+                    zoom: 13,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false
+                });
+                
+                // Crear marcador inicial
+                marker = new google.maps.Marker({
+                    map: map,
+                    draggable: true,
+                    position: { lat: 40.4168, lng: -3.7038 }
+                });
+                
+                // Añadir evento de arrastre al marcador
+                marker.addListener('dragend', function(event) {
+                    getAddressFromLatLng(event.latLng);
+                });
+                
+                // Ocultar loading
+                if (loading) {
                     loading.classList.add('hidden');
                 }
             }
