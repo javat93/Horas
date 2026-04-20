@@ -1,9 +1,12 @@
 // Version de la app (cargado antes de index.html inline script)
 window.APP_VERSION = {
-  version: '1.5.9',
+  version: '1.5.10',
   date: '2026-04-20',
   changes: [
-    'Día de hoy resaltado en calendario móvil con fondo azul y etiqueta "HOY"',
+    'Día de hoy resaltado en calendario móvil con color naranja brillante y etiqueta "HOY" animada',
+    'Indicador "HOY" con animación pulsante para máxima visibilidad',
+    'Texto blanco con sombra y tamaño aumentado para mejor legibilidad',
+    'Día de hoy ligeramente más grande con borde naranja intenso',
     'Calendario ahora muestra horas de inicio y fin de los eventos',
     'Limpiados logs de depuración del Calendar API y spreadsheet',
     'Sincronización Calendar -> Sheets ahora guarda hora inicio y fin (columnas M y N)',
