@@ -202,6 +202,36 @@
                 text-decoration: none !important;
             }
 
+            /* Resaltar hoy en vista lista móvil */
+            .fc-list-day.fc-list-today .fc-list-day-cushion {
+                background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+                border: 2px solid #1e40af !important;
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+                position: relative !important;
+            }
+
+            .fc-list-day.fc-list-today .fc-list-day-text,
+            .fc-list-day.fc-list-today .fc-list-day-side-text {
+                color: white !important;
+                font-weight: 800 !important;
+                font-size: 0.9rem !important;
+            }
+
+            /* Indicador de "HOY" para la vista lista */
+            .fc-list-day.fc-list-today .fc-list-day-cushion::before {
+                content: "HOY";
+                position: absolute;
+                top: 8px;
+                right: 14px;
+                background: rgba(255, 255, 255, 0.9);
+                color: #2563eb;
+                font-size: 0.65rem;
+                font-weight: 800;
+                padding: 2px 6px;
+                border-radius: 4px;
+                letter-spacing: 0.5px;
+            }
+
             .fc-list-event {
                 border-radius: 10px !important;
                 margin-bottom: 6px !important;
