@@ -202,48 +202,26 @@
                 text-decoration: none !important;
             }
 
-            /* Resaltar hoy en vista lista móvil - COLOR NARANJA INTENSO */
+            /* Resaltar hoy en vista lista móvil - Estilo sutil y limpio */
             .fc-list-day.fc-list-today .fc-list-day-cushion {
-                background: linear-gradient(135deg, #ff6b35, #f93c1a) !important;
-                border: 3px solid #d83415 !important;
-                box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4) !important;
+                background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+                border: 2px solid #1d4ed8 !important;
+                box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
                 position: relative !important;
-                margin: 8px 0 !important;
-                transform: scale(1.02) !important;
+                margin: 6px 0 !important;
+                transform: scale(1.01) !important;
             }
 
             .fc-list-day.fc-list-today .fc-list-day-text,
             .fc-list-day.fc-list-today .fc-list-day-side-text {
                 color: white !important;
-                font-weight: 900 !important;
-                font-size: 1rem !important;
-                text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+                font-weight: 700 !important;
+                font-size: 0.95rem !important;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
             }
 
-            /* Indicador de "HOY" para la vista lista */
-            .fc-list-day.fc-list-today .fc-list-day-cushion::before {
-                content: "HOY" !important;
-                position: absolute !important;
-                top: 10px !important;
-                right: 14px !important;
-                background: #ffeb3b !important;
-                color: #d83415 !important;
-                font-size: 0.7rem !important;
-                font-weight: 900 !important;
-                padding: 4px 8px !important;
-                border-radius: 6px !important;
-                letter-spacing: 1px !important;
-                animation: pulse-hoy 2s infinite !important;
-                box-shadow: 0 2px 8px rgba(255, 235, 59, 0.5) !important;
-            }
-
-            /* Animación para el indicador HOY */
-            @keyframes pulse-hoy {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.1); }
-                100% { transform: scale(1); }
-            }
-
+            
+            
             .fc-list-event {
                 border-radius: 10px !important;
                 margin-bottom: 6px !important;
