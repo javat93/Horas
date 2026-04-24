@@ -1705,7 +1705,7 @@
             const ubicacion = g ? g.ubicacion : '';
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
-            const fila = ["", "", boloCole, clase, "", precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, "", direccion, horaInicio, horaFin];
+            const fila = ["", "", boloCole, clase, "", precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, "", direccion, horaInicio, horaFin].slice(0, 14);
 
             try {
                 if (rowIdx) {
@@ -1943,8 +1943,10 @@
             document.getElementById('btn-' + tabId).className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 tab-active";
             if(tabId === 'calendario') {
                 setTimeout(() => {
-                    calendar.render();
-                    highlightTodayInMobileCalendar();
+                    if (calendar && calendar.render) {
+                        calendar.render();
+                        highlightTodayInMobileCalendar();
+                    }
                 }, 50);
             }
         }
