@@ -1022,7 +1022,7 @@
                         realizado: realizado,
                         boloCole: row[2] || '',
                         clase: row[3] || '',
-                        precioHora: parseFloat(row[6]) || 0,
+                        precioHora: parseFloat(row[4]) || 0,
                         fechaStr: row[5],
                         fechaObj: fObj,
                         total: parseFloat((row[6] || "0").replace("","").replace(",",".").trim()) || 0,
@@ -1705,7 +1705,7 @@
             const ubicacion = g ? g.ubicacion : '';
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
-            const fila = ["", "", boloCole, clase, "", precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, "", direccion, horaInicio, horaFin].slice(0, 14);
+            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, "", direccion, horaInicio, horaFin];
 
             try {
                 if (rowIdx) {
