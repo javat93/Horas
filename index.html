@@ -1949,63 +1949,8 @@
         }
 
         function highlightTodayInMobileCalendar() {
-            // Forzar resaltado del día de hoy en vista móvil
-            const today = new Date().toISOString().split('T')[0];
-            const isMobile = window.innerWidth <= 768;
-            
-            if (isMobile) {
-                // Buscar todos los elementos de día en la vista lista
-                const dayElements = document.querySelectorAll('.fc-list-day');
-                dayElements.forEach(dayEl => {
-                    const dateAttr = dayEl.getAttribute('data-date');
-                    if (dateAttr && dateAttr.includes(today)) {
-                        // Añadir clase personalizada para resaltado
-                        dayEl.classList.add('hoy-resaltado');
-                        
-                        // Forzar estilos inline si CSS no funciona
-                        const cushion = dayEl.querySelector('.fc-list-day-cushion');
-                        if (cushion) {
-                            cushion.style.setProperty('background', 'linear-gradient(135deg, #ff6b35, #f93c1a)', 'important');
-                            cushion.style.setProperty('border', '3px solid #d83415', 'important');
-                            cushion.style.setProperty('box-shadow', '0 6px 20px rgba(255, 107, 53, 0.4)', 'important');
-                            cushion.style.setProperty('position', 'relative', 'important');
-                            cushion.style.setProperty('margin', '8px 0', 'important');
-                            cushion.style.setProperty('transform', 'scale(1.02)', 'important');
-                        }
-                        
-                        // Añadir indicador "HOY" si no existe
-                        if (!cushion.querySelector('.hoy-indicator')) {
-                            const hoyIndicator = document.createElement('div');
-                            hoyIndicator.className = 'hoy-indicator';
-                            hoyIndicator.textContent = 'HOY';
-                            hoyIndicator.style.cssText = `
-                                position: absolute !important;
-                                top: 10px !important;
-                                right: 14px !important;
-                                background: #ffeb3b !important;
-                                color: #d83415 !important;
-                                font-size: 0.7rem !important;
-                                font-weight: 900 !important;
-                                padding: 4px 8px !important;
-                                border-radius: 6px !important;
-                                letter-spacing: 1px !important;
-                                animation: pulse-hoy 2s infinite !important;
-                                box-shadow: 0 2px 8px rgba(255, 235, 59, 0.5) !important;
-                            `;
-                            cushion.appendChild(hoyIndicator);
-                        }
-                        
-                        // Estilos para el texto
-                        const textElements = dayEl.querySelectorAll('.fc-list-day-text, .fc-list-day-side-text');
-                        textElements.forEach(textEl => {
-                            textEl.style.setProperty('color', 'white', 'important');
-                            textEl.style.setProperty('font-weight', '900', 'important');
-                            textEl.style.setProperty('font-size', '1rem', 'important');
-                            textEl.style.setProperty('text-shadow', '0 1px 2px rgba(0,0,0,0.3)', 'important');
-                        });
-                    }
-                });
-            }
+            // Los estilos del día de hoy ahora se manejan completamente con CSS
+            // No se necesita JavaScript para aplicar estilos inline
         }
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
