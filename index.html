@@ -303,6 +303,10 @@
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">Sincronizar</span>
                 </button>
+                <button id="add-future-events-btn" onclick="openAddFutureEventsModal()" class="hidden bg-blue-50 text-blue-600 font-bold px-4 py-2.5 rounded-xl hover:bg-blue-100 transition-all flex items-center gap-2 text-sm">
+                    <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Añadir eventos futuros</span>
+                </button>
                 <button id="auth-btn" onclick="handleAuthClick()" class="bg-white border-2 border-slate-100 text-slate-700 font-bold px-5 py-2.5 rounded-xl hover:border-blue-200 hover:text-blue-600 transition-all flex items-center gap-2 text-sm shadow-sm">
                     <i data-lucide="log-in" class="w-4 h-4"></i> 
                     <span id="auth-text" class="hidden sm:inline">Conectar Google</span>
@@ -602,6 +606,51 @@
         </div>
     </div>
 
+    <!-- Modal para Añadir Eventos Futuros -->
+    <div id="modal-future-events" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-extrabold text-slate-900">Añadir Eventos Futuros</h3>
+                <button type="button" onclick="closeModal('modal-future-events')" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-future-events" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Seleccionar Mes</label>
+                    <select id="future-month" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                        <option value="">Selecciona un mes...</option>
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Año</label>
+                    <select id="future-year" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                        <option value="">Selecciona un año...</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all">
+                        <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                        Importar Eventos
+                    </button>
+                    <button type="button" onclick="closeModal('modal-future-events')" class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-200 transition-all">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="app-version.js"></script>
     <script>
 
@@ -725,6 +774,7 @@
                 if (resp.error !== undefined) throw (resp);
                 document.getElementById('auth-text').innerText = "Conectado";
                 document.getElementById('sync-btn').classList.remove('hidden');
+                document.getElementById('add-future-events-btn').classList.remove('hidden');
                 localStorage.setItem('g_token', resp.access_token);
                 await syncData();
             };
@@ -737,6 +787,7 @@
                 if (token) {
                     gapi.client.setToken({access_token: token});
                     document.getElementById('sync-btn').classList.remove('hidden');
+                    document.getElementById('add-future-events-btn').classList.remove('hidden');
                     document.getElementById('auth-text').innerText = "Conectado";
                     syncData();
                 }
@@ -1891,6 +1942,28 @@
             } catch (err) { console.error("Error grupo:", err); }
         };
 
+        // Event listener para formulario de eventos futuros
+        document.getElementById('form-future-events').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const month = parseInt(document.getElementById('future-month').value);
+            const year = parseInt(document.getElementById('future-year').value);
+            
+            if (!month || !year) {
+                showErrorModal('Error de Validación', 'Por favor selecciona mes y año.', 'error');
+                return;
+            }
+            
+            try {
+                await importFutureEvents(month, year);
+                closeModal('modal-future-events');
+                syncData();
+            } catch (err) {
+                console.error("Error importando eventos futuros:", err);
+                showErrorModal('Error', 'No se pudieron importar los eventos futuros.', 'error');
+            }
+        };
+
         let confirmCallback = null;
 
         function showConfirmModal(message, callback) {
@@ -1957,6 +2030,28 @@
         function highlightTodayInMobileCalendar() {
             // Los estilos del día de hoy ahora se manejan completamente con CSS
             // No se necesita JavaScript para aplicar estilos inline
+        }
+
+        function openAddFutureEventsModal() {
+            // Poblar select de años (año actual y 2 años futuros)
+            const yearSelect = document.getElementById('future-year');
+            const currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = '<option value="">Selecciona un año...</option>';
+            
+            for (let i = 0; i <= 2; i++) {
+                const year = currentYear + i;
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+            
+            // Seleccionar mes y año actuales por defecto
+            const currentMonth = new Date().getMonth() + 1;
+            document.getElementById('future-month').value = currentMonth;
+            document.getElementById('future-year').value = currentYear;
+            
+            openModal('modal-future-events');
         }
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
@@ -2121,12 +2216,161 @@
             }
         });
 
-            window.onload = () => {
-				loadGoogleMaps();
-                gapiLoaded();
-                gisLoaded();
-                lucide.createIcons();
-            };
-        </script>
-    </body>
+        // Función principal para importar eventos futuros de Google Calendar
+        async function importFutureEvents(month, year) {
+            console.log(`Importando eventos para ${month}/${year}`);
+            
+            // Calcular rango de fechas para el mes seleccionado
+            const startDate = new Date(year, month - 1, 1);
+            const endDate = new Date(year, month, 0); // Último día del mes
+            
+            const timeMin = startDate.toISOString();
+            const timeMax = endDate.toISOString();
+            
+            console.log(`Buscando eventos desde ${timeMin} hasta ${timeMax}`);
+            
+            try {
+                // Obtener eventos de Google Calendar
+                const calendarResponse = await proxyGoogleAPI('calendar', 'list', {
+                    calendarId: 'primary',
+                    timeMin: timeMin,
+                    timeMax: timeMax,
+                    singleEvents: true,
+                    orderBy: 'startTime'
+                });
+                
+                const events = calendarResponse.result.items || [];
+                console.log(`Se encontraron ${events.length} eventos`);
+                
+                if (events.length === 0) {
+                    showErrorModal('Sin Eventos', 'No se encontraron eventos en Google Calendar para el mes seleccionado.', 'info');
+                    return;
+                }
+                
+                // Procesar cada evento y añadirlo al spreadsheet
+                const rowsToAdd = [];
+                let processedCount = 0;
+                
+                for (const event of events) {
+                    try {
+                        const row = await processCalendarEvent(event);
+                        if (row) {
+                            rowsToAdd.push(row);
+                            processedCount++;
+                        }
+                    } catch (err) {
+                        console.warn(`Error procesando evento ${event.id}:`, err);
+                    }
+                }
+                
+                if (rowsToAdd.length === 0) {
+                    showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos válidos para importar.', 'info');
+                    return;
+                }
+                
+                // Añadir todos los eventos al spreadsheet
+                console.log(`Añadiendo ${rowsToAdd.length} eventos al spreadsheet`);
+                
+                await proxyGoogleAPI('sheets', 'append', {
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: 'Detalle!A:N',
+                    valueInputOption: 'USER_ENTERED',
+                    insertDataOption: 'INSERT_ROWS'
+                }, {
+                    values: rowsToAdd
+                });
+                
+                showErrorModal('Importación Completada', `Se importaron ${processedCount} eventos correctamente.`, 'success');
+                
+            } catch (error) {
+                console.error('Error en importFutureEvents:', error);
+                throw error;
+            }
+        }
+
+        // Función para procesar un evento de calendar y convertirlo a fila del spreadsheet
+        async function processCalendarEvent(event) {
+            // Extraer información del evento
+            const title = event.summary || 'Sin título';
+            const start = event.start;
+            const end = event.end;
+            
+            // Parsear fechas y horas
+            let startDate, endDate, horaInicio, horaFin;
+            
+            if (start.dateTime) {
+                // Evento con hora específica
+                startDate = new Date(start.dateTime);
+                endDate = new Date(end.dateTime);
+                horaInicio = formatTime(startDate);
+                horaFin = formatTime(endDate);
+            } else if (start.date) {
+                // Evento de día completo - usar valores por defecto
+                startDate = new Date(start.date);
+                endDate = new Date(end.date);
+                horaInicio = '10:00';
+                horaFin = '11:00';
+            } else {
+                return null; // Evento sin fecha válida
+            }
+            
+            // Formatear fecha para spreadsheet
+            const fFormat = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}/${startDate.getFullYear()}`;
+            
+            // Extraer información del título (asumir formato: "Grupo - Clase")
+            let grupo = 'Sin grupo';
+            let clase = title;
+            let boloCole = '';
+            
+            if (title.includes(' - ')) {
+                const parts = title.split(' - ');
+                grupo = parts[0].trim();
+                clase = parts[1].trim();
+            }
+            
+            // Buscar precio del grupo
+            const grupoInfo = grupos.find(g => g.nombre === grupo);
+            const precio = grupoInfo ? grupoInfo.precio : 20;
+            const ubicacion = grupoInfo ? grupoInfo.ubicacion : '';
+            
+            // Calcular horas y total
+            const horas = endDate.getHours() + endDate.getMinutes() / 60 - (startDate.getHours() + startDate.getMinutes() / 60);
+            const total = (horas * precio).toFixed(2).replace('.', ',') + ' ';
+            
+            // Crear fila para spreadsheet
+            const fila = [
+                '', // Columna A: pagado
+                '', // Columna B: realizado
+                boloCole, // Columna C: boloCole
+                clase, // Columna D: clase
+                precio, // Columna E: precio
+                fFormat, // Columna F: fecha
+                total, // Columna G: total
+                1, // Columna H: horas
+                grupo, // Columna I: grupo
+                ubicacion, // Columna J: ubicacion
+                event.id, // Columna K: calEventId
+                '', // Columna L: direccion
+                horaInicio, // Columna M: horaInicio
+                horaFin // Columna N: horaFin
+            ];
+            
+            return fila;
+        }
+
+        // Función auxiliar para formatear tiempo
+        function formatTime(date) {
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        window.onload = () => {
+            loadGoogleMaps();
+            gapiLoaded();
+            gisLoaded();
+            lucide.createIcons();
+        };
+    </script>
+</body>
 </html>
