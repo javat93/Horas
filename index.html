@@ -2374,7 +2374,7 @@
             const clase = isMaracuya ? "" : "X"; // Columna D: "" para Maracuya, "X" para otros
             
             // Buscar información del grupo como hace el formulario
-            const g = grupos.find(x => x.nombre.toLowerCase() === grupo.toLowerCase());
+            const g = grupos.find(x => x.nombre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === grupo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase());
             
             // Usar precio bolo si es evento de Bolo, sino precio normal
             const precio = tieneBolo && g ? (g.precioBolo || g.precio) : (g ? g.precio : 20);
