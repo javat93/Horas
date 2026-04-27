@@ -2342,6 +2342,9 @@
             let grupo = 'Sin grupo';
             let sitio = '';
             
+            // Determinar si es un evento de Bolo
+            const tieneBolo = title.toLowerCase().includes('bolo');
+            
             if (title.includes(' - ')) {
                 const parts = title.split(' - ');
                 grupo = parts[0].trim();
@@ -2355,8 +2358,8 @@
             // Determinar si es Maracuya para la columna clase (como en el formulario)
             const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
             
-            // Mantenemos string vacio para la columna Bolo que hemos quitado para no romper Google Sheets
-            const boloCole = ""; 
+            // Marcar campo BoloCole si contiene la palabra "Bolo"
+            const boloCole = tieneBolo ? "X" : ""; 
             const clase = isMaracuya ? "" : "X"; // Columna D: "" para Maracuya, "X" para otros
             
             // Buscar información del grupo como hace el formulario
