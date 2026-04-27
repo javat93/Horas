@@ -1467,7 +1467,11 @@
             document.getElementById('modal-evento-title').innerText = "Editar Sesión";
             document.getElementById('ev-rowIdx').value = ev.rowIdx;
             document.getElementById('ev-grupo').value = ev.grupo;
-            document.getElementById('ev-fecha').value = ev.fechaObj ? ev.fechaObj.toISOString().split('T')[0] : '';
+
+            const offsetMS = ev.fechaObj.getTimezoneOffset() * 60 * 1000;
+            const fechaLocal = new Date(ev.fechaObj.getTime() - offsetMS);
+
+            document.getElementById('ev-fecha').value = fechaLocal.toISOString().split('T')[0];
             
             // Usar las horas reales guardadas en Sheets; si faltan, mantenemos el fallback anterior.
             const horaInicioGuardada = ev.horaInicio || '10:00';
@@ -1674,6 +1678,7 @@
             e.preventDefault();
             if (!validarFormularioClase()) return;
             const rowIdx = document.getElementById('ev-rowIdx').value;
+            const ev = eventos.find(e => e.rowIdx === rowIdx);
             const grupo = document.getElementById('ev-grupo').value;
             const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
             
@@ -1690,9 +1695,7 @@
             // Calculamos las horas usando las horas de inicio y fin introducidas
             const [h1, m1] = horaInicio.split(':').map(Number);
             const [h2, m2] = horaFin.split(':').map(Number);
-            let horasCalc = (h2 + m2/60) - (h1 + m1/60);
-            if (horasCalc < 0) horasCalc += 24; // Por si pasa de medianoche
-            if (isNaN(horasCalc) || horasCalc <= 0) horasCalc = 1;
+            let horasCalc = 1;
             
             // Para la columna H siempre guardamos 1, pero calculamos el total con las horas reales
             const horasParaColumnaH = 1;
@@ -1705,7 +1708,7 @@
             const ubicacion = g ? g.ubicacion : '';
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
-            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, "", direccion, horaInicio, horaFin];
+            const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, ev.calEventId || "", direccion, horaInicio, horaFin];
 
             try {
                 if (rowIdx) {
