@@ -2295,32 +2295,36 @@
             const start = event.start;
             const end = event.end;
             
-            // Parsear fechas y horas
+            // Parsear fechas y horas usando las mismas funciones que syncData
             let startDate, endDate, horaInicio, horaFin;
             
             if (start.dateTime) {
                 // Evento con hora específica
                 startDate = new Date(start.dateTime);
                 endDate = new Date(end.dateTime);
-                horaInicio = formatTime(startDate);
-                horaFin = formatTime(endDate);
+                
+                // Usar la misma función que syncData para formatear horas
+                const horasInfo = extractHorasFromCalendarEvent(event);
+                horaInicio = horasInfo.horaInicio;
+                horaFin = horasInfo.horaFin;
             } else if (start.date) {
-                // Evento de día completo - usar valores por defecto
+                // Evento de día completo - usar valores por defecto como syncData
                 startDate = new Date(start.date);
                 endDate = new Date(end.date);
-                horaInicio = '10:00';
-                horaFin = '11:00';
+                horaInicio = '';
+                horaFin = '';
             } else {
                 return null; // Evento sin fecha válida
             }
             
-            // Formatear fecha para spreadsheet
+            // Formatear fecha para spreadsheet (mismo formato que syncData)
             const fFormat = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}/${startDate.getFullYear()}`;
             
-            // Extraer información del título (asumir formato: "Grupo - Clase")
+            // Extraer información del título usando la misma lógica que syncData
             let grupo = 'Sin grupo';
             let clase = title;
             let boloCole = '';
+            let sitio = '';
             
             if (title.includes(' - ')) {
                 const parts = title.split(' - ');
@@ -2328,16 +2332,31 @@
                 clase = parts[1].trim();
             }
             
-            // Buscar precio del grupo
+            // Buscar información del grupo como hace syncData
             const grupoInfo = grupos.find(g => g.nombre === grupo);
             const precio = grupoInfo ? grupoInfo.precio : 20;
             const ubicacion = grupoInfo ? grupoInfo.ubicacion : '';
+            const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
-            // Calcular horas y total
-            const horas = endDate.getHours() + endDate.getMinutes() / 60 - (startDate.getHours() + startDate.getMinutes() / 60);
-            const total = (horas * precio).toFixed(2).replace('.', ',') + ' ';
+            // Calcular horas y total (misma lógica que syncData)
+            let horasCalc = 1;
+            let totalStr = '';
             
-            // Crear fila para spreadsheet
+            if (horaInicio && horaFin) {
+                // Calcular horas reales si tenemos horas específicas
+                const [h1, m1] = horaInicio.split(':').map(Number);
+                const [h2, m2] = horaFin.split(':').map(Number);
+                const minutosInicio = h1 * 60 + m1;
+                const minutosFin = h2 * 60 + m2;
+                horasCalc = (minutosFin - minutosInicio) / 60;
+                
+                if (horasCalc <= 0) horasCalc = 1; // Mínimo 1 hora
+            }
+            
+            totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " ";
+            const horasParaColumnaH = 1; // Siempre 1 como en syncData
+            
+            // Crear fila para spreadsheet con el mismo orden que syncData
             const fila = [
                 '', // Columna A: pagado
                 '', // Columna B: realizado
@@ -2345,12 +2364,12 @@
                 clase, // Columna D: clase
                 precio, // Columna E: precio
                 fFormat, // Columna F: fecha
-                total, // Columna G: total
-                1, // Columna H: horas
+                totalStr, // Columna G: total
+                horasParaColumnaH, // Columna H: horas
                 grupo, // Columna I: grupo
                 ubicacion, // Columna J: ubicacion
                 event.id, // Columna K: calEventId
-                '', // Columna L: direccion
+                direccion, // Columna L: direccion
                 horaInicio, // Columna M: horaInicio
                 horaFin // Columna N: horaFin
             ];
