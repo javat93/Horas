@@ -2239,7 +2239,7 @@
                     orderBy: 'startTime'
                 });
                 
-                const events = calendarResponse.result.items || [];
+                const events = calendarResponse.items || [];
                 console.log(`Se encontraron ${events.length} eventos`);
                 
                 if (events.length === 0) {
