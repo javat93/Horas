@@ -2253,11 +2253,15 @@
                     orderBy: 'startTime'
                 });
                 
-                const events = calendarResponse.items || [];
-                console.log(`Se encontraron ${events.length} eventos`);
+                const allEvents = calendarResponse.items || [];
+                console.log(`Se encontraron ${allEvents.length} eventos totales`);
+                
+                // Filtrar solo eventos con colorId 5 (amarillo)
+                const events = allEvents.filter(ev => ev.colorId === '5');
+                console.log(`Se encontraron ${events.length} eventos con colorId 5 (amarillo)`);
                 
                 if (events.length === 0) {
-                    showErrorModal('Sin Eventos', 'No se encontraron eventos en Google Calendar para el mes seleccionado.', 'info');
+                    showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos con color amarillo (colorId 5) en el mes seleccionado.', 'info');
                     return;
                 }
                 
