@@ -494,6 +494,10 @@
                     <input type="number" id="gr-precio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                 </div>
                 <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio Bolo (€)</label>
+                    <input type="number" id="gr-precio-bolo" class="w-full rounded-2xl p-4 input-modern text-sm font-medium">
+                </div>
+                <div>
     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Ubicación</label>
     <input type="text" id="gr-ubicacion" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Ej: Centro Cívico, Parque, etc.">
 </div>
@@ -1041,14 +1045,15 @@
                 // 1. Grupos
                 const resColes = await proxyGoogleAPI('sheets', 'get', {
                     spreadsheetId: CONFIG.SPREADSHEET_ID, 
-                    range: 'Coles!A2:D'
+                    range: 'Coles!A2:E'
                 });
                 grupos = (resColes.values || []).map((row, index) => ({
                     rowIdx: index + 2,
                     nombre: row[0],
                     sitio: row[1] || '',
                     precio: row[2] || 20,
-                    ubicacion: row[3] || ''
+                    ubicacion: row[3] || '',
+                    precioBolo: row[4] || 20
                 }));
 
                 // 2. Sesiones (leemos hasta columna N para incluir calEventId, dirección y horas guardadas)
@@ -1553,12 +1558,13 @@
         }
 
         function openEditGrupoModal(rowIdx) {
-            const g = grupos.find(x => x.rowIdx === rowIdx);
+            const g = grupos.find(gr => gr.rowIdx === rowIdx);
             if (!g) return;
             document.getElementById('modal-grupo-title').innerText = "Editar Grupo";
             document.getElementById('gr-rowIdx').value = g.rowIdx;
             document.getElementById('gr-nombre').value = g.nombre;
             document.getElementById('gr-precio').value = g.precio;
+            document.getElementById('gr-precio-bolo').value = g.precioBolo || '';
             document.getElementById('gr-sitio').value = g.sitio;
             document.getElementById('gr-ubicacion').value = g.ubicacion;
             openModal('modal-grupo');
@@ -1914,15 +1920,16 @@
             const rowIdx = document.getElementById('gr-rowIdx').value;
             const nombre = document.getElementById('gr-nombre').value;
             const precio = document.getElementById('gr-precio').value;
+            const precioBolo = document.getElementById('gr-precio-bolo').value;
             const sitio = document.getElementById('gr-sitio').value;
             const ubicacion = document.getElementById('gr-ubicacion').value;
-            const fila = [nombre, sitio, precio, ubicacion];
+            const fila = [nombre, sitio, precio, ubicacion, precioBolo];
 
             try {
                 if (rowIdx) {
                     await proxyGoogleAPI('sheets', 'update', {
                         spreadsheetId: CONFIG.SPREADSHEET_ID, 
-                        range: `Coles!A${rowIdx}:D${rowIdx}`,
+                        range: `Coles!A${rowIdx}:E${rowIdx}`,
                         valueInputOption: 'USER_ENTERED'
                     }, {
                         values: [fila]
@@ -1930,7 +1937,7 @@
                 } else {
                     await proxyGoogleAPI('sheets', 'append', {
                         spreadsheetId: CONFIG.SPREADSHEET_ID, 
-                        range: 'Coles!A:D',
+                        range: 'Coles!A:E',
                         valueInputOption: 'USER_ENTERED', 
                         insertDataOption: 'INSERT_ROWS'
                     }, {
@@ -2224,14 +2231,15 @@
                 // 1. Cargar grupos desde el spreadsheet (igual que syncData)
                 const resColes = await proxyGoogleAPI('sheets', 'get', {
                     spreadsheetId: CONFIG.SPREADSHEET_ID, 
-                    range: 'Coles!A2:D'
+                    range: 'Coles!A2:E'
                 });
                 grupos = (resColes.values || []).map((row, index) => ({
                     rowIdx: index + 2,
                     nombre: row[0],
                     sitio: row[1] || '',
                     precio: row[2] || 20,
-                    ubicacion: row[3] || ''
+                    ubicacion: row[3] || '',
+                    precioBolo: row[4] || 20
                 }));
                 console.log(`Cargados ${grupos.length} grupos desde el spreadsheet`);
                 
@@ -2344,6 +2352,7 @@
             
             // Determinar si es un evento de Bolo
             const tieneBolo = title.toLowerCase().includes('bolo');
+
             
             if (title.includes(' - ')) {
                 const parts = title.split(' - ');
@@ -2354,6 +2363,8 @@
                 grupo = title.trim();
                 sitio = '';
             }
+
+            grupo = grupo.replace(/^Bolo\s+/, "");
             
             // Determinar si es Maracuya para la columna clase (como en el formulario)
             const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
@@ -2364,7 +2375,9 @@
             
             // Buscar información del grupo como hace el formulario
             const g = grupos.find(x => x.nombre === grupo);
-            const precio = g ? g.precio : 20; // Precio del grupo o 20 por defecto
+            
+            // Usar precio bolo si es evento de Bolo, sino precio normal
+            const precio = tieneBolo && g ? (g.precioBolo || g.precio) : (g ? g.precio : 20);
             const ubicacion = g ? g.ubicacion : ''; // Ubicación del grupo
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
