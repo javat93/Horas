@@ -2220,17 +2220,31 @@
         async function importFutureEvents(month, year) {
             console.log(`Importando eventos para ${month}/${year}`);
             
-            // Calcular rango de fechas para el mes seleccionado
-            const startDate = new Date(year, month - 1, 1);
-            const endDate = new Date(year, month, 0); // Último día del mes
-            
-            const timeMin = startDate.toISOString();
-            const timeMax = endDate.toISOString();
-            
-            console.log(`Buscando eventos desde ${timeMin} hasta ${timeMax}`);
-            
             try {
-                // Obtener eventos de Google Calendar
+                // 1. Cargar grupos desde el spreadsheet (igual que syncData)
+                const resColes = await proxyGoogleAPI('sheets', 'get', {
+                    spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                    range: 'Coles!A2:D'
+                });
+                grupos = (resColes.values || []).map((row, index) => ({
+                    rowIdx: index + 2,
+                    nombre: row[0],
+                    sitio: row[1] || '',
+                    precio: row[2] || 20,
+                    ubicacion: row[3] || ''
+                }));
+                console.log(`Cargados ${grupos.length} grupos desde el spreadsheet`);
+                
+                // Calcular rango de fechas para el mes seleccionado
+                const startDate = new Date(year, month - 1, 1);
+                const endDate = new Date(year, month, 0); // Último día del mes
+                
+                const timeMin = startDate.toISOString();
+                const timeMax = endDate.toISOString();
+                
+                console.log(`Buscando eventos desde ${timeMin} hasta ${timeMax}`);
+            
+            // Obtener eventos de Google Calendar
                 const calendarResponse = await proxyGoogleAPI('calendar', 'list', {
                     calendarId: 'primary',
                     timeMin: timeMin,
