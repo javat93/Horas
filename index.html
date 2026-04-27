@@ -1678,7 +1678,7 @@
             e.preventDefault();
             if (!validarFormularioClase()) return;
             const rowIdx = document.getElementById('ev-rowIdx').value;
-            const ev = eventos.find(e => e.rowIdx === rowIdx);
+            const ev = eventos.find(e => e.rowIdx == rowIdx);
             const grupo = document.getElementById('ev-grupo').value;
             const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
             
