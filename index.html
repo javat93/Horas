@@ -2320,27 +2320,35 @@
             // Formatear fecha para spreadsheet (mismo formato que syncData)
             const fFormat = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}/${startDate.getFullYear()}`;
             
-            // Extraer información del título usando la misma lógica que syncData
+            // Extraer información del título como lo hace el formulario
             let grupo = 'Sin grupo';
-            let clase = title;
-            let boloCole = '';
             let sitio = '';
             
             if (title.includes(' - ')) {
                 const parts = title.split(' - ');
                 grupo = parts[0].trim();
-                clase = parts[1].trim();
+                sitio = parts.slice(1).join(' - ').trim(); // El resto es el sitio
+            } else {
+                // Si no tiene formato "Grupo - Sitio", asumimos que todo es el grupo
+                grupo = title.trim();
+                sitio = '';
             }
             
-            // Buscar información del grupo como hace syncData
-            const grupoInfo = grupos.find(g => g.nombre === grupo);
-            const precio = grupoInfo ? grupoInfo.precio : 20;
-            const ubicacion = grupoInfo ? grupoInfo.ubicacion : '';
+            // Determinar si es Maracuya para la columna clase (como en el formulario)
+            const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
+            
+            // Mantenemos string vacio para la columna Bolo que hemos quitado para no romper Google Sheets
+            const boloCole = ""; 
+            const clase = isMaracuya ? "" : "X"; // Columna D: "" para Maracuya, "X" para otros
+            
+            // Buscar información del grupo como hace el formulario
+            const g = grupos.find(x => x.nombre === grupo);
+            const precio = g ? g.precio : 20; // Precio del grupo o 20 por defecto
+            const ubicacion = g ? g.ubicacion : ''; // Ubicación del grupo
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
-            // Calcular horas y total (misma lógica que syncData)
+            // Calcular horas y total (misma lógica que el formulario)
             let horasCalc = 1;
-            let totalStr = '';
             
             if (horaInicio && horaFin) {
                 // Calcular horas reales si tenemos horas específicas
@@ -2353,23 +2361,24 @@
                 if (horasCalc <= 0) horasCalc = 1; // Mínimo 1 hora
             }
             
-            totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " ";
-            const horasParaColumnaH = 1; // Siempre 1 como en syncData
+            // Para la columna H siempre guardamos 1, pero calculamos el total con las horas reales
+            const horasParaColumnaH = 1;
+            const totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " ";
             
-            // Crear fila para spreadsheet con el mismo orden que syncData
+            // Crear fila para spreadsheet con el mismo orden que el formulario
             const fila = [
                 '', // Columna A: pagado
                 '', // Columna B: realizado
                 boloCole, // Columna C: boloCole
-                clase, // Columna D: clase
-                precio, // Columna E: precio
+                clase, // Columna D: clase ("" para Maracuya, "X" para otros)
+                precio, // Columna E: precio hora
                 fFormat, // Columna F: fecha
                 totalStr, // Columna G: total
-                horasParaColumnaH, // Columna H: horas
+                horasParaColumnaH, // Columna H: horas (siempre 1)
                 grupo, // Columna I: grupo
                 ubicacion, // Columna J: ubicacion
                 event.id, // Columna K: calEventId
-                direccion, // Columna L: direccion
+                direccion, // Columna L: direccion (sitio)
                 horaInicio, // Columna M: horaInicio
                 horaFin // Columna N: horaFin
             ];
