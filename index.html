@@ -1241,7 +1241,18 @@
                 renderAll();
                 document.getElementById('stats-info').innerText = `${eventos.length} clases sincronizadas.`;
                 
-                // 4. Actualizar automáticamente las clases realizadas (solo en la carga inicial)
+                // 4. Limpiar eventos huérfanos (solo si resolverCal es true)
+                if (resolverCal) {
+                    const cleanResult = await cleanOrphanedEvents();
+                    if (cleanResult.deleted > 0) {
+                        console.log(cleanResult.message);
+                        // Recargar datos después de limpiar
+                        await syncData(false, false); // Llamar recursivamente sin limpiar ni actualizar realizados
+                        return;
+                    }
+                }
+                
+                // 5. Actualizar automáticamente las clases realizadas (solo en la carga inicial)
                 if (actualizarRealizadosFlag) {
                     await actualizarRealizados();
                 }
@@ -2440,6 +2451,14 @@
                 
                 showErrorModal('Importación Completada', `Se importaron ${processedCount} eventos correctamente.`, 'success');
                 
+                // Limpiar eventos huérfanos del mes
+                const cleanResult = await cleanOrphanedEvents(month, year);
+                if (cleanResult.deleted > 0) {
+                    console.log(cleanResult.message);
+                    // Recargar datos para reflejar los cambios
+                    await syncData(false, false);
+                }
+                
             } catch (error) {
                 console.error('Error en importFutureEvents:', error);
                 throw error;
@@ -2552,6 +2571,106 @@
             ];
             
             return fila;
+        }
+
+        // Función para limpiar eventos huérfanos del spreadsheet
+        async function cleanOrphanedEvents(month = null, year = null) {
+            try {
+                showLoading('Verificando eventos huérfanos...');
+                
+                // 1. Obtener todos los eventos del spreadsheet con calEventId
+                const existingEvents = await proxyGoogleAPI('sheets', 'get', {
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: 'Detalle!A2:K' // Columna K contiene calEventId
+                });
+                
+                // 2. Obtener eventos del Calendar
+                let calendarEvents;
+                if (month && year) {
+                    // Importación de un mes específico
+                    const startDate = new Date(year, month - 1, 1);
+                    const endDate = new Date(year, month, 0);
+                    const timeMin = startDate.toISOString();
+                    const timeMax = endDate.toISOString();
+                    
+                    const calendarResponse = await proxyGoogleAPI('calendar', 'list', {
+                        calendarId: 'primary',
+                        timeMin: timeMin,
+                        timeMax: timeMax,
+                        singleEvents: true,
+                        orderBy: 'startTime'
+                    });
+                    calendarEvents = calendarResponse.items || [];
+                } else {
+                    // Sincronización completa - obtener eventos de los últimos 3 meses
+                    const now = new Date();
+                    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+                    const oneMonthAhead = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    
+                    const calendarResponse = await proxyGoogleAPI('calendar', 'list', {
+                        calendarId: 'primary',
+                        timeMin: threeMonthsAgo.toISOString(),
+                        timeMax: oneMonthAhead.toISOString(),
+                        singleEvents: true,
+                        orderBy: 'startTime'
+                    });
+                    calendarEvents = calendarResponse.items || [];
+                }
+                
+                // 3. Crear set de IDs de eventos del Calendar
+                const calendarEventIds = new Set();
+                calendarEvents.forEach(event => {
+                    if (event.id) {
+                        calendarEventIds.add(event.id);
+                    }
+                });
+                
+                // 4. Identificar eventos huérfanos (están en spreadsheet pero no en Calendar)
+                const orphanedRows = [];
+                (existingEvents.values || []).forEach((row, index) => {
+                    const rowIdx = index + 2; // +2 porque empieza en A2
+                    const calEventId = row[10]; // Columna K
+                    
+                    if (calEventId && !calendarEventIds.has(calEventId)) {
+                        orphanedRows.push(rowIdx);
+                    }
+                });
+                
+                console.log(`Se encontraron ${orphanedRows.length} eventos huérfanos para eliminar`);
+                
+                if (orphanedRows.length === 0) {
+                    hideLoading();
+                    return { deleted: 0, message: 'No hay eventos huérfanos para eliminar.' };
+                }
+                
+                // 5. Confirmar eliminación
+                const confirmMessage = `Se encontraron ${orphanedRows.length} eventos en el spreadsheet que ya no existen en Google Calendar. ¿Deseas eliminarlos?`;
+                if (!confirm(confirmMessage)) {
+                    hideLoading();
+                    return { deleted: 0, message: 'Eliminación cancelada por el usuario.' };
+                }
+                
+                // 6. Eliminar eventos huérfanos (borrar filas)
+                // Procesar en orden inverso para no afectar los índices
+                for (let i = orphanedRows.length - 1; i >= 0; i--) {
+                    const rowIdx = orphanedRows[i];
+                    await proxyGoogleAPI('sheets', 'delete', {
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
+                        range: `Detalle!A${rowIdx}:N${rowIdx}`
+                    });
+                }
+                
+                hideLoading();
+                return { 
+                    deleted: orphanedRows.length, 
+                    message: `Se eliminaron ${orphanedRows.length} eventos huérfanos.` 
+                };
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Error limpiando eventos huérfanos:', error);
+                throw error;
+            }
         }
 
         // Función auxiliar para formatear tiempo
