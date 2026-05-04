@@ -1812,15 +1812,29 @@
         }
 
         function toggleBolo() {
+            console.log('toggleBolo() llamado');
             const isBolo = document.getElementById('ev-bolo').checked;
             const precioInput = document.getElementById('ev-precio');
             const grupo = document.getElementById('ev-grupo').value;
             const g = grupos.find(x => x.nombre === grupo);
             
+            console.log('isBolo:', isBolo);
+            console.log('grupo:', grupo);
+            console.log('g encontrado:', g);
+            console.log('precioInput:', precioInput);
+            
             if (isBolo && g) {
-                precioInput.value = g.precioBolo || 50;
+                const precioBolo = g.precioBolo || 50;
+                console.log('Aplicando precio de bolo:', precioBolo);
+                precioInput.value = precioBolo;
+                console.log('Nuevo valor del input:', precioInput.value);
             } else if (g) {
-                precioInput.value = g.precio || 20;
+                const precioNormal = g.precio || 20;
+                console.log('Aplicando precio normal:', precioNormal);
+                precioInput.value = precioNormal;
+                console.log('Nuevo valor del input:', precioInput.value);
+            } else {
+                console.log('No se encontró grupo o no es bolo');
             }
         }
 
