@@ -425,14 +425,7 @@
                     <label for="ev-bolo" class="text-sm font-bold text-amber-800">Es Bolo (Precio especial)</label>
                 </div>
                 
-                <div id="bolo-info" class="hidden p-4 bg-amber-50 rounded-2xl border border-amber-100">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-bold text-amber-800">Precio de Bolo:</span>
-                        <span id="bolo-precio-display" class="text-lg font-bold text-amber-900">€50</span>
-                    </div>
-                    <p class="text-xs text-amber-600 mt-1">Se usará el precio de bolo configurado para este grupo</p>
-                </div>
-                
+                                
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sitio / Ubicación</label>
                     <div class="relative">
@@ -1815,28 +1808,20 @@
             if (g && !document.getElementById('ev-rowIdx').value) {
                 document.getElementById('ev-precio').value = g.precio;
                 document.getElementById('ev-sitio').value = g.sitio;
-                
-                // Actualizar precio de bolo display
-                document.getElementById('bolo-precio-display').textContent = `€${g.precioBolo || 50}`;
             }
         }
 
         function toggleBolo() {
             const isBolo = document.getElementById('ev-bolo').checked;
-            const boloInfo = document.getElementById('bolo-info');
             const precioInput = document.getElementById('ev-precio');
             const grupo = document.getElementById('ev-grupo').value;
             const g = grupos.find(x => x.nombre === grupo);
             
             if (isBolo) {
-                boloInfo.classList.remove('hidden');
-                
                 if (g && !document.getElementById('ev-rowIdx').value) {
                     precioInput.value = g.precioBolo || 50;
                 }
             } else {
-                boloInfo.classList.add('hidden');
-                
                 if (g && !document.getElementById('ev-rowIdx').value) {
                     precioInput.value = g.precio || 20;
                 }
