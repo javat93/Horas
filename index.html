@@ -1265,8 +1265,8 @@
                             if (event.calEventId && event.fechaStr && event.grupo) {
                                 existingEventIds.add(event.calEventId);
                                 
-                                // Crear clave única basada en fecha + grupo para detectar duplicados reales
-                                const uniqueKey = `${event.fechaStr}_${event.grupo}`;
+                                // Crear clave única basada en fecha + grupo + horas para detectar duplicados reales
+                                const uniqueKey = `${event.fechaStr}_${event.grupo}_${event.horaInicio || ''}_${event.horaFin || ''}`;
                                 existingEventKeys.add(uniqueKey);
                             }
                         });
@@ -1292,12 +1292,14 @@
                                 if (tempRow) {
                                     const fecha = tempRow[5]; // Columna F: fecha
                                     const grupo = tempRow[8]; // Columna I: grupo
+                                    const horaInicio = tempRow[12]; // Columna M: horaInicio
+                                    const horaFin = tempRow[13]; // Columna N: horaFin
                                     
-                                    // Verificar duplicado por fecha+grupo
+                                    // Verificar duplicado por fecha+grupo+horas
                                     if (fecha && grupo) {
-                                        const uniqueKey = `${fecha}_${grupo}`;
+                                        const uniqueKey = `${fecha}_${grupo}_${horaInicio || ''}_${horaFin || ''}`;
                                         if (existingEventKeys.has(uniqueKey)) {
-                                            console.log(`Evento duplicado por fecha+grupo: ${uniqueKey}, omitiendo`);
+                                            console.log(`Evento duplicado por fecha+grupo+horas: ${uniqueKey}, omitiendo`);
                                             skippedCount++;
                                             continue;
                                         }
@@ -2516,11 +2518,14 @@
                     if (row[10] && row[5]) { // Columna K (calEventId) y Columna F (fecha)
                         existingEventIds.add(row[10]);
                         
-                        // Crear clave única basada en fecha + grupo para detectar duplicados reales
+                        // Crear clave única basada en fecha + grupo + horas para detectar duplicados reales
                         const fecha = row[5]; // Columna F: fecha
                         const grupo = row[8]; // Columna I: grupo
+                        const horaInicio = row[12]; // Columna M: horaInicio
+                        const horaFin = row[13]; // Columna N: horaFin
                         if (fecha && grupo) {
-                            const uniqueKey = `${fecha}_${grupo}`;
+                            // Incluir horas para permitir múltiples eventos del mismo grupo en el mismo día
+                            const uniqueKey = `${fecha}_${grupo}_${horaInicio || ''}_${horaFin || ''}`;
                             existingEventKeys.add(uniqueKey);
                         }
                     }
@@ -2547,12 +2552,14 @@
                         if (tempRow) {
                             const fecha = tempRow[5]; // Columna F: fecha
                             const grupo = tempRow[8]; // Columna I: grupo
+                            const horaInicio = tempRow[12]; // Columna M: horaInicio
+                            const horaFin = tempRow[13]; // Columna N: horaFin
                             
-                            // Verificar duplicado por fecha+grupo
+                            // Verificar duplicado por fecha+grupo+horas
                             if (fecha && grupo) {
-                                const uniqueKey = `${fecha}_${grupo}`;
+                                const uniqueKey = `${fecha}_${grupo}_${horaInicio || ''}_${horaFin || ''}`;
                                 if (existingEventKeys.has(uniqueKey)) {
-                                    console.log(`Evento duplicado por fecha+grupo: ${uniqueKey}, omitiendo`);
+                                    console.log(`Evento duplicado por fecha+grupo+horas: ${uniqueKey}, omitiendo`);
                                     skippedCount++;
                                     continue;
                                 }
