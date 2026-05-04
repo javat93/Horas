@@ -2392,15 +2392,25 @@
                     range: 'Detalle!A2:K' // Solo necesitamos hasta columna K para calEventId
                 });
                 
-                // Crear set de calEventId existentes para búsqueda rápida
+                // Crear set de calEventId existentes para búsqueda rápida (ignorando filas vacías)
                 const existingEventIds = new Set();
+                const existingEventKeys = new Set(); // Para verificación adicional
                 (existingEvents.values || []).forEach(row => {
-                    if (row[10]) { // Columna K es calEventId
+                    // Verificar que la fila no esté completamente vacía
+                    if (row[10] && row[5]) { // Columna K (calEventId) y Columna F (fecha)
                         existingEventIds.add(row[10]);
+                        
+                        // Crear clave única basada en fecha + grupo para detectar duplicados reales
+                        const fecha = row[5]; // Columna F: fecha
+                        const grupo = row[8]; // Columna I: grupo
+                        if (fecha && grupo) {
+                            const uniqueKey = `${fecha}_${grupo}`;
+                            existingEventKeys.add(uniqueKey);
+                        }
                     }
                 });
                 
-                console.log(`Se encontraron ${existingEventIds.size} eventos existentes en el spreadsheet`);
+                console.log(`Se encontraron ${existingEventIds.size} eventos válidos en el spreadsheet`);
                 
                 // Procesar cada evento y añadirlo al spreadsheet solo si no existe
                 const rowsToAdd = [];
@@ -2409,16 +2419,30 @@
                 
                 for (const event of events) {
                     try {
-                        // Verificar si el evento ya existe
+                        // Verificar si el evento ya existe por calEventId
                         if (existingEventIds.has(event.id)) {
                             console.log(`Evento ${event.id} ya existe, omitiendo`);
                             skippedCount++;
                             continue;
                         }
                         
-                        const row = await processCalendarEvent(event);
-                        if (row) {
-                            rowsToAdd.push(row);
+                        // Verificación adicional: procesar evento para obtener fecha y grupo
+                        const tempRow = await processCalendarEvent(event);
+                        if (tempRow) {
+                            const fecha = tempRow[5]; // Columna F: fecha
+                            const grupo = tempRow[8]; // Columna I: grupo
+                            
+                            // Verificar duplicado por fecha+grupo
+                            if (fecha && grupo) {
+                                const uniqueKey = `${fecha}_${grupo}`;
+                                if (existingEventKeys.has(uniqueKey)) {
+                                    console.log(`Evento duplicado por fecha+grupo: ${uniqueKey}, omitiendo`);
+                                    skippedCount++;
+                                    continue;
+                                }
+                            }
+                            
+                            rowsToAdd.push(tempRow);
                             processedCount++;
                         }
                     } catch (err) {
