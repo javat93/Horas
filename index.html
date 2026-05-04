@@ -1236,6 +1236,133 @@
                     }
                 }
 
+                // 3. Importar eventos nuevos desde Calendar (evitando duplicados)
+                if (resolverCal) {
+                    const now = new Date();
+                    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+                    const oneMonthAhead = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    
+                    // Obtener eventos del Calendar
+                    const calendarResponse = await proxyGoogleAPI('calendar', 'list', {
+                        calendarId: 'primary',
+                        timeMin: threeMonthsAgo.toISOString(),
+                        timeMax: oneMonthAhead.toISOString(),
+                        singleEvents: true,
+                        orderBy: 'startTime'
+                    });
+                    
+                    const allEvents = calendarResponse.items || [];
+                    
+                    // Filtrar solo eventos con colorId 5 (amarillo)
+                    const events = allEvents.filter(ev => ev.colorId === '5');
+                    console.log(`Se encontraron ${events.length} eventos con colorId 5 (amarillo) en Calendar`);
+                    
+                    if (events.length > 0) {
+                        // Crear set de calEventId existentes para búsqueda rápida
+                        const existingEventIds = new Set();
+                        const existingEventKeys = new Set(); // Para verificación adicional
+                        eventosBase.forEach(event => {
+                            if (event.calEventId && event.fechaStr && event.grupo) {
+                                existingEventIds.add(event.calEventId);
+                                
+                                // Crear clave única basada en fecha + grupo para detectar duplicados reales
+                                const uniqueKey = `${event.fechaStr}_${event.grupo}`;
+                                existingEventKeys.add(uniqueKey);
+                            }
+                        });
+                        
+                        console.log(`Se encontraron ${existingEventIds.size} eventos existentes en el spreadsheet`);
+                        
+                        // Procesar cada evento y añadirlo si no existe
+                        const rowsToAdd = [];
+                        let processedCount = 0;
+                        let skippedCount = 0;
+                        
+                        for (const event of events) {
+                            try {
+                                // Verificar si el evento ya existe por calEventId
+                                if (existingEventIds.has(event.id)) {
+                                    console.log(`Evento ${event.id} ya existe, omitiendo`);
+                                    skippedCount++;
+                                    continue;
+                                }
+                                
+                                // Verificación adicional: procesar evento para obtener fecha y grupo
+                                const tempRow = await processCalendarEvent(event);
+                                if (tempRow) {
+                                    const fecha = tempRow[5]; // Columna F: fecha
+                                    const grupo = tempRow[8]; // Columna I: grupo
+                                    
+                                    // Verificar duplicado por fecha+grupo
+                                    if (fecha && grupo) {
+                                        const uniqueKey = `${fecha}_${grupo}`;
+                                        if (existingEventKeys.has(uniqueKey)) {
+                                            console.log(`Evento duplicado por fecha+grupo: ${uniqueKey}, omitiendo`);
+                                            skippedCount++;
+                                            continue;
+                                        }
+                                    }
+                                    
+                                    rowsToAdd.push(tempRow);
+                                    processedCount++;
+                                }
+                            } catch (err) {
+                                console.warn(`Error procesando evento ${event.id}:`, err);
+                            }
+                        }
+                        
+                        console.log(`Procesados ${processedCount} eventos nuevos, ${skippedCount} omitidos por duplicados`);
+                        
+                        // Añadir nuevos eventos al spreadsheet
+                        if (rowsToAdd.length > 0) {
+                            console.log(`Añadiendo ${rowsToAdd.length} eventos nuevos al spreadsheet`);
+                            await proxyGoogleAPI('sheets', 'append', {
+                                spreadsheetId: CONFIG.SPREADSHEET_ID,
+                                range: 'Detalle!A:N',
+                                valueInputOption: 'USER_ENTERED',
+                                insertDataOption: 'INSERT_ROWS'
+                            }, {
+                                values: rowsToAdd
+                            });
+                            
+                            // Recargar eventos base para incluir los nuevos
+                            const resDetalleActualizado = await proxyGoogleAPI('sheets', 'get', {
+                                spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                                range: 'Detalle!A2:N'
+                            });
+                            
+                            const rawRowsActualizado = resDetalleActualizado.values || [];
+                            eventosBase = rawRowsActualizado.map((row, index) => {
+                                const fParts = (row[5] || "").split("/");
+                                const fObj = fParts.length === 3 ? new Date(fParts[2], fParts[1]-1, fParts[0]) : null;
+                                let realizado = row[1] === 'X';
+                                if (fObj && fObj < hoy && !realizado) realizado = true;
+
+                                return {
+                                    rowIdx: index + 2,
+                                    pagado: row[0] === 'X',
+                                    realizado: realizado,
+                                    boloCole: row[2] || '',
+                                    clase: row[3] || '',
+                                    precioHora: parseFloat(row[4]) || 0,
+                                    fechaStr: row[5],
+                                    fechaObj: fObj,
+                                    total: parseFloat((row[6] || "0").replace("","").replace(",",".").trim()) || 0,
+                                    horas: parseFloat(row[7]) || 0,
+                                    grupo: row[8],
+                                    sitio: row[9] || '',
+                                    calEventId: row[10] || '',
+                                    direccion: row[11] || '',
+                                    horaInicio: row[12] || '',
+                                    horaFin: row[13] || ''
+                                };
+                            });
+                            
+                            console.log(`Se añadieron ${processedCount} eventos nuevos al spreadsheet`);
+                        }
+                    }
+                }
+
                 eventos = eventosBase.sort((a,b) => (b.fechaObj - a.fechaObj));
 
                 renderAll();
