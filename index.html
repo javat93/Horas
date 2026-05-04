@@ -1817,14 +1817,10 @@
             const grupo = document.getElementById('ev-grupo').value;
             const g = grupos.find(x => x.nombre === grupo);
             
-            if (isBolo) {
-                if (g && !document.getElementById('ev-rowIdx').value) {
-                    precioInput.value = g.precioBolo || 50;
-                }
-            } else {
-                if (g && !document.getElementById('ev-rowIdx').value) {
-                    precioInput.value = g.precio || 20;
-                }
+            if (isBolo && g) {
+                precioInput.value = g.precioBolo || 50;
+            } else if (g) {
+                precioInput.value = g.precio || 20;
             }
         }
 
