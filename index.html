@@ -417,12 +417,7 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio/Hora (€)</label>
-                    <div class="relative">
-                        <input type="number" id="ev-precio" value="20" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
-                        <div id="precio-bolo-indicator" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-amber-500">
-                            <i data-lucide="lock" class="w-4 h-4"></i>
-                        </div>
-                    </div>
+                    <input type="number" id="ev-precio" value="20" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                 </div>
                 
                 <div class="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
@@ -1830,24 +1825,17 @@
             const isBolo = document.getElementById('ev-bolo').checked;
             const boloInfo = document.getElementById('bolo-info');
             const precioInput = document.getElementById('ev-precio');
-            const precioIndicator = document.getElementById('precio-bolo-indicator');
             const grupo = document.getElementById('ev-grupo').value;
             const g = grupos.find(x => x.nombre === grupo);
             
             if (isBolo) {
                 boloInfo.classList.remove('hidden');
-                precioIndicator.classList.remove('hidden');
-                precioInput.disabled = true;
-                precioInput.classList.add('bg-amber-50', 'border-amber-200', 'cursor-not-allowed');
                 
                 if (g && !document.getElementById('ev-rowIdx').value) {
                     precioInput.value = g.precioBolo || 50;
                 }
             } else {
                 boloInfo.classList.add('hidden');
-                precioIndicator.classList.add('hidden');
-                precioInput.disabled = false;
-                precioInput.classList.remove('bg-amber-50', 'border-amber-200', 'cursor-not-allowed');
                 
                 if (g && !document.getElementById('ev-rowIdx').value) {
                     precioInput.value = g.precio || 20;
