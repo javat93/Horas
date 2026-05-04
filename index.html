@@ -1806,7 +1806,13 @@
             }
 
             if (g && !document.getElementById('ev-rowIdx').value) {
-                document.getElementById('ev-precio').value = g.precio;
+                // Verificar si el checkbox de Bolo está marcado para aplicar precio correcto
+                const isBolo = document.getElementById('ev-bolo').checked;
+                if (isBolo) {
+                    document.getElementById('ev-precio').value = g.precioBolo || 50;
+                } else {
+                    document.getElementById('ev-precio').value = g.precio;
+                }
                 document.getElementById('ev-sitio').value = g.sitio;
             }
         }
