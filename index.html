@@ -655,6 +655,16 @@
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-xs mx-4">
+            <div class="relative">
+                <div class="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+            <p id="loading-message" class="text-slate-700 font-medium text-center">Cargando...</p>
+        </div>
+    </div>
+
     <script src="app-version.js"></script>
     <script>
 
@@ -774,14 +784,19 @@
         }
 
         async function handleAuthClick() {
+            showLoading('Conectando con Google...');
             tokenClient.callback = async (resp) => {
-                if (resp.error !== undefined) throw (resp);
-                document.getElementById('auth-text').innerText = "Conectado";
-                document.getElementById('sync-btn').classList.remove('hidden');
-                document.getElementById('add-future-events-btn').classList.remove('hidden');
-                document.getElementById('auth-btn').classList.add('hidden');
-                localStorage.setItem('g_token', resp.access_token);
-                await syncData();
+                try {
+                    if (resp.error !== undefined) throw (resp);
+                    document.getElementById('auth-text').innerText = "Conectado";
+                    document.getElementById('sync-btn').classList.remove('hidden');
+                    document.getElementById('add-future-events-btn').classList.remove('hidden');
+                    document.getElementById('auth-btn').classList.add('hidden');
+                    localStorage.setItem('g_token', resp.access_token);
+                    await syncData();
+                } finally {
+                    hideLoading();
+                }
             };
             tokenClient.requestAccessToken({prompt: gapi.client.getToken() === null ? 'consent' : ''});
         }
@@ -1086,6 +1101,7 @@
         }
 
         async function syncData(resolverCal = false, actualizarRealizadosFlag = true) {
+            showLoading('Sincronizando datos...');
             try {
                 // 1. Grupos
                 const resColes = await proxyGoogleAPI('sheets', 'get', {
@@ -1248,6 +1264,8 @@
             // Lanzar error para que checkAuth() también sepa que falló
             throw err;
         }
+    } finally {
+        hideLoading();
     }
         }
 
@@ -1713,6 +1731,25 @@
 
         function closeErrorModal() {
             document.getElementById('modal-error').classList.add('hidden');
+        }
+
+        // Funciones para indicador de carga global
+        function showLoading(message = 'Cargando...') {
+            const overlay = document.getElementById('loading-overlay');
+            const messageEl = document.getElementById('loading-message');
+            messageEl.textContent = message;
+            overlay.classList.remove('hidden');
+            
+            // Prevenir scroll del body mientras carga
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.add('hidden');
+            
+            // Restaurar scroll del body
+            document.body.style.overflow = '';
         }
 
         // Función de validación para el formulario de clase
@@ -2290,6 +2327,7 @@
         // Función principal para importar eventos futuros de Google Calendar
         async function importFutureEvents(month, year) {
             console.log(`Importando eventos para ${month}/${year}`);
+            showLoading('Importando eventos...');
             
             try {
                 // 1. Cargar grupos desde el spreadsheet (igual que syncData)
@@ -2375,6 +2413,8 @@
             } catch (error) {
                 console.error('Error en importFutureEvents:', error);
                 throw error;
+            } finally {
+                hideLoading();
             }
         }
 
