@@ -803,6 +803,16 @@
                 }
             }
         }
+
+        // Función para asegurar que el botón de auth sea visible al cargar
+        function ensureAuthButtonVisible() {
+            const token = localStorage.getItem('g_token');
+            if (!token) {
+                // Solo mostrar el botón si no hay token
+                document.getElementById('auth-btn').classList.remove('hidden');
+                document.getElementById('auth-text').innerText = "Conectar Google";
+            }
+        }
 		// FUNCIÓN CLAVE: Proxy para llamadas a Google APIs en producción
         async function proxyGoogleAPI(apiType, method, params = {}, body = null) {
             if (CONFIG.ENVIRONMENT === 'production' && CONFIG.USE_PROXY) {
@@ -2437,6 +2447,7 @@
             loadGoogleMaps();
             gapiLoaded();
             gisLoaded();
+            ensureAuthButtonVisible();
             lucide.createIcons();
         };
     </script>
