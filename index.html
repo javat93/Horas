@@ -1229,7 +1229,26 @@
                 if (actualizarRealizadosFlag) {
                     await actualizarRealizados();
                 }
-            } catch (err) { console.error("Error sync:", err); }
+            } catch (err) { 
+        console.error("Error sync:", err);
+        
+        // Detectar error de autenticación y limpiar token inválido
+        if (err.message && err.message.includes('401') || 
+            (err.message && err.message.includes('authentication credentials'))) {
+            console.error('Token inválido detectado en syncData, limpiando localStorage');
+            localStorage.removeItem('g_token');
+            gapi.client.setToken(null);
+            
+            // Mostrar botón de login
+            document.getElementById('sync-btn').classList.add('hidden');
+            document.getElementById('add-future-events-btn').classList.add('hidden');
+            document.getElementById('auth-btn').classList.remove('hidden');
+            document.getElementById('auth-text').innerText = "Conectar Google";
+            
+            // Lanzar error para que checkAuth() también sepa que falló
+            throw err;
+        }
+    }
         }
 
         // Función para actualizar automáticamente las clases realizadas en el spreadsheet
