@@ -795,7 +795,18 @@
                     document.getElementById('add-future-events-btn').classList.remove('hidden');
                     document.getElementById('auth-btn').classList.add('hidden');
                     document.getElementById('auth-text').innerText = "Conectado";
-                    syncData();
+                    
+                    // Intentar sincronizar para validar el token
+                    syncData().catch(err => {
+                        console.error('Token inválido, limpiando localStorage:', err);
+                        // Limpiar token inválido y mostrar botón de login
+                        localStorage.removeItem('g_token');
+                        gapi.client.setToken(null);
+                        document.getElementById('sync-btn').classList.add('hidden');
+                        document.getElementById('add-future-events-btn').classList.add('hidden');
+                        document.getElementById('auth-btn').classList.remove('hidden');
+                        document.getElementById('auth-text').innerText = "Conectar Google";
+                    });
                 } else {
                     // Mostrar botón de autenticación solo cuando no hay token
                     document.getElementById('auth-btn').classList.remove('hidden');
