@@ -420,6 +420,19 @@
                     <input type="number" id="ev-precio" value="20" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                 </div>
                 
+                <div class="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                    <input type="checkbox" id="ev-bolo" onchange="toggleBolo()" class="w-5 h-5 accent-amber-600 rounded">
+                    <label for="ev-bolo" class="text-sm font-bold text-amber-800">Es Bolo (Precio especial)</label>
+                </div>
+                
+                <div id="bolo-info" class="hidden p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-amber-800">Precio de Bolo:</span>
+                        <span id="bolo-precio-display" class="text-lg font-bold text-amber-900">€50</span>
+                    </div>
+                    <p class="text-xs text-amber-600 mt-1">Se usará el precio de bolo configurado para este grupo</p>
+                </div>
+                
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sitio / Ubicación</label>
                     <div class="relative">
@@ -1754,10 +1767,17 @@
             document.getElementById('ev-precio').value = ev.precioHora;
             document.getElementById('ev-sitio').value = ev.sitio;
             
+            // Cargar estado del checkbox de Bolo
+            const isBolo = ev.boloCole === 'X';
+            document.getElementById('ev-bolo').checked = isBolo;
+            
             // Ocultamos opciones de calendario al editar para simplificar el flujo (Google no permite actualizar fácilmente sin eventId)
             document.getElementById('sync-calendar-wrapper').classList.add('hidden'); 
             
             autoFillGrupo(ev.grupo);
+            
+            // Actualizar estado del checkbox de Bolo después de cargar grupo
+            toggleBolo();
             openModal('modal-evento');
         }
 
@@ -1794,6 +1814,29 @@
             if (g && !document.getElementById('ev-rowIdx').value) {
                 document.getElementById('ev-precio').value = g.precio;
                 document.getElementById('ev-sitio').value = g.sitio;
+                
+                // Actualizar precio de bolo display
+                document.getElementById('bolo-precio-display').textContent = `€${g.precioBolo || 50}`;
+            }
+        }
+
+        function toggleBolo() {
+            const isBolo = document.getElementById('ev-bolo').checked;
+            const boloInfo = document.getElementById('bolo-info');
+            const precioInput = document.getElementById('ev-precio');
+            const grupo = document.getElementById('ev-grupo').value;
+            const g = grupos.find(x => x.nombre === grupo);
+            
+            if (isBolo) {
+                boloInfo.classList.remove('hidden');
+                if (g && !document.getElementById('ev-rowIdx').value) {
+                    precioInput.value = g.precioBolo || 50;
+                }
+            } else {
+                boloInfo.classList.add('hidden');
+                if (g && !document.getElementById('ev-rowIdx').value) {
+                    precioInput.value = g.precio || 20;
+                }
             }
         }
 
@@ -1968,6 +2011,7 @@
             const ev = eventos.find(e => e.rowIdx == rowIdx);
             const grupo = document.getElementById('ev-grupo').value;
             const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
+            const isBolo = document.getElementById('ev-bolo').checked;
             
             const fecha = document.getElementById('ev-fecha').value;
             const horaInicio = document.getElementById('ev-hora-inicio').value;
@@ -1975,8 +2019,8 @@
             const precio = parseFloat(document.getElementById('ev-precio').value);
             const sitio = document.getElementById('ev-sitio').value;
             
-            // Mantenemos string vacio para la columna Bolo que hemos quitado para no romper Google Sheets
-            const boloCole = ""; 
+            // Columna Bolo: "X" si es Bolo, vacío si no
+            const boloCole = isBolo ? "X" : ""; 
             const clase = isMaracuya ? "" : "X";
 
             // Calculamos las horas usando las horas de inicio y fin introducidas
@@ -2062,12 +2106,12 @@
                     const endDT = `${fecha}T${horaFin}:00`;
 
                     let eventResource = { 
-                        summary: grupo, 
+                        summary: isBolo ? `Bolo ${grupo}` : grupo, 
                         location: sitio, 
                         start: { dateTime: startDT, timeZone: tz }, 
                         end: { dateTime: endDT, timeZone: tz },
                         colorId: '5',
-                        description: `Sesión de ${horasCalc.toFixed(2)}h generada desde PercuManager.`,
+                        description: `Sesión de ${horasCalc.toFixed(2)}h${isBolo ? ' (Bolo)' : ''} generada desde PercuManager.`,
                         reminders: {
                             useDefault: false,
                             overrides: []
