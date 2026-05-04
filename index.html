@@ -2670,19 +2670,52 @@
                 // 5. Eliminar eventos huérfanos automáticamente (sin confirmación)
                 console.log(`Eliminando ${orphanedRows.length} eventos huérfanos...`);
                 // Usar método update con valores vacíos para eliminar filas (proxy no soporta delete/clear)
+                // Procesar en lotes con retrasos para evitar límite de cuota
+                const BATCH_SIZE = 10; // Procesar 10 filas a la vez
+                const DELAY_BETWEEN_BATCHES = 1000; // 1 segundo entre lotes
+                const DELAY_BETWEEN_REQUESTS = 100; // 100ms entre solicitudes
+                
+                let processedCount = 0;
+                let errorCount = 0;
+                
                 // Procesar en orden inverso para no afectar los índices
                 for (let i = orphanedRows.length - 1; i >= 0; i--) {
                     const rowIdx = orphanedRows[i];
-                    // Crear arreglo de 14 valores vacíos (columnas A:N)
-                    const emptyRow = new Array(14).fill('');
-                    await proxyGoogleAPI('sheets', 'update', {
-                        spreadsheetId: CONFIG.SPREADSHEET_ID,
-                        range: `Detalle!A${rowIdx}:N${rowIdx}`,
-                        valueInputOption: 'USER_ENTERED'
-                    }, {
-                        values: [emptyRow]
-                    });
+                    
+                    try {
+                        // Crear arreglo de 14 valores vacíos (columnas A:N)
+                        const emptyRow = new Array(14).fill('');
+                        await proxyGoogleAPI('sheets', 'update', {
+                            spreadsheetId: CONFIG.SPREADSHEET_ID,
+                            range: `Detalle!A${rowIdx}:N${rowIdx}`,
+                            valueInputOption: 'USER_ENTERED'
+                        }, {
+                            values: [emptyRow]
+                        });
+                        
+                        processedCount++;
+                        
+                        // Retraso entre solicitudes para evitar límite de cuota
+                        if (i > 0 && (orphanedRows.length - i) % BATCH_SIZE === 0) {
+                            console.log(`Procesados ${processedCount} eventos, esperando ${DELAY_BETWEEN_BATCHES}ms...`);
+                            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+                        } else if (i > 0) {
+                            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+                        }
+                        
+                    } catch (error) {
+                        errorCount++;
+                        console.warn(`Error eliminando fila ${rowIdx}:`, error.message);
+                        
+                        // Si es error de cuota, esperar más tiempo
+                        if (error.message.includes('429') || error.message.includes('quota')) {
+                            console.log('Error de cuota detectado, esperando 5 segundos...');
+                            await new Promise(resolve => setTimeout(resolve, 5000));
+                        }
+                    }
                 }
+                
+                console.log(`Eliminación completada: ${processedCount} exitosos, ${errorCount} errores`);
                 
                 hideLoading();
                 return { 
