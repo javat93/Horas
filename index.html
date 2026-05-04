@@ -2645,10 +2645,11 @@
                 
                 // 5. Eliminar eventos huérfanos automáticamente (sin confirmación)
                 console.log(`Eliminando ${orphanedRows.length} eventos huérfanos...`);
+                // Usar método clear para eliminar filas (proxy no soporta delete)
                 // Procesar en orden inverso para no afectar los índices
                 for (let i = orphanedRows.length - 1; i >= 0; i--) {
                     const rowIdx = orphanedRows[i];
-                    await proxyGoogleAPI('sheets', 'delete', {
+                    await proxyGoogleAPI('sheets', 'clear', {
                         spreadsheetId: CONFIG.SPREADSHEET_ID,
                         range: `Detalle!A${rowIdx}:N${rowIdx}`
                     });
