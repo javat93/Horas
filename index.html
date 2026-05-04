@@ -2643,14 +2643,8 @@
                     return { deleted: 0, message: 'No hay eventos huérfanos para eliminar.' };
                 }
                 
-                // 5. Confirmar eliminación
-                const confirmMessage = `Se encontraron ${orphanedRows.length} eventos en el spreadsheet que ya no existen en Google Calendar. ¿Deseas eliminarlos?`;
-                if (!confirm(confirmMessage)) {
-                    hideLoading();
-                    return { deleted: 0, message: 'Eliminación cancelada por el usuario.' };
-                }
-                
-                // 6. Eliminar eventos huérfanos (borrar filas)
+                // 5. Eliminar eventos huérfanos automáticamente (sin confirmación)
+                console.log(`Eliminando ${orphanedRows.length} eventos huérfanos...`);
                 // Procesar en orden inverso para no afectar los índices
                 for (let i = orphanedRows.length - 1; i >= 0; i--) {
                     const rowIdx = orphanedRows[i];
@@ -2663,7 +2657,7 @@
                 hideLoading();
                 return { 
                     deleted: orphanedRows.length, 
-                    message: `Se eliminaron ${orphanedRows.length} eventos huérfanos.` 
+                    message: `Se eliminaron automáticamente ${orphanedRows.length} eventos huérfanos.` 
                 };
                 
             } catch (error) {
