@@ -806,12 +806,30 @@
 
         // Función para asegurar que el botón de auth sea visible al cargar
         function ensureAuthButtonVisible() {
+            console.log('ensureAuthButtonVisible: Verificando estado del botón');
+            const authBtn = document.getElementById('auth-btn');
             const token = localStorage.getItem('g_token');
+            
+            console.log('Token encontrado:', !!token);
+            console.log('Botón visible antes:', !authBtn.classList.contains('hidden'));
+            
             if (!token) {
-                // Solo mostrar el botón si no hay token
-                document.getElementById('auth-btn').classList.remove('hidden');
+                // Forzar visibilidad del botón si no hay token
+                authBtn.classList.remove('hidden');
                 document.getElementById('auth-text').innerText = "Conectar Google";
+                console.log('Botón hecho visible');
+            } else {
+                // Ocultar botón si hay token
+                authBtn.classList.add('hidden');
+                console.log('Botón oculto porque hay token');
             }
+        }
+
+        // Llamar inmediatamente cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', ensureAuthButtonVisible);
+        } else {
+            ensureAuthButtonVisible();
         }
 		// FUNCIÓN CLAVE: Proxy para llamadas a Google APIs en producción
         async function proxyGoogleAPI(apiType, method, params = {}, body = null) {
