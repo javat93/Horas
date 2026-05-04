@@ -2375,12 +2375,36 @@
                     return;
                 }
                 
-                // Procesar cada evento y añadirlo al spreadsheet
+                // Obtener eventos existentes para evitar duplicados
+                const existingEvents = await proxyGoogleAPI('sheets', 'get', {
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: 'Detalle!A2:K' // Solo necesitamos hasta columna K para calEventId
+                });
+                
+                // Crear set de calEventId existentes para búsqueda rápida
+                const existingEventIds = new Set();
+                (existingEvents.values || []).forEach(row => {
+                    if (row[10]) { // Columna K es calEventId
+                        existingEventIds.add(row[10]);
+                    }
+                });
+                
+                console.log(`Se encontraron ${existingEventIds.size} eventos existentes en el spreadsheet`);
+                
+                // Procesar cada evento y añadirlo al spreadsheet solo si no existe
                 const rowsToAdd = [];
                 let processedCount = 0;
+                let skippedCount = 0;
                 
                 for (const event of events) {
                     try {
+                        // Verificar si el evento ya existe
+                        if (existingEventIds.has(event.id)) {
+                            console.log(`Evento ${event.id} ya existe, omitiendo`);
+                            skippedCount++;
+                            continue;
+                        }
+                        
                         const row = await processCalendarEvent(event);
                         if (row) {
                             rowsToAdd.push(row);
@@ -2391,8 +2415,14 @@
                     }
                 }
                 
+                console.log(`Procesados ${processedCount} eventos nuevos, ${skippedCount} omitidos por duplicados`);
+                
                 if (rowsToAdd.length === 0) {
-                    showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos válidos para importar.', 'info');
+                    if (skippedCount > 0) {
+                        showErrorModal('Sin Eventos Nuevos', `Todos los eventos (${skippedCount}) ya existen en el spreadsheet.`, 'info');
+                    } else {
+                        showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos válidos para importar.', 'info');
+                    }
                     return;
                 }
                 
