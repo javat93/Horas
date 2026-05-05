@@ -29,5 +29,10 @@
   "scope": "./",
   "lang": "es",
   "categories": ["productivity", "business"],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "splash_screen": {
+    "background_color": "#ffffff",
+    "icon": "icon-512.png",
+    "icon_background_color": "#ffffff"
+  }
 }
