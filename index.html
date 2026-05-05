@@ -1537,7 +1537,7 @@
                             <p class="text-lg font-black text-slate-800">${ev.total.toFixed(2)}€</p>
                         </div>
                         <div class="flex gap-1">
-                            <button onclick="togglePago(${ev.rowIdx}, ${!ev.pagado})" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'} hover:scale-110 transition-all">
+                            <button onclick="togglePago(${ev.rowIdx}, ${!ev.pagado})" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800' : 'bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600'} hover:scale-110 transition-all">
                                 <i data-lucide="euro" class="w-5 h-5"></i>
                             </button>
                             <button onclick="confirmarBorrar(${ev.rowIdx})" class="p-2.5 rounded-xl bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
