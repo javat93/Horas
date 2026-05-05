@@ -1679,14 +1679,28 @@
         }
         // Helpers UI Finales
         async function togglePago(rowIdx, newState) {
-            await proxyGoogleAPI('sheets', 'update', {
+            // Actualizar la interfaz inmediatamente para feedback instantáneo
+            const event = eventos.find(e => e.rowIdx == rowIdx);
+            if (event) {
+                event.pagado = newState;
+                renderAll(); // Actualizar solo la vista, no recargar datos
+            }
+            
+            // Hacer la actualización en segundo plano sin bloquear
+            proxyGoogleAPI('sheets', 'update', {
                 spreadsheetId: CONFIG.SPREADSHEET_ID, 
                 range: `Detalle!A${rowIdx}`,
                 valueInputOption: 'USER_ENTERED'
             }, {
                 values: [[newState ? 'X' : '']]
+            }).catch(err => {
+                console.error('Error actualizando pago:', err);
+                // Revertir el cambio si falla
+                if (event) {
+                    event.pagado = !newState;
+                    renderAll();
+                }
             });
-            syncData();
         }
         function toggleRecurrence() {
             const isChecked = document.getElementById('ev-repite').checked;
