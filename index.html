@@ -1259,7 +1259,20 @@
                     const allEvents = calendarResponse.items || [];
                     
                     // Filtrar solo eventos con colorId 5 (amarillo)
-                    const events = allEvents.filter(ev => ev.colorId === '5');
+                    const events = allEvents.filter(ev => {
+                        // Validación robusta del colorId
+                        if (!ev.colorId) {
+                            console.warn('Evento sin colorId:', ev.summary || 'Sin título');
+                            return false;
+                        }
+                        // Asegurar que colorId sea string y comparar correctamente
+                        const colorIdStr = String(ev.colorId);
+                        const isValid = colorIdStr === '5';
+                        if (!isValid) {
+                            console.warn('Evento con colorId diferente a 5:', ev.summary || 'Sin título', 'colorId:', ev.colorId);
+                        }
+                        return isValid;
+                    });
                     
                     if (events.length > 0) {
                         // Crear set de calEventId existentes para búsqueda rápida
@@ -2522,7 +2535,20 @@
                 const allEvents = calendarResponse.items || [];
                 
                 // Filtrar solo eventos con colorId 5 (amarillo)
-                const events = allEvents.filter(ev => ev.colorId === '5');
+                const events = allEvents.filter(ev => {
+                    // Validación robusta del colorId
+                    if (!ev.colorId) {
+                        console.warn('Evento sin colorId en importFutureEvents:', ev.summary || 'Sin título');
+                        return false;
+                    }
+                    // Asegurar que colorId sea string y comparar correctamente
+                    const colorIdStr = String(ev.colorId);
+                    const isValid = colorIdStr === '5';
+                    if (!isValid) {
+                        console.warn('Evento con colorId diferente a 5 en importFutureEvents:', ev.summary || 'Sin título', 'colorId:', ev.colorId);
+                    }
+                    return isValid;
+                });
                 
                 if (events.length === 0) {
                     showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos con color amarillo (colorId 5) en el mes seleccionado.', 'info');
