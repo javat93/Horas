@@ -412,7 +412,25 @@
                 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Grupo / Colegio</label>
-                    <select id="ev-grupo" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required onchange="autoFillGrupo(this.value)"></select>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="ev-grupo-search" 
+                            class="w-full rounded-2xl p-4 input-modern text-sm font-medium" 
+                            placeholder="Buscar grupo..."
+                            autocomplete="off"
+                            oninput="filterGrupos(this.value)"
+                            onfocus="showGrupoDropdown()"
+                            required
+                        >
+                        <select id="ev-grupo" class="w-full rounded-2xl p-4 input-modern text-sm font-medium hidden" required onchange="autoFillGrupo(this.value)"></select>
+                        <div id="grupo-dropdown" class="absolute z-50 w-full bg-white rounded-2xl shadow-lg border border-slate-200 hidden max-h-60 overflow-y-auto">
+                            <div class="p-2">
+                                <div class="text-xs text-slate-500 font-medium mb-2">Grupos disponibles:</div>
+                                <div id="grupo-options" class="space-y-1"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div>
@@ -2411,7 +2429,102 @@
             const sel = document.getElementById('ev-grupo');
             sel.innerHTML = '<option value="">Selecciona grupo...</option>' + 
                 grupos.map(g => `<option value="${g.nombre}">${g.nombre}</option>`).join('');
+            populateGrupoOptions();
         }
+
+        // Función para poblar las opciones del dropdown de búsqueda
+        function populateGrupoOptions() {
+            const optionsContainer = document.getElementById('grupo-options');
+            if (!optionsContainer) return;
+            
+            optionsContainer.innerHTML = grupos.map(g => 
+                `<div class="grupo-option px-3 py-2 hover:bg-slate-100 cursor-pointer rounded-lg transition-colors" 
+                       onclick="selectGrupo('${g.nombre.replace(/'/g, "\\'")}')"
+                       data-grupo="${g.nombre}">
+                    <div class="font-medium text-sm">${g.nombre}</div>
+                </div>`
+            ).join('');
+        }
+
+        // Función para mostrar/ocultar el dropdown
+        function showGrupoDropdown() {
+            const dropdown = document.getElementById('grupo-dropdown');
+            const searchInput = document.getElementById('ev-grupo-search');
+            if (dropdown) {
+                dropdown.classList.remove('hidden');
+                populateGrupoOptions();
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
+        }
+
+        function hideGrupoDropdown() {
+            const dropdown = document.getElementById('grupo-dropdown');
+            if (dropdown) {
+                setTimeout(() => {
+                    dropdown.classList.add('hidden');
+                }, 200); // Pequeño delay para permitir clic en opciones
+            }
+        }
+
+        // Función para filtrar grupos según búsqueda
+        function filterGrupos(searchTerm) {
+            const optionsContainer = document.getElementById('grupo-options');
+            if (!optionsContainer) return;
+            
+            const filtered = grupos.filter(g => 
+                g.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            if (filtered.length === 0) {
+                optionsContainer.innerHTML = '<div class="text-slate-400 text-sm px-3 py-2">No se encontraron grupos</div>';
+            } else {
+                optionsContainer.innerHTML = filtered.map(g => 
+                    `<div class="grupo-option px-3 py-2 hover:bg-slate-100 cursor-pointer rounded-lg transition-colors" 
+                           onclick="selectGrupo('${g.nombre.replace(/'/g, "\\'")}')"
+                           data-grupo="${g.nombre}">
+                        <div class="font-medium text-sm">${g.nombre}</div>
+                    </div>`
+                ).join('');
+            }
+            
+            // Mostrar dropdown si hay búsqueda
+            const dropdown = document.getElementById('grupo-dropdown');
+            if (dropdown && searchTerm.trim() !== '') {
+                dropdown.classList.remove('hidden');
+            }
+        }
+
+        // Función para seleccionar un grupo del dropdown
+        function selectGrupo(grupoNombre) {
+            const searchInput = document.getElementById('ev-grupo-search');
+            const hiddenSelect = document.getElementById('ev-grupo');
+            
+            if (searchInput) {
+                searchInput.value = grupoNombre;
+            }
+            
+            if (hiddenSelect) {
+                hiddenSelect.value = grupoNombre;
+                // Disparar el evento onchange para mantener compatibilidad
+                const event = new Event('change', { bubbles: true });
+                hiddenSelect.dispatchEvent(event);
+            }
+            
+            hideGrupoDropdown();
+        }
+
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('grupo-dropdown');
+            const searchInput = document.getElementById('ev-grupo-search');
+            const dropdownContainer = searchInput ? searchInput.parentElement : null;
+            
+            if (dropdown && dropdownContainer && !dropdownContainer.contains(event.target)) {
+                hideGrupoDropdown();
+            }
+        });
 
         // Funciones para el Mapa Interactivo
         function openMapModal(targetFieldId) {
