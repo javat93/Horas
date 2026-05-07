@@ -1301,38 +1301,97 @@
                         const rowsToAdd = [];
                         let processedCount = 0;
                         let skippedCount = 0;
+                        let updateCount = 0;
                         
                         for (const event of events) {
                             try {
-                                // Verificar si el evento ya existe por calEventId
-                                if (existingEventIds.has(event.id)) {
-                                    skippedCount++;
+                                // Procesar evento para obtener datos actuales del Calendar
+                                const tempRow = await processCalendarEvent(event);
+                                if (!tempRow) {
+                                    console.warn(`No se pudo procesar evento ${event.id}`);
                                     continue;
                                 }
                                 
-                                // Verificación adicional: procesar evento para obtener fecha y grupo
-                                const tempRow = await processCalendarEvent(event);
-                                if (tempRow) {
-                                    const fecha = tempRow[5]; // Columna F: fecha
-                                    const grupo = tempRow[8]; // Columna I: grupo
-                                    const horaInicio = tempRow[12]; // Columna M: horaInicio
-                                    const horaFin = tempRow[13]; // Columna N: horaFin
-                                    
-                                    // Verificar duplicado por fecha+grupo+horas
-                                    if (fecha && grupo) {
-                                        const uniqueKey = `${fecha}_${grupo}_${horaInicio || ''}_${horaFin || ''}`;
-                                        if (existingEventKeys.has(uniqueKey)) {
+                                // Guardar tempRow en el evento para usarlo en comparaciones
+                                event.tempRow = tempRow;
+                                
+                                // Verificar si el evento ya existe por calEventId
+                                if (existingEventIds.has(event.id)) {
+                                    // El evento existe, verificar si hay cambios
+                                    const existingEvent = eventosBase.find(ev => ev.calEventId === event.id);
+                                    if (existingEvent) {
+                                        // Convertir evento existente a formato de fila para comparación
+                                        const existingRow = [
+                                            existingEvent.pagado ? 'X' : '',
+                                            existingEvent.realizado ? 'X' : '',
+                                            existingEvent.boloCole,
+                                            existingEvent.clase,
+                                            existingEvent.precioHora,
+                                            existingEvent.fechaStr,
+                                            existingEvent.total.toFixed(2).replace('.', ',') + ' ',
+                                            existingEvent.horas,
+                                            existingEvent.grupo,
+                                            existingEvent.sitio,
+                                            existingEvent.calEventId,
+                                            existingEvent.direccion,
+                                            existingEvent.horaInicio,
+                                            existingEvent.horaFin
+                                        ];
+                                        
+                                        // Verificar si hay cambios
+                                        if (hasEventChanges(event, existingRow)) {
+                                            // Hay cambios, actualizar el registro existente
+                                            const updated = await updateExistingEvent(existingEvent.rowIdx, event);
+                                            if (updated) {
+                                                updateCount++;
+                                                console.log(`Evento ${event.id} actualizado con cambios de fecha/hora`);
+                                            } else {
+                                                console.warn(`No se pudo actualizar evento ${event.id}`);
+                                            }
+                                        } else {
+                                            // No hay cambios, omitir
                                             skippedCount++;
-                                            continue;
                                         }
+                                    } else {
+                                        skippedCount++;
                                     }
-                                    
-                                    rowsToAdd.push(tempRow);
-                                    processedCount++;
+                                    continue;
                                 }
+                                
+                                // El evento no existe, verificar si es un nuevo evento
+                                const fecha = tempRow[5]; // Columna F: fecha
+                                const grupo = tempRow[8]; // Columna I: grupo
+                                const horaInicio = tempRow[12]; // Columna M: horaInicio
+                                const horaFin = tempRow[13]; // Columna N: horaFin
+                                
+                                // Verificar duplicado por fecha+grupo+horas
+                                if (fecha && grupo) {
+                                    const uniqueKey = `${fecha}_${grupo}_${horaInicio || ''}_${horaFin || ''}`;
+                                    if (existingEventKeys.has(uniqueKey)) {
+                                        skippedCount++;
+                                        continue;
+                                    }
+                                }
+                                
+                                rowsToAdd.push(tempRow);
+                                processedCount++;
                             } catch (err) {
                                 console.warn(`Error procesando evento ${event.id}:`, err);
                             }
+                        }
+                        
+                        // Mostrar resumen de sincronización
+                        let message = '';
+                        if (processedCount > 0 || updateCount > 0) {
+                            message = `Sincronización completada: `;
+                            const parts = [];
+                            if (processedCount > 0) parts.push(`${processedCount} nuevos eventos`);
+                            if (updateCount > 0) parts.push(`${updateCount} eventos actualizados`);
+                            if (skippedCount > 0) parts.push(`${skippedCount} omitidos`);
+                            message += parts.join(', ') + '.';
+                            showErrorModal('Sincronización Completada', message, 'success');
+                        } else if (skippedCount > 0) {
+                            showErrorModal('Sincronización', `${skippedCount} eventos ya estaban sincronizados.`, 'info');
                         }
                         
                         // Añadir nuevos eventos al spreadsheet
@@ -2656,6 +2715,57 @@
                 throw error;
             } finally {
                 hideLoading();
+            }
+        }
+
+        // Función para detectar cambios entre evento de Calendar y registro existente en Excel
+        function hasEventChanges(calendarEvent, existingRow) {
+            const calendarData = {
+                fecha: calendarEvent.tempRow ? calendarEvent.tempRow[5] : '',
+                horaInicio: calendarEvent.tempRow ? calendarEvent.tempRow[12] : '',
+                horaFin: calendarEvent.tempRow ? calendarEvent.tempRow[13] : '',
+                grupo: calendarEvent.tempRow ? calendarEvent.tempRow[8] : '',
+                sitio: calendarEvent.tempRow ? calendarEvent.tempRow[9] : ''
+            };
+            
+            const excelData = {
+                fecha: existingRow[5] || '',
+                horaInicio: existingRow[12] || '',
+                horaFin: existingRow[13] || '',
+                grupo: existingRow[8] || '',
+                sitio: existingRow[9] || ''
+            };
+            
+            // Comparar campos clave
+            return calendarData.fecha !== excelData.fecha ||
+                   calendarData.horaInicio !== excelData.horaInicio ||
+                   calendarData.horaFin !== excelData.horaFin ||
+                   calendarData.grupo !== excelData.grupo ||
+                   calendarData.sitio !== excelData.sitio;
+        }
+
+        // Función para actualizar un registro existente en Excel
+        async function updateExistingEvent(rowIdx, calendarEvent) {
+            if (!calendarEvent.tempRow) return false;
+            
+            try {
+                // Preparar datos para actualización (mantener columnas A y B si existen)
+                const updateRow = [...calendarEvent.tempRow];
+                updateRow[0] = ''; // Columna A: pagado (mantener vacío)
+                updateRow[1] = ''; // Columna B: realizado (mantener vacío)
+                
+                await proxyGoogleAPI('sheets', 'update', {
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
+                    range: `Detalle!A${rowIdx}:N${rowIdx}`,
+                    valueInputOption: 'USER_ENTERED'
+                }, {
+                    values: [updateRow]
+                });
+                
+                return true;
+            } catch (err) {
+                console.error('Error actualizando evento existente:', err);
+                return false;
             }
         }
 
