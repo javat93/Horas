@@ -2585,7 +2585,10 @@
                 
                 // Calcular rango de fechas para el mes seleccionado
                 const startDate = new Date(year, month - 1, 1);
-                const endDate = new Date(year, month, 0); // Último día del mes
+                const endDate = new Date(year, month, 0); // Primer día del mes siguiente
+                // Ajustar para obtener el último día real del mes actual
+                endDate.setDate(0); // Establecer al último día del mes anterior
+                endDate.setHours(23, 59, 59, 999); // Fin del día
                 
                 const timeMin = startDate.toISOString();
                 const timeMax = endDate.toISOString();
