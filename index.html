@@ -2454,7 +2454,6 @@
             // Actualizar el span con la información financiera
             statsInfo.innerHTML = `
                 <div class="space-y-1">
-                    <div class="text-sm">${eventos.length} clases sincronizadas</div>
                     <div class="text-xs text-slate-600">
                         <span class="font-medium">A cobrar:</span> ${formatCurrency(totalCobrar)} | 
                         <span class="font-medium">Neto (35%):</span> ${formatCurrency(totalNeto)}
@@ -2775,7 +2774,7 @@
                 });
                 
                 if (events.length === 0) {
-                    showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos con color amarillo (colorId 5) en el mes seleccionado.', 'info');
+                    showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos en el mes seleccionado.', 'info');
                     return;
                 }
                 
