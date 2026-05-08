@@ -1462,7 +1462,7 @@
                 eventos = eventosBase.sort((a,b) => (b.fechaObj - a.fechaObj));
 
                 renderAll();
-                document.getElementById('stats-info').innerText = `${eventos.length} clases sincronizadas.`;
+                updateFinancialStats();
                 
                 // 4. Actualizar automáticamente las clases realizadas (solo en la carga inicial)
                 if (actualizarRealizadosFlag) {
@@ -1783,6 +1783,7 @@
             if (event) {
                 event.pagado = newState;
                 renderAll(); // Actualizar solo la vista, no recargar datos
+                updateFinancialStats(); // Actualizar estadísticas financieras
             }
             
             // Hacer la actualización en segundo plano sin bloquear
@@ -2424,6 +2425,43 @@
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Función para actualizar estadísticas financieras
+        function updateFinancialStats() {
+            const statsInfo = document.getElementById('stats-info');
+            if (!statsInfo) return;
+            
+            // Calcular totales
+            let totalCobrar = 0;
+            let totalPendiente = 0;
+            
+            eventos.forEach(ev => {
+                if (!ev.pagado) {
+                    totalCobrar += ev.total;
+                    totalPendiente += ev.total;
+                }
+            });
+            
+            // Calcular total menos 35% (comisión)
+            const comision = totalCobrar * 0.35;
+            const totalNeto = totalCobrar - comision;
+            
+            // Formatear números
+            const formatCurrency = (amount) => {
+                return amount.toFixed(2).replace('.', ',') + '€';
+            };
+            
+            // Actualizar el span con la información financiera
+            statsInfo.innerHTML = `
+                <div class="space-y-1">
+                    <div class="text-sm">${eventos.length} clases sincronizadas</div>
+                    <div class="text-xs text-slate-600">
+                        <span class="font-medium">A cobrar:</span> ${formatCurrency(totalCobrar)} | 
+                        <span class="font-medium">Neto (35%):</span> ${formatCurrency(totalNeto)}
+                    </div>
+                </div>
+            `;
+        }
 
         function populateSelects() {
             const sel = document.getElementById('ev-grupo');
