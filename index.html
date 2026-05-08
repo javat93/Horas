@@ -2464,8 +2464,12 @@
 
         function populateSelects() {
             const sel = document.getElementById('ev-grupo');
+            // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
+            const gruposOrdenados = [...grupos].sort((a, b) => 
+                a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+            );
             sel.innerHTML = '<option value="">Selecciona grupo...</option>' + 
-                grupos.map(g => `<option value="${g.nombre}">${g.nombre}</option>`).join('');
+                gruposOrdenados.map(g => `<option value="${g.nombre}">${g.nombre}</option>`).join('');
             populateGrupoOptions();
         }
 
@@ -2474,7 +2478,12 @@
             const optionsContainer = document.getElementById('grupo-options');
             if (!optionsContainer) return;
             
-            optionsContainer.innerHTML = grupos.map(g => 
+            // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
+            const gruposOrdenados = [...grupos].sort((a, b) => 
+                a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+            );
+            
+            optionsContainer.innerHTML = gruposOrdenados.map(g => 
                 `<div class="grupo-option px-3 py-2 hover:bg-slate-100 cursor-pointer rounded-lg transition-colors" 
                        onclick="selectGrupo('${g.nombre.replace(/'/g, "\\'")}')"
                        data-grupo="${g.nombre}">
