@@ -1366,7 +1366,7 @@
                                             existingEvent.clase,
                                             existingEvent.precioHora,
                                             existingEvent.fechaStr,
-                                            existingEvent.total.toFixed(2).replace('.', '.') + ' ',
+                                            existingEvent.total.toFixed(2).replace('.', ',') + ' €',
                                             existingEvent.horas,
                                             existingEvent.grupo,
                                             existingEvent.sitio,
@@ -2149,7 +2149,7 @@
             const horasParaColumnaH = 1;
             const fParts = fecha.split("-");
             const fFormat = `${fParts[2]}/${fParts[1]}/${fParts[0]}`;
-            const totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " ";
+            const totalStr = precio.toFixed(2).replace(".",",") + " €";
 
             // Obtener ubicación del grupo y dirección del formulario
             const g = grupos.find(x => x.nombre === grupo);
@@ -3071,7 +3071,7 @@
             
             // Para la columna H siempre guardamos 1, pero calculamos el total con las horas reales
             const horasParaColumnaH = 1;
-            const totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " ";
+            const totalStr = precio.toFixed(2).replace(".",",") + " €";
             
             // Crear fila para spreadsheet con el mismo orden que el formulario
             const fila = [
