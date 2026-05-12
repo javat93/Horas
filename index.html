@@ -747,6 +747,26 @@
         let marker;
         let geocoder;
         let currentTargetField = null;
+        
+        // Función para parsear números de Google Sheets (soporta formato español con coma y símbolos de moneda)
+        function parseSpanishNumber(val) {
+            if (val === undefined || val === null || val === '') return 0;
+            if (typeof val === 'number') return val;
+            
+            // Eliminar espacios, símbolos de moneda y otros caracteres no numéricos excepto coma y punto
+            let cleanVal = val.toString().replace(/[^\d,.-]/g, '').trim();
+            
+            // Si hay puntos y comas, asumimos que el punto es separador de miles y la coma decimal (formato español)
+            if (cleanVal.includes('.') && cleanVal.includes(',')) {
+                cleanVal = cleanVal.replace(/\./g, '').replace(',', '.');
+            } else if (cleanVal.includes(',')) {
+                // Si solo hay coma, es el separador decimal
+                cleanVal = cleanVal.replace(',', '.');
+            }
+            
+            const result = parseFloat(cleanVal);
+            return isNaN(result) ? 0 : result;
+        }
 		
 		// --- 1. CARGA DINÁMICA DE GOOGLE MAPS UTILIZANDO PROXY EN PRODUCCIÓN ---
         function loadGoogleMaps() {
@@ -1144,8 +1164,8 @@
                     rowIdx: index + 2,
                     nombre: row[0],
                     sitio: row[1] || '',
-                    precio: row[2] || 20,
-                    precioBolo: row[3] || 50,
+                    precio: parseSpanishNumber(row[2]) || 20,
+                    precioBolo: parseSpanishNumber(row[3]) || 50,
                     ubicacion: row[4] || ''                    
                 }));
 
@@ -1171,11 +1191,11 @@
                         realizado: realizado,
                         boloCole: row[2] || '',
                         clase: row[3] || '',
-                        precioHora: parseFloat(row[4]) || 0,
+                        precioHora: parseSpanishNumber(row[4]),
                         fechaStr: row[5],
                         fechaObj: fObj,
-                        total: parseFloat((row[6] || "0").replace("","").replace(",",".").trim()) || 0,
-                        horas: parseFloat(row[7]) || 0,
+                        total: parseSpanishNumber(row[6]),
+                        horas: parseSpanishNumber(row[7]),
                         grupo: row[8],
                         sitio: row[9] || '',
                         calEventId: row[10] || '',
@@ -1442,11 +1462,11 @@
                                     realizado: realizado,
                                     boloCole: row[2] || '',
                                     clase: row[3] || '',
-                                    precioHora: parseFloat(row[4]) || 0,
+                                    precioHora: parseSpanishNumber(row[4]),
                                     fechaStr: row[5],
                                     fechaObj: fObj,
-                                    total: parseFloat((row[6] || "0").replace("","").replace(",",".").trim()) || 0,
-                                    horas: parseFloat(row[7]) || 0,
+                                    total: parseSpanishNumber(row[6]),
+                                    horas: parseSpanishNumber(row[7]),
                                     grupo: row[8],
                                     sitio: row[9] || '',
                                     calEventId: row[10] || '',
@@ -2117,7 +2137,12 @@
             // Calculamos las horas usando las horas de inicio y fin introducidas
             const [h1, m1] = horaInicio.split(':').map(Number);
             const [h2, m2] = horaFin.split(':').map(Number);
-            let horasCalc = 1;
+            
+            // Calcular horas reales
+            const minutosInicio = h1 * 60 + m1;
+            const minutosFin = h2 * 60 + m2;
+            let horasCalc = (minutosFin - minutosInicio) / 60;
+            if (horasCalc <= 0) horasCalc = 1; // Mínimo 1 hora
             
             // Para la columna H siempre guardamos 1, pero calculamos el total con las horas reales
             const horasParaColumnaH = 1;
@@ -2739,8 +2764,8 @@
                     rowIdx: index + 2,
                     nombre: row[0],
                     sitio: row[1] || '',
-                    precio: row[2] || 20,
-                    precioBolo: row[3] || 50,
+                    precio: parseSpanishNumber(row[2]) || 20,
+                    precioBolo: parseSpanishNumber(row[3]) || 50,
                     ubicacion: row[4] || ''                    
                 }));
                 
@@ -3016,7 +3041,7 @@
             
             // Para la columna H siempre guardamos 1, pero calculamos el total con las horas reales
             const horasParaColumnaH = 1;
-            const totalStr = (horasParaColumnaH * precio).toFixed(2).replace(".",",") + " ";
+            const totalStr = (horasCalc * precio).toFixed(2).replace(".",",") + " ";
             
             // Crear fila para spreadsheet con el mismo orden que el formulario
             const fila = [
