@@ -53,6 +53,14 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'Missing calendarId or eventId for delete method' });
       }
       url = `${baseUrl}/calendars/${params.calendarId}/events/${params.eventId}`;
+    } else if (method === 'update') {
+      if (!params || !params.calendarId || !params.eventId) {
+        return res.status(400).json({ error: 'Missing calendarId or eventId for update method' });
+      }
+      if (!body) {
+        return res.status(400).json({ error: 'Missing body for update method' });
+      }
+      url = `${baseUrl}/calendars/${params.calendarId}/events/${params.eventId}`;
     } else {
       return res.status(400).json({ error: `Unsupported method: ${method}` });
     }
@@ -72,7 +80,7 @@ module.exports = async (req, res) => {
 
     // Configurar request - usar token de OAuth del header Authorization
     const fetchOptions = {
-      method: method === 'list' ? 'GET' : method === 'delete' ? 'DELETE' : 'POST',
+      method: method === 'list' ? 'GET' : method === 'delete' ? 'DELETE' : method === 'update' ? 'PUT' : 'POST',
       headers: {
         'Authorization': req.headers.authorization || `Bearer ${GOOGLE_API_KEY}`,
         'Content-Type': 'application/json'
