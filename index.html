@@ -1863,6 +1863,7 @@
             document.getElementById('modal-evento-title').innerText = "Editar Sesión";
             document.getElementById('ev-rowIdx').value = ev.rowIdx;
             document.getElementById('ev-grupo').value = ev.grupo;
+            document.getElementById('ev-grupo-search').value = ev.grupo;
 
             const offsetMS = ev.fechaObj.getTimezoneOffset() * 60 * 1000;
             const fechaLocal = new Date(ev.fechaObj.getTime() - offsetMS);
@@ -2171,6 +2172,35 @@
                     }, {
                         values: [fila]
                     });
+
+                    // Sincronizar con Google Calendar si existe el eventId
+                    if (calEventId) {
+                        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                        const startDT = `${fecha}T${horaInicio}:00`;
+                        const endDT = `${fecha}T${horaFin}:00`;
+
+                        let eventResource = { 
+                            summary: isBolo ? `Bolo ${grupo}` : grupo, 
+                            location: sitio, 
+                            start: { dateTime: startDT, timeZone: tz }, 
+                            end: { dateTime: endDT, timeZone: tz },
+                            colorId: '5',
+                            description: `Sesión de ${horasCalc.toFixed(2)}h${isBolo ? ' (Bolo)' : ''} generada desde PercuManager.`,
+                            reminders: {
+                                useDefault: false,
+                                overrides: []
+                            }
+                        };
+
+                        try {
+                            await proxyGoogleAPI('calendar', 'update', {
+                                calendarId: 'primary',
+                                eventId: calEventId
+                            }, eventResource);
+                        } catch (calendarError) {
+                            console.error('Error actualizando evento en Google Calendar:', calendarError);
+                        }
+                    }
                 } else {
                     // El append devuelve el rango donde insertó, ej: "Detalle!A5:N5"
                     const appendResponse = await proxyGoogleAPI('sheets', 'append', {
