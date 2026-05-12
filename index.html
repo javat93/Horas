@@ -345,12 +345,12 @@
         </div>
 
         <div id="tab-eventos" class="space-y-6">
-            <div class="flex justify-between items-end px-1">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end px-1 gap-4">
                 <div>
                     <h2 class="text-2xl font-extrabold text-slate-900">Clases</h2>
                     <p class="text-sm text-slate-500" id="stats-info">Cargando datos...</p>
                 </div>
-                <button onclick="openNewSesionModal()" class="btn-blue px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2">
+                <button onclick="openNewSesionModal()" class="btn-blue w-full sm:w-auto px-6 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2">
                     <i data-lucide="plus" class="w-5 h-5"></i> Nueva Clase
                 </button>
             </div>
@@ -2509,9 +2509,9 @@
             // Actualizar el span con la información financiera
             statsInfo.innerHTML = `
                 <div class="space-y-1">
-                    <div class="text-xs text-slate-600">
-                        <span class="font-medium">Bruto:</span> ${formatCurrency(totalCobrar)} | 
-                        <span class="font-medium">Neto (35%):</span> ${formatCurrency(totalNeto)}
+                    <div class="text-xs text-slate-600 flex flex-col sm:flex-row sm:gap-x-4">
+                        <span><span class="font-medium">Bruto:</span> ${formatCurrency(totalCobrar)}</span>
+                        <span><span class="font-medium">Neto (35%):</span> ${formatCurrency(totalNeto)}</span>
                     </div>
                 </div>
             `;
