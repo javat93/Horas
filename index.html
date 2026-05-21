@@ -2145,7 +2145,7 @@
             let horasCalc = (minutosFin - minutosInicio) / 60;
             if (horasCalc <= 0) horasCalc = 1; // Mínimo 1 hora
             
-            // Para la columna H siempre guardamos 1, pero calculamos el total con las horas reales
+            // Para la columna H siempre guardamos 1, y el total se calcula en base a Precio * 1
             const horasParaColumnaH = 1;
             const fParts = fecha.split("-");
             const fFormat = `${fParts[2]}/${fParts[1]}/${fParts[0]}`;
@@ -3069,7 +3069,7 @@
                 if (horasCalc <= 0) horasCalc = 1; // Mínimo 1 hora
             }
             
-            // Para la columna H siempre guardamos 1, pero calculamos el total con las horas reales
+            // Para la columna H siempre guardamos 1, y el total se calcula en base a Precio * 1
             const horasParaColumnaH = 1;
             const totalStr = precio.toFixed(2).replace(".",",") + " €";
             
