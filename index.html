@@ -1888,14 +1888,13 @@
             const isBolo = ev.boloCole === 'X';
             document.getElementById('ev-bolo').checked = isBolo;
             
-            // Ocultamos opciones de calendario al editar para simplificar el flujo (Google no permite actualizar fácilmente sin eventId)
-            document.getElementById('sync-calendar-wrapper').classList.add('hidden'); 
+            // Mostrar opciones de calendario al editar
+            document.getElementById('sync-calendar-wrapper').classList.remove('hidden'); 
+            document.getElementById('ev-repite').checked = false;
+            document.getElementById('recurrence-options').classList.add('hidden');
             
-            autoFillGrupo(ev.grupo);
+            autoFillGrupo(ev.grupo, true);
             
-            // Actualizar estado del checkbox de Bolo después de cargar grupo
-            // y asegurar que el precio se configure correctamente
-            toggleBolo();
             openModal('modal-evento');
         }
 
@@ -1919,7 +1918,7 @@
             openModal('modal-grupo');
         }
 
-        function autoFillGrupo(nombre) {
+        function autoFillGrupo(nombre, ignoreOverwrite = false) {
             const isMaracuya = nombre.toLowerCase().includes('maracuyá') || nombre.toLowerCase().includes('maracuya');
             const g = grupos.find(x => x.nombre === nombre);
             
@@ -1929,7 +1928,7 @@
                 document.getElementById('maracuya-gps-hint').classList.add('hidden');
             }
 
-            if (g && !document.getElementById('ev-rowIdx').value) {
+            if (g && !ignoreOverwrite) {
                 // Verificar si el checkbox de Bolo está marcado para aplicar precio correcto
                 const isBolo = document.getElementById('ev-bolo').checked;
                 if (isBolo) {
@@ -2191,6 +2190,20 @@
                                 overrides: []
                             }
                         };
+
+                        // Reglas de Recursividad
+                        if (document.getElementById('ev-repite').checked) {
+                            const freq = document.getElementById('ev-freq').value;
+                            const interval = document.getElementById('ev-interval').value;
+                            const untilDate = document.getElementById('ev-until').value;
+                            
+                            let rrule = `RRULE:FREQ=${freq};INTERVAL=${interval}`;
+                            if (untilDate) {
+                                const formattedUntil = untilDate.replace(/-/g, '') + 'T235959Z';
+                                rrule += `;UNTIL=${formattedUntil}`;
+                            }
+                            eventResource.recurrence = [rrule];
+                        }
 
                         try {
                             await proxyGoogleAPI('calendar', 'update', {
