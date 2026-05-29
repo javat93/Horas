@@ -1379,7 +1379,7 @@
                                         // Verificar si hay cambios
                                         if (hasEventChanges(event, existingRow)) {
                                             // Hay cambios, actualizar el registro existente
-                                            const updated = await updateExistingEvent(existingEvent.rowIdx, event);
+                                            const updated = await updateExistingEvent(existingEvent.rowIdx, event, existingEvent);
                                             if (updated) {
                                                 updateCount++;
                                                 console.log(`Evento ${event.id} actualizado con cambios de fecha/hora`);
@@ -2812,18 +2812,14 @@
                     ubicacion: row[4] || ''                    
                 }));
                 
-                // Calcular rango de fechas para el mes seleccionado
-                const startDate = new Date(year, month - 1, 1);
-                const endDate = new Date(year, month, 0); // Primer día del mes siguiente
-                // Ajustar para obtener el último día real del mes actual
-                endDate.setDate(0); // Establecer al último día del mes anterior
-                endDate.setHours(23, 59, 59, 999); // Fin del día
+                // Calcular rango de fechas para el mes seleccionado de forma robusta
+                const startDate = new Date(year, month - 1, 1, 0, 0, 0, 0);
+                const endDate = new Date(year, month, 0, 23, 59, 59, 999);
                 
                 const timeMin = startDate.toISOString();
                 const timeMax = endDate.toISOString();
                 
-                            
-            // Obtener eventos de Google Calendar
+                // 2. Obtener eventos de Google Calendar
                 const calendarResponse = await proxyGoogleAPI('calendar', 'list', {
                     calendarId: 'primary',
                     timeMin: timeMin,
@@ -2836,111 +2832,241 @@
                 
                 // Filtrar solo eventos con colorId 5 (amarillo)
                 const events = allEvents.filter(ev => {
-                    // Validación robusta del colorId
-                    if (!ev.colorId) {
-                        console.warn('Evento sin colorId en importFutureEvents:', ev.summary || 'Sin título');
-                        return false;
-                    }
-                    // Asegurar que colorId sea string y comparar correctamente
-                    const colorIdStr = String(ev.colorId);
-                    const isValid = colorIdStr === '5';
-                    if (!isValid) {
-                        console.warn('Evento con colorId diferente a 5 en importFutureEvents:', ev.summary || 'Sin título', 'colorId:', ev.colorId);
-                    }
-                    return isValid;
+                    if (!ev.colorId) return false;
+                    return String(ev.colorId) === '5';
                 });
                 
-                if (events.length === 0) {
-                    showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos en el mes seleccionado.', 'info');
-                    return;
+                // Procesar eventos de Calendar para obtener su representación en Excel (tempRow)
+                for (const event of events) {
+                    event.tempRow = await processCalendarEvent(event);
                 }
                 
-                // Obtener eventos existentes para evitar duplicados
+                // 3. Obtener eventos existentes del spreadsheet en rango completo Detalle!A2:N
                 const existingEvents = await proxyGoogleAPI('sheets', 'get', {
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: 'Detalle!A2:K' // Solo necesitamos hasta columna K para calEventId
+                    range: 'Detalle!A2:N'
                 });
                 
-                // Crear set de calEventId existentes para búsqueda rápida (ignorando filas vacías)
-                const existingEventIds = new Set();
-                const existingEventKeys = new Set(); // Para verificación adicional
-                (existingEvents.values || []).forEach(row => {
-                    // Verificar que la fila no esté completamente vacía
-                    if (row[10] && row[5]) { // Columna K (calEventId) y Columna F (fecha)
-                        existingEventIds.add(row[10]);
-                        
-                        // Crear clave única basada en fecha + grupo + horas para detectar duplicados reales
-                        const fecha = row[5]; // Columna F: fecha
-                        const grupo = row[8]; // Columna I: grupo
-                        const horaInicio = row[12]; // Columna M: horaInicio
-                        const horaFin = row[13]; // Columna N: horaFin
-                        if (fecha && grupo) {
-                            // Incluir horas para permitir múltiples eventos del mismo grupo en el mismo día
-                            const uniqueKey = `${fecha}_${grupo}_${horaInicio || ''}_${horaFin || ''}`;
-                            existingEventKeys.add(uniqueKey);
-                        }
-                    }
+                const allSheetRows = existingEvents.values || [];
+                
+                // Mapear filas completas a objetos
+                const sheetEvents = allSheetRows.map((row, index) => {
+                    const fParts = (row[5] || "").split("/");
+                    const fObj = fParts.length === 3 ? new Date(fParts[2], fParts[1]-1, fParts[0]) : null;
+                    return {
+                        rowIdx: index + 2,
+                        pagado: row[0] === 'X',
+                        realizado: row[1] === 'X',
+                        boloCole: row[2] || '',
+                        clase: row[3] || '',
+                        precioHora: parseSpanishNumber(row[4]) || 0,
+                        fechaStr: row[5] || '',
+                        fechaObj: fObj,
+                        total: parseSpanishNumber(row[6]) || 0,
+                        horas: parseSpanishNumber(row[7]) || 1,
+                        grupo: row[8] || '',
+                        sitio: row[9] || '',
+                        calEventId: row[10] || '',
+                        direccion: row[11] || '',
+                        horaInicio: row[12] || '',
+                        horaFin: row[13] || ''
+                    };
                 });
                 
-                // Procesar cada evento y añadirlo al spreadsheet solo si no existe
-                const rowsToAdd = [];
-                let processedCount = 0;
-                let skippedCount = 0;
+                // Filtrar eventos del spreadsheet para el mes y año seleccionados
+                const sheetEventsInMonth = sheetEvents.filter(ev => 
+                    ev.fechaObj && 
+                    (ev.fechaObj.getMonth() + 1) === month && 
+                    ev.fechaObj.getFullYear() === year
+                );
                 
-                for (const event of events) {
-                    try {
-                        // Verificar si el evento ya existe por calEventId
-                        if (existingEventIds.has(event.id)) {
-                            skippedCount++;
-                            continue;
-                        }
-                        
-                        // Verificación adicional: procesar evento para obtener fecha y grupo
-                        const tempRow = await processCalendarEvent(event);
-                        if (tempRow) {
-                            const fecha = tempRow[5]; // Columna F: fecha
-                            const grupo = tempRow[8]; // Columna I: grupo
-                            const horaInicio = tempRow[12]; // Columna M: horaInicio
-                            const horaFin = tempRow[13]; // Columna N: horaFin
-                            
-                            // Verificar duplicado por fecha+grupo+horas
-                            if (fecha && grupo) {
-                                const uniqueKey = `${fecha}_${grupo}_${horaInicio || ''}_${horaFin || ''}`;
-                                if (existingEventKeys.has(uniqueKey)) {
-                                    skippedCount++;
-                                    continue;
-                                }
-                            }
-                            
-                            rowsToAdd.push(tempRow);
-                            processedCount++;
-                        }
-                    } catch (err) {
-                        console.warn(`Error procesando evento ${event.id}:`, err);
-                    }
-                }
-                
-                if (rowsToAdd.length === 0) {
-                    if (skippedCount > 0) {
-                        showErrorModal('Sin Eventos Nuevos', `Todos los eventos (${skippedCount}) ya existen en el spreadsheet.`, 'info');
-                    } else {
-                        showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos válidos para importar.', 'info');
-                    }
+                if (events.length === 0 && sheetEventsInMonth.length === 0) {
+                    showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos en el mes seleccionado ni en Google Calendar ni en el Spreadsheet.', 'info');
                     return;
                 }
                 
-                // Añadir todos los eventos al spreadsheet
+                // Registro de estados y matched IDs/Keys
+                const matchedCalendarEventIds = new Set();
+                const rowsToAdd = [];
+                let insertedInSheets = 0;
+                let updatedInSheets = 0;
+                let insertedInCalendar = 0;
+                let skippedCount = 0;
                 
-                await proxyGoogleAPI('sheets', 'append', {
-                    spreadsheetId: CONFIG.SPREADSHEET_ID,
-                    range: 'Detalle!A:N',
-                    valueInputOption: 'USER_ENTERED',
-                    insertDataOption: 'INSERT_ROWS'
-                }, {
-                    values: rowsToAdd
-                });
+                // Paso 1: Cruzar datos de Sheets a Calendar
+                for (const sheetEv of sheetEventsInMonth) {
+                    let calEv = null;
+                    
+                    // Buscar coincidencia en Calendar
+                    if (sheetEv.calEventId) {
+                        calEv = events.find(e => e.id === sheetEv.calEventId);
+                    }
+                    
+                    if (!calEv) {
+                        // Buscar por coincidencia de clave única si no tiene ID o si el ID no se encontró
+                        calEv = events.find(e => {
+                            if (!e.tempRow) return false;
+                            const tempFecha = e.tempRow[5];
+                            const tempGrupo = e.tempRow[8];
+                            const tempHoraInicio = e.tempRow[12];
+                            const tempHoraFin = e.tempRow[13];
+                            return tempFecha === sheetEv.fechaStr && 
+                                   tempGrupo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === sheetEv.grupo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() &&
+                                   tempHoraInicio === sheetEv.horaInicio &&
+                                   tempHoraFin === sheetEv.horaFin;
+                        });
+                    }
+                    
+                    if (calEv) {
+                        // El evento existe en ambos lados
+                        matchedCalendarEventIds.add(calEv.id);
+                        
+                        // Convertir evento de la hoja a fila para comparación
+                        const existingRow = [
+                            sheetEv.pagado ? 'X' : '',
+                            sheetEv.realizado ? 'X' : '',
+                            sheetEv.boloCole,
+                            sheetEv.clase,
+                            sheetEv.precioHora,
+                            sheetEv.fechaStr,
+                            sheetEv.total.toFixed(2).replace('.', ',') + ' €',
+                            sheetEv.horas,
+                            sheetEv.grupo,
+                            sheetEv.sitio,
+                            sheetEv.calEventId,
+                            sheetEv.direccion,
+                            sheetEv.horaInicio,
+                            sheetEv.horaFin
+                        ];
+                        
+                        const needsIdUpdate = sheetEv.calEventId !== calEv.id;
+                        const hasChanges = hasEventChanges(calEv, existingRow);
+                        
+                        if (hasChanges || needsIdUpdate) {
+                            // Actualizar calEventId en tempRow antes de guardarlo en Excel
+                            calEv.tempRow[10] = calEv.id;
+                            
+                            const updated = await updateExistingEvent(sheetEv.rowIdx, calEv, sheetEv);
+                            if (updated) {
+                                updatedInSheets++;
+                            }
+                        } else {
+                            skippedCount++;
+                        }
+                    } else {
+                        // El evento está en Spreadsheet pero NO está en Calendar. ¡Debemos agregarlo!
+                        try {
+                            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                            const fParts = sheetEv.fechaStr.split("/");
+                            const fechaYYYYMMDD = `${fParts[2]}-${fParts[1]}-${fParts[0]}`;
+                            
+                            // Asegurar hora de inicio y fin válidas
+                            const hInicio = sheetEv.horaInicio || '10:00';
+                            const hFin = sheetEv.horaFin || '11:00';
+                            const startDT = `${fechaYYYYMMDD}T${hInicio}:00`;
+                            const endDT = `${fechaYYYYMMDD}T${hFin}:00`;
+                            
+                            const isBolo = sheetEv.boloCole === 'X';
+                            const grupo = sheetEv.grupo;
+                            const sitio = sheetEv.direccion || sheetEv.sitio || '';
+                            
+                            // Calcular horas reales para la descripción
+                            let horasCalc = 1;
+                            if (sheetEv.horaInicio && sheetEv.horaFin) {
+                                const [h1, m1] = sheetEv.horaInicio.split(':').map(Number);
+                                const [h2, m2] = sheetEv.horaFin.split(':').map(Number);
+                                const minutosInicio = h1 * 60 + m1;
+                                const minutosFin = h2 * 60 + m2;
+                                horasCalc = (minutosFin - minutosInicio) / 60;
+                                if (horasCalc <= 0) horasCalc = 1;
+                            }
+                            
+                            let eventResource = { 
+                                summary: isBolo ? `Bolo ${grupo}` : grupo, 
+                                location: sitio, 
+                                start: { dateTime: startDT, timeZone: tz }, 
+                                end: { dateTime: endDT, timeZone: tz },
+                                colorId: '5', // Amarillo (mismo color que sincronizar)
+                                description: `Sesión de ${horasCalc.toFixed(2)}h${isBolo ? ' (Bolo)' : ''} generada desde PercuManager.`,
+                                reminders: {
+                                    useDefault: false,
+                                    overrides: []
+                                }
+                            };
+                            
+                            const calResponse = await proxyGoogleAPI('calendar', 'insert', {
+                                calendarId: 'primary'
+                            }, eventResource);
+                            
+                            const newCalEventId = calResponse && calResponse.id ? calResponse.id : (calResponse && calResponse.result ? calResponse.result.id : null);
+                            
+                            if (newCalEventId) {
+                                // Guardar el eventId en la columna K de Sheets
+                                await proxyGoogleAPI('sheets', 'batchUpdate', {
+                                    spreadsheetId: CONFIG.SPREADSHEET_ID
+                                }, {
+                                    requests: [{
+                                        updateCells: {
+                                            range: {
+                                                sheetId: 0,
+                                                startRowIndex: sheetEv.rowIdx - 1,
+                                                endRowIndex: sheetEv.rowIdx,
+                                                startColumnIndex: 10, // Columna K (0-indexed)
+                                                endColumnIndex: 11
+                                            },
+                                            rows: [{
+                                                values: [{
+                                                    userEnteredValue: { stringValue: newCalEventId }
+                                                }]
+                                            }],
+                                            fields: 'userEnteredValue'
+                                        }
+                                    }]
+                                });
+                                insertedInCalendar++;
+                            }
+                        } catch (calInsError) {
+                            console.error(`Error insertando en Calendar el evento de la fila ${sheetEv.rowIdx}:`, calInsError);
+                        }
+                    }
+                }
                 
-                showErrorModal('Importación Completada', `Se importaron ${processedCount} eventos correctamente.`, 'success');
+                // Paso 2: Agregar a Sheets los eventos que están en Calendar pero no en Sheets
+                const unmatchedEvents = events.filter(e => !matchedCalendarEventIds.has(e.id));
+                for (const unmatchedEv of unmatchedEvents) {
+                    if (unmatchedEv.tempRow) {
+                        rowsToAdd.push(unmatchedEv.tempRow);
+                        insertedInSheets++;
+                    }
+                }
+                
+                // Insertar los registros nuevos en Sheets en lote
+                if (rowsToAdd.length > 0) {
+                    await proxyGoogleAPI('sheets', 'append', {
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
+                        range: 'Detalle!A:N',
+                        valueInputOption: 'USER_ENTERED',
+                        insertDataOption: 'INSERT_ROWS'
+                    }, {
+                        values: rowsToAdd
+                    });
+                }
+                
+                // 4. Mostrar resumen completo
+                let message = '';
+                const parts = [];
+                if (insertedInSheets > 0) parts.push(`${insertedInSheets} nuevos en Sheets`);
+                if (updatedInSheets > 0) parts.push(`${updatedInSheets} actualizados en Sheets`);
+                if (insertedInCalendar > 0) parts.push(`${insertedInCalendar} agregados a Calendar`);
+                if (skippedCount > 0) parts.push(`${skippedCount} omitidos (sin cambios)`);
+                
+                if (parts.length > 0) {
+                    message = `Operación completada: ` + parts.join(', ') + '.';
+                } else {
+                    message = `No se realizaron cambios.`;
+                }
+                
+                showErrorModal('Importación y Sincronización', message, 'success');
                 
             } catch (error) {
                 console.error('Error en importFutureEvents:', error);
@@ -2977,14 +3103,14 @@
         }
 
         // Función para actualizar un registro existente en Excel
-        async function updateExistingEvent(rowIdx, calendarEvent) {
+        async function updateExistingEvent(rowIdx, calendarEvent, existingEvent = null) {
             if (!calendarEvent.tempRow) return false;
             
             try {
                 // Preparar datos para actualización (mantener columnas A y B si existen)
                 const updateRow = [...calendarEvent.tempRow];
-                updateRow[0] = ''; // Columna A: pagado (mantener vacío)
-                updateRow[1] = ''; // Columna B: realizado (mantener vacío)
+                updateRow[0] = existingEvent && existingEvent.pagado ? 'X' : '';
+                updateRow[1] = existingEvent && existingEvent.realizado ? 'X' : '';
                 
                 await proxyGoogleAPI('sheets', 'update', {
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
