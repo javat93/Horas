@@ -1,4 +1,8 @@
-# Fase 1: entorno de pruebas
+# Entorno de pruebas — fase 2
+
+La fase 1 fue validada por el usuario. En fase 2 se habilita «Revisar vínculos de Calendar»: análisis de IDs compartidos y filas sin ID, consulta de candidatos amarillos con coincidencia exacta de grupo/día/horas en Madrid, lectura de todas las páginas y confirmación por fila. El servicio `api=test?api=links` (ruta real `/api/test?api=links`) permite únicamente modificar K de Detalle en la copia; vuelve a leer la fila y comprueba que el nuevo ID no esté usado por otra. No modifica Calendar ni condiciones económicas. La comprobación previa no es una transacción atómica de Sheets: evitar editar simultáneamente la misma fila mientras se confirma.
+
+Ejemplo de prueba: buscar la fila 1533 (Slap Martes), revisar que su vínculo actual corresponde a Moli, elegir «Dejar sin vincular» y confirmar. Se limpia K1533; K1531 y el evento real permanecen. No se corrige el histórico automáticamente.
 
 Arranque: `npm run start:pruebas` y abrir http://localhost:3000/pruebas .
 

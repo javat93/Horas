@@ -19,14 +19,16 @@
     
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
-    configScript.src = isProduction ? 'config.production.js?v=pruebas-20261028' : 'config.secure.js';
+    configScript.src = isProduction ? 'config.production.js?v=fase2-20261028' : 'config.secure.js';
     window.horasConfigReady = new Promise((resolve, reject) => {
         configScript.onload = resolve;
         configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
     });
     document.head.appendChild(configScript);
 </script>
-    <script src="sandbox/panel.js?v=pruebas-20261028" defer></script>
+    <script src="calendar-linking.js?v=fase2-20261028"></script>
+    <script src="sandbox/panel.js?v=fase2-20261028" defer></script>
+    <script src="sandbox/calendar-review.js?v=fase2-20261028" defer></script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <!-- PWA Manifest and Icons -->
     <link rel="manifest" href="manifest.json">
@@ -1079,8 +1081,7 @@
         }
 
         // Busca en Google Calendar el eventId para una fila de Sheets que no lo tenga todavía.
-        // Reglas: si hay un solo evento ese día → asigna directo.
-        // Si hay varios → busca color amarillo (colorId "5") que contenga el nombre del grupo.
+        // Requiere coincidencia de grupo, fecha y horas; solo amarillo, sin asignaciones por descarte.
         // Si no encaja ninguno → deja vacío.
         function formatHoraHHMM(isoDateTime) {
             if (!isoDateTime) return '';
@@ -1100,74 +1101,18 @@
             };
         }
 
-        async function fetchCalendarEventInfo(fechaObj, grupoNombre, sitioNombre) {
-            if (!fechaObj) return { id: '', horaInicio: '', horaFin: '' };
-            try {
-                const timeMin = new Date(fechaObj);
-                timeMin.setHours(0, 0, 0, 0);
-                const timeMax = new Date(fechaObj);
-                timeMax.setHours(23, 59, 59, 999);
+        async function listAllCalendarEvents(params) {
+            return CalendarLinking.listAll(page => proxyGoogleAPI('calendar', 'list', page), params);
+        }
 
-                const res = await proxyGoogleAPI('calendar', 'list', {
-                    calendarId: 'primary',
-                    timeMin: timeMin.toISOString(),
-                    timeMax: timeMax.toISOString(),
-                    singleEvents: true,
-                    orderBy: 'startTime'
-                });
-
-                const items = res.items || [];
-                if (items.length === 0) return { id: '', horaInicio: '', horaFin: '' };
-
-                // Un solo evento ese día → asignamos directamente
-                if (items.length === 1) {
-                    const one = items[0];
-                    const horas = extractHorasFromCalendarEvent(one);
-                    return { id: one.id || '', ...horas };
-                }
-
-                // Helper: comprueba si el título del evento coincide con nombre o sitio
-                const nombreLower = limpiarTexto(grupoNombre || '').toLowerCase();
-                const sitioLower = limpiarTexto(sitioNombre || '').toLowerCase();
-                function coincide(ev) {
-                    const titulo = limpiarTexto(ev.summary || '').toLowerCase();
-                    const matchNombre = nombreLower && (titulo.includes(nombreLower) || nombreLower.includes(titulo));
-                    const matchSitio = sitioLower && (titulo.includes(sitioLower) || sitioLower.includes(titulo));
-                    return matchNombre || matchSitio;
-                }
-
-                // Varios eventos → priorizamos búsqueda por coincidencia exacta
-                // 1. Primero buscamos coincidencia exacta de nombre o sitio
-                let selected = items.find(ev => coincide(ev));
-                if (selected) {
-                    const horas = extractHorasFromCalendarEvent(selected);
-                    return { id: selected.id || '', ...horas };
-                }
-
-                // 2. Si no hay coincidencia exacta, buscamos eventos con color amarillo (colorId "5")
-                selected = items.find(ev => ev.colorId === '5');
-                if (selected) {
-                    const horas = extractHorasFromCalendarEvent(selected);
-                    return { id: selected.id || '', ...horas };
-                }
-
-                // 3. Si no hay amarillo, usamos el primer evento creado por nuestra app (buscar en descripción)
-                selected = items.find(ev => 
-                    ev.description && ev.description.includes('PercuManager')
-                );
-                if (selected) {
-                    const horas = extractHorasFromCalendarEvent(selected);
-                    return { id: selected.id || '', ...horas };
-                }
-
-                // 4. Último recurso: el primer evento del día
-                selected = items[0];
-                const horas = extractHorasFromCalendarEvent(selected);
-                return { id: selected?.id || '', ...horas };
-            } catch (e) {
-                console.warn('Error buscando evento en Calendar:', e);
-                return { id: '', horaInicio: '', horaFin: '' };
-            }
+        async function fetchCalendarEventInfo(fechaObj, grupoNombre, sitioNombre, sourceEvent = null, sourceRows = eventos) {
+            if (!fechaObj) return { status: 'unmatched', id: '', horaInicio: '', horaFin: '' };
+            const timeMin = new Date(fechaObj); timeMin.setHours(0,0,0,0);
+            const timeMax = new Date(timeMin); timeMax.setDate(timeMax.getDate()+1);
+            const response = await listAllCalendarEvents({calendarId:'primary', timeMin:timeMin.toISOString(), timeMax:timeMax.toISOString(), singleEvents:true, orderBy:'startTime'});
+            const row = sourceEvent || { grupo:grupoNombre, fechaStr:fechaObj.getDate()+'/'+(fechaObj.getMonth()+1)+'/'+fechaObj.getFullYear() };
+            const decision = CalendarLinking.choose(row,response.items,sourceRows);
+            return { id:'', horaInicio:'', horaFin:'', ...decision };
         }
 
         async function syncData(resolverCal = false, actualizarRealizadosFlag = !CONFIG.TEST_MODE) {
@@ -1227,6 +1172,7 @@
                     };
                 });
 
+                if (resolverCal) CalendarLinking.assertUniqueLinks(eventosBase);
                 const sinId = resolverCal
                     ? eventosBase.filter(ev => !ev.calEventId && ev.fechaObj)
                     : [];
@@ -1235,7 +1181,7 @@
                 if (sinId.length > 0) {
                     const updates = [];
                     for (const ev of sinId) {
-                        const info = await fetchCalendarEventInfo(ev.fechaObj, ev.grupo, ev.sitio);
+                        const info = await fetchCalendarEventInfo(ev.fechaObj, ev.grupo, ev.sitio, ev, eventosBase);
                         if (info && info.id) {
                             ev.calEventId = info.id;
                             if (info.horaInicio) ev.horaInicio = info.horaInicio;
@@ -1314,10 +1260,10 @@
                 if (resolverCal) {
                     const now = new Date();
                     const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-                    const oneMonthAhead = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    const oneMonthAhead = new Date(now.getFullYear(), now.getMonth() + 1, 1);
                     
                     // Obtener eventos del Calendar
-                    const calendarResponse = await proxyGoogleAPI('calendar', 'list', {
+                    const calendarResponse = await listAllCalendarEvents({
                         calendarId: 'primary',
                         timeMin: threeMonthsAgo.toISOString(),
                         timeMax: oneMonthAhead.toISOString(),
@@ -1348,13 +1294,9 @@
                         const existingEventIds = new Set();
                         const existingEventKeys = new Set(); // Para verificación adicional
                         eventosBase.forEach(event => {
-                            if (event.calEventId && event.fechaStr && event.grupo) {
-                                existingEventIds.add(event.calEventId);
-                                
-                                // Crear clave única basada en fecha + grupo + horas para detectar duplicados reales
-                                const uniqueKey = `${event.fechaStr}_${event.grupo}_${event.horaInicio || ''}_${event.horaFin || ''}`;
-                                existingEventKeys.add(uniqueKey);
-                            }
+                            if (event.calEventId) existingEventIds.add(event.calEventId);
+                            const uniqueKey = CalendarLinking.eventKey(event);
+                            if (uniqueKey) existingEventKeys.add(uniqueKey);
                         });
                         
                         // Procesar cada evento y añadirlo si no existe
@@ -1426,13 +1368,19 @@
                                 
                                 // Verificar duplicado por fecha+grupo+horas
                                 if (fecha && grupo) {
-                                    const uniqueKey = `${fecha}_${grupo}_${horaInicio || ''}_${horaFin || ''}`;
+                                    const uniqueKey = CalendarLinking.eventKey({fechaStr:fecha,grupo,horaInicio,horaFin});
                                     if (existingEventKeys.has(uniqueKey)) {
                                         skippedCount++;
                                         continue;
                                     }
                                 }
                                 
+                                if (eventosBase.some(ev => !ev.calEventId && CalendarLinking.compatible(ev, event))) {
+                                    skippedCount++;
+                                    continue; // Resolver la ambigüedad antes de añadir otra fila.
+                                }
+                                existingEventIds.add(event.id);
+                                existingEventKeys.add(CalendarLinking.eventKey({fechaStr:fecha,grupo,horaInicio,horaFin}));
                                 rowsToAdd.push(tempRow);
                                 processedCount++;
                             } catch (err) {
@@ -2182,6 +2130,7 @@
             const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, calEventId, direccion, horaInicio, horaFin];
 
             try {
+                if (ev && ev.calEventId && eventos.some(other => other.rowIdx !== ev.rowIdx && other.calEventId === ev.calEventId)) throw new Error('CalendarId compartido. Revisa el vínculo antes de editar.');
                 if (rowIdx) {
                     const old = eventos.find(ev => ev.rowIdx == rowIdx);
                     fila[0] = old.pagado ? 'X' : '';
@@ -2441,6 +2390,10 @@
 
         function confirmarBorrar(rowIdx) {
             const ev = eventos.find(e => e.rowIdx === rowIdx);
+            if (ev && ev.calEventId && eventos.some(other => other.rowIdx !== rowIdx && other.calEventId === ev.calEventId)) {
+                showErrorModal('Vínculo compartido', 'Revisa el CalendarId antes de borrar. Podría pertenecer a otra clase.', 'warning');
+                return;
+            }
             const mensaje = ev ? 
                 `¿Seguro que quieres borrar la clase "${ev.grupo}" del ${ev.fechaStr}? Esta acción no se puede deshacer.` :
                 "¿Seguro que quieres borrar esta fila? Esta acción no se puede deshacer.";
@@ -2836,13 +2789,13 @@
                 
                 // Calcular rango de fechas para el mes seleccionado de forma robusta
                 const startDate = new Date(year, month - 1, 1, 0, 0, 0, 0);
-                const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+                const endDate = new Date(year, month, 1, 0, 0, 0, 0);
                 
                 const timeMin = startDate.toISOString();
                 const timeMax = endDate.toISOString();
                 
                 // 2. Obtener eventos de Google Calendar
-                const calendarResponse = await proxyGoogleAPI('calendar', 'list', {
+                const calendarResponse = await listAllCalendarEvents({
                     calendarId: 'primary',
                     timeMin: timeMin,
                     timeMax: timeMax,
@@ -2895,6 +2848,7 @@
                     };
                 });
                 
+                CalendarLinking.assertUniqueLinks(sheetEvents);
                 // Filtrar eventos del spreadsheet para el mes y año seleccionados
                 const sheetEventsInMonth = sheetEvents.filter(ev => 
                     ev.fechaObj && 
@@ -2908,7 +2862,7 @@
                 }
                 
                 // Registro de estados y matched IDs/Keys
-                const matchedCalendarEventIds = new Set();
+                const matchedCalendarEventIds = new Set(sheetEvents.map(ev => ev.calEventId).filter(Boolean));
                 const rowsToAdd = [];
                 let insertedInSheets = 0;
                 let updatedInSheets = 0;
@@ -2924,21 +2878,11 @@
                         calEv = events.find(e => e.id === sheetEv.calEventId);
                     }
                     
-                    if (!calEv) {
-                        // Buscar por coincidencia de clave única si no tiene ID o si el ID no se encontró
-                        calEv = events.find(e => {
-                            if (!e.tempRow) return false;
-                            const tempFecha = e.tempRow[5];
-                            const tempGrupo = e.tempRow[8];
-                            const tempHoraInicio = e.tempRow[12];
-                            const tempHoraFin = e.tempRow[13];
-                            return tempFecha === sheetEv.fechaStr && 
-                                   tempGrupo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === sheetEv.grupo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() &&
-                                   tempHoraInicio === sheetEv.horaInicio &&
-                                   tempHoraFin === sheetEv.horaFin;
-                        });
+                    if (!calEv && !sheetEv.calEventId) {
+                        const decision = CalendarLinking.choose(sheetEv, events, sheetEvents);
+                        if (decision.status === 'matched') calEv = events.find(e => e.id === decision.id);
                     }
-                    
+
                     if (calEv) {
                         // El evento existe en ambos lados
                         matchedCalendarEventIds.add(calEv.id);
@@ -2970,92 +2914,26 @@
                             
                             const updated = await updateExistingEvent(sheetEv.rowIdx, calEv, sheetEv);
                             if (updated) {
+                                sheetEv.calEventId = calEv.id;
                                 updatedInSheets++;
                             }
                         } else {
                             skippedCount++;
                         }
                     } else {
-                        // El evento está en Spreadsheet pero NO está en Calendar. ¡Debemos agregarlo!
-                        try {
-                            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                            const fParts = sheetEv.fechaStr.split("/");
-                            const fechaYYYYMMDD = `${fParts[2]}-${fParts[1]}-${fParts[0]}`;
-                            
-                            // Asegurar hora de inicio y fin válidas
-                            const hInicio = sheetEv.horaInicio || '10:00';
-                            const hFin = sheetEv.horaFin || '11:00';
-                            const startDT = `${fechaYYYYMMDD}T${hInicio}:00`;
-                            const endDT = `${fechaYYYYMMDD}T${hFin}:00`;
-                            
-                            const isBolo = sheetEv.boloCole === 'X';
-                            const grupo = sheetEv.grupo;
-                            const sitio = sheetEv.direccion || sheetEv.sitio || '';
-                            
-                            // Calcular horas reales para la descripción
-                            let horasCalc = 1;
-                            if (sheetEv.horaInicio && sheetEv.horaFin) {
-                                const [h1, m1] = sheetEv.horaInicio.split(':').map(Number);
-                                const [h2, m2] = sheetEv.horaFin.split(':').map(Number);
-                                const minutosInicio = h1 * 60 + m1;
-                                const minutosFin = h2 * 60 + m2;
-                                horasCalc = (minutosFin - minutosInicio) / 60;
-                                if (horasCalc <= 0) horasCalc = 1;
-                            }
-                            
-                            let eventResource = { 
-                                summary: isBolo ? `Bolo ${grupo}` : grupo, 
-                                location: sitio, 
-                                start: { dateTime: startDT, timeZone: tz }, 
-                                end: { dateTime: endDT, timeZone: tz },
-                                colorId: '5', // Amarillo (mismo color que sincronizar)
-                                description: `Sesión de ${horasCalc.toFixed(2)}h${isBolo ? ' (Bolo)' : ''} generada desde PercuManager.`,
-                                reminders: {
-                                    useDefault: false,
-                                    overrides: []
-                                }
-                            };
-                            
-                            const calResponse = await proxyGoogleAPI('calendar', 'insert', {
-                                calendarId: 'primary'
-                            }, eventResource);
-                            
-                            const newCalEventId = calResponse && calResponse.id ? calResponse.id : (calResponse && calResponse.result ? calResponse.result.id : null);
-                            
-                            if (newCalEventId) {
-                                // Guardar el eventId en la columna K de Sheets
-                                await proxyGoogleAPI('sheets', 'batchUpdate', {
-                                    spreadsheetId: CONFIG.SPREADSHEET_ID
-                                }, {
-                                    requests: [{
-                                        updateCells: {
-                                            range: {
-                                                sheetId: 0,
-                                                startRowIndex: sheetEv.rowIdx - 1,
-                                                endRowIndex: sheetEv.rowIdx,
-                                                startColumnIndex: 10, // Columna K (0-indexed)
-                                                endColumnIndex: 11
-                                            },
-                                            rows: [{
-                                                values: [{
-                                                    userEnteredValue: { stringValue: newCalEventId }
-                                                }]
-                                            }],
-                                            fields: 'userEnteredValue'
-                                        }
-                                    }]
-                                });
-                                insertedInCalendar++;
-                            }
-                        } catch (calInsError) {
-                            console.error(`Error insertando en Calendar el evento de la fila ${sheetEv.rowIdx}:`, calInsError);
-                        }
+                        // Ausente del mes no equivale a borrado: conservar el vínculo y no recrear.
+                        skippedCount++;
+                        console.warn('Vínculo pendiente de revisión; no se crea un evento nuevo', sheetEv.rowIdx);
                     }
                 }
-                
+
                 // Paso 2: Agregar a Sheets los eventos que están en Calendar pero no en Sheets
                 const unmatchedEvents = events.filter(e => !matchedCalendarEventIds.has(e.id));
                 for (const unmatchedEv of unmatchedEvents) {
+                    if (sheetEvents.some(ev => CalendarLinking.compatible(ev, unmatchedEv))) {
+                        skippedCount++;
+                        continue;
+                    }
                     if (unmatchedEv.tempRow) {
                         rowsToAdd.push(unmatchedEv.tempRow);
                         insertedInSheets++;

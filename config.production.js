@@ -9,6 +9,8 @@ const CONFIG = {
     SPREADSHEET_ID: '1breBD5aoBR4i9yiPJUKZC2Ouk0rvFOlRmwgJk4bUPwI',
     SPREADSHEET_NAME: 'Horas Fran — PRUEBAS — 28-10-2026',
     TEST_MODE: true,
+    TEST_PHASE: 2,
+    CALENDAR_LINKS_API_URL: 'https://horas-git-main-javat93s-projects.vercel.app/api/test?api=links',
     SCOPES: 'https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/spreadsheets',
     DISCOVERY_DOCS: [
         'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest',
