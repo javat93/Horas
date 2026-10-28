@@ -57,7 +57,7 @@ async function runLocale(payload,token,request){
   if(payload.action==='audit')return {dates,numbers,spreadsheetId:TEST_ID,locale:'es_ES',timeZone:'Europe/Madrid',conflicts:dates.filter(p=>p.conflict).length};
   const requests=[],checks=[],expectedRows=new Map();
   if(payload.action==='applyDates'){
-    if(!Array.isArray(payload.decisions)||payload.decisions.length>100)throw new Error('Revisa como máximo 100 fechas por lote.');
+    if(!Array.isArray(payload.decisions)||payload.decisions.length>500)throw new Error('Revisa como máximo 500 fechas por lote.');
     for(const decision of payload.decisions){
       const plan=dates.find(p=>p.rowIdx===decision.rowIdx);if(!plan||plan.expectedVersion!==decision.expectedVersion)throw new Error('La fecha cambió desde la revisión. Recarga antes de guardar.');
       if(expectedRows.has(`Detalle:${plan.rowIdx}`))throw new Error('Fila repetida.');

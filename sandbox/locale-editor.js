@@ -21,13 +21,13 @@
     const status=node('p');status.setAttribute('role','status');section.append(status);
     const refresh=node('button','Volver a analizar'),formats=node('input'),rowSearch=node('input'),find=node('button','Buscar fecha por fila');refresh.type=find.type='button';formats.type='checkbox';rowSearch.type='number';rowSearch.min='2';
     section.append(refresh);const formatLabel=node('label',' Mostrar también cambios de formato ');formatLabel.append(formats);section.append(formatLabel);const searchLabel=node('label',' Fila de fecha: ');searchLabel.append(rowSearch);section.append(searchLabel,find);
-    const selectVerified=node('button','Seleccionar respaldadas de esta página'),prepare=node('button','Revisar fechas seleccionadas');selectVerified.type=prepare.type='button';section.append(selectVerified,prepare);
+    const selectVerified=node('button','Seleccionar lote respaldado (hasta 450)'),prepare=node('button','Revisar fechas seleccionadas');selectVerified.type=prepare.type='button';section.append(selectVerified,prepare);
     for(const button of [refresh,find,selectVerified,prepare])button.style.cssText='padding:8px;margin:8px;border:1px solid #64748b;border-radius:6px';
     const selectedText=node('p'),list=node('div'),pager=node('div'),confirmation=node('div');section.append(selectedText,list,pager,confirmation);
     const numbers=node('div');numbers.style.cssText='margin-top:24px;padding-top:12px;border-top:1px solid #cbd5e1';section.append(numbers);
     const prepareNumbers=node('button','Revisar números y formatos monetarios'),check=node('button','Probar suma y datos del gráfico');prepareNumbers.type=check.type='button';prepareNumbers.style.cssText=check.style.cssText='padding:8px;margin:8px;border:1px solid #64748b;border-radius:6px';numbers.append(prepareNumbers,check);const numberResult=node('div');numbers.append(numberResult);
     let review=null,busy=false,page=0,search='',selected=new Map();
-    function count(){selectedText.textContent=`${selected.size} fechas seleccionadas (máximo 100 por lote).`;prepare.disabled=selected.size===0||selected.size>100;}
+    function count(){selectedText.textContent=`${selected.size} fechas seleccionadas (máximo 500 por lote).`;prepare.disabled=selected.size===0||selected.size>500;}
     async function action(work){if(busy)return;busy=true;for(const b of section.querySelectorAll('button,input,select'))b.disabled=true;try{await work();}catch(error){status.textContent=error.message;}finally{busy=false;for(const b of section.querySelectorAll('button,input,select'))b.disabled=false;const buttons=pager.querySelectorAll('button');if(buttons[0])buttons[0].disabled=page===0;if(buttons[1])buttons[1].disabled=(page+1)*50>=filtered().length;count();}}
     function filtered(){if(!review)return [];return review.dates.filter(p=>search?p.rowIdx===Number(search):formats.checked||p.conflict||p.textDate);}
     function draw(){
@@ -43,7 +43,7 @@
     }
     async function analyze(){status.textContent='Contrastando fechas e IDs con todas las páginas de Calendar…';review=await api('audit');selected.clear();confirmation.replaceChildren();page=0;status.textContent=`${review.conflicts} discrepancias entre día interno y presentación; ${review.dates.filter(p=>p.verified).length} ajustes respaldados, incluidos cambios de formato. No se ha escrito nada.`;draw();}
     open.onclick=()=>{section.hidden=false;section.scrollIntoView({behavior:'smooth',block:'start'});action(analyze);};refresh.onclick=()=>action(analyze);formats.onchange=()=>{search='';rowSearch.value='';page=0;draw();};find.onclick=()=>{search=rowSearch.value;page=0;draw();};
-    selectVerified.onclick=()=>{for(const plan of filtered().slice(page*50,page*50+50))if(plan.verified&&!selected.has(plan.rowIdx)&&selected.size<100)selected.set(plan.rowIdx,{rowIdx:plan.rowIdx,expectedVersion:plan.expectedVersion,choice:plan.verified,verifiedOnly:true});draw();};
+    selectVerified.onclick=()=>{for(const plan of filtered())if(plan.verified&&!selected.has(plan.rowIdx)&&selected.size<450)selected.set(plan.rowIdx,{rowIdx:plan.rowIdx,expectedVersion:plan.expectedVersion,choice:plan.verified,verifiedOnly:true});draw();};
     prepare.onclick=()=>{
       confirmation.replaceChildren();confirmation.append(node('h3','Confirmación de las fechas elegidas'));
       for(const decision of selected.values()){const plan=review.dates.find(p=>p.rowIdx===decision.rowIdx),choice=plan.choices.find(c=>c.key===decision.choice);confirmation.append(node('p',`F${plan.rowIdx}: ${LocaleData.display(plan.internal)||'(texto)'} → ${LocaleData.display(choice.iso)}${plan.internal===choice.iso?' (solo formato)':''}`));}
