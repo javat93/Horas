@@ -1,4 +1,8 @@
-# Entorno de pruebas — fase 3
+# Entorno de pruebas — fase 4
+
+La fase 4 lee valores nativos (números, fechas seriales y horas), muestra moneda española y marca las discrepancias de fecha pendientes. La revisión de fechas conserva la distinción entre el día interno y el texto anteriormente mostrado. Propone el cambio respaldado por Calendar solo con ID no compartido, grupo y horario compatibles; nunca intercambia día/mes de todo el histórico. Cada cambio se revisa, se relee la fila y solo escribe F con número serial y formato dd/mm/yyyy. Las fórmulas de fecha no se sustituyen.
+
+La normalización numérica se aplica por lotes de hasta 500 celdas, solo en Detalle E/G/H y Coles C/D. Conserva números y fórmulas; convierte texto solo si no es ambiguo y sin redondear el valor interno. No recalcula precios, no cambia H=1 ni escribe barrios o dirección. La prueba temporal verifica 16,50 + 20,25 = 36,75 y el origen numérico de un gráfico, retirando la pestaña al terminar. La configuración de la copia permanece es_ES y Europe/Madrid. La migración queda registrada en el informe externo de la fase; el original sigue bloqueado.
 
 La fase 2 fue validada por el usuario. La fase 3 añade revisión de precios, importes por sesión, barrios y horarios antes de guardar o sincronizar un mes. Se conserva todo por defecto y se confirma cada grupo de campos por separado. Cancelar no envía escrituras. El endpoint protegido vuelve a leer valores nativos y fórmulas, verifica las versiones de las filas y el catálogo y escribe solo las celdas aceptadas (E/G, J o M/N), en un lote. No escribe A/B/C/D/F/H/I/K/L, no cambia fechas ni Calendar y no permite altas/borrados ni editar grupos todavía.
 

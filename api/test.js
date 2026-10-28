@@ -3,6 +3,7 @@ const { TEST_ID, SCOPES, validateTarget, validateOperation } = require('../sandb
 const { controlProbe, googleRequest } = require('../sandbox/server.cjs');
 const {runLinks}=require('../sandbox/link-service.cjs');
 const {runProtected}=require('../sandbox/protected-service.cjs');
+const {runLocale}=require('../sandbox/locale-service.cjs');
 
 module.exports = async (req,res) => {
   const allowedOrigins = ['https://javat93.github.io','https://horas-git-main-javat93s-projects.vercel.app',`https://${req.headers.host}`];
@@ -15,12 +16,12 @@ module.exports = async (req,res) => {
   res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');
   if(req.method==='OPTIONS')return res.status(204).end();
   const api=req.query?.api;
-  if(req.method==='GET' && api==='environment')return res.json({mode:'test',phase:3,linkReview:true,protectedReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:false,appWrites:false});
+  if(req.method==='GET' && api==='environment')return res.json({mode:'test',phase:4,linkReview:true,protectedReview:true,localeReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:false,appWrites:false});
   if(req.method==='GET' && api==='oauth')return res.json({client_id:'367465910816-1epkiok8ntvrphrv08b4g6amh0u9knpv.apps.googleusercontent.com',scopes:SCOPES});
   if(req.method!=='POST')return res.status(405).json({error:'Método no permitido.'});
   const payload=req.body || {};
   try {
-    if(['control','links','protected'].includes(api))validateTarget(payload.spreadsheetId);
+    if(['control','links','protected','locale'].includes(api))validateTarget(payload.spreadsheetId);
     else validateOperation(api,payload.method,payload.params);
   } catch(error){return res.status(403).json({error:error.message});}
   const token=req.headers.authorization;
@@ -29,6 +30,7 @@ module.exports = async (req,res) => {
     if(api==='control')return res.json(await controlProbe(token));
     if(api==='links')return res.json(await runLinks(payload,token,googleRequest));
     if(api==='protected')return res.json(await runProtected(payload,token,googleRequest));
+    if(api==='locale')return res.json(await runLocale(payload,token,googleRequest));
     let url;
     if(api==='sheets'){
       const query=new URLSearchParams();

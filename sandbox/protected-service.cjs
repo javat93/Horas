@@ -3,10 +3,11 @@ const L=require('../calendar-linking.js');
 const {TEST_ID,validateTarget}=require('./policy.cjs');
 const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`;
 const CAL='https://www.googleapis.com/calendar/v3/calendars/primary/events';
+const D=require('../locale-data.js');
 const {createHash}=require('node:crypto');
 const fingerprint=cells=>createHash('sha256').update(P.version(cells)).digest('hex');
 async function snapshot(token,request){
-  const query=new URLSearchParams({includeGridData:'true',fields:'sheets(properties(title),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue,formattedValue))))'});
+  const query=new URLSearchParams({includeGridData:'true',fields:'sheets(properties(title),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue,formattedValue,effectiveFormat(numberFormat)))))'});
   query.append('ranges','Detalle!A1:N3000');query.append('ranges','Coles!A1:E1220');
   const data=await request(`${BASE}?${query}`,token);
   function rows(title,width){const sheet=data.sheets?.find(s=>s.properties.title===title);if(!sheet)throw new Error(`No se pudo leer ${title}.`);const result=[];for(const grid of sheet.data||[]){for(const [i,row]of (grid.rowData||[]).entries())result[(grid.startRow||0)+i]=Array.from({length:width},(_,c)=>row.values?.[c]||{});}return result;}
@@ -17,7 +18,7 @@ async function build(payload,snap,token,request){
   let selected;
   if(payload.mode==='sync'){
     if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(payload.month||''))throw new Error('Selecciona un mes válido.');
-    selected=snap.rows.map((cells,i)=>({cells,rowIdx:i+1})).filter(({cells,rowIdx})=>rowIdx>1&&L.dateKey(P.text(cells?.[5])).startsWith(payload.month));
+    selected=snap.rows.map((cells,i)=>({cells,rowIdx:i+1})).filter(({cells,rowIdx})=>rowIdx>1&&D.dateISO(cells?.[5]).startsWith(payload.month));
   }else{
     if(!Number.isInteger(payload.rowIdx)||payload.rowIdx<2||payload.rowIdx>3000)throw new Error('Fila no válida.');
     const cells=snap.rows[payload.rowIdx-1];if(!cells||!P.text(cells[8]))throw new Error('No se encontró la sesión.');selected=[{cells,rowIdx:payload.rowIdx}];
@@ -50,11 +51,12 @@ async function build(payload,snap,token,request){
       const id=P.text(cells[10]),claimed=id&&allRows.filter(r=>r.calEventId===id).length>1;
       const event=id&&!claimed?events.find(e=>e.id===id):null;
       if(claimed)notes.push('ID compartido: se conserva el horario; revisa el vínculo en fase 2.');
-      else if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&L.groupFromTitle(event.summary)===groupName&&L.calendarDate(event)===L.dateKey(P.text(cells[5]))){
+      else if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&L.groupFromTitle(event.summary)===groupName&&L.calendarDate(event)===D.dateISO(cells[5])){
         const h=L.hours(event);if(h.horaInicio&&h.horaFin)proposal.time={start:h.horaInicio,end:h.horaFin};
       }else if(id)notes.push('El evento no aparece como amarillo y compatible en este mes: se conserva el horario y no se recrea.');
     }
     const plan=P.makePlan(rowIdx,cells,proposal,payload.mode==='edit'?'Formulario':'Tarifa y barrio de Coles; horario de Calendar',notes);
+    plan.date=D.display(D.dateISO(cells[5]));
     plan.expectedVersion=fingerprint(cells);plans.push(plan);
   }
   return {plans,catalogVersion,mode:payload.mode,month:payload.month,spreadsheetId:TEST_ID,calendarReadOnly:true};

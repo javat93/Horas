@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const banner=document.createElement('div');
     banner.id='test-environment-banner';
     banner.style.cssText='padding:16px;background:#fff3cd;color:#312a12;position:relative;z-index:100';
-    banner.innerHTML='<strong>PRUEBAS — Fase 3 — Calendar solo lectura</strong><div>Hoja: Horas Fran — PRUEBAS — 28-10-2026</div><div id="test-target-status">Comprobando destino del backend…</div><button id="test-reload" type="button">Recargar copia</button> · <button id="test-control" type="button">Probar escritura y restauración en la copia</button><div id="test-result" role="status" aria-live="polite"></div>';
+    banner.innerHTML='<strong>PRUEBAS — Fase 4 — Calendar solo lectura</strong><div>Hoja: Horas Fran — PRUEBAS — 28-10-2026</div><div id="test-target-status">Comprobando destino del backend…</div><button id="test-reload" type="button">Recargar copia</button> · <button id="test-control" type="button">Probar escritura y restauración en la copia</button><div id="test-result" role="status" aria-live="polite"></div>';
     document.body.prepend(banner);
   }
   const status=document.getElementById('test-target-status');
@@ -42,11 +42,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const env=await response.json();
     if(!response.ok || env.mode!=='test' || env.spreadsheetId!==CONFIG.SPREADSHEET_ID || !env.calendarReadOnly || env.automaticWrites || env.appWrites) throw new Error('El backend no coincide con la configuración de pruebas.');
     if(CONFIG.TEST_PHASE===2 && (env.phase!==2||!env.linkReview))throw new Error('El backend aún no está preparado para la fase 2. Recarga en unos instantes.');
-    if(CONFIG.TEST_PHASE>=3 && (env.phase!==3||!env.protectedReview))throw new Error('El backend aún no está preparado para la fase 3. Recarga en unos instantes.');
+    if(CONFIG.TEST_PHASE>=3 && (env.phase!==CONFIG.TEST_PHASE||!env.protectedReview))throw new Error('El backend aún no está preparado para esta fase. Recarga en unos instantes.');
+    if(CONFIG.TEST_PHASE>=4 && !env.localeReview)throw new Error('La revisión de fechas aún no está disponible.');
     status.textContent=`Backend comprobado: ${env.spreadsheetId}. Los cambios requieren revisión; no hay escrituras automáticas ni cambios en Calendar.`;
     control.disabled=false;
     resolveEnvironment(true);
     window.mountCalendarReview?.(document.getElementById('test-environment-banner'));
+    if(CONFIG.TEST_PHASE>=4)window.mountLocaleReview?.(document.getElementById('test-environment-banner'));
     if(CONFIG.TEST_PHASE>=3){
       window.mountProtectedReview?.(document.getElementById('test-environment-banner'));
       const sync=document.getElementById('sync-btn');if(sync){sync.disabled=false;sync.title='Preparar revisión de sincronización, sin cambios automáticos';}

@@ -2,12 +2,15 @@ const Links=require('../calendar-linking.js');
 const {TEST_ID,validateTarget}=require('./policy.cjs');
 const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`;
 const CAL='https://www.googleapis.com/calendar/v3/calendars/primary/events';
+const {snapshot:readSnapshot}=require('./protected-service.cjs');
+const D=require('../locale-data.js');
+async function readNative(token,request){const snap=await readSnapshot(token,request);return {details:snap.rows.slice(1).map(cells=>cells.map((c,i)=>i===5?D.display(D.dateISO(c)):[12,13].includes(i)?D.time(D.value(c)):c?.formattedValue??D.value(c)))};}
 function sameRow(a,b){return Array.isArray(b)&&b.length===14&&JSON.stringify(a)===JSON.stringify(b);}
 async function runLinks(payload,token,request){
   validateTarget(payload.spreadsheetId);
   if(!['audit','candidates','apply'].includes(payload.action))throw new Error('Acción de vínculos no permitida.');
-  const snapshot=await request(`${BASE}/values/${encodeURIComponent('Detalle!A2:N')}?valueRenderOption=FORMATTED_VALUE`,token);
-  const rows=(snapshot.values||[]).map((v,i)=>Links.rowFromValues(v,i+2));
+  const snapshot=await readNative(token,request);
+  const rows=snapshot.details.map((v,i)=>Links.rowFromValues(v,i+2));
   if(payload.action==='audit')return {rows:rows.filter(r=>r.grupo||r.fechaStr),shared:Links.sharedIds(rows),missing:rows.filter(r=>r.grupo&&!r.calEventId),spreadsheetId:TEST_ID};
   const row=rows.find(r=>r.rowIdx===payload.rowIdx);
   if(!row || !sameRow(row.expectedRow,payload.expectedRow))throw new Error('La fila cambió desde la revisión. Recarga el análisis antes de continuar.');
@@ -35,8 +38,8 @@ async function runLinks(payload,token,request){
     if(!Links.compatible(row,event))throw new Error('El evento no coincide en grupo, fecha y horario, está cancelado o no es amarillo. No se cambió el vínculo.');
   }
   // Volver a comprobar toda la fila y los demás IDs justo antes de escribir K.
-  const fresh=await request(`${BASE}/values/${encodeURIComponent('Detalle!A2:N')}?valueRenderOption=FORMATTED_VALUE`,token);
-  const freshRows=(fresh.values||[]).map((v,i)=>Links.rowFromValues(v,i+2));
+  const fresh=await readNative(token,request);
+  const freshRows=fresh.details.map((v,i)=>Links.rowFromValues(v,i+2));
   const current=freshRows.find(r=>r.rowIdx===row.rowIdx);
   if(!current||!sameRow(current.expectedRow,payload.expectedRow))throw new Error('La fila cambió durante la revisión. No se guardó nada.');
   if(newId&&freshRows.some(other=>other.rowIdx!==row.rowIdx&&other.calEventId===newId))throw new Error('Otra fila ya usa ese evento. Recarga el análisis.');
