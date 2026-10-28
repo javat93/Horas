@@ -87,14 +87,15 @@ async function numericProbe(token,request){
     const title=`Prueba castellano ${Date.now()}`;
     const added=await request(`${BASE}:batchUpdate`,token,'POST',{requests:[{addSheet:{properties:{title,gridProperties:{rowCount:8,columnCount:3}}}}]});
     sheetId=added.replies?.[0]?.addSheet?.properties?.sheetId;if(!Number.isInteger(sheetId))throw new Error('No se pudo verificar la pestaña temporal.');
-    await request(`${BASE}:batchUpdate`,token,'POST',{requests:[
+    const created=await request(`${BASE}:batchUpdate`,token,'POST',{requests:[
       {updateCells:{range:{sheetId,startRowIndex:0,endRowIndex:4,startColumnIndex:0,endColumnIndex:2},rows:[{values:[{userEnteredValue:{stringValue:'Concepto'}},{userEnteredValue:{stringValue:'Importe'}}]},{values:[{userEnteredValue:{stringValue:'Primero'}},{userEnteredValue:{numberValue:16.5},userEnteredFormat:{numberFormat:{type:'CURRENCY',pattern:'#,##0.00" €"'}}}]},{values:[{userEnteredValue:{stringValue:'Segundo'}},{userEnteredValue:{numberValue:20.25},userEnteredFormat:{numberFormat:{type:'CURRENCY',pattern:'#,##0.00" €"'}}}]},{values:[{userEnteredValue:{stringValue:'Suma'}},{userEnteredValue:{formulaValue:'=SUM(B2:B3)'},userEnteredFormat:{numberFormat:{type:'CURRENCY',pattern:'#,##0.00" €"'}}}]}],fields:'userEnteredValue,userEnteredFormat.numberFormat'}},
       {addChart:{chart:{spec:{title:'Comprobación de importes numéricos',basicChart:{chartType:'COLUMN',headerCount:1,domains:[{domain:{sourceRange:{sources:[{sheetId,startRowIndex:0,endRowIndex:3,startColumnIndex:0,endColumnIndex:1}]}}}],series:[{series:{sourceRange:{sources:[{sheetId,startRowIndex:0,endRowIndex:3,startColumnIndex:1,endColumnIndex:2}]}},targetAxis:'LEFT_AXIS'}]}},position:{overlayPosition:{anchorCell:{sheetId,rowIndex:0,columnIndex:2}}}}}}
     ]});
     const query=new URLSearchParams({includeGridData:'true',fields:'sheets(properties(sheetId),charts(spec),data(rowData(values(effectiveValue,formattedValue))))'});query.append('ranges',`'${title}'!A1:B4`);
     const result=await request(`${BASE}?${query}`,token),sheet=result.sheets?.find(s=>s.properties.sheetId===sheetId),rows=sheet?.data?.[0]?.rowData;
     const total=rows?.[3]?.values?.[1];if(total?.effectiveValue?.numberValue!==36.75||!total.formattedValue?.includes('36,75'))throw new Error('La suma o su formato español no coincide con 36,75.');
-    if(!sheet?.charts?.some(chart=>chart.spec.basicChart?.series?.[0]?.series?.sourceRange?.sources?.[0]?.sheetId===sheetId))throw new Error('No se pudo comprobar el origen numérico del gráfico.');
+    const charts=[...(sheet?.charts||[]),...(created.replies||[]).filter(r=>r.addChart).map(r=>r.addChart.chart)];
+    if(!charts.some(chart=>chart?.spec?.basicChart?.series?.some(series=>series.series?.sourceRange?.sources?.some(source=>source.sheetId===sheetId&&source.startColumnIndex===1))))throw new Error('No se pudo comprobar el origen numérico del gráfico: '+JSON.stringify(charts.map(chart=>({chartId:chart?.chartId,spec:chart?.spec}))).slice(0,1600));
     return {sum:36.75,formatted:total.formattedValue,chartDataVerified:true,calendarModified:false,restored:true};
   }finally{if(Number.isInteger(sheetId)){try{await request(`${BASE}:batchUpdate`,token,'POST',{requests:[{deleteSheet:{sheetId}}]});}catch{throw new Error(`No se pudo retirar la pestaña temporal (${sheetId}). Revísala antes de repetir la prueba.`);}}}
 }
