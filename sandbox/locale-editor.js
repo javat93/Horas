@@ -20,6 +20,7 @@
     section.append(node('p','Cambiar el formato no repara una fecha interna equivocada. Revisa ambas fechas y la comprobación de Calendar. Sin selección no se cambia nada; no se intercambian días y meses en bloque.'));
     const status=node('p');status.setAttribute('role','status');section.append(status);
     const refresh=node('button','Volver a analizar'),formats=node('input'),rowSearch=node('input'),find=node('button','Buscar fecha por fila');refresh.type=find.type='button';formats.type='checkbox';rowSearch.type='number';rowSearch.min='2';
+    rowSearch.style.cssText='width:90px;padding:6px;border:1px solid #94a3b8;margin:6px';
     section.append(refresh);const formatLabel=node('label',' Mostrar también cambios de formato ');formatLabel.append(formats);section.append(formatLabel);const searchLabel=node('label',' Fila de fecha: ');searchLabel.append(rowSearch);section.append(searchLabel,find);
     const selectVerified=node('button','Seleccionar lote respaldado (hasta 450)'),prepare=node('button','Revisar fechas seleccionadas');selectVerified.type=prepare.type='button';section.append(selectVerified,prepare);
     for(const button of [refresh,find,selectVerified,prepare])button.style.cssText='padding:8px;margin:8px;border:1px solid #64748b;border-radius:6px';
@@ -35,7 +36,7 @@
       for(const plan of visible){const card=node('div');card.style.cssText='border-top:1px solid #cbd5e1;padding:12px 0';list.append(card);
         card.append(node('p',`Fila ${plan.rowIdx} · ${plan.group} · Interna: ${LocaleData.display(plan.internal)||'(no numérica)'} · Antes se mostraba: ${LocaleData.display(plan.visible)||'(sin fecha reconocida)'}`));
         card.append(node('p',plan.reason));if(plan.calendar)card.append(node('p',`Calendar: ${plan.calendar.title} · ${LocaleData.display(plan.calendar.date)}`));
-        const label=node('label',`Decisión de fecha, fila ${plan.rowIdx}: `),select=node('select');select.style.cssText='max-width:100%;border:1px solid #94a3b8;padding:8px';const keep=node('option','Dejar pendiente, sin cambios');keep.value='keep';select.append(keep);
+        const label=node('label',`Decisión de fecha, fila ${plan.rowIdx}: `),select=node('select');select.setAttribute('aria-label',`Decisión de fecha, fila ${plan.rowIdx}:`);select.style.cssText='max-width:100%;border:1px solid #94a3b8;padding:8px';const keep=node('option','Dejar pendiente, sin cambios');keep.value='keep';select.append(keep);
         for(const choice of plan.choices){const option=node('option',`${choice.label}: ${LocaleData.display(choice.iso)}${plan.verified===choice.key?' · respaldada':''}`);option.value=choice.key;select.append(option);}
         select.value=selected.get(plan.rowIdx)?.choice||'keep';select.onchange=()=>{confirmation.replaceChildren();if(select.value==='keep')selected.delete(plan.rowIdx);else selected.set(plan.rowIdx,{rowIdx:plan.rowIdx,expectedVersion:plan.expectedVersion,choice:select.value,verifiedOnly:false});count();};label.append(select);card.append(label);
       }
@@ -49,7 +50,7 @@
       for(const decision of selected.values()){const plan=review.dates.find(p=>p.rowIdx===decision.rowIdx),choice=plan.choices.find(c=>c.key===decision.choice);confirmation.append(node('p',`F${plan.rowIdx}: ${LocaleData.display(plan.internal)||'(texto)'} → ${LocaleData.display(choice.iso)}${plan.internal===choice.iso?' (solo formato)':''}`));}
       const confirm=node('button','Confirmar fechas en la copia'),cancel=node('button','Cancelar selección');confirm.type=cancel.type='button';confirmation.append(confirm,cancel);
       cancel.onclick=()=>{selected.clear();confirmation.replaceChildren();draw();status.textContent='Selección cancelada. Sin cambios.';};
-      confirm.onclick=()=>action(async()=>{const result=await api('applyDates',{decisions:[...selected.values()]});const saved=`${result.cellsChanged||0} fechas o formatos guardados y verificados. Calendar no cambia.`;try{await analyze();await syncData(false,false);status.textContent=saved;}catch(error){status.textContent=saved+' Falta refrescar el análisis: '+error.message;}});
+      confirm.onclick=()=>action(async()=>{status.textContent='Aplicando únicamente las fechas seleccionadas y verificando el resultado…';const result=await api('applyDates',{decisions:[...selected.values()]});const saved=`${result.cellsChanged||0} fechas o formatos guardados y verificados. Calendar no cambia.`;try{await analyze();await syncData(false,false);status.textContent=saved;}catch(error){status.textContent=saved+' Falta refrescar el análisis: '+error.message;}});
       confirmation.scrollIntoView({block:'nearest'});
     };
     prepareNumbers.onclick=()=>action(async()=>{
