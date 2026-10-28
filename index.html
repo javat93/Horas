@@ -19,9 +19,14 @@
     
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
-    configScript.src = isProduction ? 'config.production.js' : 'config.secure.js';
+    configScript.src = isProduction ? 'config.production.js?v=pruebas-20261028' : 'config.secure.js';
+    window.horasConfigReady = new Promise((resolve, reject) => {
+        configScript.onload = resolve;
+        configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
+    });
     document.head.appendChild(configScript);
 </script>
+    <script src="sandbox/panel.js?v=pruebas-20261028" defer></script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <!-- PWA Manifest and Icons -->
     <link rel="manifest" href="manifest.json">
@@ -734,6 +739,9 @@
         console.log('%c========================', 'color: #2563eb; font-weight: bold; font-size: 14px');
 
         let tokenClient;
+        function tokenStorageKey() {
+            return typeof CONFIG !== 'undefined' && CONFIG.TEST_MODE ? 'g_token_pruebas' : 'g_token';
+        }
         let gapiInited = false;
         let gisInited = false;
         let eventos = [];
@@ -812,6 +820,7 @@
         }
 
         async function loadOAuthConfig() {
+            if (CONFIG.TEST_MODE) return;
             try {
                 if (CONFIG.ENVIRONMENT === 'production' && CONFIG.USE_PROXY) {
                     const response = await fetch(`${CONFIG.PROXY_URL}/api/oauth-config`);
@@ -832,6 +841,10 @@
             await loadOAuthConfig();
             if (CONFIG.CLIENT_ID) {
                 tokenClient = google.accounts.oauth2.initTokenClient({
+                    error_callback: (error) => {
+                        hideLoading();
+                        if (CONFIG.TEST_MODE) document.getElementById('test-result').textContent = 'No se pudo completar la conexión de Google (' + (error.type || 'error de acceso') + ').';
+                    },
                     client_id: CONFIG.CLIENT_ID,
                     scope: CONFIG.SCOPES,
                     callback: '', 
@@ -852,7 +865,7 @@
                     document.getElementById('sync-btn').classList.remove('hidden');
                     document.getElementById('add-future-events-btn').classList.remove('hidden');
                     document.getElementById('auth-btn').classList.add('hidden');
-                    localStorage.setItem('g_token', resp.access_token);
+                    localStorage.setItem(tokenStorageKey(), resp.access_token);
                     await syncData();
                 } finally {
                     hideLoading();
@@ -863,7 +876,7 @@
 
         function checkAuth() {
             if (gapiInited && gisInited) {
-                const token = localStorage.getItem('g_token');
+                const token = localStorage.getItem(tokenStorageKey());
                 if (token) {
                     gapi.client.setToken({access_token: token});
                     document.getElementById('sync-btn').classList.remove('hidden');
@@ -875,7 +888,7 @@
                     syncData().catch(err => {
                         console.error('Token inválido, limpiando localStorage:', err);
                         // Limpiar token inválido y mostrar botón de login
-                        localStorage.removeItem('g_token');
+                        localStorage.removeItem(tokenStorageKey());
                         gapi.client.setToken(null);
                         document.getElementById('sync-btn').classList.add('hidden');
                         document.getElementById('add-future-events-btn').classList.add('hidden');
@@ -893,7 +906,7 @@
         // Función para asegurar que el botón de auth sea visible al cargar
         function ensureAuthButtonVisible() {
             const authBtn = document.getElementById('auth-btn');
-            const token = localStorage.getItem('g_token');
+            const token = localStorage.getItem(tokenStorageKey());
             
             if (!token) {
                 // Forzar visibilidad del botón si no hay token
@@ -913,6 +926,11 @@
         }
 		// FUNCIÓN CLAVE: Proxy para llamadas a Google APIs en producción
         async function proxyGoogleAPI(apiType, method, params = {}, body = null) {
+            if (CONFIG.TEST_MODE) {
+                if (!window.horasEnvironmentReady || !await window.horasEnvironmentReady) throw new Error('El entorno de pruebas no está verificado.');
+                if (apiType === 'sheets' && params.spreadsheetId !== CONFIG.SPREADSHEET_ID) throw new Error('Destino de hoja bloqueado en pruebas.');
+                if (!((apiType === 'sheets' && method === 'get') || (apiType === 'calendar' && method === 'list'))) throw new Error('Fase 1: escrituras ordinarias y cambios en Calendar bloqueados.');
+            }
             if (CONFIG.ENVIRONMENT === 'production' && CONFIG.USE_PROXY) {
                 // En producción, usar el proxy
                 const proxyUrl = CONFIG[`GOOGLE_${apiType.toUpperCase()}_API_URL`];
@@ -921,7 +939,7 @@
                 }
                 
                 // Obtener token de OAuth si está disponible
-                const token = gapi.client?.getToken()?.access_token || localStorage.getItem('g_token');
+                const token = gapi.client?.getToken()?.access_token || localStorage.getItem(tokenStorageKey());
                 
                 const headers = {
                     'Content-Type': 'application/json',
@@ -1152,7 +1170,11 @@
             }
         }
 
-        async function syncData(resolverCal = false, actualizarRealizadosFlag = true) {
+        async function syncData(resolverCal = false, actualizarRealizadosFlag = !CONFIG.TEST_MODE) {
+            if (CONFIG.TEST_MODE && resolverCal) {
+                showErrorModal('Fase 1', 'Usa «Recargar copia». La sincronización que modifica datos se probará en las siguientes fases.', 'info');
+                return;
+            }
             showLoading('Sincronizando datos...');
             try {
                 // 1. Grupos
@@ -1495,7 +1517,7 @@
         if (err.message && err.message.includes('401') || 
             (err.message && err.message.includes('authentication credentials'))) {
             console.error('Token inválido detectado en syncData, limpiando localStorage');
-            localStorage.removeItem('g_token');
+            localStorage.removeItem(tokenStorageKey());
             gapi.client.setToken(null);
             
             // Mostrar botón de login
@@ -3241,8 +3263,9 @@
             return `${hours}:${minutes}`;
         }
 
-        window.onload = () => {
-            loadGoogleMaps();
+        window.onload = async () => {
+            await window.horasConfigReady;
+            if (!CONFIG.TEST_MODE) loadGoogleMaps();
             gapiLoaded();
             gisLoaded();
             ensureAuthButtonVisible();

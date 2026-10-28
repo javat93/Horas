@@ -4,6 +4,8 @@
   "description": "Backend proxy seguro para PercuManager",
   "main": "proxy.js",
   "scripts": {
+    "start:pruebas": "node sandbox/server.cjs",
+    "test:pruebas": "node --test sandbox/isolation.test.cjs",
     "start": "node proxy.js",
     "dev": "nodemon proxy.js",
     "build-css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
