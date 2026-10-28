@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     status.textContent=`Backend comprobado: ${env.spreadsheetId}. Solo se pueden guardar vínculos revisados; precios y Calendar no cambian.`;
     control.disabled=false;
     resolveEnvironment(true);
-    window.mountCalendarReview?.(banner);
+    window.mountCalendarReview?.(document.getElementById('test-environment-banner'));
   } catch(error){status.textContent=error.message;resolveEnvironment(false);return;}
   document.getElementById('test-reload').onclick=()=>syncData(false,false);
   control.onclick=async()=>{

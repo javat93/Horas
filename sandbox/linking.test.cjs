@@ -3,6 +3,7 @@ const assert=require('node:assert/strict');
 const L=require('../calendar-linking.js');
 const {runLinks}=require('./link-service.cjs');
 const {TEST_ID,ORIGINAL_ID}=require('./policy.cjs');
+const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const row={rowIdx:2,grupo:'Molí de finestrelles',fechaStr:'28/09/2026',horaInicio:'18:30',horaFin:'19:30',calEventId:''};
 const event={id:'moli',summary:'Moli de finestrelles',colorId:'5',status:'confirmed',start:{dateTime:'2026-09-28T18:30:00+02:00'},end:{dateTime:'2026-09-28T19:30:00+02:00'}};
 test('nunca asigna el único evento ajeno, ni uno que solo comparte barrio',()=>{
@@ -86,4 +87,17 @@ test('no permite forzar un ID personal, cancelado ni de otro grupo',async()=>{
 test('rechaza el original sin siquiera leer y repetir la confirmación no vuelve a escribir',async()=>{
   const m=mock([makeRow()]);await assert.rejects(()=>runLinks({spreadsheetId:ORIGINAL_ID,action:'audit'},'Bearer fake',m.request));assert.equal(m.calls.length,0);
   const v=makeRow('Molí de finestrelles','moli');const n=mock([v]);const result=await runLinks({spreadsheetId:TEST_ID,action:'apply',rowIdx:2,expectedRow:v,newEventId:'moli'},'Bearer fake',n.request);assert.equal(result.unchanged,true);assert(n.calls.every(c=>c.method==='GET'));
+});
+test('el panel monta el revisor después de verificar el backend, con banner existente o nuevo',async()=>{
+  for(const exists of [true,false]){
+    const elements={};const element=()=>({addEventListener(){},style:{},append(){}});
+    for(const id of ['test-target-status','test-result','test-control','auth-btn','test-reload'])elements[id]=element();
+    if(exists)elements['test-environment-banner']=element();
+    let ready,mounted;
+    const window={horasConfigReady:Promise.resolve(),mountCalendarReview:el=>{mounted=el}};
+    const document={getElementById:id=>elements[id],createElement:()=>element(),body:{prepend:el=>{elements[el.id]=el}},addEventListener:(name,fn)=>{if(name==='DOMContentLoaded')ready=fn}};
+    const context=vm.createContext({window,document,CONFIG:{TEST_MODE:true,TEST_PHASE:2,SPREADSHEET_ID:TEST_ID,PROXY_URL:'https://example.invalid'},fetch:async()=>({ok:true,json:async()=>({mode:'test',phase:2,linkReview:true,spreadsheetId:TEST_ID,calendarReadOnly:true,automaticWrites:false,appWrites:false})})});
+    vm.runInContext(fs.readFileSync(path.join(__dirname,'panel.js'),'utf8'),context);
+    await ready();assert.equal(await window.horasEnvironmentReady,true);assert.equal(mounted,elements['test-environment-banner']);assert.match(elements['test-target-status'].textContent,/Backend comprobado/);
+  }
 });
