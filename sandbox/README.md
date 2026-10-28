@@ -1,4 +1,8 @@
-# Entorno de pruebas — fase 2
+# Entorno de pruebas — fase 3
+
+La fase 2 fue validada por el usuario. La fase 3 añade revisión de precios, importes por sesión, barrios y horarios antes de guardar o sincronizar un mes. Se conserva todo por defecto y se confirma cada grupo de campos por separado. Cancelar no envía escrituras. El endpoint protegido vuelve a leer valores nativos y fórmulas, verifica las versiones de las filas y el catálogo y escribe solo las celdas aceptadas (E/G, J o M/N), en un lote. No escribe A/B/C/D/F/H/I/K/L, no cambia fechas ni Calendar y no permite altas/borrados ni editar grupos todavía.
+
+«Conservar» deja intactos los valores y fórmulas de precio/importe. «Usar propuesta» económica fija explícitamente precio e importe por sesión, sin multiplicar por duración. Un barrio vacío no borra uno manual. Las fórmulas que puedan depender de horario requieren revisar el importe antes de cambiar ese horario. La propuesta del formulario se compara con los datos actuales de Sheets, no con una copia antigua en el navegador. Las comprobaciones previas detectan cambios pero no constituyen una transacción atómica frente a ediciones simultáneas externas.
 
 La fase 1 fue validada por el usuario. En fase 2 se habilita «Revisar vínculos de Calendar»: análisis de IDs compartidos y filas sin ID, consulta de candidatos amarillos con coincidencia exacta de grupo/día/horas en Madrid, lectura de todas las páginas y confirmación por fila. El servicio `api=test?api=links` (ruta real `/api/test?api=links`) permite únicamente modificar K de Detalle en la copia; vuelve a leer la fila y comprueba que el nuevo ID no esté usado por otra. No modifica Calendar ni condiciones económicas. La comprobación previa no es una transacción atómica de Sheets: evitar editar simultáneamente la misma fila mientras se confirma.
 

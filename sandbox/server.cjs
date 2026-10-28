@@ -63,7 +63,7 @@ function testConfig(origin) {
     API_KEY:null, CLIENT_ID, SPREADSHEET_ID:TEST_ID, SCOPES,
     DISCOVERY_DOCS:['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest','https://sheets.googleapis.com/$discovery/rest?version=v4'],
     PROXY_URL:origin,GOOGLE_SHEETS_API_URL:`${origin}/api/sheets`,GOOGLE_CALENDAR_API_URL:`${origin}/api/calendar`,
-    USE_PROXY:true,ENVIRONMENT:'production',TEST_MODE:true,TEST_PHASE:2,CALENDAR_LINKS_API_URL:`${origin}/api/test-links`
+    USE_PROXY:true,ENVIRONMENT:'production',TEST_MODE:true,TEST_PHASE:3,CALENDAR_LINKS_API_URL:`${origin}/api/test-links`,PROTECTED_REVIEW_API_URL:`${origin}/api/test-protected`
   })});`;
 }
 function testPage() {
@@ -81,19 +81,20 @@ function createServer(fetchImpl = fetch) {
       const allowedHosts = new Set([`localhost:${actualPort}`,`127.0.0.1:${actualPort}`]);
       if (!allowedHosts.has(req.headers.host) || (req.headers.origin && ![origin,`http://127.0.0.1:${actualPort}`].includes(req.headers.origin))) return send(res,403,{error:'Origen no permitido.'});
       const url = new URL(req.url,origin);
-      if (req.method === 'GET' && url.pathname === '/api/test-environment') return send(res,200,{mode:'test',phase:2,linkReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:false,appWrites:false});
+      if (req.method === 'GET' && url.pathname === '/api/test-environment') return send(res,200,{mode:'test',phase:3,linkReview:true,protectedReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:false,appWrites:false});
       if (req.method === 'GET' && url.pathname === '/api/oauth-config') return send(res,200,{client_id:CLIENT_ID,scopes:SCOPES});
-      if (req.method === 'POST' && ['/api/sheets','/api/calendar','/api/test-control','/api/test-links'].includes(url.pathname)) {
+      if (req.method === 'POST' && ['/api/sheets','/api/calendar','/api/test-control','/api/test-links','/api/test-protected'].includes(url.pathname)) {
         const payload = await readBody(req);
         // Rechazar operaciones peligrosas antes de autenticación y antes de cualquier llamada remota.
         try {
-          if (['/api/test-control','/api/test-links'].includes(url.pathname)) validateTarget(payload.spreadsheetId);
+          if (['/api/test-control','/api/test-links','/api/test-protected'].includes(url.pathname)) validateTarget(payload.spreadsheetId);
           else validateOperation(url.pathname.slice(5),payload.method,payload.params);
         } catch (error) { return send(res,403,{error:error.message}); }
         const token = req.headers.authorization;
         if (!token || !/^Bearer \S+$/.test(token)) return send(res,401,{error:'Conecta Google desde la aplicación de pruebas.'});
         if (url.pathname === '/api/test-control') return send(res,200,await controlProbe(token,fetchImpl));
         if (url.pathname === '/api/test-links') return send(res,200,await require('./link-service.cjs').runLinks(payload,token,(url,token,method='GET',body)=>googleRequest(url,token,method,body,fetchImpl)));
+        if (url.pathname === '/api/test-protected') return send(res,200,await require('./protected-service.cjs').runProtected(payload,token,(url,token,method='GET',body)=>googleRequest(url,token,method,body,fetchImpl)));
         let upstream;
         if (url.pathname === '/api/sheets') {
           const query = new URLSearchParams();
@@ -114,7 +115,7 @@ function createServer(fetchImpl = fetch) {
         const actualOrigin = `http://${req.headers.host}`;
         res.writeHead(200,{'Content-Type':'text/javascript; charset=utf-8','Cache-Control':'no-store'}); return res.end(testConfig(actualOrigin));
       }
-      const files = {'/calendar-linking.js':['calendar-linking.js','text/javascript'],'/sandbox/calendar-review.js':['sandbox/calendar-review.js','text/javascript'],'/sandbox/panel.js':['sandbox/panel.js','text/javascript'],'/styles.css':['styles.css','text/css'],'/favicon.ico':['favicon.ico','image/x-icon'],'/icon-192.png':['icon-192.png','image/png'],'/icon-512.png':['icon-512.png','image/png'],'/app-version.js':['app-version.js','text/javascript']};
+      const files = {'/protected-review.js':['protected-review.js','text/javascript'],'/sandbox/protected-editor.js':['sandbox/protected-editor.js','text/javascript'],'/calendar-linking.js':['calendar-linking.js','text/javascript'],'/sandbox/calendar-review.js':['sandbox/calendar-review.js','text/javascript'],'/sandbox/panel.js':['sandbox/panel.js','text/javascript'],'/styles.css':['styles.css','text/css'],'/favicon.ico':['favicon.ico','image/x-icon'],'/icon-192.png':['icon-192.png','image/png'],'/icon-512.png':['icon-512.png','image/png'],'/app-version.js':['app-version.js','text/javascript']};
       const file=files[url.pathname];
       if (!file) return send(res,404,{error:'Recurso no disponible en pruebas.'});
       res.writeHead(200,{'Content-Type':file[1],'Cache-Control':'no-store'}); res.end(fs.readFileSync(path.join(ROOT,file[0])));

@@ -89,15 +89,16 @@ test('rechaza el original sin siquiera leer y repetir la confirmación no vuelve
   const v=makeRow('Molí de finestrelles','moli');const n=mock([v]);const result=await runLinks({spreadsheetId:TEST_ID,action:'apply',rowIdx:2,expectedRow:v,newEventId:'moli'},'Bearer fake',n.request);assert.equal(result.unchanged,true);assert(n.calls.every(c=>c.method==='GET'));
 });
 test('el panel monta el revisor después de verificar el backend, con banner existente o nuevo',async()=>{
-  for(const exists of [true,false]){
+  for(const [exists,phase]of [[true,2],[false,2],[true,3],[false,3]]){
     const elements={};const element=()=>({addEventListener(){},style:{},append(){}});
-    for(const id of ['test-target-status','test-result','test-control','auth-btn','test-reload'])elements[id]=element();
+    for(const id of ['test-target-status','test-result','test-control','auth-btn','test-reload','sync-btn'])elements[id]=element();
     if(exists)elements['test-environment-banner']=element();
-    let ready,mounted;
-    const window={horasConfigReady:Promise.resolve(),mountCalendarReview:el=>{mounted=el}};
+    let ready,mounted,protectedMounted;
+    const window={horasConfigReady:Promise.resolve(),mountCalendarReview:el=>{mounted=el},mountProtectedReview:el=>{protectedMounted=el}};
     const document={getElementById:id=>elements[id],createElement:()=>element(),body:{prepend:el=>{elements[el.id]=el}},addEventListener:(name,fn)=>{if(name==='DOMContentLoaded')ready=fn}};
-    const context=vm.createContext({window,document,CONFIG:{TEST_MODE:true,TEST_PHASE:2,SPREADSHEET_ID:TEST_ID,PROXY_URL:'https://example.invalid'},fetch:async()=>({ok:true,json:async()=>({mode:'test',phase:2,linkReview:true,spreadsheetId:TEST_ID,calendarReadOnly:true,automaticWrites:false,appWrites:false})})});
+    const context=vm.createContext({window,document,CONFIG:{TEST_MODE:true,TEST_PHASE:phase,SPREADSHEET_ID:TEST_ID,PROXY_URL:'https://example.invalid'},fetch:async()=>({ok:true,json:async()=>({mode:'test',phase,linkReview:true,protectedReview:true,spreadsheetId:TEST_ID,calendarReadOnly:true,automaticWrites:false,appWrites:false})})});
     vm.runInContext(fs.readFileSync(path.join(__dirname,'panel.js'),'utf8'),context);
     await ready();assert.equal(await window.horasEnvironmentReady,true);assert.equal(mounted,elements['test-environment-banner']);assert.match(elements['test-target-status'].textContent,/Backend comprobado/);
+    if(phase===3){assert.equal(protectedMounted,elements['test-environment-banner']);assert.equal(elements['sync-btn'].disabled,false);}
   }
 });

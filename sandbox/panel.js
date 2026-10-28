@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const banner=document.createElement('div');
     banner.id='test-environment-banner';
     banner.style.cssText='padding:16px;background:#fff3cd;color:#312a12;position:relative;z-index:100';
-    banner.innerHTML='<strong>PRUEBAS — Fase 2 — Calendar solo lectura</strong><div>Hoja: Horas Fran — PRUEBAS — 28-10-2026</div><div id="test-target-status">Comprobando destino del backend…</div><button id="test-reload" type="button">Recargar copia</button> · <button id="test-control" type="button">Probar escritura y restauración en la copia</button><div id="test-result" role="status" aria-live="polite"></div>';
+    banner.innerHTML='<strong>PRUEBAS — Fase 3 — Calendar solo lectura</strong><div>Hoja: Horas Fran — PRUEBAS — 28-10-2026</div><div id="test-target-status">Comprobando destino del backend…</div><button id="test-reload" type="button">Recargar copia</button> · <button id="test-control" type="button">Probar escritura y restauración en la copia</button><div id="test-result" role="status" aria-live="polite"></div>';
     document.body.prepend(banner);
   }
   const status=document.getElementById('test-target-status');
@@ -23,7 +23,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   // Evitar formularios y sincronizaciones con efectos parciales en esta fase.
   for (const id of ['form-evento','form-grupo','form-future-events']) {
-    document.getElementById(id)?.addEventListener('submit',e=>{e.preventDefault();e.stopImmediatePropagation();result.textContent='La edición se habilitará al probar las siguientes fases.';},true);
+    document.getElementById(id)?.addEventListener('submit',e=>{
+      e.preventDefault();e.stopImmediatePropagation();
+      if(id==='form-evento'&&CONFIG.TEST_PHASE>=3&&window.reviewSessionForm){window.reviewSessionForm().catch(error=>showErrorModal('Revisión pendiente',error.message,'warning'));return;}
+      result.textContent='Esta operación se habilitará al probar las siguientes fases.';
+    },true);
   }
   for (const id of ['sync-btn','add-future-events-btn']) {
     const button=document.getElementById(id);if(button) {button.disabled=true;button.title='Bloqueado durante la fase 1';}
@@ -38,10 +42,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const env=await response.json();
     if(!response.ok || env.mode!=='test' || env.spreadsheetId!==CONFIG.SPREADSHEET_ID || !env.calendarReadOnly || env.automaticWrites || env.appWrites) throw new Error('El backend no coincide con la configuración de pruebas.');
     if(CONFIG.TEST_PHASE===2 && (env.phase!==2||!env.linkReview))throw new Error('El backend aún no está preparado para la fase 2. Recarga en unos instantes.');
-    status.textContent=`Backend comprobado: ${env.spreadsheetId}. Solo se pueden guardar vínculos revisados; precios y Calendar no cambian.`;
+    if(CONFIG.TEST_PHASE>=3 && (env.phase!==3||!env.protectedReview))throw new Error('El backend aún no está preparado para la fase 3. Recarga en unos instantes.');
+    status.textContent=`Backend comprobado: ${env.spreadsheetId}. Los cambios requieren revisión; no hay escrituras automáticas ni cambios en Calendar.`;
     control.disabled=false;
     resolveEnvironment(true);
     window.mountCalendarReview?.(document.getElementById('test-environment-banner'));
+    if(CONFIG.TEST_PHASE>=3){
+      window.mountProtectedReview?.(document.getElementById('test-environment-banner'));
+      const sync=document.getElementById('sync-btn');if(sync){sync.disabled=false;sync.title='Preparar revisión de sincronización, sin cambios automáticos';}
+    }
   } catch(error){status.textContent=error.message;resolveEnvironment(false);return;}
   document.getElementById('test-reload').onclick=()=>syncData(false,false);
   control.onclick=async()=>{

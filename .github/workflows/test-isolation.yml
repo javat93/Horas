@@ -10,4 +10,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test sandbox/isolation.test.cjs sandbox/linking.test.cjs
+      - run: node --test sandbox/isolation.test.cjs sandbox/linking.test.cjs sandbox/protected.test.cjs

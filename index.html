@@ -19,7 +19,7 @@
     
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
-    configScript.src = isProduction ? 'config.production.js?v=fase2-20261028' : 'config.secure.js';
+    configScript.src = isProduction ? 'config.production.js?v=fase3-20261028' : 'config.secure.js';
     window.horasConfigReady = new Promise((resolve, reject) => {
         configScript.onload = resolve;
         configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
@@ -27,8 +27,10 @@
     document.head.appendChild(configScript);
 </script>
     <script src="calendar-linking.js?v=fase2-20261028"></script>
-    <script src="sandbox/panel.js?v=fase2-20261028-r2" defer></script>
+    <script src="protected-review.js?v=fase3-20261028"></script>
+    <script src="sandbox/panel.js?v=fase3-20261028" defer></script>
     <script src="sandbox/calendar-review.js?v=fase2-20261028" defer></script>
+    <script src="sandbox/protected-editor.js?v=fase3-20261028" defer></script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <!-- PWA Manifest and Icons -->
     <link rel="manifest" href="manifest.json">
@@ -457,8 +459,15 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio/Hora (€)</label>
-                    <input type="number" id="ev-precio" value="20" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                    <label for="ev-precio" class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio por sesión (€)</label>
+                    <input type="number" step="0.01" id="ev-precio" value="20" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                </div>
+                <div id="protected-session-fields" hidden>
+                    <label for="ev-total">Importe de la sesión (€), independiente de la duración</label>
+                    <input type="text" inputmode="decimal" id="ev-total" class="w-full rounded-2xl p-4 input-modern text-sm font-medium">
+                    <label for="ev-barrio">Barrio / zona de esta sesión</label>
+                    <input type="text" id="ev-barrio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium">
+                    <p>Se revisarán las diferencias antes de guardar en la copia. Calendar no cambia. La fecha, el grupo y la dirección se conservan durante esta fase.</p>
                 </div>
                 
                 <div class="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
@@ -1117,6 +1126,7 @@
 
         async function syncData(resolverCal = false, actualizarRealizadosFlag = !CONFIG.TEST_MODE) {
             if (CONFIG.TEST_MODE && resolverCal) {
+                if (CONFIG.TEST_PHASE >= 3 && window.prepareProtectedSync) return window.prepareProtectedSync();
                 showErrorModal('Fase 1', 'Usa «Recargar copia». La sincronización que modifica datos se probará en las siguientes fases.', 'info');
                 return;
             }
@@ -1864,6 +1874,7 @@
             document.getElementById('recurrence-options').classList.add('hidden');
             
             autoFillGrupo(ev.grupo, true);
+            window.configureProtectedSession?.(ev);
             
             openModal('modal-evento');
         }
@@ -2087,6 +2098,7 @@
 
         document.getElementById('form-evento').onsubmit = async (e) => {
             e.preventDefault();
+            if (CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 3) return window.reviewSessionForm();
             if (!validarFormularioClase()) return;
             const rowIdx = document.getElementById('ev-rowIdx').value;
             const ev = eventos.find(e => e.rowIdx == rowIdx);
