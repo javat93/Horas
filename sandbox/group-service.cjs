@@ -11,16 +11,17 @@ async function read(token,request){
   return rows;
 }
 function normalize(input){
-  if(!input||Object.keys(input).some(k=>!['price','gigPrice','location'].includes(k)))throw new Error('Solo se permiten precio, precio de bolo y ubicación.');
+  if(!input||Object.keys(input).some(k=>!['price','gigPrice','location','address'].includes(k)))throw new Error('Solo se permiten precios, barrio y dirección.');
   const out={};for(const key of ['price','gigPrice'])if(input[key]!==undefined){const n=D.numeric(input[key]);if(n===null||n<0)throw new Error('Introduce una tarifa numérica válida; no se usará una tarifa por defecto.');out[key]=n;}
   if(input.location!==undefined){if(typeof input.location!=='string'||input.location.length>500)throw new Error('Ubicación no válida.');out.location=input.location.trim();}
+  if(input.address!==undefined){if(typeof input.address!=='string'||input.address.length>1000)throw new Error('Dirección no válida.');if(input.address.trim())out.address=input.address.trim();}
   return out;
 }
-const columns={price:2,gigPrice:3,location:4};
+const columns={address:1,price:2,gigPrice:3,location:4};
 function plan(rows,payload){
   const r=payload.rowIdx;if(!Number.isInteger(r)||r<2||r>1220||!D.value(rows[r-1]?.[0]))throw new Error('Selecciona un grupo existente. Las altas se probarán en otra etapa.');
-  const row=rows[r-1],proposal=normalize(payload.proposal),current={price:D.value(row[2]),gigPrice:D.value(row[3]),location:String(D.value(row[4]))};
-  const diff={};for(const key of Object.keys(proposal))diff[key]=key==='location'?current[key]!==proposal[key]:D.numeric(current[key])!==proposal[key];
+  const row=rows[r-1],proposal=normalize(payload.proposal),current={price:D.value(row[2]),gigPrice:D.value(row[3]),location:String(D.value(row[4])),address:String(D.value(row[1]))};
+  const diff={};for(const key of Object.keys(proposal))diff[key]=['location','address'].includes(key)?current[key]!==proposal[key]:D.numeric(current[key])!==proposal[key];
   return {rowIdx:r,name:String(D.value(row[0])),current,proposal,diff,expectedVersion:version(row)};
 }
 async function runGroups(payload,token,request){

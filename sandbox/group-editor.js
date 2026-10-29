@@ -13,7 +13,7 @@
     const dialog=node('dialog');dialog.id='group-review-dialog';dialog.setAttribute('aria-label','Revisar tarifas y ubicación del grupo');dialog.style.cssText='padding:24px;border-radius:16px;width:min(650px,95vw);max-height:90vh;overflow:auto;color:#0f172a';
     dialog.append(node('h2',`Revisar grupo: ${p.name}`),node('p','A Grupo · B Dirección · C Precio de sesión · D Precio Bolo · E Barrio/Ubicación. Solo se guardan los campos que elijas. Las sesiones ya registradas conservan sus importes y barrios.'));
     const choices={price:'keep',gigPrice:'keep',location:'keep'};
-    for(const [key,label]of [['price','Precio de sesión'],['gigPrice','Precio Bolo'],['location','Barrio/Ubicación']]){
+    for(const [key,label]of [['price','Precio de sesión'],['gigPrice','Precio Bolo'],['location','Barrio/Ubicación'],['address','Dirección habitual']]){
       const display=v=>typeof v==='number'?LocaleData.currency(v):String(v||'(vacío)');
       dialog.append(node('p',`${label}: actual ${display(p.current[key])}${p.diff[key]?` → propuesta ${display(p.proposal[key])}`:' · se conserva'}`));
       if(!p.diff[key])continue;
@@ -32,6 +32,7 @@
   window.reviewGroupForm=async()=>{
     const rowIdx=Number(document.getElementById('gr-rowIdx').value);if(!rowIdx)throw new Error('En esta fase se revisan grupos existentes. Las altas siguen bloqueadas.');
     const proposal={location:document.getElementById('gr-ubicacion').value};for(const [key,id]of [['price','gr-precio'],['gigPrice','gr-precio-bolo']]){const value=document.getElementById(id).value;if(value.trim()!=='')proposal[key]=value;}
+    if(CONFIG.TEST_PHASE>=7)proposal.address=document.getElementById('gr-sitio').value;
     await review(rowIdx,proposal);
   };
   window.mountGroupReview=banner=>{

@@ -17,7 +17,7 @@ module.exports = async (req,res) => {
   res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');
   if(req.method==='OPTIONS')return res.status(204).end();
   const api=req.query?.api;
-  if(req.method==='GET' && api==='environment')return res.json({mode:'test',phase:6,identityReview:true,groupReview:true,linkReview:true,protectedReview:true,localeReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:false,appWrites:false});
+  if(req.method==='GET' && api==='environment')return res.json({mode:'test',phase:7,addressReview:true,identityReview:true,groupReview:true,linkReview:true,protectedReview:true,localeReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:false,appWrites:false});
   if(req.method==='GET' && api==='oauth')return res.json({client_id:'367465910816-1epkiok8ntvrphrv08b4g6amh0u9knpv.apps.googleusercontent.com',scopes:SCOPES});
   if(req.method!=='POST')return res.status(405).json({error:'Método no permitido.'});
   const payload=req.body || {};

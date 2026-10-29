@@ -30,12 +30,12 @@
       const details=node('details');details.open=review.plans.length===1;details.style.cssText='border-top:1px solid #cbd5e1;padding:12px 0';
       details.append(node('summary',`Fila ${plan.rowIdx} · ${plan.group} · ${plan.date}`));body.append(details);
       details.append(node('p',`Origen: ${plan.source}`));
-      const decision={rowIdx:plan.rowIdx,expectedVersion:plan.expectedVersion,proposalVersion:plan.proposalVersion,choices:{money:'keep',district:'keep',time:'keep'}};decisions.push(decision);
-      const fields=[['money','Precio e importe por sesión',`${currency(plan.current.price)} / ${currency(plan.current.total)}`,plan.proposal.money?`${currency(plan.proposal.money.price)} / ${currency(plan.proposal.money.total)}`:'Sin propuesta'],['district','Barrio',plan.current.district||'(vacío)',plan.proposal.district||'(sin propuesta; se conserva)'],['time','Horario de la sesión',`${plan.current.start||'?'}–${plan.current.end||'?'}`,plan.proposal.time?`${plan.proposal.time.start}–${plan.proposal.time.end}`:'Sin propuesta']];
+      const decision={rowIdx:plan.rowIdx,expectedVersion:plan.expectedVersion,proposalVersion:plan.proposalVersion,choices:{money:'keep',district:'keep',address:'keep',time:'keep'}};decisions.push(decision);
+      const fields=[['money','Precio e importe por sesión',`${currency(plan.current.price)} / ${currency(plan.current.total)}`,plan.proposal.money?`${currency(plan.proposal.money.price)} / ${currency(plan.proposal.money.total)}`:'Sin propuesta'],['district','Barrio',plan.current.district||'(vacío)',plan.proposal.district||'(sin propuesta; se conserva)'],['address','Dirección de esta sesión',plan.current.address||'(vacía)',plan.proposal.address||'(sin propuesta; se conserva)'],['time','Horario de la sesión',`${plan.current.start||'?'}–${plan.current.end||'?'}`,plan.proposal.time?`${plan.proposal.time.start}–${plan.proposal.time.end}`:'Sin propuesta']];
       for(const [field,label,current,next]of fields){
         details.append(node('p',`${label}: actual ${current}${plan.diff[field]?` → propuesta ${next}`:' · se conserva'}`));
         if(!plan.diff[field])continue;differences++;
-        const wrapper=node('label',`${label}, fila ${plan.rowIdx}: `),select=node('select');select.style.cssText='border:1px solid #94a3b8;padding:8px;max-width:100%;margin:6px 0';
+        const wrapper=node('label',`${label}, fila ${plan.rowIdx}: `),select=node('select');select.setAttribute('aria-label',`${label}, fila ${plan.rowIdx}`);select.style.cssText='border:1px solid #94a3b8;padding:8px;max-width:100%;margin:6px 0';
         for(const [value,text]of [['keep','Conservar actual'],['use','Usar propuesta']]){const option=node('option',text);option.value=value;select.append(option);}
         select.onchange=()=>{decision.choices[field]=select.value;};wrapper.append(select);details.append(wrapper);
       }
@@ -66,12 +66,14 @@
     document.getElementById('ev-total').value=String(ev.total).replace('.',',');document.getElementById('ev-barrio').value=ev.sitio||'';
     for(const id of ['ev-fecha','ev-grupo','ev-grupo-search','ev-bolo','ev-sitio','ev-repite','ev-freq','ev-interval','ev-until'])document.getElementById(id).disabled=true;
     document.getElementById('ev-sitio').value=ev.direccion||'';
+    if(CONFIG.TEST_PHASE>=7)document.getElementById('ev-sitio').disabled=false;
     for(const id of ['ev-hora-inicio','ev-hora-fin'])document.getElementById(id).required=false;
     document.getElementById('ev-hora-inicio').value=CalendarLinking.time(ev.horaInicio);document.getElementById('ev-hora-fin').value=CalendarLinking.time(ev.horaFin);
   };
   window.reviewSessionForm=async function(){
     const rowIdx=Number(document.getElementById('ev-rowIdx').value);if(!rowIdx){showErrorModal('Fase 3','Las altas se probarán después de corregir fechas. Ahora puedes revisar sesiones existentes.','info');return;}
     const proposal={price:document.getElementById('ev-precio').value,total:document.getElementById('ev-total').value,district:document.getElementById('ev-barrio').value};
+    if(CONFIG.TEST_PHASE>=7)proposal.address=document.getElementById('ev-sitio').value;
     const start=document.getElementById('ev-hora-inicio').value,end=document.getElementById('ev-hora-fin').value;if(start||end){proposal.start=start;proposal.end=end;}
     await launch({mode:'edit',rowIdx,proposal});
   };
@@ -79,7 +81,7 @@
   window.mountProtectedReview=function(banner){
     if(document.getElementById('protected-sync-month'))return;
     const wrapper=node('div');wrapper.style.cssText='margin-top:12px;padding-top:12px;border-top:1px solid #b8ac7a';banner.append(wrapper);
-    const label=node('label','Mes para revisar precios, barrios y horarios: ');monthInput=node('input');monthInput.type='month';monthInput.id='protected-sync-month';
+    const label=node('label','Mes para revisar precios, barrios, direcciones y horarios: ');monthInput=node('input');monthInput.type='month';monthInput.id='protected-sync-month';
     const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit'}).formatToParts(new Date());monthInput.value=parts.find(p=>p.type==='year').value+'-'+parts.find(p=>p.type==='month').value;label.append(monthInput);wrapper.append(label);
     const button=node('button','Preparar revisión de sincronización');button.type='button';button.style.cssText='margin:8px;padding:8px;border:1px solid currentColor;border-radius:6px';button.onclick=window.prepareProtectedSync;wrapper.append(button);
     const rowLabel=node('label',' Editar sesión, fila: '),row=node('input');row.type='number';row.min='2';row.style.cssText='width:90px;border:1px solid #94a3b8;padding:4px';rowLabel.append(row);wrapper.append(rowLabel);

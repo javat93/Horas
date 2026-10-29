@@ -19,7 +19,7 @@
     
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
-    configScript.src = isProduction ? 'config.production.js?v=fase6-20261029' : 'config.secure.js';
+    configScript.src = isProduction ? 'config.production.js?v=fase7-20261029' : 'config.secure.js';
     window.horasConfigReady = new Promise((resolve, reject) => {
         configScript.onload = resolve;
         configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
@@ -29,12 +29,12 @@
     <script src="locale-data.js?v=fase4-20261028"></script>
     <script src="group-identity.js?v=fase6-20261029"></script>
     <script src="calendar-linking.js?v=fase6-20261029"></script>
-    <script src="protected-review.js?v=fase3-20261028"></script>
-    <script src="sandbox/panel.js?v=fase6-20261029" defer></script>
+    <script src="protected-review.js?v=fase7-20261029"></script>
+    <script src="sandbox/panel.js?v=fase7-20261029" defer></script>
     <script src="sandbox/identity-review.js?v=fase6-20261029" defer></script>
-    <script src="sandbox/group-editor.js?v=fase5-20261029" defer></script>
+    <script src="sandbox/group-editor.js?v=fase7-20261029" defer></script>
     <script src="sandbox/calendar-review.js?v=fase2-20261028" defer></script>
-    <script src="sandbox/protected-editor.js?v=fase3-20261028" defer></script>
+    <script src="sandbox/protected-editor.js?v=fase7-20261029" defer></script>
     <script src="sandbox/locale-editor.js?v=fase4-20261028-r2" defer></script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <!-- PWA Manifest and Icons -->
@@ -475,7 +475,7 @@
                     <input type="text" inputmode="decimal" id="ev-total" class="w-full rounded-2xl p-4 input-modern text-sm font-medium">
                     <label for="ev-barrio">Barrio / zona de esta sesión</label>
                     <input type="text" id="ev-barrio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium">
-                    <p>Se revisarán las diferencias antes de guardar en la copia. Calendar no cambia. La fecha, el grupo y la dirección se conservan durante esta fase.</p>
+                    <p>Se revisan barrio y dirección por separado. Un campo vacío conserva el dato existente. Calendar no cambia; la fecha y el grupo se conservan.</p>
                 </div>
                 
                 <div class="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
@@ -485,7 +485,7 @@
                 
                                 
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Sitio / Ubicación</label>
+                    <label for="ev-sitio" class="block text-xs font-bold text-slate-400 uppercase mb-2">Dirección de esta sesión</label>
                     <div class="relative">
                         <input type="text" id="ev-sitio" class="w-full rounded-2xl p-4 pr-12 input-modern text-sm font-medium" placeholder="Dirección o nombre del lugar">
                         <div id="maracuya-gps-hint" class="hidden absolute right-4 top-4 text-blue-500">
@@ -567,7 +567,7 @@
     <input type="text" id="gr-ubicacion" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Ej: Centro Cívico, Parque, etc.">
 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Dirección / Sitio (Ayuda Maps)</label>
+                    <label for="gr-sitio" class="block text-xs font-bold text-slate-400 uppercase mb-2">Dirección habitual del grupo</label>
                     <div class="relative">
                         <input type="text" id="gr-sitio" class="w-full rounded-2xl p-4 pr-12 input-modern text-sm font-medium" placeholder="Empieza a escribir para buscar...">
                         <button type="button" onclick="openMapModal('gr-sitio')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600">
@@ -1880,7 +1880,8 @@
             document.getElementById('ev-hora-fin').value = horaFinGuardada;
             
             document.getElementById('ev-precio').value = ev.precioHora;
-            document.getElementById('ev-sitio').value = ev.sitio;
+            document.getElementById('ev-sitio').value = ev.direccion || '';
+            document.getElementById('ev-barrio').value = ev.sitio || '';
             
             // Cargar estado del checkbox de Bolo
             const isBolo = ev.boloCole === 'X';
@@ -1914,7 +1915,7 @@
             document.getElementById('gr-precio').value = g.precio ?? '';
             document.getElementById('gr-precio-bolo').value = g.precioBolo ?? '';
             document.getElementById('gr-nombre').disabled = CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 5;
-            document.getElementById('gr-sitio').disabled = CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 5;
+            document.getElementById('gr-sitio').disabled = CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 5 && CONFIG.TEST_PHASE < 7;
             document.getElementById('gr-sitio').value = g.sitio;
             document.getElementById('gr-ubicacion').value = g.ubicacion;
             openModal('modal-grupo');
@@ -1938,7 +1939,8 @@
                 } else {
                     document.getElementById('ev-precio').value = g.precio;
                 }
-                document.getElementById('ev-sitio').value = g.sitio;
+                if(!document.getElementById('ev-sitio').value.trim())document.getElementById('ev-sitio').value = g.sitio || '';
+                if(!document.getElementById('ev-barrio').value.trim())document.getElementById('ev-barrio').value = g.ubicacion || '';
             }
         }
 
@@ -2155,7 +2157,7 @@
 
             // Obtener ubicación del grupo y dirección del formulario
             const g = GroupIdentity.resolve(grupos,grupo);
-            const ubicacion = g ? g.ubicacion : '';
+            const ubicacion = document.getElementById('ev-barrio').value.trim() || ev?.sitio || g?.ubicacion || '';
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
             // Validar que ev exista antes de acceder a calEventId
@@ -3154,7 +3156,7 @@
             const precio = g ? (tieneBolo ? g.precioBolo : g.precio) : null;
             if(precio === null || !Number.isFinite(precio))throw new Error(`El grupo «${grupo}» no tiene una tarifa válida para este tipo de sesión. Revisa Coles antes de importar.`);
             const ubicacion = g ? g.ubicacion : ''; // Ubicación del grupo
-            const direccion = g ? g.sitio : ''; // El campo sitio del formulario es la dirección para Maps
+            const direccion = typeof event.location === 'string' && event.location.trim() ? event.location.trim() : (g ? g.sitio : '');
             
             // Calcular horas y total (misma lógica que el formulario)
             let horasCalc = 1;

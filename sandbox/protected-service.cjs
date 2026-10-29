@@ -36,9 +36,10 @@ async function build(payload,snap,token,request){
     const notes=[],proposal={};
     if(payload.mode==='edit'){
       const input=payload.proposal||{};
-      if(Object.keys(input).some(k=>!['price','total','district','start','end'].includes(k)))throw new Error('Esta fase solo permite editar precio, importe, barrio y horario.');
+      if(Object.keys(input).some(k=>!['price','total','district','address','start','end'].includes(k)))throw new Error('Esta fase solo permite editar precio, importe, barrio, dirección y horario.');
       if(input.price!==undefined||input.total!==undefined){proposal.money={price:P.number(input.price),total:P.number(input.total)};}
       if(input.district!==undefined){if(typeof input.district!=='string'||input.district.length>500)throw new Error('Barrio no válido.');if(input.district.trim())proposal.district=input.district.trim();else notes.push('El barrio vacío no borrará el que ya existe.');}
+      if(input.address!==undefined){if(typeof input.address!=='string'||input.address.length>1000)throw new Error('Dirección no válida.');if(input.address.trim())proposal.address=input.address.trim();else notes.push('La dirección vacía no borrará la que ya existe.');}
       if(input.start!==undefined||input.end!==undefined){const start=L.time(input.start),end=L.time(input.end);if(!start||!end||end<=start)throw new Error('Introduce un horario válido con fin posterior al inicio.');proposal.time={start,end};}
     }else{
       const groupName=L.normalize(P.text(cells[8]));
@@ -48,15 +49,17 @@ async function build(payload,snap,token,request){
         const group=groups[0],isBolo=P.text(cells[2])==='X',price=P.amount(group[isBolo?3:2]);
         if(price!==null)proposal.money={price,total:price};else notes.push('No hay una tarifa numérica: no se inventará un precio por defecto.');
         if(P.text(group[4]).trim())proposal.district=P.text(group[4]).trim();
+        if(!P.text(cells[11]).trim()&&P.text(group[1]).trim()){proposal.address=P.text(group[1]).trim();notes.push('Dirección propuesta desde Coles porque la sesión no tiene dirección; requiere aceptar.');}
       }
       const id=P.text(cells[10]),claimed=id&&allRows.filter(r=>r.calEventId===id).length>1;
       const event=id&&!claimed?events.find(e=>e.id===id):null;
       if(claimed)notes.push('ID compartido: se conserva el horario; revisa el vínculo en fase 2.');
       else if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&G.same(L.groupFromTitle(event.summary),groupName)&&L.calendarDate(event)===D.dateISO(cells[5])){
         const h=L.hours(event);if(h.horaInicio&&h.horaFin)proposal.time={start:h.horaInicio,end:h.horaFin};
+        if(typeof event.location==='string'&&event.location.trim()&&event.location.length<=1000){proposal.address=event.location.trim();notes.push('Dirección propuesta desde la ubicación específica de este evento de Calendar; el barrio se revisa por separado.');}
       }else if(id)notes.push('El evento no aparece como amarillo y compatible en este mes: se conserva el horario y no se recrea.');
     }
-    const plan=P.makePlan(rowIdx,cells,proposal,payload.mode==='edit'?'Formulario':'Tarifa y barrio de Coles; horario de Calendar',notes);
+    const plan=P.makePlan(rowIdx,cells,proposal,payload.mode==='edit'?'Formulario: barrio y dirección independientes':'Tarifa y barrio de Coles; dirección específica y horario de Calendar',notes);
     plan.date=D.display(D.dateISO(cells[5]));
     plan.group=G.label(plan.group,D.dateISO(cells[5]));
     plan.expectedVersion=fingerprint(cells);plans.push(plan);

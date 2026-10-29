@@ -9,7 +9,7 @@ function fixture(values=['Cole','Calle especial',25,50,'Sant Andreu']){
   const request=async(url,token,method='GET',body)=>{
     assert(url.startsWith(`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`));
     if(method==='GET')return {sheets:[{properties:{title:'Coles'},data:[{rowData:structuredClone(rows).map(values=>({values}))}]}]};
-    writes.push(body);for(const r of body.requests){const u=r.updateCells;assert.equal(u.range.sheetId,758405382);assert(u.range.startColumnIndex>=2&&u.range.endColumnIndex<=5);const c=u.rows[0].values[0];rows[u.range.startRowIndex][u.range.startColumnIndex]={...c,effectiveValue:c.userEnteredValue};}return {};
+    writes.push(body);for(const r of body.requests){const u=r.updateCells;assert.equal(u.range.sheetId,758405382);assert(u.range.startColumnIndex>=1&&u.range.endColumnIndex<=5);const c=u.rows[0].values[0];rows[u.range.startRowIndex][u.range.startColumnIndex]={...c,effectiveValue:c.userEnteredValue};}return {};
   };
   return {rows,writes,request};
 }
@@ -52,4 +52,9 @@ test('formulario real escribe A/B/C/D/E en orden con importes numéricos; texto 
   const calls=[],errors=[];vm.runInNewContext(handler,{document:{getElementById:id=>fields[id]},LocaleData:D,CONFIG:{SPREADSHEET_ID:TEST_ID},proxyGoogleAPI:async(...args)=>calls.push(args),closeModal(){},syncData(){},showErrorModal:(...args)=>errors.push(args),console});
   await fields['form-grupo'].onsubmit({preventDefault(){}});assert.equal(calls[0][2].range,'Coles!A2:E2');assert.equal(JSON.stringify(calls[0][3].values),JSON.stringify([['Cole','Calle',16.5,80,'Sant Andreu']]));
   fields['gr-precio-bolo'].value='Sant Andreu';await fields['form-grupo'].onsubmit({preventDefault(){}});assert.equal(calls.length,1);assert.equal(errors.length,1);
+});
+test('dirección habitual cambia solo B, sin propagarla a sesiones ni al barrio E',async()=>{
+  const f=fixture(),input={...payload,proposal:{address:'Calle nueva, 22'}};const p=await runGroups({...input,action:'preview'},'',f.request);
+  await runGroups({...input,action:'apply',expectedVersion:p.expectedVersion,choices:{address:'use'}},'',f.request);assert.equal(f.writes[0].requests[0].updateCells.range.startColumnIndex,1);assert.deepEqual(f.rows[1].map(D.value),['Cole','Calle nueva, 22',25,50,'Sant Andreu']);
+  const empty=await runGroups({...input,proposal:{address:''},action:'preview'},'',f.request);assert.equal(empty.diff.address,undefined);
 });

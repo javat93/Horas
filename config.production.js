@@ -9,7 +9,7 @@ const CONFIG = {
     SPREADSHEET_ID: '1breBD5aoBR4i9yiPJUKZC2Ouk0rvFOlRmwgJk4bUPwI',
     SPREADSHEET_NAME: 'Horas Fran — PRUEBAS — 28-10-2026',
     TEST_MODE: true,
-    TEST_PHASE: 6,
+    TEST_PHASE: 7,
     GROUPS_API_URL: 'https://horas-git-main-javat93s-projects.vercel.app/api/test?api=groups',
     LOCALE_API_URL: 'https://horas-git-main-javat93s-projects.vercel.app/api/test?api=locale',
     PROTECTED_REVIEW_API_URL: 'https://horas-git-main-javat93s-projects.vercel.app/api/test?api=protected',

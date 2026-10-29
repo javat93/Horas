@@ -38,6 +38,7 @@ test('importación real conserva referencia del catálogo y no detecta el alias 
   const context=vm.createContext({GroupIdentity:G,grupos:[{nombre:'Moli de finestrelles',precio:24,precioBolo:80,ubicacion:'Sant Andreu',sitio:'Calle'}],extractHorasFromCalendarEvent:()=>({horaInicio:'18:00',horaFin:'19:00'})});vm.runInContext(processor+changes,context);
   const event={id:'example',summary:'Tramuntana',start:{dateTime:'2026-09-28T18:00:00+02:00'},end:{dateTime:'2026-09-28T19:00:00+02:00'}};
   const row=await context.processCalendarEvent(event);assert.equal(row[8],'Moli de finestrelles');assert.equal(row[4],24);assert.equal(row[7],1);
+  const special=await context.processCalendarEvent({...event,location:'Calle específica del bolo, 80'});assert.equal(special[11],'Calle específica del bolo, 80');assert.equal(special[9],'Sant Andreu');assert.equal(row[11],'Calle');
   const alternate=[...row];alternate[8]='Tramuntana';assert.equal(context.hasEventChanges({...event,tempRow:row},alternate),false);
 });
 test('filtro real reúne años y alias una sola vez, con los dos nombres según fecha',()=>{
