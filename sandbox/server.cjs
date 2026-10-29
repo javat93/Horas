@@ -122,6 +122,7 @@ function createServer(fetchImpl = fetch) {
       files['/sandbox/group-editor.js']=['sandbox/group-editor.js','text/javascript'];
       files['/group-identity.js']=['group-identity.js','text/javascript'];files['/sandbox/identity-review.js']=['sandbox/identity-review.js','text/javascript'];
       files['/auth-session.js']=['auth-session.js','text/javascript'];
+      for(const name of ['inicio.html','privacidad.html','condiciones.html'])files['/'+name]=[name,'text/html; charset=utf-8'];files['/informacion.css']=['informacion.css','text/css'];
       const file=files[url.pathname];
       if (!file) return send(res,404,{error:'Recurso no disponible en pruebas.'});
       res.writeHead(200,{'Content-Type':file[1],'Cache-Control':'no-store'}); res.end(fs.readFileSync(path.join(ROOT,file[0])));
