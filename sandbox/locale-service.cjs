@@ -15,7 +15,7 @@ function datePlan(cells,rowIdx,events,allRows){
   const claimed=id&&allRows.filter(row=>String(D.value(row[10]))===id).length>1;
   const event=id&&!claimed?events.find(e=>e.id===id):null;
   let verified=null,reason=claimed?'ID compartido: requiere revisión.':!id?'Sin CalendarId: requiere revisión.':'Sin evento amarillo compatible: requiere revisión.';
-  if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&G.same(L.groupFromTitle(event.summary),group)){
+  if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&L.groupMatches(event.summary,group,L.calendarDate(event))){
     const hours=L.hours(event),start=D.time(D.value(cells[12])),end=D.time(D.value(cells[13]));
     const day=L.calendarDate(event);
     if((!start||hours.horaInicio===start)&&(!end||hours.horaFin===end)&&choices.some(choice=>choice.iso===day)){

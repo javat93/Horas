@@ -4,7 +4,23 @@
   else root.CalendarLinking=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(G){
   function normalize(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,' ').toLowerCase();}
-  function groupFromTitle(value){return normalize(String(value||'').split(' - ')[0]).replace(/^bolo\s+/,'');}
+  const calendarAliases=Object.freeze({
+    'clases molins de rei':'Perxuscat',
+    'molins de rei':'Perxuscat',
+    'molins de rei peques':'Perxuscat Jr',
+    'clases trinitat nova':'Bruixes i bruixots',
+    'trinitat nova':'Bruixes i bruixots',
+    'trinitat':'Bruixes i bruixots',
+    'bolo trini':'Bruixes i bruixots',
+    'trini':'Bruixes i bruixots',
+    'olesa':'Diablots',
+    'mamut':'Àngels diabòlics'
+  });
+  function groupFromTitle(value){const name=normalize(String(value||'').split(' - ')[0]),base=name.replace(/^(clases?|bolo|taller)\s+/,'');return normalize(calendarAliases[name]||calendarAliases[base]||base);}
+  function groupMatches(title,name,iso){
+    if(G.same(normalize(String(title||'').split(' - ')[0]),name)||G.same(groupFromTitle(title),name))return true;
+    return normalize(title)==='slap'&&normalize(name)==='slap lunes'&&/^\d{4}-\d{2}-\d{2}$/.test(iso||'')&&new Date(iso+'T12:00:00Z').getUTCDay()===1;
+  }
   function dateKey(value){
     const match=String(value||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if(!match)return '';
@@ -30,8 +46,11 @@
   }
   function compatible(row,event){
     if(!event?.id || String(event.colorId)!=='5' || event.status==='cancelled')return false;
-    if(!G.same(groupFromTitle(event.summary),row.grupo))return false;
-    if(!dateKey(row.fechaStr) || calendarDate(event)!==dateKey(row.fechaStr))return false;
+    if(!groupMatches(event.summary,row.grupo,dateKey(row.fechaStr)))return false;
+    const date=dateKey(row.fechaStr);if(!date)return false;
+    if(event.start?.date&&event.end?.date){
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(event.end.date)||date<event.start.date||date>=event.end.date)return false;
+    }else if(calendarDate(event)!==date)return false;
     const h=hours(event);
     return (!row.horaInicio || (time(row.horaInicio) && time(row.horaInicio)===h.horaInicio)) && (!row.horaFin || (time(row.horaFin) && time(row.horaFin)===h.horaFin));
   }
@@ -60,5 +79,5 @@
     return {items};
   }
   function rowFromValues(values,rowIdx){return {rowIdx,fechaStr:values[5]||'',grupo:values[8]||'',calEventId:values[10]||'',horaInicio:values[12]||'',horaFin:values[13]||'',expectedRow:Array.from({length:14},(_,i)=>values[i]??'')};}
-  return {normalize,groupFromTitle,dateKey,calendarDate,hours,time,compatible,sharedIds,assertUniqueLinks,eventKey,choose,listAll,rowFromValues};
+  return {normalize,groupFromTitle,groupMatches,dateKey,calendarDate,hours,time,compatible,sharedIds,assertUniqueLinks,eventKey,choose,listAll,rowFromValues};
 });

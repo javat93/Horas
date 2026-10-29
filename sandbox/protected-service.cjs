@@ -59,7 +59,7 @@ async function build(payload,snap,token,request){
       const id=P.text(cells[10]),claimed=id&&allRows.filter(r=>r.calEventId===id).length>1;
       const event=id&&!claimed?events.find(e=>e.id===id):null;
       if(claimed)notes.push('ID compartido: se conserva el horario; revisa el vínculo en fase 2.');
-      else if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&G.same(L.groupFromTitle(event.summary),groupName)&&L.calendarDate(event)===D.dateISO(cells[5])){
+      else if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&L.groupMatches(event.summary,groupName,L.calendarDate(event))&&L.calendarDate(event)===D.dateISO(cells[5])){
         const h=L.hours(event);if(h.horaInicio&&h.horaFin)proposal.time={start:h.horaInicio,end:h.horaFin};
         if(typeof event.location==='string'&&event.location.trim()&&event.location.length<=1000){proposal.address=event.location.trim();notes.push('Dirección propuesta desde la ubicación específica de este evento de Calendar; el barrio se revisa por separado.');}
       }else if(id)notes.push('El evento no aparece como amarillo y compatible en este mes: se conserva el horario y no se recrea.');

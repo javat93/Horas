@@ -19,6 +19,23 @@ test('reconoce Tramuntana como el mismo cole y no duplica la clave de sesión',(
   assert.equal(L.choose(row,[{...event,summary:'Tramuntana'}]).status,'matched');
   assert.equal(L.eventKey(row),L.eventKey({...row,grupo:'Tramuntana'}));
 });
+
+test('equivalencias históricas confirmadas conservan identidad, día, horario y color',()=>{
+  for(const [title,name]of [['Clases Molins de rei','Perxuscat'],['Molins de rei Peques','Perxuscat Jr'],['Clases Trinitat Nova','Bruixes i bruixots'],['Trinitat','Bruixes i bruixots'],['Bolo trini','Bruixes i bruixots'],['Olesa','Diablots'],['Clase Can Fabra','Can Fabra'],['Clases Cardedeu','Clases Cardedeu']]){
+    const r={...row,grupo:name},e={...event,summary:title};assert.equal(L.compatible(r,e),true);assert.equal(L.compatible(r,{...e,colorId:'1'}),false);assert.equal(L.compatible(r,{...e,end:{dateTime:'2026-09-28T20:30:00+02:00'}}),false);
+  }
+  assert.equal(L.groupMatches('Molins de rei Peques','Perxuscat'),false);assert.equal(L.groupMatches('Clases Molins de rei','Perxuscat Jr'),false);assert.equal(L.groupMatches('Olesa','Perxuscat Jr'),false);assert.equal(L.groupMatches('Trinitat','SAFA'),false);assert.equal(L.groupMatches('Bolo trini guineueta','Bruixes i bruixots'),false);
+});
+
+test('un evento de varios días incluye el último día trabajado y excluye el día de fin',()=>{
+  const e={...event,summary:'Port aventura',start:{date:'2023-03-25'},end:{date:'2023-03-27'}},r={grupo:'Port aventura',fechaStr:'26/03/2023',horaInicio:'',horaFin:''};
+  assert.equal(L.compatible(r,e),true);assert.equal(L.compatible({...r,fechaStr:'25/03/2023'},e),true);assert.equal(L.compatible({...r,fechaStr:'27/03/2023'},e),false);assert.equal(L.compatible({...r,fechaStr:'24/03/2023'},e),false);assert.equal(L.compatible({...r,horaInicio:'10:00'},e),false);assert.equal(L.compatible(r,{...e,colorId:'1'}),false);
+});
+
+test('Mamut confirmado y Slap en lunes se reconocen sin fusionar grupos ni días',()=>{
+  assert.equal(L.groupMatches('Bolo Mamut','Ángels diabólics'),true);assert.equal(L.groupMatches('Bolo Mamut','Bolo Mamut'),true);assert.equal(L.groupMatches('Bolo Trinitat','Bruixes i bruixots'),true);assert.equal(L.groupMatches('Bolo Olesa','Diablots'),true);
+  assert.equal(L.groupMatches('Slap','Slap Lunes','2026-09-28'),true);assert.equal(L.groupMatches('Slap','Slap Lunes','2026-09-29'),false);assert.equal(L.groupMatches('Slap','Slap Martes','2026-09-29'),false);assert.equal(L.groupMatches('Slap','Slap Lunes'),false);assert.equal(L.groupMatches('Mamut','Maracuyá'),false);
+});
 test('dos coincidencias requieren elegir; un ID de otra fila no puede asignarse',()=>{
   assert.equal(L.choose(row,[event,{...event,id:'otro'}]).status,'ambiguous');
   assert.equal(L.choose(row,[event],[{rowIdx:3,calEventId:'moli'}]).status,'claimed');

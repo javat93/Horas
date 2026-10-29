@@ -3,8 +3,8 @@ window.mountCalendarReview=function(banner){
   const node=(tag,text)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;return el;};
   const open=node('button','Revisar vínculos de Calendar');open.type='button';open.style.cssText='display:block;margin-top:12px;padding:8px 12px;border:1px solid currentColor;border-radius:6px;font-weight:bold';banner.append(open);
   const section=node('section');section.id='calendar-link-review';section.hidden=true;section.style.cssText='margin:20px auto;padding:20px;max-width:1100px;background:white;border:1px solid #cbd5e1;border-radius:12px';banner.after(section);
-  section.append(node('h2','Revisión de vínculos — Fase 2'));
-  section.append(node('p','Solo cambia CalendarId (columna K) en la copia. No cambia precios, fechas, horas, barrios ni Calendar. Las fechas se comparan como se muestran en la app; su saneamiento tendrá una fase propia.'));
+  section.append(node('h2','Revisión de vínculos de Calendar'));
+  section.append(node('p','Solo cambia CalendarId (columna K) en la copia. Usa las fechas internas de Sheets y la hora de Madrid. Las partidas de cobro pueden existir sin evento. Un ID compartido puede corresponder a varias partidas o a un evento de varios días: requiere revisión, no borrar filas. Precios, fechas, horas, ubicaciones y Calendar se conservan.'));
   const message=node('p');message.setAttribute('role','status');section.append(message);
   const reload=node('button','Analizar de nuevo');reload.type='button';section.append(reload);
   const label=node('label',' Revisar fila: '),input=node('input');input.type='number';input.min='2';input.style.cssText='width:90px;border:1px solid #94a3b8;margin:8px;padding:4px';label.append(input);section.append(label);
