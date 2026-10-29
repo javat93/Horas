@@ -3,8 +3,8 @@
   let busy=false;
   async function api(payload){
     if(!await window.horasEnvironmentReady)throw new Error('El entorno de pruebas no está comprobado.');
-    const token=gapi.client?.getToken()?.access_token||localStorage.getItem('g_token_pruebas');if(!token)throw new Error('Primero conecta Google.');
-    const response=await fetch(CONFIG.GROUPS_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,...payload})});
+    const token=window.horasAccessToken ? window.horasAccessToken() : gapi.client?.getToken()?.access_token||localStorage.getItem('g_token_pruebas');if(!token)throw new Error('Primero conecta Google.');
+    const response=await (window.horasFetch||fetch)(CONFIG.GROUPS_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,...payload})});
     const data=await response.json();if(!response.ok)throw new Error(data.error||'No se pudo revisar el grupo.');return data;
   }
   async function review(rowIdx,proposal){

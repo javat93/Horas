@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(target && /togglePago\(|confirmarBorrar\(/.test(target.getAttribute('onclick'))){e.preventDefault();e.stopImmediatePropagation();result.textContent='Edición y borrado bloqueados durante la fase 1.';}
   },true);
   try {
-    const response=await fetch(CONFIG.TEST_ENVIRONMENT_API_URL || `${CONFIG.PROXY_URL}/api/test-environment`);
+    const response=await (window.horasFetch||fetch)(CONFIG.TEST_ENVIRONMENT_API_URL || `${CONFIG.PROXY_URL}/api/test-environment`);
     const env=await response.json();
     if(!response.ok || env.mode!=='test' || env.spreadsheetId!==CONFIG.SPREADSHEET_ID || !env.calendarReadOnly || env.automaticWrites || env.appWrites) throw new Error('El backend no coincide con la configuración de pruebas.');
     if(CONFIG.TEST_PHASE===2 && (env.phase!==2||!env.linkReview))throw new Error('El backend aún no está preparado para la fase 2. Recarga en unos instantes.');
@@ -62,12 +62,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch(error){status.textContent=error.message;resolveEnvironment(false);return;}
   document.getElementById('test-reload').onclick=()=>syncData(false,false);
   control.onclick=async()=>{
-    const token=gapi.client?.getToken()?.access_token || localStorage.getItem('g_token_pruebas');
+    let token;try{token=window.horasAccessToken ? window.horasAccessToken() : gapi.client?.getToken()?.access_token || localStorage.getItem('g_token_pruebas');}catch(error){result.textContent=error.message;return;}
     if(!token){result.textContent='Primero pulsa «Conectar Google». No se ha escrito nada.';return;}
     control.disabled=true;
     result.textContent='Creando una pestaña temporal en la copia, verificando el valor 42 y retirándola…';
     try {
-      const response=await fetch(CONFIG.TEST_CONTROL_API_URL || `${CONFIG.PROXY_URL}/api/test-control`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID})});
+      const response=await (window.horasFetch||fetch)(CONFIG.TEST_CONTROL_API_URL || `${CONFIG.PROXY_URL}/api/test-control`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID})});
       const data=await response.json();
       if(!response.ok)throw new Error(data.error || 'Falló la prueba de aislamiento.');
       if(data.spreadsheetId!==CONFIG.SPREADSHEET_ID || !data.restored || data.valueVerified!==42 || data.calendarModified)throw new Error('Resultado de prueba inesperado.');

@@ -121,6 +121,7 @@ function createServer(fetchImpl = fetch) {
       files['/locale-data.js']=['locale-data.js','text/javascript'];files['/sandbox/locale-editor.js']=['sandbox/locale-editor.js','text/javascript'];
       files['/sandbox/group-editor.js']=['sandbox/group-editor.js','text/javascript'];
       files['/group-identity.js']=['group-identity.js','text/javascript'];files['/sandbox/identity-review.js']=['sandbox/identity-review.js','text/javascript'];
+      files['/auth-session.js']=['auth-session.js','text/javascript'];
       const file=files[url.pathname];
       if (!file) return send(res,404,{error:'Recurso no disponible en pruebas.'});
       res.writeHead(200,{'Content-Type':file[1],'Cache-Control':'no-store'}); res.end(fs.readFileSync(path.join(ROOT,file[0])));

@@ -5,7 +5,7 @@
   "main": "proxy.js",
   "scripts": {
     "start:pruebas": "node sandbox/server.cjs",
-    "test:pruebas": "node --test sandbox/isolation.test.cjs sandbox/linking.test.cjs sandbox/protected.test.cjs sandbox/locale.test.cjs sandbox/group.test.cjs sandbox/identity.test.cjs",
+    "test:pruebas": "node --test sandbox/isolation.test.cjs sandbox/linking.test.cjs sandbox/protected.test.cjs sandbox/locale.test.cjs sandbox/group.test.cjs sandbox/identity.test.cjs sandbox/auth.test.cjs",
     "start": "node proxy.js",
     "dev": "nodemon proxy.js",
     "build-css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",

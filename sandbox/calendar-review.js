@@ -12,9 +12,9 @@ window.mountCalendarReview=function(banner){
   const list=node('div');section.append(list);let snapshot=null,busy=false;
   async function request(action,body={}){
     if(!await window.horasEnvironmentReady)throw new Error('El destino de pruebas no está verificado.');
-    const token=gapi.client?.getToken()?.access_token||localStorage.getItem('g_token_pruebas');
+    const token=window.horasAccessToken ? window.horasAccessToken() : gapi.client?.getToken()?.access_token||localStorage.getItem('g_token_pruebas');
     if(!token)throw new Error('Primero pulsa «Conectar Google». No se ha cambiado ningún vínculo.');
-    const response=await fetch(CONFIG.CALENDAR_LINKS_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action,...body})});
+    const response=await (window.horasFetch||fetch)(CONFIG.CALENDAR_LINKS_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action,...body})});
     const data=await response.json();if(!response.ok)throw new Error(data.error||'No se pudo revisar el vínculo.');return data;
   }
   async function action(work){if(busy)return;busy=true;reload.disabled=true;inspect.disabled=true;open.disabled=true;try{await work();}catch(error){message.textContent=error.message;}finally{busy=false;reload.disabled=false;inspect.disabled=false;open.disabled=false;}}
