@@ -19,7 +19,7 @@
     
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
-    configScript.src = isProduction ? 'config.production.js?v=fase5-20261029' : 'config.secure.js';
+    configScript.src = isProduction ? 'config.production.js?v=fase6-20261029' : 'config.secure.js';
     window.horasConfigReady = new Promise((resolve, reject) => {
         configScript.onload = resolve;
         configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
@@ -27,9 +27,11 @@
     document.head.appendChild(configScript);
 </script>
     <script src="locale-data.js?v=fase4-20261028"></script>
-    <script src="calendar-linking.js?v=fase2-20261028"></script>
+    <script src="group-identity.js?v=fase6-20261029"></script>
+    <script src="calendar-linking.js?v=fase6-20261029"></script>
     <script src="protected-review.js?v=fase3-20261028"></script>
-    <script src="sandbox/panel.js?v=fase5-20261029" defer></script>
+    <script src="sandbox/panel.js?v=fase6-20261029" defer></script>
+    <script src="sandbox/identity-review.js?v=fase6-20261029" defer></script>
     <script src="sandbox/group-editor.js?v=fase5-20261029" defer></script>
     <script src="sandbox/calendar-review.js?v=fase2-20261028" defer></script>
     <script src="sandbox/protected-editor.js?v=fase3-20261028" defer></script>
@@ -382,6 +384,9 @@
                     <option value="realizado">Realizados (Pasados)</option>
                     <option value="futuro">Futuros</option>
                 </select>
+                <select id="filter-grupo" aria-label="Filtrar sesiones por grupo" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700">
+                    <option value="">Todos los grupos</option>
+                </select>
             </div>
 
             <div id="lista-eventos" class="grid gap-4"></div>
@@ -447,7 +452,7 @@
                 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Fecha</label>
-                    <input type="date" id="ev-fecha" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                    <input type="date" id="ev-fecha" onchange="refreshGroupLabels()" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -547,6 +552,7 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Nombre del Grupo</label>
                     <input type="text" id="gr-nombre" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                    <p id="gr-name-info" class="text-xs text-slate-500 mt-2"></p>
                 </div>
                 <div>
                     <label for="gr-precio" class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio por sesión (€)</label>
@@ -1563,6 +1569,7 @@
         }
 
         function renderAll() {
+            populateGroupFilter();
             renderEventos();
             renderGrupos();
             renderCalendar();
@@ -1602,6 +1609,7 @@
             const container = document.getElementById('lista-eventos');
             const fCobrados = document.getElementById('filter-cobrados').value;
             const fRealizados = document.getElementById('filter-realizados').value;
+            const fGrupo = document.getElementById('filter-grupo').value;
             
             const filtered = eventos.filter(ev => {
                 let pasaCobro = true;
@@ -1612,7 +1620,7 @@
                 if (fRealizados === 'realizado') pasaRealizado = ev.realizado;
                 if (fRealizados === 'futuro') pasaRealizado = !ev.realizado;
                 
-                return pasaCobro && pasaRealizado;
+                return pasaCobro && pasaRealizado && (!fGrupo || GroupIdentity.id(ev.grupo) === fGrupo);
             });
 
             if (filtered.length === 0) {
@@ -1627,7 +1635,7 @@
                             <i data-lucide="${ev.realizado ? 'check-circle' : 'clock'}"></i>
                         </div>
                         <div>
-                            <h4 class="font-extrabold text-slate-900">${ev.grupo}</h4>
+                            <h4 class="font-extrabold text-slate-900">${sessionGroupName(ev)}</h4>
                             <div class="flex gap-3 mt-1">
                                 <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${ev.fechaStr}${ev.dateWarning ? ' · Revisar fecha' : ''}</span>
                                 <span class="text-xs font-bold ${ev.realizado ? 'text-blue-500' : 'text-slate-400'} flex items-center gap-1">
@@ -1660,7 +1668,7 @@
             const term = document.getElementById('search-grupos').value.toLowerCase();
             
             const filtered = grupos.filter(g => 
-                g.nombre.toLowerCase().includes(term) || 
+                GroupIdentity.matches(g.nombre,term) ||
                 (g.sitio && g.sitio.toLowerCase().includes(term))
             );
 
@@ -1674,7 +1682,8 @@
                     <div class="flex items-center gap-4 cursor-pointer flex-1" onclick="openEditGrupoModal(${g.rowIdx})">
                         <div class="bg-slate-900 text-white p-3 rounded-xl"><i data-lucide="users"></i></div>
                         <div>
-                            <h4 class="font-bold text-slate-900">${g.nombre}</h4>
+                            <h4 class="font-bold text-slate-900">${GroupIdentity.catalogLabel(g.nombre)}</h4>
+                            <p class="text-xs text-slate-500">${GroupIdentity.description(g.nombre)}</p>
                             <p class="text-xs text-slate-500">${g.sitio || 'Sin ubicación'}</p>
                         </div>
                     </div>
@@ -1722,13 +1731,13 @@
                 const isMobile = window.innerWidth <= 768;
                 if (isMobile) {
                     // En móvil: mantener formato actual (solo grupo)
-                    eventTitle = (e.grupo && e.grupo.trim() !== '') ? e.grupo : (e.sitio && e.sitio.trim() !== '' ? e.sitio : 'Sesión');
+                    eventTitle = sessionGroupName(e) || e.sitio || 'Sesión';
                 } else {
                     // En PC: mostrar grupo + horas si están disponibles
                     if (e.horaInicio && e.horaFin && e.horaInicio.trim() !== '' && e.horaFin.trim() !== '') {
-                        eventTitle = `${e.grupo || e.sitio || 'Sesión'} (${e.horaInicio}-${e.horaFin})`;
+                        eventTitle = `${sessionGroupName(e) || e.sitio || 'Sesión'} (${e.horaInicio}-${e.horaFin})`;
                     } else {
-                        eventTitle = (e.grupo && e.grupo.trim() !== '') ? e.grupo : (e.sitio && e.sitio.trim() !== '' ? e.sitio : 'Sesión');
+                        eventTitle = sessionGroupName(e) || e.sitio || 'Sesión';
                     }
                 }
                 
@@ -1833,6 +1842,7 @@
             const minutosStr = minutosActuales.toString().padStart(2, '0');
             
             document.getElementById('ev-fecha').value = now.toISOString().split('T')[0];
+            refreshGroupLabels();
             document.getElementById('ev-hora-inicio').value = `${horaActual}:${minutosStr}`;
             
             // Calcular hora fin (1 hora después)
@@ -1849,13 +1859,14 @@
             if (!ev) return;
             document.getElementById('modal-evento-title').innerText = "Editar Sesión";
             document.getElementById('ev-rowIdx').value = ev.rowIdx;
-            document.getElementById('ev-grupo').value = ev.grupo;
-            document.getElementById('ev-grupo-search').value = ev.grupo;
+            document.getElementById('ev-grupo').value = GroupIdentity.resolve(grupos,ev.grupo)?.nombre || ev.grupo;
+            document.getElementById('ev-grupo-search').value = sessionGroupName(ev);
 
             const offsetMS = ev.fechaObj.getTimezoneOffset() * 60 * 1000;
             const fechaLocal = new Date(ev.fechaObj.getTime() - offsetMS);
 
             document.getElementById('ev-fecha').value = fechaLocal.toISOString().split('T')[0];
+            refreshGroupLabels();
             
             // Usar las horas reales guardadas en Sheets; si faltan, mantenemos el fallback anterior.
             const horaInicioGuardada = ev.horaInicio || '10:00';
@@ -1896,9 +1907,10 @@
         function openEditGrupoModal(rowIdx) {
             const g = grupos.find(gr => gr.rowIdx === rowIdx);
             if (!g) return;
-            document.getElementById('modal-grupo-title').innerText = "Editar Grupo";
+            document.getElementById('modal-grupo-title').innerText = 'Editar Grupo · ' + GroupIdentity.catalogLabel(g.nombre);
             document.getElementById('gr-rowIdx').value = g.rowIdx;
             document.getElementById('gr-nombre').value = g.nombre;
+            document.getElementById('gr-name-info').textContent = GroupIdentity.description(g.nombre);
             document.getElementById('gr-precio').value = g.precio ?? '';
             document.getElementById('gr-precio-bolo').value = g.precioBolo ?? '';
             document.getElementById('gr-nombre').disabled = CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 5;
@@ -1910,7 +1922,7 @@
 
         function autoFillGrupo(nombre, ignoreOverwrite = false) {
             const isMaracuya = nombre.toLowerCase().includes('maracuyá') || nombre.toLowerCase().includes('maracuya');
-            const g = grupos.find(x => x.nombre === nombre);
+            const g = GroupIdentity.resolve(grupos,nombre);
             
             if (isMaracuya) {
                 document.getElementById('maracuya-gps-hint').classList.remove('hidden');
@@ -1934,7 +1946,7 @@
             const isBolo = document.getElementById('ev-bolo').checked;
             const precioInput = document.getElementById('ev-precio');
             const grupo = document.getElementById('ev-grupo').value;
-            const g = grupos.find(x => x.nombre === grupo);
+            const g = GroupIdentity.resolve(grupos,grupo);
             
             if (isBolo && g) {
                 precioInput.value = g.precioBolo ?? '';
@@ -2142,7 +2154,7 @@
             const totalStr = precio.toFixed(2).replace(".",",") + " €";
 
             // Obtener ubicación del grupo y dirección del formulario
-            const g = grupos.find(x => x.nombre === grupo);
+            const g = GroupIdentity.resolve(grupos,grupo);
             const ubicacion = g ? g.ubicacion : '';
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
             
@@ -2528,14 +2540,39 @@
             `;
         }
 
+        function sessionGroupName(ev) {
+            return GroupIdentity.label(ev.grupo, LocaleData.parseSpanish(ev.fechaStr));
+        }
+
+        function groupOptionName(name) {
+            return GroupIdentity.label(name, document.getElementById('ev-fecha').value) || name;
+        }
+
+        function populateGroupFilter() {
+            const select = document.getElementById('filter-grupo'), selected = select.value;
+            const names = new Map();
+            for(const name of [...grupos.map(g=>g.nombre),...eventos.map(ev=>ev.grupo)])if(GroupIdentity.id(name))names.set(GroupIdentity.id(name),GroupIdentity.catalogLabel(name));
+            select.replaceChildren(new Option('Todos los grupos',''));
+            for(const [id,name]of [...names].sort((a,b)=>a[1].localeCompare(b[1],'es')))select.append(new Option(name,id));
+            select.value = names.has(selected) ? selected : '';
+        }
+
+        function refreshGroupLabels() {
+            populateSelects();
+            const value = document.getElementById('ev-grupo').value;
+            if(value)document.getElementById('ev-grupo-search').value = groupOptionName(value);
+        }
+
         function populateSelects() {
             const sel = document.getElementById('ev-grupo');
+            const selected = sel.value;
             // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
             const gruposOrdenados = [...grupos].sort((a, b) => 
-                a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+                groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base' })
             );
             sel.innerHTML = '<option value="">Selecciona grupo...</option>' + 
-                gruposOrdenados.map(g => `<option value="${g.nombre}">${g.nombre}</option>`).join('');
+                gruposOrdenados.map(g => `<option value="${g.nombre}">${groupOptionName(g.nombre)}</option>`).join('');
+            sel.value = selected;
             populateGrupoOptions();
         }
 
@@ -2546,14 +2583,14 @@
             
             // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
             const gruposOrdenados = [...grupos].sort((a, b) => 
-                a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+                groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base' })
             );
             
             optionsContainer.innerHTML = gruposOrdenados.map(g => 
                 `<div class="grupo-option px-3 py-2 hover:bg-slate-100 cursor-pointer rounded-lg transition-colors" 
                        onclick="selectGrupo('${g.nombre.replace(/'/g, "\\'")}')"
                        data-grupo="${g.nombre}">
-                    <div class="font-medium text-sm">${g.nombre}</div>
+                    <div class="font-medium text-sm">${groupOptionName(g.nombre)}</div>
                 </div>`
             ).join('');
         }
@@ -2586,7 +2623,7 @@
             if (!optionsContainer) return;
             
             const filtered = grupos.filter(g => 
-                g.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+                GroupIdentity.matches(g.nombre,searchTerm)
             );
             
             if (filtered.length === 0) {
@@ -2596,7 +2633,7 @@
                     `<div class="grupo-option px-3 py-2 hover:bg-slate-100 cursor-pointer rounded-lg transition-colors" 
                            onclick="selectGrupo('${g.nombre.replace(/'/g, "\\'")}')"
                            data-grupo="${g.nombre}">
-                        <div class="font-medium text-sm">${g.nombre}</div>
+                        <div class="font-medium text-sm">${groupOptionName(g.nombre)}</div>
                     </div>`
                 ).join('');
             }
@@ -2614,7 +2651,7 @@
             const hiddenSelect = document.getElementById('ev-grupo');
             
             if (searchInput) {
-                searchInput.value = grupoNombre;
+                searchInput.value = groupOptionName(grupoNombre);
             }
             
             if (hiddenSelect) {
@@ -3021,7 +3058,7 @@
             return calendarData.fecha !== excelData.fecha ||
                    calendarData.horaInicio !== excelData.horaInicio ||
                    calendarData.horaFin !== excelData.horaFin ||
-                   calendarData.grupo !== excelData.grupo ||
+                   (calendarData.grupo !== excelData.grupo && !GroupIdentity.same(calendarData.grupo,excelData.grupo)) ||
                    calendarData.sitio !== excelData.sitio;
         }
 
@@ -3110,7 +3147,8 @@
             const clase = isMaracuya ? "" : "X"; // Columna D: "" para Maracuya, "X" para otros
             
             // Buscar información del grupo como hace el formulario
-            const g = grupos.find(x => x.nombre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === grupo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase());
+            const g = GroupIdentity.resolve(grupos,grupo);
+            if(g)grupo = g.nombre;
             
             // Usar precio bolo si es evento de Bolo, sino precio normal
             const precio = g ? (tieneBolo ? g.precioBolo : g.precio) : null;

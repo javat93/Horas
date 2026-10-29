@@ -28,6 +28,13 @@ function fixture(options={}){
 const sync={spreadsheetId:TEST_ID,action:'preview',mode:'sync',month:'2026-09'};
 function apply(review,choices,extra={}){return {...sync,action:'apply',catalogVersion:review.catalogVersion,decisions:review.plans.map(plan=>({rowIdx:plan.rowIdx,expectedVersion:plan.expectedVersion,proposalVersion:plan.proposalVersion,choices:{money:'keep',district:'keep',time:'keep',...choices}})),...extra};}
 const writes=f=>f.calls.filter(c=>c.method!=='GET');
+
+test('tarifa y horario reconocen alias sin renombrar ni sobrescribir el histórico',async()=>{
+  const f=fixture();f.rows[1][8]=cell('Tramuntana');f.groups[1][0]=cell('Moli de finestrelles');
+  const request=async(url,...args)=>url.includes('calendar')?{items:[{id:'work',summary:'Moli de finestrelles',colorId:'5',start:{dateTime:'2026-09-28T18:30:00+02:00'},end:{dateTime:'2026-09-28T20:00:00+02:00'}}]}:f.request(url,...args);
+  const review=await runProtected(sync,'Bearer fake',request);assert.equal(review.plans[0].group,'Tramuntana');assert.equal(review.plans[0].proposal.money.price,20);assert.equal(review.plans[0].proposal.time.start,'18:30');assert.equal(writes(f).length,0);
+  f.groups.push(clone(f.groups[1]));f.groups[2][0]=cell('Tramuntana');const ambiguous=await runProtected(sync,'Bearer fake',request);assert.equal(ambiguous.plans[0].proposal.money,null);assert.equal(f.rows[1][8].effectiveValue.stringValue,'Tramuntana');
+});
 test('importes españoles y equivalencias, sin adivinar separadores ambiguos',()=>{
   for(const value of [37.5,'37,50 €','37.50'])assert.equal(P.number(value),37.5);
   assert.equal(P.number('1.234,56'),1234.56);

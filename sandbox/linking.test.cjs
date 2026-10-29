@@ -15,8 +15,9 @@ test('solo amarillo, no cancelado y coincidencia completa de grupo, día y horar
   for(const candidate of [{...event,colorId:'1'},{...event,status:'cancelled'},{...event,summary:'Moli de finestrelles Jr'},{...event,start:{dateTime:'2026-09-29T18:30:00+02:00'}},{...event,end:{dateTime:'2026-09-28T20:30:00+02:00'}}])assert.equal(L.choose(row,[candidate]).status,'unmatched');
   assert.equal(L.choose(row,[{...event,summary:'Bolo Molí de finestrelles - Sant Andreu'}]).status,'matched');
 });
-test('no importa alias de Tramuntana como cole nuevo durante esta fase',()=>{
-  assert.equal(L.choose(row,[{...event,summary:'Tramuntana'}]).status,'unmatched');
+test('reconoce Tramuntana como el mismo cole y no duplica la clave de sesión',()=>{
+  assert.equal(L.choose(row,[{...event,summary:'Tramuntana'}]).status,'matched');
+  assert.equal(L.eventKey(row),L.eventKey({...row,grupo:'Tramuntana'}));
 });
 test('dos coincidencias requieren elegir; un ID de otra fila no puede asignarse',()=>{
   assert.equal(L.choose(row,[event,{...event,id:'otro'}]).status,'ambiguous');
@@ -94,16 +95,16 @@ test('rechaza el original sin siquiera leer y repetir la confirmación no vuelve
   const v=makeRow('Molí de finestrelles','moli');const n=mock([v]);const result=await runLinks({spreadsheetId:TEST_ID,action:'apply',rowIdx:2,expectedRow:v,newEventId:'moli'},'Bearer fake',n.request);assert.equal(result.unchanged,true);assert(n.calls.every(c=>c.method==='GET'));
 });
 test('el panel monta el revisor después de verificar el backend, con banner existente o nuevo',async()=>{
-  for(const [exists,phase]of [[true,2],[false,2],[true,3],[false,3],[true,4],[false,4],[true,5],[false,5]]){
+  for(const [exists,phase]of [[true,2],[false,2],[true,3],[false,3],[true,4],[false,4],[true,5],[false,5],[true,6],[false,6]]){
     const elements={};const element=()=>({addEventListener(){},style:{},append(){}});
     for(const id of ['test-target-status','test-result','test-control','auth-btn','test-reload','sync-btn'])elements[id]=element();
     if(exists)elements['test-environment-banner']=element();
-    let ready,mounted,protectedMounted,localeMounted,groupMounted;
-    const window={horasConfigReady:Promise.resolve(),mountGroupReview:el=>{groupMounted=el},mountCalendarReview:el=>{mounted=el},mountProtectedReview:el=>{protectedMounted=el},mountLocaleReview:el=>{localeMounted=el}};
+    let ready,mounted,protectedMounted,localeMounted,groupMounted,identityMounted;
+    const window={horasConfigReady:Promise.resolve(),mountIdentityReview:el=>{identityMounted=el},mountGroupReview:el=>{groupMounted=el},mountCalendarReview:el=>{mounted=el},mountProtectedReview:el=>{protectedMounted=el},mountLocaleReview:el=>{localeMounted=el}};
     const document={getElementById:id=>elements[id],createElement:()=>element(),body:{prepend:el=>{elements[el.id]=el}},addEventListener:(name,fn)=>{if(name==='DOMContentLoaded')ready=fn}};
-    const context=vm.createContext({window,document,CONFIG:{TEST_MODE:true,TEST_PHASE:phase,SPREADSHEET_ID:TEST_ID,PROXY_URL:'https://example.invalid'},fetch:async()=>({ok:true,json:async()=>({mode:'test',phase,groupReview:true,linkReview:true,protectedReview:true,localeReview:true,spreadsheetId:TEST_ID,calendarReadOnly:true,automaticWrites:false,appWrites:false})})});
+    const context=vm.createContext({window,document,CONFIG:{TEST_MODE:true,TEST_PHASE:phase,SPREADSHEET_ID:TEST_ID,PROXY_URL:'https://example.invalid'},fetch:async()=>({ok:true,json:async()=>({mode:'test',phase,identityReview:true,groupReview:true,linkReview:true,protectedReview:true,localeReview:true,spreadsheetId:TEST_ID,calendarReadOnly:true,automaticWrites:false,appWrites:false})})});
     vm.runInContext(fs.readFileSync(path.join(__dirname,'panel.js'),'utf8'),context);
     await ready();assert.equal(await window.horasEnvironmentReady,true);assert.equal(mounted,elements['test-environment-banner']);assert.match(elements['test-target-status'].textContent,/Backend comprobado/);
-    if(phase>=3){assert.equal(protectedMounted,elements['test-environment-banner']);assert.equal(elements['sync-btn'].disabled,false);}if(phase>=4)assert.equal(localeMounted,elements['test-environment-banner']);if(phase>=5)assert.equal(groupMounted,elements['test-environment-banner']);
+    if(phase>=3){assert.equal(protectedMounted,elements['test-environment-banner']);assert.equal(elements['sync-btn'].disabled,false);}if(phase>=4)assert.equal(localeMounted,elements['test-environment-banner']);if(phase>=5)assert.equal(groupMounted,elements['test-environment-banner']);if(phase>=6)assert.equal(identityMounted,elements['test-environment-banner']);
   }
 });

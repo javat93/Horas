@@ -1,4 +1,5 @@
 const D=require('../locale-data.js'),L=require('../calendar-linking.js');
+const G=require('../group-identity.js');
 const {snapshot}=require('./protected-service.cjs');
 const {TEST_ID,validateTarget}=require('./policy.cjs');
 const {createHash}=require('node:crypto');
@@ -14,7 +15,7 @@ function datePlan(cells,rowIdx,events,allRows){
   const claimed=id&&allRows.filter(row=>String(D.value(row[10]))===id).length>1;
   const event=id&&!claimed?events.find(e=>e.id===id):null;
   let verified=null,reason=claimed?'ID compartido: requiere revisión.':!id?'Sin CalendarId: requiere revisión.':'Sin evento amarillo compatible: requiere revisión.';
-  if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&L.groupFromTitle(event.summary)===L.normalize(group)){
+  if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&G.same(L.groupFromTitle(event.summary),group)){
     const hours=L.hours(event),start=D.time(D.value(cells[12])),end=D.time(D.value(cells[13]));
     const day=L.calendarDate(event);
     if((!start||hours.horaInicio===start)&&(!end||hours.horaFin===end)&&choices.some(choice=>choice.iso===day)){

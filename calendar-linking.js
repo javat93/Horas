@@ -1,8 +1,8 @@
 (function(root,factory){
-  const api=factory();
+  const api=factory(typeof module==='object'&&module.exports?require('./group-identity.js'):root.GroupIdentity);
   if(typeof module==='object' && module.exports)module.exports=api;
   else root.CalendarLinking=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(G){
   function normalize(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,' ').toLowerCase();}
   function groupFromTitle(value){return normalize(String(value||'').split(' - ')[0]).replace(/^bolo\s+/,'');}
   function dateKey(value){
@@ -30,7 +30,7 @@
   }
   function compatible(row,event){
     if(!event?.id || String(event.colorId)!=='5' || event.status==='cancelled')return false;
-    if(!normalize(row.grupo) || groupFromTitle(event.summary)!==normalize(row.grupo))return false;
+    if(!G.same(groupFromTitle(event.summary),row.grupo))return false;
     if(!dateKey(row.fechaStr) || calendarDate(event)!==dateKey(row.fechaStr))return false;
     const h=hours(event);
     return (!row.horaInicio || (time(row.horaInicio) && time(row.horaInicio)===h.horaInicio)) && (!row.horaFin || (time(row.horaFin) && time(row.horaFin)===h.horaFin));
@@ -40,7 +40,7 @@
     return [...ids].filter(([,list])=>list.length>1).map(([id,rows])=>({id,rows}));
   }
   function assertUniqueLinks(rows){if(sharedIds(rows).length)throw new Error('Hay IDs de Calendar compartidos. Revisa las vinculaciones antes de sincronizar, editar o borrar.');}
-  function eventKey(row){const date=dateKey(row.fechaStr),group=normalize(row.grupo);return date&&group?[date,group,time(row.horaInicio),time(row.horaFin)].join('|'):'';}
+  function eventKey(row){const date=dateKey(row.fechaStr),group=G.id(row.grupo);return date&&group?[date,group,time(row.horaInicio),time(row.horaFin)].join('|'):'';}
   function choose(row,events,rows=[]){
     const candidates=events.filter(event=>compatible(row,event)).map(event=>({...event,claimedBy:rows.filter(other=>other.rowIdx!==row.rowIdx && other.calEventId===event.id).map(other=>other.rowIdx)}));
     if(candidates.length!==1)return {status:candidates.length?'ambiguous':'unmatched',candidates};

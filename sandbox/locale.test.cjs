@@ -24,6 +24,11 @@ function fixture(options={}){
   };return f;
 }
 const payload={spreadsheetId:TEST_ID,action:'audit'};
+
+test('revisión de fecha admite alias pero mantiene ID, horario y color',()=>{
+  const f=fixture(),row=f.rows[1];row[8]=cell('Moli de finestrelles');const event={id:'event',summary:'Tramuntana',colorId:'5',start:{dateTime:'2026-02-08T17:00:00+01:00'},end:{dateTime:'2026-02-08T18:30:00+01:00'}};
+  assert.equal(datePlan(row,2,[event],[row]).verified,'visible');assert.equal(datePlan(row,2,[{...event,colorId:'1'}],[row]).verified,null);assert.equal(datePlan(row,2,[{...event,id:'otro'}],[row]).verified,null);
+});
 test('fechas seriales son días de calendario sin ambigüedad ni cambios de zona horaria',()=>{
   assert.equal(D.fromSerial(46236),'2026-08-02');assert.equal(D.parseSpanish('08/02/2026'),'2026-02-08');
   for(const iso of ['2026-03-29','2026-10-25','2025-12-31','2026-01-01','2024-02-29'])assert.equal(D.fromSerial(D.serial(iso)),iso);

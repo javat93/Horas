@@ -4,6 +4,7 @@ const {TEST_ID,validateTarget}=require('./policy.cjs');
 const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`;
 const CAL='https://www.googleapis.com/calendar/v3/calendars/primary/events';
 const D=require('../locale-data.js');
+const G=require('../group-identity.js');
 const {createHash}=require('node:crypto');
 const fingerprint=cells=>createHash('sha256').update(P.version(cells)).digest('hex');
 async function snapshot(token,request){
@@ -41,7 +42,7 @@ async function build(payload,snap,token,request){
       if(input.start!==undefined||input.end!==undefined){const start=L.time(input.start),end=L.time(input.end);if(!start||!end||end<=start)throw new Error('Introduce un horario válido con fin posterior al inicio.');proposal.time={start,end};}
     }else{
       const groupName=L.normalize(P.text(cells[8]));
-      const groups=snap.groups.slice(1).filter(g=>g&&L.normalize(P.text(g[0]))===groupName);
+      const groups=snap.groups.slice(1).filter(g=>g&&G.same(P.text(g[0]),groupName));
       if(groups.length!==1)notes.push('Grupo sin una tarifa única en Coles: se conservan los importes y el barrio.');
       else{
         const group=groups[0],isBolo=P.text(cells[2])==='X',price=P.amount(group[isBolo?3:2]);
@@ -51,12 +52,13 @@ async function build(payload,snap,token,request){
       const id=P.text(cells[10]),claimed=id&&allRows.filter(r=>r.calEventId===id).length>1;
       const event=id&&!claimed?events.find(e=>e.id===id):null;
       if(claimed)notes.push('ID compartido: se conserva el horario; revisa el vínculo en fase 2.');
-      else if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&L.groupFromTitle(event.summary)===groupName&&L.calendarDate(event)===D.dateISO(cells[5])){
+      else if(event&&String(event.colorId)==='5'&&event.status!=='cancelled'&&G.same(L.groupFromTitle(event.summary),groupName)&&L.calendarDate(event)===D.dateISO(cells[5])){
         const h=L.hours(event);if(h.horaInicio&&h.horaFin)proposal.time={start:h.horaInicio,end:h.horaFin};
       }else if(id)notes.push('El evento no aparece como amarillo y compatible en este mes: se conserva el horario y no se recrea.');
     }
     const plan=P.makePlan(rowIdx,cells,proposal,payload.mode==='edit'?'Formulario':'Tarifa y barrio de Coles; horario de Calendar',notes);
     plan.date=D.display(D.dateISO(cells[5]));
+    plan.group=G.label(plan.group,D.dateISO(cells[5]));
     plan.expectedVersion=fingerprint(cells);plans.push(plan);
   }
   return {plans,catalogVersion,mode:payload.mode,month:payload.month,spreadsheetId:TEST_ID,calendarReadOnly:true};
