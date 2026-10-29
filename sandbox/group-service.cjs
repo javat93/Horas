@@ -4,7 +4,7 @@ const {createHash}=require('node:crypto');
 const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`;
 const version=row=>createHash('sha256').update(JSON.stringify(row)).digest('hex');
 async function read(token,request){
-  const q=new URLSearchParams({includeGridData:'true',fields:'sheets(properties(title),data(startRow,rowData(values(userEnteredValue,effectiveValue,formattedValue))))',ranges:'Coles!A1:E1220'});
+  const q=new URLSearchParams({includeGridData:'true',fields:'sheets(properties(title),data(startRow,rowData(values(userEnteredValue,effectiveValue,formattedValue))))',ranges:'Coles!A:E'});
   const result=await request(`${BASE}?${q}`,token),sheet=result.sheets?.find(s=>s.properties.title==='Coles');
   if(!sheet)throw new Error('No se pudo leer Coles.');
   const rows=[];for(const grid of sheet.data||[])for(const [i,r]of (grid.rowData||[]).entries())rows[(grid.startRow||0)+i]=Array.from({length:5},(_,c)=>r.values?.[c]||{});
@@ -19,7 +19,7 @@ function normalize(input){
 }
 const columns={address:1,price:2,gigPrice:3,location:4};
 function plan(rows,payload){
-  const r=payload.rowIdx;if(!Number.isInteger(r)||r<2||r>1220||!D.value(rows[r-1]?.[0]))throw new Error('Selecciona un grupo existente. Las altas se probarán en otra etapa.');
+  const r=payload.rowIdx;if(!Number.isInteger(r)||r<2||r>rows.length||!D.value(rows[r-1]?.[0]))throw new Error('Selecciona un grupo existente. Las altas se probarán en otra etapa.');
   const row=rows[r-1],proposal=normalize(payload.proposal),current={price:D.value(row[2]),gigPrice:D.value(row[3]),location:String(D.value(row[4])),address:String(D.value(row[1]))};
   const diff={};for(const key of Object.keys(proposal))diff[key]=['location','address'].includes(key)?current[key]!==proposal[key]:D.numeric(current[key])!==proposal[key];
   return {rowIdx:r,name:String(D.value(row[0])),current,proposal,diff,expectedVersion:version(row)};

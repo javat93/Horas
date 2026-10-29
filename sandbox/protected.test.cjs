@@ -14,6 +14,7 @@ function fixture(options={}){
     state.calls.push({url,method,body:clone(body||null)});
     if(url.includes('calendar')){assert.equal(method,'GET');return {items:[event]};}
     assert(url.includes(TEST_ID));assert(!url.includes(ORIGINAL_ID));
+    if(url.includes('/values:batchGet'))return {valueRanges:[{values:state.rows.map(row=>row.map(P.text))},{values:state.groups.map(row=>row.map(P.text))}]};
     if(method==='POST'){
       assert(url.endsWith(':batchUpdate'));
       for(const request of body.requests){const update=request.updateCells;assert.equal(update.range.sheetId,0);assert.equal(update.range.endRowIndex,update.range.startRowIndex+1);assert.equal(update.range.endColumnIndex,update.range.startColumnIndex+1);assert([4,6,9,11,12,13].includes(update.range.startColumnIndex));

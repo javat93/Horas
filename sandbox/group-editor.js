@@ -24,7 +24,7 @@
     const save=node('button','Confirmar cambios del grupo en la copia'),cancel=node('button','Cancelar sin guardar');save.type=cancel.type='button';for(const b of [save,cancel])b.style.cssText='margin:8px;padding:10px;border:1px solid #64748b;border-radius:6px';dialog.append(save,cancel);
     cancel.onclick=()=>{if(!busy){dialog.close();dialog.remove();}};dialog.addEventListener('cancel',e=>{if(busy)e.preventDefault();});
     save.onclick=async()=>{if(busy)return;busy=true;save.disabled=cancel.disabled=true;for(const select of dialog.querySelectorAll('select'))select.disabled=true;status.textContent='Volviendo a leer el grupo antes de guardar…';
-      try{const r=await api({action:'apply',rowIdx,proposal,expectedVersion:p.expectedVersion,choices});status.textContent=r.unchanged?'Se conserva todo. Ninguna celda modificada.':`${r.cellsChanged} celdas guardadas y verificadas. Calendar y sesiones sin cambios.`;if(!r.unchanged){await syncData(false,false);closeModal('modal-grupo');}save.hidden=true;cancel.textContent='Cerrar';}
+      try{const r=await api({action:'apply',rowIdx,proposal,expectedVersion:p.expectedVersion,choices});const saved=r.unchanged?'Se conserva todo. Ninguna celda modificada.':`${r.cellsChanged} celdas guardadas y verificadas. Calendar y sesiones sin cambios.`;status.textContent=saved;save.hidden=true;cancel.textContent='Cerrar';if(!r.unchanged){closeModal('modal-grupo');try{await syncData(false,false);}catch(error){status.textContent=saved+' Falta recargar la vista: '+error.message;}}}
       catch(error){status.textContent=error.message;save.hidden=true;}finally{busy=false;cancel.disabled=false;}
     };
     document.body.append(dialog);dialog.showModal();cancel.focus();

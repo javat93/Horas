@@ -19,24 +19,26 @@
     
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
-    configScript.src = isProduction ? 'config.production.js?v=fase7-20261029' : 'config.secure.js';
+    configScript.src = isProduction ? 'config.production.js?v=fase8-20261029' : 'config.secure.js';
     window.horasConfigReady = new Promise((resolve, reject) => {
         configScript.onload = resolve;
         configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
     });
     document.head.appendChild(configScript);
 </script>
-    <script src="locale-data.js?v=fase4-20261028"></script>
+    <script src="locale-data.js?v=fase8-20261029"></script>
     <script src="auth-session.js?v=auth-20261029"></script>
+    <script src="app-data.js?v=fase8-20261029"></script>
     <script src="group-identity.js?v=fase6-20261029"></script>
     <script src="calendar-linking.js?v=fase6-20261029"></script>
     <script src="protected-review.js?v=fase7-20261029"></script>
-    <script src="sandbox/panel.js?v=auth-20261029" defer></script>
+    <script src="sandbox/panel.js?v=fase8-20261029" defer></script>
+    <script src="sandbox/performed-editor.js?v=fase8-20261029" defer></script>
     <script src="sandbox/identity-review.js?v=fase6-20261029" defer></script>
-    <script src="sandbox/group-editor.js?v=auth-20261029" defer></script>
-    <script src="sandbox/calendar-review.js?v=auth-20261029" defer></script>
-    <script src="sandbox/protected-editor.js?v=auth-20261029" defer></script>
-    <script src="sandbox/locale-editor.js?v=auth-20261029" defer></script>
+    <script src="sandbox/group-editor.js?v=fase8-20261029" defer></script>
+    <script src="sandbox/calendar-review.js?v=fase8-20261029" defer></script>
+    <script src="sandbox/protected-editor.js?v=fase8-20261029" defer></script>
+    <script src="sandbox/locale-editor.js?v=fase8-20261029" defer></script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <!-- PWA Manifest and Icons -->
     <link rel="manifest" href="manifest.json">
@@ -382,9 +384,9 @@
                     <option value="pendiente" selected>Solo Pendientes</option>
                 </select>
                 <select id="filter-realizados" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700 outline-none focus:border-blue-400">
-                    <option value="all">Fecha: Todas</option>
-                    <option value="realizado">Realizados (Pasados)</option>
-                    <option value="futuro">Futuros</option>
+                    <option value="all">Realización: Todas</option>
+                    <option value="realizado">Marcados como realizados</option>
+                    <option value="futuro">Sin marcar como realizados</option>
                 </select>
                 <select id="filter-grupo" aria-label="Filtrar sesiones por grupo" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700">
                     <option value="">Todos los grupos</option>
@@ -772,6 +774,9 @@
         let gisInited = false;
         let authRestoreStarted = false;
         let authConnecting = false;
+        let syncInFlight = null;
+        const mutationGate = AppData.createGate();
+        window.horasOperationBusy=()=>!!syncInFlight||mutationGate.isBusy();
         function savedSession(){return AuthSession.create(localStorage,tokenStorageKey());}
         function showGoogleConnection(connected,message=''){
             document.getElementById('auth-btn').classList.toggle('hidden',connected);
@@ -791,9 +796,16 @@
             return stored.token;
         };
         window.horasFetch=async function(url,options){
+            const send=async()=>{
             const response=await fetch(url,options);
             if(!response.ok){const data=await response.clone().json().catch(()=>({}));if(AuthSession.isAuthError({status:response.status,message:data.error}))expireGoogleConnection();}
             return response;
+            };
+            if(AppData.mutatingRequest(url,options)){
+                if(syncInFlight)throw new Error('Espera a que termine la carga antes de guardar cambios.');
+                return mutationGate.run(()=>typeof navigator!=='undefined'&&navigator.locks?navigator.locks.request('horas-copia-write',{ifAvailable:true},lock=>{if(!lock)throw new Error('Otra pestaña está guardando. Espera a que termine.');return send();}):send());
+            }
+            return send();
         };
         let eventos = [];
         let grupos = [];
@@ -1017,17 +1029,12 @@
                     body: JSON.stringify(requestData)
                 });
                 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    console.error('Proxy API error response:', errorData);
-                    throw new Error(`Error del proxy: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
-                }
-                
-                const result = await response.json();
-                return result;
+                return await AppData.readResponse(response);
             } else {
                 // En desarrollo, usar gapi directamente
-                return await gapi.client[apiType.toLowerCase()][method](params);
+                const service=apiType==='sheets'?gapi.client.sheets.spreadsheets.values:gapi.client.calendar.events;
+                if(apiType==='sheets'&&method==='batchUpdate')return (await gapi.client.sheets.spreadsheets.batchUpdate({...params,resource:body})).result;
+                return (await service[method]({...params,...(body?{resource:body}:{})})).result;
             }
         }
 
@@ -1167,7 +1174,13 @@
             return { id:'', horaInicio:'', horaFin:'', ...decision };
         }
 
-        async function syncData(resolverCal = false, actualizarRealizadosFlag = !CONFIG.TEST_MODE) {
+        function syncData(resolverCal = false, actualizarRealizadosFlag = false) {
+            if(syncInFlight)return syncInFlight;
+            if(window.horasOperationBusy?.())return Promise.reject(new Error('Espera a que termine el guardado antes de recargar.'));
+            syncInFlight=performDataSync(resolverCal,actualizarRealizadosFlag).then(value=>{setTimeout(()=>window.runAutoPerformed?.(),0);return value;}).finally(()=>{syncInFlight=null;});
+            return syncInFlight;
+        }
+        async function performDataSync(resolverCal = false, actualizarRealizadosFlag = false) {
             if (CONFIG.TEST_MODE && resolverCal) {
                 if (CONFIG.TEST_PHASE >= 3 && window.prepareProtectedSync) return window.prepareProtectedSync();
                 showErrorModal('Fase 1', 'Usa «Recargar copia». La sincronización que modifica datos se probará en las siguientes fases.', 'info');
@@ -1182,14 +1195,14 @@
                     spreadsheetId: CONFIG.SPREADSHEET_ID, 
                     range: 'Coles!A2:E'
                 });
-                grupos = (resColes.values || []).map((row, index) => ({
+                const loadedGroups = (resColes.values || []).map((row, index) => AppData.hasContent(row)?({
                     rowIdx: index + 2,
-                    nombre: row[0],
+                    nombre: String(row[0]||''),
                     sitio: row[1] || '',
                     precio: LocaleData.numeric(row[2]),
                     precioBolo: LocaleData.numeric(row[3]),
                     ubicacion: row[4] || ''                    
-                }));
+                }):null).filter(Boolean);
 
                 // 2. Sesiones (leemos hasta columna N para incluir calEventId, dirección y horas guardadas)
                 const resDetalle = nativeData ? {values:nativeData.details} : await proxyGoogleAPI('sheets', 'get', {
@@ -1202,20 +1215,22 @@
                 
                 // Mapeamos primero sin calEventId para tener los objetos base
                 let eventosBase = rawRows.map((row, index) => {
+                    if(!AppData.hasContent(row))return null;
                     const fObj = LocaleData.localDate(LocaleData.parseSpanish(row[5]));
                     let realizado = row[1] === 'X';
-                    if (fObj && fObj < hoy && !realizado) realizado = true;
 
                     return {
                         rowIdx: index + 2,
+                        sourceVersion: nativeData?.rowVersions?.[index],
                         dateWarning: nativeData?.warnings.some(w => w.rowIdx === index + 2),
-                        amountWarning: nativeData?.amountWarnings.some(w => w.rowIdx === index + 2 && [4,6].includes(w.column)),
+                        amountWarning: LocaleData.numeric(row[6])===null || nativeData?.amountWarnings.some(w => w.rowIdx === index + 2 && [4,6].includes(w.column)),
                         pagado: row[0] === 'X',
                         realizado: realizado,
+                        autoExcluded: String(row[14]??'').trim().toUpperCase()==='NO'||row[14]===false,
                         boloCole: row[2] || '',
                         clase: row[3] || '',
                         precioHora: parseSpanishNumber(row[4]),
-                        fechaStr: row[5],
+                        fechaStr: row[5] || '',
                         fechaObj: fObj,
                         total: parseSpanishNumber(row[6]),
                         horas: parseSpanishNumber(row[7]),
@@ -1226,7 +1241,7 @@
                         horaInicio: row[12] || '',
                         horaFin: row[13] || ''
                     };
-                });
+                }).filter(Boolean);
 
                 if (resolverCal) CalendarLinking.assertUniqueLinks(eventosBase);
                 const sinId = resolverCal
@@ -1480,7 +1495,6 @@
                                 const fParts = (row[5] || "").split("/");
                                 const fObj = fParts.length === 3 ? new Date(fParts[2], fParts[1]-1, fParts[0]) : null;
                                 let realizado = row[1] === 'X';
-                                if (fObj && fObj < hoy && !realizado) realizado = true;
 
                                 return {
                                     rowIdx: index + 2,
@@ -1505,6 +1519,7 @@
                     }
                 }
 
+                grupos = loadedGroups;
                 eventos = eventosBase.sort((a,b) => (b.fechaObj - a.fechaObj));
 
                 renderAll();
@@ -1525,6 +1540,9 @@
             // Lanzar error para que checkAuth() también sepa que falló
             throw err;
         }
+        const notice=document.getElementById('test-result')||document.getElementById('auth-status');
+        if(notice)notice.textContent='No se pudieron recargar los datos. Se conserva la última vista: '+err.message;
+        throw err;
     } finally {
         hideLoading();
     }
@@ -1662,7 +1680,7 @@
                         <div>
                             <h4 class="font-extrabold text-slate-900">${sessionGroupName(ev)}</h4>
                             <div class="flex gap-3 mt-1">
-                                <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${ev.fechaStr}${ev.dateWarning ? ' · Revisar fecha' : ''}</span>
+                                <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${ev.fechaStr||'Fecha pendiente'}${ev.dateWarning ? ' · Revisar fecha' : ''}${ev.paymentUncertain?' · Pago por comprobar':''}</span>
                                 <span class="text-xs font-bold ${ev.realizado ? 'text-blue-500' : 'text-slate-400'} flex items-center gap-1">
                                     <i data-lucide="${ev.realizado ? 'flag' : 'hourglass'}" class="w-3 h-3"></i> 
                                     ${ev.realizado ? 'Realizado' : 'Pendiente'}
@@ -1676,7 +1694,7 @@
                             <p class="text-lg font-black text-slate-800">${ev.amountWarning ? 'Revisar importe' : LocaleData.currency(ev.total)}</p>
                         </div>
                         <div class="flex gap-1">
-                            <button onclick="togglePago(${ev.rowIdx}, ${!ev.pagado})" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800' : 'bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600'} hover:scale-110 transition-all">
+                            <button aria-label="Cambiar estado de pago, fila ${ev.rowIdx}" ${ev.paymentSaving||ev.paymentUncertain||!ev.fechaObj||!ev.grupo?.trim()?'disabled':''} onclick="togglePago(${ev.rowIdx}, ${!ev.pagado})" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800' : 'bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600'} hover:scale-110 transition-all">
                                 <i data-lucide="euro" class="w-5 h-5"></i>
                             </button>
                             <button onclick="confirmarBorrar(${ev.rowIdx})" class="p-2.5 rounded-xl bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
@@ -1707,7 +1725,7 @@
                     <div class="flex items-center gap-4 cursor-pointer flex-1" onclick="openEditGrupoModal(${g.rowIdx})">
                         <div class="bg-slate-900 text-white p-3 rounded-xl"><i data-lucide="users"></i></div>
                         <div>
-                            <h4 class="font-bold text-slate-900">${GroupIdentity.catalogLabel(g.nombre)}</h4>
+                            <h4 class="font-bold text-slate-900">${GroupIdentity.catalogLabel(g.nombre)||'Grupo incompleto · fila '+g.rowIdx}</h4>
                             <p class="text-xs text-slate-500">${GroupIdentity.description(g.nombre)}</p>
                             <p class="text-xs text-slate-500">${g.sitio || 'Sin ubicación'}</p>
                         </div>
@@ -1722,7 +1740,7 @@
 
         function renderCalendar() {
             const el = document.getElementById('calendar');
-            const source = eventos.map(e => {
+            const source = eventos.filter(e=>e.fechaObj&&!Number.isNaN(+e.fechaObj)).map(e => {
                 // Crear objeto de evento con horas si están disponibles
                 let startDateTime = e.fechaObj;
                 let endDateTime = e.fechaObj;
@@ -1819,29 +1837,25 @@
         }
         // Helpers UI Finales
         async function togglePago(rowIdx, newState) {
-            // Actualizar la interfaz inmediatamente para feedback instantáneo
-            const event = eventos.find(e => e.rowIdx == rowIdx);
-            if (event) {
-                event.pagado = newState;
-                renderAll(); // Actualizar solo la vista, no recargar datos
-                updateFinancialStats(); // Actualizar estadísticas financieras
-            }
-            
-            // Hacer la actualización en segundo plano sin bloquear
-            proxyGoogleAPI('sheets', 'update', {
-                spreadsheetId: CONFIG.SPREADSHEET_ID, 
-                range: `Detalle!A${rowIdx}`,
-                valueInputOption: 'USER_ENTERED'
-            }, {
-                values: [[newState ? 'X' : '']]
-            }).catch(err => {
-                console.error('Error actualizando pago:', err);
-                // Revertir el cambio si falla
-                if (event) {
-                    event.pagado = !newState;
-                    renderAll();
+            const event=eventos.find(e=>e.rowIdx===rowIdx);
+            if(!event||event.paymentSaving||event.paymentUncertain)return;
+            const previous=event.pagado;event.paymentSaving=true;event.pagado=newState;
+            renderAll();updateFinancialStats();
+            try {
+                if(CONFIG.TEST_MODE){
+                    if(!await window.horasEnvironmentReady)throw new Error('El entorno de pruebas no está verificado.');
+                    const token=window.horasAccessToken();if(!token)throw new Error('Primero conecta Google.');
+                    const response=await window.horasFetch(CONFIG.STATE_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action:'setPayment',rowIdx,paid:newState,expectedVersion:event.sourceVersion})});
+                    const saved=await AppData.readResponse(response);if(saved.paid!==newState||!saved.version||saved.spreadsheetId!==CONFIG.SPREADSHEET_ID||saved.calendarModified!==false)throw new Error('La respuesta no confirma el pago. Recarga para comprobarlo.');event.sourceVersion=saved.version;
+                }else{
+                    await proxyGoogleAPI('sheets','update',{spreadsheetId:CONFIG.SPREADSHEET_ID,range:`Detalle!A${rowIdx}`,valueInputOption:'RAW'},{values:[[newState?'X':'']]});
                 }
-            });
+                const notice=document.getElementById('test-result');if(notice)notice.textContent='Estado de pago guardado y verificado en la copia. Calendar sin cambios.';
+            }catch(error){
+                event.pagado=previous;
+                event.paymentUncertain=true;
+                showErrorModal('Pago sin confirmar',error.message+' Se ha restaurado la vista anterior. Recarga antes de repetir.','warning');
+            }finally{event.paymentSaving=false;renderAll();updateFinancialStats();}
         }
         function toggleRecurrence() {
             const isChecked = document.getElementById('ev-repite').checked;
@@ -1882,6 +1896,7 @@
         function openEditSesionModal(rowIdx) {
             const ev = eventos.find(e => e.rowIdx === rowIdx);
             if (!ev) return;
+            if(!ev.fechaObj){showErrorModal('Sesión incompleta',`La fila ${rowIdx} no tiene una fecha válida. Revísala en la hoja antes de editarla.`,'warning');return;}
             document.getElementById('modal-evento-title').innerText = "Editar Sesión";
             document.getElementById('ev-rowIdx').value = ev.rowIdx;
             document.getElementById('ev-grupo').value = GroupIdentity.resolve(grupos,ev.grupo)?.nombre || ev.grupo;
@@ -2547,9 +2562,9 @@
                 }
             });
             
-            // Calcular total menos 35% (comisión)
-            const comision = totalCobrar * 0.35;
-            const totalNeto = totalCobrar - comision;
+            // Estimación de IRPF configurada por el usuario.
+            const retencionIRPF = totalCobrar * 0.35;
+            const totalNeto = totalCobrar - retencionIRPF;
             
             // Formatear números
             const formatCurrency = (amount) => {
@@ -2560,15 +2575,17 @@
             statsInfo.innerHTML = `
                 <div class="space-y-1">
                     <div class="text-xs text-slate-600 flex flex-col sm:flex-row sm:gap-x-4">
-                        <span><span class="font-medium">Bruto:</span> ${formatCurrency(totalCobrar)}</span>
-                        <span><span class="font-medium">Neto (35%):</span> ${formatCurrency(totalNeto)}</span>
+                        <span><span class="font-medium">Pendiente de cobro (bruto):</span> ${formatCurrency(totalCobrar)}</span>
+                        <span><span class="font-medium">IRPF estimado (35 %):</span> ${formatCurrency(retencionIRPF)}</span>
+                        <span><span class="font-medium">Estimado tras IRPF:</span> ${formatCurrency(totalNeto)}</span>
                     </div>
+                    <p class="text-xs text-slate-500">Todo el histórico pendiente de cobro, sin depender de los filtros de la lista. Los importes sin interpretar se excluyen. IRPF estimado con el 35 % configurado; no es una liquidación fiscal.</p>
                 </div>
             `;
         }
 
         function sessionGroupName(ev) {
-            return GroupIdentity.label(ev.grupo, LocaleData.parseSpanish(ev.fechaStr));
+            return GroupIdentity.label(ev.grupo, LocaleData.parseSpanish(ev.fechaStr)) || 'Sesión incompleta · fila '+ev.rowIdx;
         }
 
         function groupOptionName(name) {
@@ -2594,7 +2611,7 @@
             const sel = document.getElementById('ev-grupo');
             const selected = sel.value;
             // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
-            const gruposOrdenados = [...grupos].sort((a, b) => 
+            const gruposOrdenados = grupos.filter(g=>g.nombre.trim()).sort((a, b) =>
                 groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base' })
             );
             sel.innerHTML = '<option value="">Selecciona grupo...</option>' + 
@@ -2609,7 +2626,7 @@
             if (!optionsContainer) return;
             
             // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
-            const gruposOrdenados = [...grupos].sort((a, b) => 
+            const gruposOrdenados = grupos.filter(g=>g.nombre.trim()).sort((a, b) =>
                 groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base' })
             );
             

@@ -5,14 +5,19 @@ const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`;
 const CAL='https://www.googleapis.com/calendar/v3/calendars/primary/events';
 const D=require('../locale-data.js');
 const G=require('../group-identity.js');
+const A=require('../app-data.js');
 const {createHash}=require('node:crypto');
 const fingerprint=cells=>createHash('sha256').update(P.version(cells)).digest('hex');
 async function snapshot(token,request){
+  const extentQuery=new URLSearchParams({valueRenderOption:'UNFORMATTED_VALUE'});extentQuery.append('ranges','Detalle!A:O');extentQuery.append('ranges','Coles!A:E');
+  const extent=await request(`${BASE}/values:batchGet?${extentQuery}`,token);
+  if(!Array.isArray(extent.valueRanges)||extent.valueRanges.length!==2)throw new Error('No se pudo determinar el alcance de las filas de la copia.');
+  const counts=extent.valueRanges.map(range=>Math.max(1,A.trimRows(range.values||[],v=>v).length));
   const query=new URLSearchParams({includeGridData:'true',fields:'sheets(properties(title),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue,formattedValue,effectiveFormat(numberFormat)))))'});
-  query.append('ranges','Detalle!A1:N3000');query.append('ranges','Coles!A1:E1220');
+  query.append('ranges',`Detalle!A1:O${counts[0]}`);query.append('ranges',`Coles!A1:E${counts[1]}`);
   const data=await request(`${BASE}?${query}`,token);
   function rows(title,width){const sheet=data.sheets?.find(s=>s.properties.title===title);if(!sheet)throw new Error(`No se pudo leer ${title}.`);const result=[];for(const grid of sheet.data||[]){for(const [i,row]of (grid.rowData||[]).entries())result[(grid.startRow||0)+i]=Array.from({length:width},(_,c)=>row.values?.[c]||{});}return result;}
-  return {rows:rows('Detalle',14),groups:rows('Coles',5)};
+  return {rows:A.trimRows(rows('Detalle',15),D.value),groups:A.trimRows(rows('Coles',5),D.value)};
 }
 async function build(payload,snap,token,request){
   if(!['edit','sync'].includes(payload.mode))throw new Error('Modo de revisión no permitido.');
@@ -21,7 +26,7 @@ async function build(payload,snap,token,request){
     if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(payload.month||''))throw new Error('Selecciona un mes válido.');
     selected=snap.rows.map((cells,i)=>({cells,rowIdx:i+1})).filter(({cells,rowIdx})=>rowIdx>1&&D.dateISO(cells?.[5]).startsWith(payload.month));
   }else{
-    if(!Number.isInteger(payload.rowIdx)||payload.rowIdx<2||payload.rowIdx>3000)throw new Error('Fila no válida.');
+    if(!Number.isInteger(payload.rowIdx)||payload.rowIdx<2||payload.rowIdx>snap.rows.length)throw new Error('Fila no válida.');
     const cells=snap.rows[payload.rowIdx-1];if(!cells||!P.text(cells[8]))throw new Error('No se encontró la sesión.');selected=[{cells,rowIdx:payload.rowIdx}];
   }
   const catalogVersion=fingerprint(snap.groups.flat());

@@ -47,7 +47,8 @@ window.mountCalendarReview=function(banner){
             confirm.disabled=true;
             try{const saved=await request('apply',{rowIdx:row.rowIdx,expectedRow:row.expectedRow,newEventId:newId});
               if(saved.unchanged){message.textContent='El vínculo ya era el seleccionado. Sin cambios.';return;}
-              await analyze();message.textContent=`Guardado y verificado en ${saved.range}. Calendar y demás columnas sin cambios.`;await syncData(false,false);
+              const notice=document.getElementById('test-result'),text=`Guardado y verificado en ${saved.range}. Calendar y demás columnas sin cambios.`;notice.textContent=message.textContent=text;confirm.hidden=true;
+              try{await analyze();await syncData(false,false);}catch(error){notice.textContent=text+' Falta refrescar la vista: '+error.message;}
             }finally{confirm.disabled=false;}
           });
         };

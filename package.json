@@ -2,12 +2,12 @@
   "name": "percu-manager-proxy",
   "version": "1.0.1",
   "description": "Backend proxy seguro para PercuManager",
-  "main": "proxy.js",
+  "main": "sandbox/server.cjs",
   "scripts": {
     "start:pruebas": "node sandbox/server.cjs",
-    "test:pruebas": "node --test sandbox/isolation.test.cjs sandbox/linking.test.cjs sandbox/protected.test.cjs sandbox/locale.test.cjs sandbox/group.test.cjs sandbox/identity.test.cjs sandbox/auth.test.cjs",
-    "start": "node proxy.js",
-    "dev": "nodemon proxy.js",
+    "test:pruebas": "node --test sandbox/*.test.cjs",
+    "start": "node sandbox/server.cjs",
+    "dev": "nodemon sandbox/server.cjs",
     "build-css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
     "build-css-prod": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify"
   },
@@ -26,7 +26,7 @@
     "postcss": "^8.4.32"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "keywords": ["proxy", "google-apis", "security", "backend"],
   "author": "PercuManager",

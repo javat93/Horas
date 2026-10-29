@@ -54,7 +54,7 @@
       try{
         const result=await api({...payload,action:'apply',catalogVersion:review.catalogVersion,decisions});
         close();document.getElementById('test-result').textContent=result.unchanged?'Se ha conservado todo. Ninguna celda modificada.':`Guardado y verificado: ${result.rowsChanged} sesión(es), ${result.cellsChanged} celda(s). Calendar sin cambios.`;
-        if(!result.unchanged)await syncData(false,false);
+        if(!result.unchanged){try{await syncData(false,false);}catch(error){document.getElementById('test-result').textContent=`Guardado y verificado: ${result.rowsChanged} sesión(es), ${result.cellsChanged} celda(s). Falta recargar la vista: ${error.message}`;}}
       }catch(error){status.textContent=error.message;status.scrollIntoView({block:'nearest'});}
       finally{saving=false;save.disabled=cancel.disabled=false;for(const select of body.querySelectorAll('select'))select.disabled=false;}
     };

@@ -17,7 +17,7 @@ function harness({granted=true,error}={}){
   const s=storage(),elements={},requests=[],syncs=[],errors=[];let token=null;
   for(const id of ['auth-btn','sync-btn','add-future-events-btn','auth-text','auth-status'])elements[id]={classList:{toggle(){},add(){},remove(){}}};
   const client={requestAccessToken:options=>requests.push(options)},window={};
-  const context=vm.createContext({window,AuthSession:A,localStorage:s,CONFIG:{TEST_MODE:true,SCOPES:'scope1 scope2'},document:{getElementById:id=>elements[id]},gapi:{client:{getToken:()=>token,setToken:v=>token=v}},google:{accounts:{oauth2:{hasGrantedAllScopes:()=>granted}}},showLoading(){},hideLoading(){},showErrorModal:(...args)=>errors.push(args),syncData:async(...args)=>{syncs.push(args);if(error)throw error;},fetch:async()=>{throw Error('No real network');},console});
+  const context=vm.createContext({window,AppData:require('../app-data.js'),AuthSession:A,localStorage:s,CONFIG:{TEST_MODE:true,SCOPES:'scope1 scope2'},document:{getElementById:id=>elements[id]},gapi:{client:{getToken:()=>token,setToken:v=>token=v}},google:{accounts:{oauth2:{hasGrantedAllScopes:()=>granted}}},showLoading(){},hideLoading(){},showErrorModal:(...args)=>errors.push(args),syncData:async(...args)=>{syncs.push(args);if(error)throw error;},fetch:async()=>{throw Error('No real network');},console});
   const state=html.slice(html.indexOf('        let tokenClient;'),html.indexOf('        let eventos = []'));
   const funcs=html.slice(html.indexOf('        async function handleAuthClick('),html.indexOf('        // Función para asegurar que el botón de auth'));
   context.client=client;vm.runInContext(state+funcs+';gapiInited=gisInited=true;tokenClient=client;',context);

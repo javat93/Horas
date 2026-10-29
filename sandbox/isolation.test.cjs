@@ -22,7 +22,7 @@ test('configuración y HTML servidos no apuntan al proxy de producción',()=>{
   const html=testPage();
   assert(!html.includes("getItem('g_token')"));
   assert(!html.includes('config.secure.js'));
-  assert.match(html,/actualizarRealizadosFlag = !CONFIG.TEST_MODE/);
+  assert.match(html,/actualizarRealizadosFlag = false/);
   assert.match(html,/CONFIG.TEST_MODE && resolverCal/);
   assert.match(html,/sandbox\/panel.js/);
   for(const script of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(script[1]);
@@ -89,7 +89,7 @@ test('HTTP bloquea el original, Calendar y archivos sensibles antes de llamar a 
   }
   assert.equal(calls,0);
   const env=await(await fetch(`${base}/api/test-environment`)).json();
-  assert.equal(env.spreadsheetId,TEST_ID);assert.equal(env.calendarReadOnly,true);assert.equal(env.automaticWrites,false);
+  assert.equal(env.spreadsheetId,TEST_ID);assert.equal(env.calendarReadOnly,true);assert.equal(env.automaticWrites,true);assert.equal(env.performedAutomation,true);
   const unauth=await fetch(`${base}/api/sheets`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'get',params:{spreadsheetId:TEST_ID,range:'Detalle!A1'}})});
   assert.equal(unauth.status,401);assert.equal(calls,0);
   const read=await fetch(`${base}/api/sheets`,{method:'POST',headers,body:JSON.stringify({method:'get',params:{spreadsheetId:TEST_ID,range:'Detalle!A1'}})});

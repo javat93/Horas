@@ -12,6 +12,7 @@ function fixture(options={}){
     f.calls.push({url,method,body:clone(body||null)});
     if(url.includes('calendar')){assert.equal(method,'GET');return {items:[options.event||event]};}
     assert(url.includes(TEST_ID));assert(!url.includes(ORIGINAL_ID));
+    if(url.includes('/values:batchGet'))return {valueRanges:[{values:f.rows.map(row=>row.map(D.value))},{values:f.groups.map(row=>row.map(D.value))}]};
     if(method==='POST'){
       for(const item of body.requests){const u=item.updateCells;assert(u);assert([0,758405382].includes(u.range.sheetId));const rows=u.range.sheetId===0?f.rows:f.groups,c=rows[u.range.startRowIndex][u.range.startColumnIndex],data=u.rows[0].values[0];assert.equal(u.range.endRowIndex,u.range.startRowIndex+1);assert.equal(u.range.endColumnIndex,u.range.startColumnIndex+1);
         if(data.userEnteredValue){c.userEnteredValue=clone(data.userEnteredValue);c.effectiveValue=clone(data.userEnteredValue);}
