@@ -65,6 +65,8 @@ test('el endpoint Vercel rechaza original y Calendar antes de autenticación o r
   assert.equal((await call('sheets',{method:'update',params:{spreadsheetId:TEST_ID,range:'Detalle!A1'}})).code,403);
   assert.equal((await call('calendar',{method:'delete',params:{calendarId:'primary',eventId:'personal'}})).code,403);
   assert.equal((await call('control',{spreadsheetId:ORIGINAL_ID})).code,403);
+  assert.equal((await call('groups',{spreadsheetId:ORIGINAL_ID,action:'apply'})).code,403);
+  assert.equal((await call('groups',{spreadsheetId:TEST_ID,action:'audit'})).code,401);
   assert.equal((await call('sheets',{method:'get',params:{spreadsheetId:TEST_ID,range:'Detalle!A1'}})).code,401);
   assert.equal((await call('environment',null,'GET','https://ajeno.example')).code,403);
 });

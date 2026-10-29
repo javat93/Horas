@@ -19,7 +19,7 @@
     
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
-    configScript.src = isProduction ? 'config.production.js?v=fase4-20261028' : 'config.secure.js';
+    configScript.src = isProduction ? 'config.production.js?v=fase5-20261029' : 'config.secure.js';
     window.horasConfigReady = new Promise((resolve, reject) => {
         configScript.onload = resolve;
         configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
@@ -29,7 +29,8 @@
     <script src="locale-data.js?v=fase4-20261028"></script>
     <script src="calendar-linking.js?v=fase2-20261028"></script>
     <script src="protected-review.js?v=fase3-20261028"></script>
-    <script src="sandbox/panel.js?v=fase4-20261028" defer></script>
+    <script src="sandbox/panel.js?v=fase5-20261029" defer></script>
+    <script src="sandbox/group-editor.js?v=fase5-20261029" defer></script>
     <script src="sandbox/calendar-review.js?v=fase2-20261028" defer></script>
     <script src="sandbox/protected-editor.js?v=fase3-20261028" defer></script>
     <script src="sandbox/locale-editor.js?v=fase4-20261028-r2" defer></script>
@@ -548,15 +549,15 @@
                     <input type="text" id="gr-nombre" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio por Defecto (€)</label>
-                    <input type="number" id="gr-precio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
+                    <label for="gr-precio" class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio por sesión (€)</label>
+                    <input type="text" inputmode="decimal" id="gr-precio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Sin tarifa">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio Bolo (€)</label>
-                    <input type="number" id="gr-precio-bolo" class="w-full rounded-2xl p-4 input-modern text-sm font-medium">
+                    <label for="gr-precio-bolo" class="block text-xs font-bold text-slate-400 uppercase mb-2">Precio Bolo (€)</label>
+                    <input type="text" inputmode="decimal" id="gr-precio-bolo" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Sin tarifa">
                 </div>
                 <div>
-    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Ubicación</label>
+    <label for="gr-ubicacion" class="block text-xs font-bold text-slate-400 uppercase mb-2">Barrio / Ubicación</label>
     <input type="text" id="gr-ubicacion" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" placeholder="Ej: Centro Cívico, Parque, etc.">
 </div>
                 <div>
@@ -1146,8 +1147,8 @@
                     rowIdx: index + 2,
                     nombre: row[0],
                     sitio: row[1] || '',
-                    precio: nativeData ? LocaleData.numeric(row[2]) : parseSpanishNumber(row[2]) || 20,
-                    precioBolo: nativeData ? LocaleData.numeric(row[3]) : parseSpanishNumber(row[3]) || 50,
+                    precio: LocaleData.numeric(row[2]),
+                    precioBolo: LocaleData.numeric(row[3]),
                     ubicacion: row[4] || ''                    
                 }));
 
@@ -1898,8 +1899,10 @@
             document.getElementById('modal-grupo-title').innerText = "Editar Grupo";
             document.getElementById('gr-rowIdx').value = g.rowIdx;
             document.getElementById('gr-nombre').value = g.nombre;
-            document.getElementById('gr-precio').value = g.precio;
-            document.getElementById('gr-precio-bolo').value = g.precioBolo || '';
+            document.getElementById('gr-precio').value = g.precio ?? '';
+            document.getElementById('gr-precio-bolo').value = g.precioBolo ?? '';
+            document.getElementById('gr-nombre').disabled = CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 5;
+            document.getElementById('gr-sitio').disabled = CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 5;
             document.getElementById('gr-sitio').value = g.sitio;
             document.getElementById('gr-ubicacion').value = g.ubicacion;
             openModal('modal-grupo');
@@ -1919,7 +1922,7 @@
                 // Verificar si el checkbox de Bolo está marcado para aplicar precio correcto
                 const isBolo = document.getElementById('ev-bolo').checked;
                 if (isBolo) {
-                    document.getElementById('ev-precio').value = g.precioBolo || 50;
+                    document.getElementById('ev-precio').value = g.precioBolo ?? '';
                 } else {
                     document.getElementById('ev-precio').value = g.precio;
                 }
@@ -1934,9 +1937,9 @@
             const g = grupos.find(x => x.nombre === grupo);
             
             if (isBolo && g) {
-                precioInput.value = g.precioBolo || 50;
+                precioInput.value = g.precioBolo ?? '';
             } else if (g) {
-                precioInput.value = g.precio || 20;
+                precioInput.value = g.precio ?? '';
             }
         }
 
@@ -2342,7 +2345,9 @@
             const precioBolo = document.getElementById('gr-precio-bolo').value;
             const sitio = document.getElementById('gr-sitio').value;
             const ubicacion = document.getElementById('gr-ubicacion').value;
-            const fila = [nombre, sitio, precio, ubicacion, precioBolo];
+            const sessionPrice = LocaleData.numeric(precio), gigPrice = LocaleData.numeric(precioBolo);
+            if(sessionPrice === null || sessionPrice < 0 || gigPrice === null || gigPrice < 0){showErrorModal('Tarifa no válida','Introduce precios numéricos válidos. No se asignará una tarifa por defecto.','warning');return;}
+            const fila = [nombre, sitio, sessionPrice, gigPrice, ubicacion];
 
             try {
                 if (rowIdx) {
@@ -2800,8 +2805,8 @@
                     rowIdx: index + 2,
                     nombre: row[0],
                     sitio: row[1] || '',
-                    precio: parseSpanishNumber(row[2]) || 20,
-                    precioBolo: parseSpanishNumber(row[3]) || 50,
+                    precio: LocaleData.numeric(row[2]),
+                    precioBolo: LocaleData.numeric(row[3]),
                     ubicacion: row[4] || ''                    
                 }));
                 
@@ -3108,7 +3113,8 @@
             const g = grupos.find(x => x.nombre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === grupo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase());
             
             // Usar precio bolo si es evento de Bolo, sino precio normal
-            const precio = tieneBolo && g ? (g.precioBolo || g.precio) : (g ? g.precio : 20);
+            const precio = g ? (tieneBolo ? g.precioBolo : g.precio) : null;
+            if(precio === null || !Number.isFinite(precio))throw new Error(`El grupo «${grupo}» no tiene una tarifa válida para este tipo de sesión. Revisa Coles antes de importar.`);
             const ubicacion = g ? g.ubicacion : ''; // Ubicación del grupo
             const direccion = g ? g.sitio : ''; // El campo sitio del formulario es la dirección para Maps
             
