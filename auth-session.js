@@ -6,7 +6,7 @@
     function clear(){storage.removeItem(key);storage.removeItem(expiryKey);}
     return {read,save,clear};
   }
-  const requestOptions=()=>({prompt:''});
+  const requestOptions=(reviewPermissions=false)=>({prompt:reviewPermissions===true?'consent':''});
   const isAuthError=error=>Number(error?.status)===401||/\b401\b|invalid_token|invalid authentication credentials|token (?:has )?expired/i.test(String(error?.message||error?.error||''));
   return {create,requestOptions,isAuthError};
 });

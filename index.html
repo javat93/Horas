@@ -348,6 +348,10 @@
         </div>
     </header>
     <p id="auth-status" role="status" aria-live="polite" class="max-w-4xl mx-auto px-4 text-sm text-slate-600"></p>
+    <div class="max-w-4xl mx-auto px-4 mb-4">
+        <button id="review-google-permissions" type="button" onclick="handleAuthClick(true)" class="text-sm text-slate-600 underline">Revisar permisos de Google</button>
+        <p class="text-xs text-slate-500">Abre la pantalla de consentimiento para revisar los permisos actuales.</p>
+    </div>
 
     <main class="max-w-4xl mx-auto px-4">
         <div class="flex p-1.5 bg-white rounded-2xl shadow-sm border border-slate-100 mb-8 max-w-md mx-auto">
@@ -907,6 +911,7 @@
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     error_callback: (error) => {
                         authConnecting=false;
+                        document.getElementById('review-google-permissions').disabled=false;
                         document.getElementById('auth-btn').disabled=false;
                         hideLoading();
                         document.getElementById('auth-status').textContent='No se completó la conexión. Pulsa «Conectar Google» para volver a intentarlo.';
@@ -923,10 +928,11 @@
             }
         }
 
-        async function handleAuthClick() {
+        async function handleAuthClick(reviewPermissions=false) {
             if(authConnecting)return;
             if(!gisInited||!gapiInited||!tokenClient){showErrorModal('Google se está preparando','Espera unos segundos y vuelve a pulsar Conectar Google.','info');return;}
             authConnecting=true;document.getElementById('auth-btn').disabled=true;
+            document.getElementById('review-google-permissions').disabled=true;
             showLoading('Conectando con Google...');
             tokenClient.callback = async (resp) => {
                 try {
@@ -940,10 +946,11 @@
                     showErrorModal('Conexión de Google',error.message||error.error_description||'No se pudo completar la conexión.','warning');
                 } finally {
                     authConnecting=false;document.getElementById('auth-btn').disabled=false;
+                    document.getElementById('review-google-permissions').disabled=false;
                     hideLoading();
                 }
             };
-            try{tokenClient.requestAccessToken(AuthSession.requestOptions());}catch(error){authConnecting=false;document.getElementById('auth-btn').disabled=false;hideLoading();showErrorModal('Conexión de Google',error.message,'warning');}
+            try{tokenClient.requestAccessToken(AuthSession.requestOptions(reviewPermissions));}catch(error){authConnecting=false;document.getElementById('auth-btn').disabled=false;document.getElementById('review-google-permissions').disabled=false;hideLoading();showErrorModal('Conexión de Google',error.message,'warning');}
         }
 
         function checkAuth() {
