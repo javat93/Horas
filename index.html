@@ -35,13 +35,13 @@
     <script src="group-identity.js?v=fase6-20261029"></script>
     <script src="calendar-linking.js?v=enlaces-20261029"></script>
     <script src="protected-review.js?v=fase7-20261029"></script>
-    <script src="sandbox/daily-editor.js?v=protegido-20261102" defer></script>
-    <script src="sandbox/panel.js?v=ensayo-20261102" defer></script>
-    <script src="sandbox/performed-editor.js?v=ensayo-20261102" defer></script>
+    <script src="sandbox/daily-editor.js?v=productiva-20261102" defer></script>
+    <script src="sandbox/panel.js?v=productiva-20261102" defer></script>
+    <script src="sandbox/performed-editor.js?v=productiva-20261102" defer></script>
     <script src="sandbox/identity-review.js?v=fase6-20261029" defer></script>
     <script src="sandbox/group-editor.js?v=protegido-20261102" defer></script>
     <script src="sandbox/calendar-review.js?v=enlaces-20261029" defer></script>
-    <script src="sandbox/protected-editor.js?v=protegido-20261102" defer></script>
+    <script src="sandbox/protected-editor.js?v=productiva-20261102" defer></script>
     <script src="sandbox/locale-editor.js?v=protegido-20261102" defer></script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <!-- PWA Manifest and Icons -->
@@ -335,7 +335,7 @@
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">La Galeta Percussió</p>
                 </div>
             </div>
-            <div class="flex gap-2">
+            <div id="production-actions" class="flex gap-2 flex-wrap justify-end">
                 <button id="sync-btn" onclick="syncData(true)" class="hidden bg-emerald-50 text-emerald-600 font-bold px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-all flex items-center gap-2 text-sm">
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">Sincronizar</span>
@@ -352,7 +352,8 @@
         </div>
     </header>
     <p id="auth-status" role="status" aria-live="polite" class="max-w-4xl mx-auto px-4 text-sm text-slate-600"></p>
-    <div class="max-w-4xl mx-auto px-4 mb-4">
+    <div id="production-notices" class="max-w-4xl mx-auto px-4 text-sm text-slate-600"></div>
+    <div id="google-permissions-review" class="max-w-4xl mx-auto px-4 mb-4">
         <button id="review-google-permissions" type="button" onclick="handleAuthClick(true)" class="text-sm text-slate-600 underline">Revisar permisos de Google</button>
         <p class="text-xs text-slate-500">Abre la pantalla de consentimiento para revisar los permisos actuales.</p>
     </div>
@@ -431,7 +432,7 @@
     </main>
     <footer class="max-w-4xl mx-auto px-4 py-6 text-sm text-slate-600">
         <a href="inicio.html">Sobre Horas · PercuManager</a> · <a href="privacidad.html">Política de privacidad</a> · <a href="condiciones.html">Condiciones de uso</a>
-        <p>Google Calendar se consulta en modo de solo lectura. Los cambios en la hoja requieren revisión. <a href="mailto:javat93@gmail.com">Contacto</a>.</p>
+        <a href="mailto:javat93@gmail.com">Contacto</a>
     </footer>
 
     <div id="modal-evento" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">

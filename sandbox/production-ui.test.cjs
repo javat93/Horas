@@ -16,7 +16,8 @@ async function mount(mode,overrides={}){
 }
 for(const mode of ['rehearsal','production'])test(mode+': TEST_MODE=false conserva interceptores, papelera y sincronización; herramientas de auditoría plegadas',async()=>{
   const h=await mount(mode);assert.equal(await h.window.horasEnvironmentReady,true);assert.equal(h.window.horasDailyReady,true);assert.equal(h.window.horasWritesEnabled,true);
-  assert.equal(h.mounted.sync,h.elements['test-environment-banner']);assert.equal(h.mounted.daily,h.mounted.sync);assert.notEqual(h.mounted.locale,h.mounted.sync);assert.equal(h.elements['test-control'].disabled,true);assert.equal(h.elements['sync-btn'].disabled,false);
+  assert.equal(h.mounted.sync,h.elements['test-environment-banner']);assert.equal(h.mounted.daily,h.elements[mode==='production'?'production-actions':'test-environment-banner']);assert.notEqual(h.mounted.locale,h.mounted.sync);assert.equal(h.elements['test-control'].disabled,true);assert.equal(h.elements['sync-btn'].disabled,false);
+  if(mode==='production'){assert.equal(h.elements['test-environment-banner'].hidden,true);assert.equal(h.elements['test-target-status'].hidden,true);assert.equal(h.elements['google-permissions-review'].hidden,true);}
   for(const id of ['form-evento','form-grupo','form-future-events']){let stopped=false;h.elements[id].handlers.submit({preventDefault(){},stopImmediatePropagation(){stopped=true;}});assert(stopped);}
   h.handlers.click({target:{closest:()=>({getAttribute:()=> 'confirmarBorrar(12)'})},preventDefault(){},stopImmediatePropagation(){}});
   assert.deepEqual(h.calls.slice(0,3),['new','group','import']);assert.equal(h.calls[3][1],12);

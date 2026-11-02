@@ -78,7 +78,17 @@
     const start=document.getElementById('ev-hora-inicio').value,end=document.getElementById('ev-hora-fin').value;if(start||end){proposal.start=start;proposal.end=end;}
     await launch({mode:'edit',rowIdx,proposal});
   };
-  window.prepareProtectedSync=async function(){if(!monthInput){showErrorModal('Preparando revisión','Espera a que se compruebe el entorno protegido.','info');return;}await launch({mode:'sync',month:monthInput.value});};
+  window.prepareProtectedSync=async function(){
+    if(!monthInput){showErrorModal('Preparando sincronización','Espera a que se compruebe la conexión.','info');return;}
+    if(CONFIG.DATA_MODE!=='production'){await launch({mode:'sync',month:monthInput.value});return;}
+    if(document.getElementById('sync-month-dialog'))return;
+    const dialog=node('dialog');dialog.id='sync-month-dialog';dialog.setAttribute('aria-label','Sincronizar sesiones');dialog.style.cssText='padding:24px;border-radius:16px;width:min(420px,95vw)';
+    dialog.append(node('h2','Sincronizar sesiones'));const label=node('label','Mes: '),input=node('input');input.type='month';input.required=true;input.value=monthInput.value;label.append(input);dialog.append(label);
+    const review=node('button','Revisar cambios'),cancel=node('button','Cancelar');for(const b of [review,cancel]){b.type='button';b.style.cssText='padding:10px;margin:12px 8px 0 0;border:1px solid #94a3b8;border-radius:8px';}dialog.append(review,cancel);
+    const close=()=>{dialog.close();dialog.remove();};cancel.onclick=close;dialog.addEventListener('cancel',()=>dialog.remove());
+    review.onclick=async()=>{if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(input.value)){input.reportValidity();return;}monthInput.value=input.value;close();await launch({mode:'sync',month:monthInput.value});};
+    document.body.append(dialog);dialog.showModal();input.focus();
+  };
   window.mountProtectedReview=function(banner,audit=banner){
     if(document.getElementById('protected-sync-month'))return;
     const wrapper=node('div');wrapper.style.cssText='margin-top:12px;padding-top:12px;border-top:1px solid #b8ac7a';banner.append(wrapper);

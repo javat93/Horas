@@ -18,6 +18,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const status=document.getElementById('test-target-status');
   const result=document.getElementById('test-result');
   const control=document.getElementById('test-control');
+  const isProduction=mode==='production';
+  if(isProduction){
+    document.getElementById('test-environment-banner').hidden=true;
+    document.getElementById('google-permissions-review').hidden=true;
+    status.hidden=true;
+    document.getElementById('production-notices').append(status,result);
+  }
   control.disabled=true;
   document.getElementById('auth-btn')?.addEventListener('click',()=>{
     setTimeout(()=>{
@@ -63,11 +70,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     status.textContent=`Backend comprobado: ${env.spreadsheetId}. ${CONFIG.TEST_PHASE>=8?'Realizado se marca automáticamente al terminar las sesiones verificadas; el resto de cambios requiere revisión.':'Los cambios requieren revisión; no hay escrituras automáticas.'} Calendar solo lectura.`;
     window.horasWritesEnabled=env.writeEnabled!==false;
     if(!isTest)status.textContent=window.horasWritesEnabled?'Conexión verificada. Calendar solo lectura. Los cambios se revisan antes de guardar.':'Conexión verificada. Hoja y Calendar en solo lectura; cambios pendientes de activación.';
+    if(isProduction){status.hidden=window.horasWritesEnabled;status.textContent=window.horasWritesEnabled?'':'Modo de solo lectura.';}
     control.disabled=!isTest;
     let audit=document.getElementById('test-environment-banner');
     if(!isTest){const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Herramientas de revisión';details.append(summary);audit.append(details);audit=details;}
     window.horasDailyReady=env.dailyOperations===true&&!!CONFIG.DAILY_API_URL;
-    if(window.horasDailyReady){window.mountDailyOperations?.(document.getElementById('test-environment-banner'));const future=document.getElementById('add-future-events-btn');if(future){future.disabled=false;future.title='Revisar importación sin modificar Calendar';}}
+    if(window.horasDailyReady){window.mountDailyOperations?.(document.getElementById(isProduction?'production-actions':'test-environment-banner'));const future=document.getElementById('add-future-events-btn');if(future){future.disabled=false;future.title='Añadir eventos futuros';}}
     resolveEnvironment(true);
     window.mountCalendarReview?.(audit);
     if(CONFIG.TEST_PHASE>=5)window.mountGroupReview?.(audit);
@@ -77,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.mountProtectedReview?.(document.getElementById('test-environment-banner'),audit);
       const sync=document.getElementById('sync-btn');if(sync){sync.disabled=false;sync.title='Preparar revisión de sincronización, sin cambios automáticos';}
     }
-  } catch(error){status.textContent=error.message;resolveEnvironment(false);return;}
+  } catch(error){status.textContent=error.message;status.hidden=false;resolveEnvironment(false);return;}
   document.getElementById('test-reload').onclick=()=>syncData(false,false);
   control.onclick=async()=>{
     let token;try{token=window.horasAccessToken?.();}catch(error){result.textContent=error.message;return;}

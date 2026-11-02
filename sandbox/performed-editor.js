@@ -24,7 +24,7 @@
     status.textContent='Realizado automático al terminar (hora de Madrid), al abrir la app o mientras siga abierta. Solo sesiones con evento amarillo verificado y fecha y horario seguros. Cancelaciones y discrepancias quedan pendientes. Para una excepción, escribe NO en Detalle, columna O; no se usará H como duración.';
     if(CONFIG.DATA_MODE&&CONFIG.DATA_MODE!=='test')status.textContent='Realizado se marca al terminar las sesiones verificadas. Las discrepancias quedan pendientes de revisión.';
     if(CONFIG.DATA_MODE==='rehearsal')status.textContent='Realizado automático pausado durante el ensayo para conservar el histórico.';
-    window.horasEnvironmentReady.then(ready=>{if(ready){if(window.horasWritesEnabled===false)status.textContent='Realizado automático pendiente de activación.';document.getElementById('test-environment-banner')?.append(status);}});
+    window.horasEnvironmentReady.then(ready=>{if(ready){if(CONFIG.DATA_MODE==='production')status.textContent='';else if(window.horasWritesEnabled===false)status.textContent='Realizado automático pendiente de activación.';document.getElementById(CONFIG.DATA_MODE==='production'?'production-notices':'test-environment-banner')?.append(status);}});
     setInterval(()=>window.runAutoPerformed(),60000);
   });
 })();

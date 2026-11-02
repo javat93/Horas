@@ -48,7 +48,7 @@
   window.reviewFutureImport=()=>review('import',{month:value('future-year')+'-'+value('future-month').padStart(2,'0')});
   window.reviewDeleteSession=rowIdx=>review('delete',{rowIdx});
   window.mountDailyOperations=banner=>{
-    const b=node('button','Abrir papelera de sesiones');b.type='button';b.style.cssText='padding:8px;margin-top:12px;border:1px solid currentColor;border-radius:6px';banner.append(b);
+    const production=CONFIG.DATA_MODE==='production',b=node('button',production?'Papelera':'Abrir papelera de sesiones');b.type='button';if(production)b.className='bg-white text-slate-700 font-bold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-all text-sm';else b.style.cssText='padding:8px;margin-top:12px;border:1px solid currentColor;border-radius:6px';banner.append(b);
     b.onclick=async()=>{if(busy)return;busy=true;try{
       const result=await api({action:'trash'}),d=node('dialog');d.setAttribute('aria-label','Papelera de sesiones');d.style.cssText='padding:24px;max-height:90vh;overflow:auto';d.append(node('h2','Sesiones archivadas'));
       if(!result.items.length)d.append(node('p','La papelera está vacía.'));
