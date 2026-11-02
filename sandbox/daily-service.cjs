@@ -59,8 +59,9 @@ async function trashRows(token,request,meta){
     let cells;try{cells=JSON.parse(r[3]);}catch{throw Error('La papelera contiene una fila no reconocida.');}
     const anchor=meta.developerMetadata?.find(m=>m.metadataKey==='horas_trash_'+r[0]);
     if(!Array.isArray(cells)||cells.length!==15||hash(cells)!==r[4]||anchor?.metadataValue!==r[4])throw Error('La copia archivada no coincide con su comprobación.');
-    const range=anchor.location?.dimensionRange;if(range?.sheetId!==0||range.dimension!=='ROWS'||range.endIndex!==range.startIndex+1)throw Error('No se encuentra la fila original de la papelera.');
-    return {operationId:r[0],archivedAt:r[1],rowIdx:range.startIndex+1,cells};
+    const range=anchor.location?.dimensionRange,start=range?.startIndex??0;
+    if(!range||(range.sheetId??0)!==0||range.dimension!=='ROWS'||!Number.isInteger(start)||start<1||range.endIndex!==start+1)throw Error('No se encuentra la fila original de la papelera.');
+    return {operationId:r[0],archivedAt:r[1],rowIdx:start+1,cells};
   });
 }
 async function build(p,snap,token,request,now){

@@ -9,7 +9,7 @@ function fake(){
     calls.push({url,method,body:clone(body||{})});const u=new URL(url);
     if(url.startsWith('https://www.googleapis.com/calendar')){assert.equal(method,'GET');const p=u.searchParams.get('pageToken');return clone(p?{items:events2}:{items:events,...(events2.length?{nextPageToken:'page2'}:{})});}
     assert(url.startsWith(S.BASE),'Solo la copia');
-    if(u.pathname.endsWith('/developerMetadata:search'))return {matchedDeveloperMetadata:clone(meta).map(developerMetadata=>({developerMetadata}))};
+    if(u.pathname.endsWith('/developerMetadata:search'))return {matchedDeveloperMetadata:clone(meta).map(developerMetadata=>{if(developerMetadata.location.dimensionRange?.sheetId===0)delete developerMetadata.location.dimensionRange.sheetId;return {developerMetadata};})};
     if(method==='POST'){
       for(const r of body.requests){
         if(r.addSheet){const p=clone(r.addSheet.properties);props.set(p.sheetId,p);grids.set(p.sheetId,[]);}
