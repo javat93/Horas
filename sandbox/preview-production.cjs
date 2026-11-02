@@ -1,8 +1,10 @@
 // Local visual preview only: no Google requests, credentials or real sheet writes.
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
-const {createHandler}=require('../api/test.js'),C=require('../protected-config.js'),{fake}=require('./fixtures/daily.cjs');
+const {createHandler}=require('../api/test.js'),C=require('../protected-config.js'),{fake,c}=require('./fixtures/daily.cjs');
 const root=path.resolve(__dirname,'..'),port=Number(process.env.HORAS_PREVIEW_PORT||3011),origin=`http://localhost:${port}`;
-const handler=createHandler({profile:'production',writeEnabled:false,request:fake().request});
+const fixture=fake();
+fixture.grids.get(0).push([false,false,false,true,24,'02/11/2026',24,1,'Moli de finestrelles','Barrio de ejemplo','','Dirección de ejemplo','17:00','18:00',''].map(c));
+const handler=createHandler({profile:'production',writeEnabled:false,request:fixture.request});
 const files=new Set(['styles.css','locale-data.js','auth-session.js','app-data.js','group-identity.js','calendar-linking.js','protected-review.js','protected-config.js','sandbox/daily-editor.js','sandbox/panel.js','sandbox/performed-editor.js','sandbox/identity-review.js','sandbox/group-editor.js','sandbox/calendar-review.js','sandbox/protected-editor.js','sandbox/locale-editor.js','favicon.ico','manifest.json','icon-192.png','icon-512.png']);
 const server=http.createServer(async(req,res)=>{
   try{
@@ -22,11 +24,11 @@ const server=http.createServer(async(req,res)=>{
       let html=fs.readFileSync(path.join(root,'index.html'),'utf8');
       html=html.replace(/<script>\s*\/\/ Detectar si estamos en producción[\s\S]*?<\/script>/,'<script src="/config.js"></script><script>window.horasConfigReady=Promise.resolve();</script>');
       html=html.replace(/<script src="https:\/\/(accounts\.google|apis\.google)[^>]*><\/script>/g,'');
-      html=html.replace(/window.onload = async \(\) => \{[\s\S]*?^        \};/m,"window.onload=()=>{ensureAuthButtonVisible();document.getElementById('auth-btn').disabled=true;};");
+      html=html.replace(/window.onload = async \(\) => \{[\s\S]*?^        \};/m,"window.onload=async()=>{window.horasAccessToken=()=> 'synthetic-token';window.horasFetch=(url,options)=>{if(new URL(url,location.origin).origin!==location.origin)throw Error('La vista local no permite peticiones a Google');return fetch(url,options);};await window.horasEnvironmentReady;await syncData(false,false);showGoogleConnection(true);lucide.createIcons();};");
       html=html.replace('<body class="pb-20">','<body class="pb-20"><p style="padding:12px;background:#dbeafe">Vista local del modo protegido · Sin conexión a Google ni datos personales</p>');
       res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(html);
     }
-    const name=u.pathname.slice(1);if(!files.has(name)){res.writeHead(404);return res.end();}
+    const name=u.pathname.slice(1);if(!files.has(name)&&name!=='review-ui.css'){res.writeHead(404);return res.end();}
     res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'application/octet-stream');res.end(fs.readFileSync(path.join(root,name)));
   }catch(error){res.statusCode=500;res.end(error.message);}
 });

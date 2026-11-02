@@ -14,14 +14,15 @@
     const title={group:'Nuevo grupo',session:'Nuevas sesiones',import:'Importar desde Calendar',delete:'Enviar sesión a la papelera',restore:'Restaurar sesión'}[kind];
     d.append(node('h2',title),node('p','Destino: '+(CONFIG.SPREADSHEET_NAME||'hoja seleccionada')+'. Calendar se consulta, sin crear, editar ni eliminar eventos. Las sesiones ya existentes conservan sus precios, barrios y direcciones.'));
     for(const s of plan.summary){
+      const card=node('div');card.className='review-record';d.append(card);
       const label=kind==='group'?`${GroupIdentity.catalogLabel(s.name)} · sesión: ${s.price===''?'sin tarifa':LocaleData.currency(s.price)} · bolo: ${s.gigPrice===''?'sin tarifa':LocaleData.currency(s.gigPrice)}`:`${GroupIdentity.label(s.group,s.date)} · ${LocaleData.display(s.date)} · ${s.start||''}–${s.end||''} · ${LocaleData.numeric(s.total)===null?'sin importe':LocaleData.currency(LocaleData.numeric(s.total))}`;
-      d.append(node('p',label));if(s.district||s.address)d.append(node('p',`Barrio: ${s.district||'(vacío)'} · Dirección: ${s.address||'(vacía)'}`));
+      card.append(node('p',label));if(s.district||s.address)card.append(node('p',`Barrio: ${s.district||'(vacío)'} · Dirección: ${s.address||'(vacía)'}`));
     }
     if(kind==='delete')d.append(node('p','Se conserva una copia recuperable y se vacía únicamente esta fila, sin desplazar otras filas ni borrar el evento de Calendar.'));
     for(const s of plan.skipped)d.append(node('p',`Se omite ${s.title||''} · ${s.date||''}: ${s.reason}`));
     const extra=node('input');extra.type='checkbox';if(plan.duplicates){const label=node('label',`${plan.duplicates} sesiones coinciden con un registro existente. Crear una partida adicional de cobro: `);label.append(extra);d.append(label);}
     const status=node('p');status.setAttribute('role','status');d.append(status);
-    const save=node('button','Confirmar en la hoja seleccionada'),cancel=node('button','Cancelar sin guardar');save.type=cancel.type='button';for(const b of [save,cancel])b.style.cssText='padding:10px;margin:8px;border:1px solid #64748b;border-radius:6px';d.append(save,cancel);if(window.horasWritesEnabled===false){save.disabled=true;status.textContent='Solo lectura: los cambios aún no están activados.';}
+    const save=node('button','Confirmar en la hoja seleccionada'),cancel=node('button','Cancelar sin guardar');save.className='review-primary';save.type=cancel.type='button';for(const b of [save,cancel])b.style.cssText='padding:10px;margin:8px;border:1px solid #64748b;border-radius:6px';d.append(save,cancel);if(window.horasWritesEnabled===false){save.disabled=true;status.textContent='Solo lectura: los cambios aún no están activados.';}
     const operationId=crypto.randomUUID();let saving=false,uncertain=false;
     cancel.onclick=()=>{if(!saving){d.close();d.remove();}};d.addEventListener('cancel',e=>{if(saving)e.preventDefault();});
     save.onclick=async()=>{
@@ -49,6 +50,10 @@
   window.reviewDeleteSession=rowIdx=>review('delete',{rowIdx});
   window.mountDailyOperations=banner=>{
     const production=CONFIG.DATA_MODE==='production',b=node('button',production?'Papelera':'Abrir papelera de sesiones');b.type='button';if(production)b.className='bg-white text-slate-700 font-bold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-all text-sm';else b.style.cssText='padding:8px;margin-top:12px;border:1px solid currentColor;border-radius:6px';banner.append(b);
+    if(production){
+      b.className='archive-link';b.textContent='Sesiones archivadas';b.id='session-archive-button';
+      document.getElementById('session-archive-actions').append(b);
+    }
     b.onclick=async()=>{if(busy)return;busy=true;try{
       const result=await api({action:'trash'}),d=node('dialog');d.setAttribute('aria-label','Papelera de sesiones');d.style.cssText='padding:24px;max-height:90vh;overflow:auto';d.append(node('h2','Sesiones archivadas'));
       if(!result.items.length)d.append(node('p','La papelera está vacía.'));

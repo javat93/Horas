@@ -42,8 +42,8 @@
       for(const note of plan.notes)details.append(node('p',note));
     }
     const warnings=review.plans.filter(p=>p.notes.length).length;
-    status.textContent=(differences?`${differences} diferencias para revisar. Nada se ha escrito.`:'No hay diferencias que guardar.')+(warnings?` Hay avisos en ${warnings} sesión(es).`:'');
-    const save=node('button','Confirmar decisiones en la hoja seleccionada'),cancel=node('button','Cancelar sin guardar');save.type=cancel.type='button';save.style.cssText='padding:10px;margin:12px 12px 0 0;border:1px solid #475569;border-radius:6px;font-weight:bold';cancel.style.cssText='padding:10px;border:1px solid #94a3b8;border-radius:6px';body.append(save,cancel);
+    status.textContent=(differences?`${differences} ${differences===1?'diferencia':'diferencias'} para revisar. Nada se ha escrito.`:'No hay diferencias que guardar.')+(warnings?` Hay avisos en ${warnings} sesión(es).`:'');
+    const save=node('button','Confirmar decisiones en la hoja seleccionada'),cancel=node('button','Cancelar sin guardar');save.className='review-primary';save.type=cancel.type='button';save.style.cssText='padding:10px;margin:12px 12px 0 0;border:1px solid #475569;border-radius:6px;font-weight:bold';cancel.style.cssText='padding:10px;border:1px solid #94a3b8;border-radius:6px';body.append(save,cancel);
     let saving=false;const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
     if(window.horasWritesEnabled===false){save.disabled=true;save.title='Solo lectura: cambios pendientes de activación.';}
     const close=()=>{overlay.remove();document.body.style.overflow=previousOverflow;};
@@ -59,7 +59,7 @@
       }catch(error){status.textContent=error.message;status.scrollIntoView({block:'nearest'});}
       finally{saving=false;save.disabled=window.horasWritesEnabled===false;cancel.disabled=false;for(const select of body.querySelectorAll('select'))select.disabled=false;}
     };
-    document.body.append(overlay);cancel.focus();
+    document.body.append(overlay);title.tabIndex=-1;title.focus({preventScroll:true});body.scrollTop=0;
   }
   window.configureProtectedSession=function(ev){
     if(!(CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)||CONFIG.TEST_PHASE<3)return;
@@ -84,7 +84,7 @@
     if(document.getElementById('sync-month-dialog'))return;
     const dialog=node('dialog');dialog.id='sync-month-dialog';dialog.setAttribute('aria-label','Sincronizar sesiones');dialog.style.cssText='padding:24px;border-radius:16px;width:min(420px,95vw)';
     dialog.append(node('h2','Sincronizar sesiones'));const label=node('label','Mes: '),input=node('input');input.type='month';input.required=true;input.value=monthInput.value;label.append(input);dialog.append(label);
-    const review=node('button','Revisar cambios'),cancel=node('button','Cancelar');for(const b of [review,cancel]){b.type='button';b.style.cssText='padding:10px;margin:12px 8px 0 0;border:1px solid #94a3b8;border-radius:8px';}dialog.append(review,cancel);
+    const review=node('button','Revisar cambios'),cancel=node('button','Cancelar');review.className='review-primary';for(const b of [review,cancel]){b.type='button';b.style.cssText='padding:10px;margin:12px 8px 0 0;border:1px solid #94a3b8;border-radius:8px';}dialog.append(review,cancel);
     const close=()=>{dialog.close();dialog.remove();};cancel.onclick=close;dialog.addEventListener('cancel',()=>dialog.remove());
     review.onclick=async()=>{if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(input.value)){input.reportValidity();return;}monthInput.value=input.value;close();await launch({mode:'sync',month:monthInput.value});};
     document.body.append(dialog);dialog.showModal();input.focus();

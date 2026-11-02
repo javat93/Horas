@@ -1,0 +1,79 @@
+/* Shared presentation for session reviews and the responsive app header. */
+.app-header-inner { gap: 16px; }
+.app-brand { gap: 12px; min-width: 0; }
+.app-logo { flex: 0 0 48px; width: 48px; height: 48px; }
+.app-logo img { display: block; width: 100%; height: 100%; object-fit: contain; border: 0; border-radius: 0; box-shadow: none; }
+.app-brand-copy { min-width: 0; }
+#production-actions { flex-shrink: 0; align-items: center; }
+#production-actions button { min-width: 44px; min-height: 44px; justify-content: center; }
+#production-actions button:focus-visible, .archive-link:focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
+.archive-link { display: inline-flex; align-items: center; gap: 6px; margin: 12px 0 0; padding: 6px 0; font: inherit; color: #64748b; }
+.archive-link:hover { color: #2563eb; text-decoration: underline; }
+.archive-link svg { width: 16px; height: 16px; flex: none; }
+
+dialog, #protected-review-dialog > div {
+  box-sizing: border-box; color: #1e293b; font: inherit; background: #fff;
+  border: 1px solid #e2e8f0; border-radius: 24px !important;
+  padding: 28px !important; max-width: min(850px, calc(100vw - 32px)) !important;
+  max-height: 88dvh !important; overflow: auto; overscroll-behavior: contain;
+  box-shadow: 0 24px 80px rgb(15 23 42 / .2); overflow-wrap: anywhere;
+}
+dialog { margin: auto; width: min(680px, calc(100vw - 32px)); }
+#sync-month-dialog { width: min(440px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgb(15 23 42 / .55); backdrop-filter: blur(5px); }
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) h2 {
+  margin: 0 0 14px; font-size: 1.35rem !important; line-height: 1.35; font-weight: 800 !important; letter-spacing: -.025em;
+}
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) p {
+  margin: 10px 0; font-size: .875rem; line-height: 1.7; color: #64748b;
+}
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) label {
+  display: block; margin: 16px 0; color: #475569; font-size: .875rem; font-weight: 600;
+}
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) :is(input:not([type=checkbox]), select) {
+  display: block; box-sizing: border-box; max-width: 100% !important; width: 100%; min-height: 46px;
+  margin: 8px 0 0 !important; padding: 10px 12px !important; border: 1px solid #cbd5e1 !important;
+  border-radius: 12px; background: #f8fafc; color: #1e293b; font: inherit; font-weight: 500;
+}
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) input[type=checkbox] {
+  width: 18px; height: 18px; margin: 0 8px; vertical-align: middle; accent-color: #2563eb;
+}
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) button {
+  min-height: 44px; margin: 12px 8px 0 0 !important; padding: 11px 16px !important;
+  border: 1px solid #e2e8f0 !important; border-radius: 12px !important;
+  background: #f8fafc; color: #475569; font: inherit; font-size: .875rem; font-weight: 700;
+  line-height: 1.45; text-align: center; transition: background .15s, box-shadow .15s;
+}
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) button:hover:not(:disabled) { background: #eff6ff; border-color: #bfdbfe !important; color: #1d4ed8; }
+:is(dialog, #protected-review-dialog) button.review-primary {
+  background: #2563eb; color: #fff; border-color: #2563eb !important; box-shadow: 0 4px 12px rgb(37 99 235 / .18);
+}
+:is(dialog, #protected-review-dialog) button.review-primary:hover:not(:disabled) { background: #1d4ed8; color: #fff; }
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) :is(button, input, select, summary):focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) button:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #group-review, #identity-review) [role=status]:not(:empty) {
+  padding: 12px 16px; background: #eff6ff; color: #1e40af; border-radius: 12px; margin: 18px 0;
+}
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #identity-review) details { margin: 14px 0; padding: 16px !important; border: 1px solid #e2e8f0 !important; border-radius: 16px; }
+:is(dialog, #protected-review-dialog, #calendar-link-review, #locale-review, #identity-review) summary { cursor: pointer; font-size: .875rem; font-weight: 700; line-height: 1.6; }
+:is(#calendar-link-review, #locale-review) { width: calc(100% - 32px); max-width: 896px !important; margin: 20px auto !important; padding: 24px !important; border-color: #e2e8f0 !important; border-radius: 20px !important; }
+.review-record { padding: 16px; margin: 14px 0; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; }
+.review-record p:first-child { margin-top: 0; color: #1e293b; font-weight: 700; }
+
+@media (max-width: 640px) {
+  .app-header-inner { gap: 8px; }
+  .app-brand { gap: 9px; }
+  .app-logo { flex-basis: 42px; width: 42px; height: 42px; }
+  .app-brand-copy h1 { font-size: 1rem; }
+  .app-brand-copy p { font-size: 8px; letter-spacing: .09em; }
+  #production-actions { gap: 6px; flex-wrap: nowrap; }
+  #production-actions button { padding: 10px !important; }
+  dialog, #protected-review-dialog > div { padding: 22px 18px !important; border-radius: 20px !important; }
+  :is(dialog, #protected-review-dialog) button { display: block; width: 100%; margin: 12px 0 0 !important; }
+  :is(#calendar-link-review, #locale-review) { padding: 20px 16px !important; }
+  #protected-review-dialog { padding: 12px !important; }
+}
+@media (max-width: 359px) {
+  .app-header-inner { flex-wrap: wrap; }
+  #production-actions { margin-left: auto; }
+}
