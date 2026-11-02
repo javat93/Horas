@@ -1,4 +1,4 @@
 // Perfil fijo del clon: nunca permite elegir la hoja desde el navegador.
-// Primera etapa del ensayo autenticado: solo lectura.
+// Operaciones manuales del ensayo autenticado; Realizado automático sigue pausado.
 const {createHandler}=require('./test.js');
-module.exports=createHandler({profile:'rehearsal',writeEnabled:false,automaticEnabled:false});
+module.exports=createHandler({profile:'rehearsal',writeEnabled:true,automaticEnabled:false});

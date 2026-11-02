@@ -45,6 +45,7 @@
     status.textContent=(differences?`${differences} diferencias para revisar. Nada se ha escrito.`:'No hay diferencias que guardar.')+(warnings?` Hay avisos en ${warnings} sesión(es).`:'');
     const save=node('button','Confirmar decisiones en la hoja seleccionada'),cancel=node('button','Cancelar sin guardar');save.type=cancel.type='button';save.style.cssText='padding:10px;margin:12px 12px 0 0;border:1px solid #475569;border-radius:6px;font-weight:bold';cancel.style.cssText='padding:10px;border:1px solid #94a3b8;border-radius:6px';body.append(save,cancel);
     let saving=false;const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
+    if(window.horasWritesEnabled===false){save.disabled=true;save.title='Solo lectura: cambios pendientes de activación.';}
     const close=()=>{overlay.remove();document.body.style.overflow=previousOverflow;};
     cancel.onclick=()=>{if(!saving){close();document.getElementById('test-result').textContent='Revisión cancelada. No se ha guardado nada.';}};
     overlay.addEventListener('keydown',e=>{if(e.key==='Escape'&&!saving)cancel.click();});
@@ -56,7 +57,7 @@
         close();document.getElementById('test-result').textContent=result.unchanged?'Se ha conservado todo. Ninguna celda modificada.':`Guardado y verificado: ${result.rowsChanged} sesión(es), ${result.cellsChanged} celda(s). Calendar sin cambios.`;
         if(!result.unchanged){try{await syncData(false,false);}catch(error){document.getElementById('test-result').textContent=`Guardado y verificado: ${result.rowsChanged} sesión(es), ${result.cellsChanged} celda(s). Falta recargar la vista: ${error.message}`;}}
       }catch(error){status.textContent=error.message;status.scrollIntoView({block:'nearest'});}
-      finally{saving=false;save.disabled=cancel.disabled=false;for(const select of body.querySelectorAll('select'))select.disabled=false;}
+      finally{saving=false;save.disabled=window.horasWritesEnabled===false;cancel.disabled=false;for(const select of body.querySelectorAll('select'))select.disabled=false;}
     };
     document.body.append(overlay);cancel.focus();
   }

@@ -13,11 +13,12 @@ test('producción queda cerrada por defecto y exige verificación de migración 
   assert.deepEqual(releaseSettings({HORAS_PROTECTED_PROFILE:'production',HORAS_MIGRATION_VERIFIED:'migracion-20261102'}),{profile:'production',writeEnabled:false});
   assert.deepEqual(releaseSettings({HORAS_PROTECTED_PROFILE:'rehearsal',HORAS_PROTECTED_WRITES:'enabled'}),{profile:'rehearsal',writeEnabled:true});
 });
-test('acceso separado del ensayo solo lee el clon y pausa Realizado incluso con escritura habilitada',async()=>{
+test('acceso separado del ensayo fija el clon y pausa Realizado incluso con escritura habilitada',async()=>{
   const endpoint=require('../api/rehearsal.js'),env=await call(endpoint,'environment',null,'GET');
-  assert.equal(env.body.mode,'rehearsal');assert.equal(env.body.spreadsheetId,P.REHEARSAL_ID);assert.equal(env.body.writeEnabled,false);assert.equal(env.body.automaticWrites,false);C.verify(C.create('rehearsal'),env.body);
+  assert.equal(env.body.mode,'rehearsal');assert.equal(env.body.spreadsheetId,P.REHEARSAL_ID);assert.equal(typeof env.body.writeEnabled,'boolean');assert.equal(env.body.automaticWrites,false);C.verify(C.create('rehearsal'),env.body);
   assert.equal((await call(endpoint,'daily',{spreadsheetId:P.ORIGINAL_ID,action:'preview',kind:'session',input:session})).code,403);
-  assert.equal((await call(endpoint,'daily',{spreadsheetId:P.REHEARSAL_ID,action:'apply'})).code,403);
+  const readonly=createHandler({profile:'rehearsal',writeEnabled:false,automaticEnabled:false,request:async()=>{throw Error('No debe llamar a Google');}});
+  assert.equal((await call(readonly,'daily',{spreadsheetId:P.REHEARSAL_ID,action:'apply'})).code,403);
   const enabled=createHandler({profile:'rehearsal',writeEnabled:true,automaticEnabled:false,request:async()=>{throw Error('No debe llamar a Google');}});
   const ready=(await call(enabled,'environment',null,'GET')).body;C.verify(C.create('rehearsal'),ready);assert.equal(ready.automaticWrites,false);
   assert.equal((await call(enabled,'state',{spreadsheetId:P.REHEARSAL_ID,action:'autoPerformed'})).code,403);
