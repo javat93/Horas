@@ -1,8 +1,8 @@
 const {createHash}=require('node:crypto');
-const {TEST_ID,validateTarget}=require('./policy.cjs');
+const {targetId,validateTarget}=require('./policy.cjs');
 const {snapshot}=require('./protected-service.cjs');
 const D=require('../locale-data.js'),G=require('../group-identity.js'),L=require('../calendar-linking.js');
-const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`,CAL='https://www.googleapis.com/calendar/v3/calendars/primary/events';
+const base=()=>`https://sheets.googleapis.com/v4/spreadsheets/${targetId()}`,CAL='https://www.googleapis.com/calendar/v3/calendars/primary/events';
 const TRASH='Papelera Horas';
 const hash=v=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const values=row=>Array.from({length:15},(_,i)=>row?.[i]?.userEnteredValue||{});
@@ -12,7 +12,7 @@ const cell=v=>v===''?{}:({userEnteredValue:typeof v==='number'?{numberValue:v}:{
 const catalog=rows=>rows.slice(1).filter(r=>D.value(r?.[0])).map(r=>({nombre:String(D.value(r[0])),sitio:String(D.value(r[1])),precio:D.value(r[2]),precioBolo:D.value(r[3]),ubicacion:String(D.value(r[4]))}));
 const key=r=>[G.id(D.value(r?.[8])),D.dateISO(r?.[5]),D.time(D.value(r?.[12])),D.time(D.value(r?.[13]))].join('|');
 async function rawRow(rowIdx,token,request){
-  const result=await request(`${BASE}?includeGridData=true&ranges=${encodeURIComponent(`Detalle!A${rowIdx}:O${rowIdx}`)}&fields=sheets(properties(sheetId,title),data(rowData(values(userEnteredValue,userEnteredFormat,dataValidation,note))))`,token);
+  const result=await request(`${base()}?includeGridData=true&ranges=${encodeURIComponent(`Detalle!A${rowIdx}:O${rowIdx}`)}&fields=sheets(properties(sheetId,title),data(rowData(values(userEnteredValue,userEnteredFormat,dataValidation,note))))`,token);
   const sheet=result.sheets?.find(s=>s.properties?.sheetId===0&&s.properties?.title==='Detalle');if(!sheet)throw Error('No se pudo comprobar la fila de Detalle.');
   return Array.from({length:15},(_,i)=>sheet.data?.[0]?.rowData?.[0]?.values?.[i]||{});
 }
@@ -47,14 +47,14 @@ function rowFor(s){
   row[7].userEnteredFormat={numberFormat:{type:'NUMBER',pattern:'0'}};return row;
 }
 async function metadata(token,request){
-  const m=await request(`${BASE}?fields=properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties),developerMetadata),developerMetadata`,token);
+  const m=await request(`${base()}?fields=properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties),developerMetadata),developerMetadata`,token);
   if(m.properties?.locale!=='es_ES'||m.properties?.timeZone!=='Europe/Madrid'||!m.sheets?.some(s=>s.properties.sheetId===0&&s.properties.title==='Detalle')||!m.sheets.some(s=>s.properties.sheetId===758405382&&s.properties.title==='Coles'))throw Error('Estructura o configuración de la hoja no reconocida.');
-  const found=await request(`${BASE}/developerMetadata:search`,token,'POST',{dataFilters:[{developerMetadataLookup:{visibility:'DOCUMENT'}}]});
+  const found=await request(`${base()}/developerMetadata:search`,token,'POST',{dataFilters:[{developerMetadataLookup:{visibility:'DOCUMENT'}}]});
   m.developerMetadata=(found.matchedDeveloperMetadata||[]).map(r=>r.developerMetadata).filter(Boolean);return m;
 }
 async function trashRows(token,request,meta){
   const sheet=meta.sheets.find(s=>s.properties.title===TRASH);if(!sheet)return [];
-  const result=await request(`${BASE}/values/${encodeURIComponent(`'${TRASH}'!A:E`)}?valueRenderOption=UNFORMATTED_VALUE`,token);
+  const result=await request(`${base()}/values/${encodeURIComponent(`'${TRASH}'!A:E`)}?valueRenderOption=UNFORMATTED_VALUE`,token);
   return (result.values||[]).filter(r=>r[0]&&!meta.developerMetadata?.some(m=>m.metadataKey==='horas_restored_'+r[0])).map(r=>{
     let cells;try{cells=JSON.parse(r[3]);}catch{throw Error('La papelera contiene una fila no reconocida.');}
     const anchor=meta.developerMetadata?.find(m=>m.metadataKey==='horas_trash_'+r[0]);
@@ -116,21 +116,21 @@ async function runDaily(payload,token,request,now=new Date()){
   validateTarget(payload.spreadsheetId);
   if(payload.action==='trash'){
     if(Object.keys(payload).some(k=>!['spreadsheetId','action'].includes(k)))throw Error('Petición de papelera no válida.');
-    return {items:(await trashRows(token,request,await metadata(token,request))).map(({cells,...r})=>({...r,group:D.value(cells[8]),date:D.dateISO(cells[5]),total:D.value(cells[6])})),spreadsheetId:TEST_ID};
+    return {items:(await trashRows(token,request,await metadata(token,request))).map(({cells,...r})=>({...r,group:D.value(cells[8]),date:D.dateISO(cells[5]),total:D.value(cells[6])})),spreadsheetId:targetId()};
   }
   if(!payload||Object.keys(payload).some(k=>!['spreadsheetId','action','kind','input','expectedVersion','operationId','allowSimilar'].includes(k))||!['preview','apply'].includes(payload.action))throw Error('Petición diaria no válida.');
-  if(payload.action==='preview'){const snap=await snapshot(token,request);await metadata(token,request);const p=await build(payload,snap,token,request,now);return {...p,rows:undefined,spreadsheetId:TEST_ID,calendarModified:false};}
+  if(payload.action==='preview'){const snap=await snapshot(token,request);await metadata(token,request);const p=await build(payload,snap,token,request,now);return {...p,rows:undefined,spreadsheetId:targetId(),calendarModified:false};}
   if(!/^[a-f0-9-]{36}$/.test(payload.operationId||'')||typeof payload.expectedVersion!=='string'||(payload.allowSimilar!==undefined&&typeof payload.allowSimilar!=='boolean'))throw Error('Falta la revisión u operación válida.');
   const previous=pending;let unlock;pending=new Promise(r=>unlock=r);await previous;
   try{
     let meta=await metadata(token,request);
     const operationKey='horas_daily_'+payload.operationId,requestHash=hash({kind:payload.kind,input:payload.input,version:payload.expectedVersion,allowSimilar:payload.allowSimilar===true});
     const recorded=meta.developerMetadata?.find(m=>m.metadataKey===operationKey);
-    if(recorded){if(recorded.metadataValue!==requestHash)throw Error('El identificador ya se usó para otra revisión.');return {alreadyApplied:true,spreadsheetId:TEST_ID,calendarModified:false};}
+    if(recorded){if(recorded.metadataValue!==requestHash)throw Error('El identificador ya se usó para otra revisión.');return {alreadyApplied:true,spreadsheetId:targetId(),calendarModified:false};}
     const snap=await snapshot(token,request),p=await build(payload,snap,token,request,now);
     if(p.version!==payload.expectedVersion)throw Error('La hoja o Calendar cambió desde la revisión. Analiza de nuevo antes de guardar.');
     if(p.duplicates&&!payload.allowSimilar)throw Error('Hay sesiones con el mismo grupo, fecha y horario. Confirma expresamente una partida adicional.');
-    if(!p.rows.length&&p.kind!=='delete')return {unchanged:true,spreadsheetId:TEST_ID,calendarModified:false};
+    if(!p.rows.length&&p.kind!=='delete')return {unchanged:true,spreadsheetId:targetId(),calendarModified:false};
     const fresh=await snapshot(token,request);if(hash({rows:fresh.rows.map(values),groups:fresh.groups.map(values)})!==hash({rows:snap.rows.map(values),groups:snap.groups.map(values)}))throw Error('La hoja se editó durante la confirmación. No se guardó nada.');
     const requests=[];
     if(p.kind==='delete'){
@@ -149,7 +149,7 @@ async function runDaily(payload,token,request,now=new Date()){
       requests.push({createDeveloperMetadata:{developerMetadata:{metadataKey:'horas_restored_'+payload.input.operationId,metadataValue:payload.operationId,visibility:'DOCUMENT',location:{sheetId:0}}}});
     }else requests.push({appendCells:{sheetId:p.sheetId,rows:p.rows.map(values=>({values})),fields:'userEnteredValue,userEnteredFormat.numberFormat,dataValidation'}});
     requests.push({createDeveloperMetadata:{developerMetadata:{metadataKey:operationKey,metadataValue:requestHash,visibility:'DOCUMENT',location:{sheetId:p.sheetId}}}});
-    try{await request(`${BASE}:batchUpdate`,token,'POST',{requests});}catch(e){throw Error('Resultado de guardado incierto. Conserva esta revisión y comprueba antes de reintentar: '+e.message);}
+    try{await request(`${base()}:batchUpdate`,token,'POST',{requests});}catch(e){throw Error('Resultado de guardado incierto. Conserva esta revisión y comprueba antes de reintentar: '+e.message);}
     meta=await metadata(token,request);if(!meta.developerMetadata?.some(m=>m.metadataKey===operationKey&&m.metadataValue===requestHash))throw Error('Petición enviada; falta verificarla. No crees otra revisión.');
     const after=await snapshot(token,request);
     if(p.kind==='delete'){
@@ -160,7 +160,7 @@ async function runDaily(payload,token,request,now=new Date()){
       const rows=p.sheetId===0?after.rows:after.groups;
       for(const planned of p.rows)if(!rows.some(r=>JSON.stringify(values(r).slice(0,planned.length))===JSON.stringify(planned.map(c=>c.userEnteredValue||{}))))throw Error('Alta enviada; falta verificar una fila. No repitas con una revisión nueva.');
     }
-    return {saved:p.kind==='delete'?1:p.rows.length,operationId:payload.operationId,archived:p.kind==='delete',spreadsheetId:TEST_ID,calendarModified:false};
+    return {saved:p.kind==='delete'?1:p.rows.length,operationId:payload.operationId,archived:p.kind==='delete',spreadsheetId:targetId(),calendarModified:false};
   }finally{unlock();}
 }
-module.exports={runDaily,session,dates,rowFor,build,hash,values,metadata,trashRows,TRASH,BASE};
+module.exports={runDaily,session,dates,rowFor,build,hash,values,metadata,trashRows,TRASH,get BASE(){return base();}};

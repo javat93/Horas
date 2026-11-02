@@ -1,9 +1,9 @@
 const D=require('../locale-data.js'),L=require('../calendar-linking.js');
 const G=require('../group-identity.js');
 const {snapshot}=require('./protected-service.cjs');
-const {TEST_ID,validateTarget}=require('./policy.cjs');
+const {targetId,validateTarget}=require('./policy.cjs');
 const {createHash}=require('node:crypto');
-const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`;
+const base=()=>`https://sheets.googleapis.com/v4/spreadsheets/${targetId()}`;
 const fingerprint=cells=>createHash('sha256').update(JSON.stringify(cells.map(c=>[c?.userEnteredValue||{},c?.effectiveValue||{},c?.effectiveFormat?.numberFormat||{}]))).digest('hex');
 function datePlan(cells,rowIdx,events,allRows){
   const c=cells[5],internal=D.dateISO(c),visible=D.parseSpanish(c?.formattedValue),id=String(D.value(cells[10])),group=String(D.value(cells[8]));
@@ -44,7 +44,7 @@ async function calendarFor(snap,token,request){
   const start=new Date(`${dates[0]}T00:00:00Z`),end=new Date(`${dates[dates.length-1]}T00:00:00Z`);start.setUTCDate(start.getUTCDate()-1);end.setUTCDate(end.getUTCDate()+2);
   return (await L.listAll(params=>request(`https://www.googleapis.com/calendar/v3/calendars/primary/events?${new URLSearchParams(Object.fromEntries(Object.entries(params).map(([k,v])=>[k,String(v)])))}`,token),{timeMin:start.toISOString(),timeMax:end.toISOString(),singleEvents:true,orderBy:'startTime'})).items;
 }
-async function readNative(token,request){const snap=await snapshot(token,request);const details=snap.rows.slice(1).map(c=>D.rowValues(c)),groups=snap.groups.slice(1).map(c=>D.rowValues(c,'group'));const warnings=snap.rows.slice(1).map((c,i)=>({rowIdx:i+2,internal:D.dateISO(c[5]),visible:D.parseSpanish(c[5]?.formattedValue)})).filter(r=>r.internal&&r.visible&&r.internal!==r.visible);const amountWarnings=[];snap.rows.slice(1).forEach((row,i)=>{for(const col of [4,6,7])if(D.value(row[col])!==''&&D.numeric(D.value(row[col]))===null)amountWarnings.push({rowIdx:i+2,column:col});});return {details,groups,rowVersions:snap.rows.slice(1).map(c=>fingerprint(c)),warnings,amountWarnings,spreadsheetId:TEST_ID,locale:'es_ES',timeZone:'Europe/Madrid'};}
+async function readNative(token,request){const snap=await snapshot(token,request);const details=snap.rows.slice(1).map(c=>D.rowValues(c)),groups=snap.groups.slice(1).map(c=>D.rowValues(c,'group'));const warnings=snap.rows.slice(1).map((c,i)=>({rowIdx:i+2,internal:D.dateISO(c[5]),visible:D.parseSpanish(c[5]?.formattedValue)})).filter(r=>r.internal&&r.visible&&r.internal!==r.visible);const amountWarnings=[];snap.rows.slice(1).forEach((row,i)=>{for(const col of [4,6,7])if(D.value(row[col])!==''&&D.numeric(D.value(row[col]))===null)amountWarnings.push({rowIdx:i+2,column:col});});return {details,groups,rowVersions:snap.rows.slice(1).map(c=>fingerprint(c)),warnings,amountWarnings,spreadsheetId:targetId(),locale:'es_ES',timeZone:'Europe/Madrid'};}
 function cellRequest(sheetId,row,column,value,format){const data={userEnteredFormat:{numberFormat:format}};if(value)data.userEnteredValue=value;return {updateCells:{range:{sheetId,startRowIndex:row-1,endRowIndex:row,startColumnIndex:column,endColumnIndex:column+1},rows:[{values:[data]}],fields:'userEnteredFormat.numberFormat'+(value?',userEnteredValue':'')}};}
 async function runLocale(payload,token,request){
   validateTarget(payload.spreadsheetId);
@@ -52,10 +52,10 @@ async function runLocale(payload,token,request){
   if(payload.action==='data')return readNative(token,request);
   if(!['audit','numbersAudit','applyDates','applyNumbers'].includes(payload.action))throw new Error('Acción de fechas no permitida.');
   const snap=await snapshot(token,request);
-  if(payload.action==='numbersAudit')return {numbers:numberPlans(snap),spreadsheetId:TEST_ID};
+  if(payload.action==='numbersAudit')return {numbers:numberPlans(snap),spreadsheetId:targetId()};
   const events=payload.action==='applyNumbers'?[]:await calendarFor(snap,token,request);
   const dates=snap.rows.slice(1).map((row,i)=>datePlan(row,i+2,events,snap.rows.slice(1))).filter(Boolean),numbers=numberPlans(snap);
-  if(payload.action==='audit')return {dates,numbers,spreadsheetId:TEST_ID,locale:'es_ES',timeZone:'Europe/Madrid',conflicts:dates.filter(p=>p.conflict).length};
+  if(payload.action==='audit')return {dates,numbers,spreadsheetId:targetId(),locale:'es_ES',timeZone:'Europe/Madrid',conflicts:dates.filter(p=>p.conflict).length};
   const requests=[],checks=[],expectedRows=new Map();
   if(payload.action==='applyDates'){
     if(!Array.isArray(payload.decisions)||payload.decisions.length>500)throw new Error('Revisa como máximo 500 fechas por lote.');
@@ -78,26 +78,26 @@ async function runLocale(payload,token,request){
   }
   if(!requests.length)return {unchanged:true,cellsChanged:0,calendarModified:false};
   const fresh=await snapshot(token,request);for(const [key,version]of expectedRows){const [kind,row]=key.split(':');if(fingerprint((kind==='Detalle'?fresh.rows:fresh.groups)[+row-1]||[])!==version)throw new Error('Se editó una fila durante la confirmación. No se guardó nada.');}
-  await request(`${BASE}:batchUpdate`,token,'POST',{requests});
+  await request(`${base()}:batchUpdate`,token,'POST',{requests});
   const verified=await snapshot(token,request);for(const check of checks){const c=(check.kind==='Detalle'?verified.rows:verified.groups)[check.rowIdx-1]?.[check.column];if(check.value!==null&&c?.userEnteredValue?.numberValue!==check.value)throw new Error('Se envió el cambio, pero falta verificar el valor. Recarga.');if(c?.effectiveFormat?.numberFormat?.pattern!==check.format)throw new Error('No se pudo verificar el formato. Recarga.');}
-  return {cellsChanged:checks.length,calendarModified:false,spreadsheetId:TEST_ID};
+  return {cellsChanged:checks.length,calendarModified:false,spreadsheetId:targetId()};
 }
 async function numericProbe(token,request){
   let sheetId;
   try{
     const title=`Prueba castellano ${Date.now()}`;
-    const added=await request(`${BASE}:batchUpdate`,token,'POST',{requests:[{addSheet:{properties:{title,gridProperties:{rowCount:8,columnCount:3}}}}]});
+    const added=await request(`${base()}:batchUpdate`,token,'POST',{requests:[{addSheet:{properties:{title,gridProperties:{rowCount:8,columnCount:3}}}}]});
     sheetId=added.replies?.[0]?.addSheet?.properties?.sheetId;if(!Number.isInteger(sheetId))throw new Error('No se pudo verificar la pestaña temporal.');
-    const created=await request(`${BASE}:batchUpdate`,token,'POST',{requests:[
+    const created=await request(`${base()}:batchUpdate`,token,'POST',{requests:[
       {updateCells:{range:{sheetId,startRowIndex:0,endRowIndex:4,startColumnIndex:0,endColumnIndex:2},rows:[{values:[{userEnteredValue:{stringValue:'Concepto'}},{userEnteredValue:{stringValue:'Importe'}}]},{values:[{userEnteredValue:{stringValue:'Primero'}},{userEnteredValue:{numberValue:16.5},userEnteredFormat:{numberFormat:{type:'CURRENCY',pattern:'#,##0.00" €"'}}}]},{values:[{userEnteredValue:{stringValue:'Segundo'}},{userEnteredValue:{numberValue:20.25},userEnteredFormat:{numberFormat:{type:'CURRENCY',pattern:'#,##0.00" €"'}}}]},{values:[{userEnteredValue:{stringValue:'Suma'}},{userEnteredValue:{formulaValue:'=SUM(B2:B3)'},userEnteredFormat:{numberFormat:{type:'CURRENCY',pattern:'#,##0.00" €"'}}}]}],fields:'userEnteredValue,userEnteredFormat.numberFormat'}},
       {addChart:{chart:{spec:{title:'Comprobación de importes numéricos',basicChart:{chartType:'COLUMN',headerCount:1,domains:[{domain:{sourceRange:{sources:[{sheetId,startRowIndex:0,endRowIndex:3,startColumnIndex:0,endColumnIndex:1}]}}}],series:[{series:{sourceRange:{sources:[{sheetId,startRowIndex:0,endRowIndex:3,startColumnIndex:1,endColumnIndex:2}]}},targetAxis:'LEFT_AXIS'}]}},position:{overlayPosition:{anchorCell:{sheetId,rowIndex:0,columnIndex:2}}}}}}
     ]});
     const query=new URLSearchParams({includeGridData:'true',fields:'sheets(properties(sheetId),charts(spec),data(rowData(values(effectiveValue,formattedValue))))'});query.append('ranges',`'${title}'!A1:B4`);
-    const result=await request(`${BASE}?${query}`,token),sheet=result.sheets?.find(s=>s.properties.sheetId===sheetId),rows=sheet?.data?.[0]?.rowData;
+    const result=await request(`${base()}?${query}`,token),sheet=result.sheets?.find(s=>s.properties.sheetId===sheetId),rows=sheet?.data?.[0]?.rowData;
     const total=rows?.[3]?.values?.[1];if(total?.effectiveValue?.numberValue!==36.75||!total.formattedValue?.includes('36,75'))throw new Error('La suma o su formato español no coincide con 36,75.');
     const charts=[...(sheet?.charts||[]),...(created.replies||[]).filter(r=>r.addChart).map(r=>r.addChart.chart)];
     if(!charts.some(chart=>chart?.spec?.basicChart?.series?.some(series=>series.series?.sourceRange?.sources?.some(source=>source.sheetId===sheetId&&source.startColumnIndex===1))))throw new Error('No se pudo comprobar el origen numérico del gráfico: '+JSON.stringify(charts.map(chart=>({chartId:chart?.chartId,spec:chart?.spec}))).slice(0,1600));
     return {sum:36.75,formatted:total.formattedValue,chartDataVerified:true,calendarModified:false,restored:true};
-  }finally{if(Number.isInteger(sheetId)){try{await request(`${BASE}:batchUpdate`,token,'POST',{requests:[{deleteSheet:{sheetId}}]});}catch{throw new Error(`No se pudo retirar la pestaña temporal (${sheetId}). Revísala antes de repetir la prueba.`);}}}
+  }finally{if(Number.isInteger(sheetId)){try{await request(`${base()}:batchUpdate`,token,'POST',{requests:[{deleteSheet:{sheetId}}]});}catch{throw new Error(`No se pudo retirar la pestaña temporal (${sheetId}). Revísala antes de repetir la prueba.`);}}}
 }
 module.exports={runLocale,readNative,datePlan,numberPlans,fingerprint,numericProbe};

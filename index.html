@@ -11,6 +11,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 	<!-- Carga del archivo de configuración -->
+    <script src="protected-config.js?v=protegido-20261102"></script>
     <!-- Configuración segura según entorno -->
 <script>
     // Detectar si estamos en producción
@@ -19,27 +20,27 @@
     
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
-    configScript.src = isProduction ? 'config.production.js?v=fase8-20261029' : 'config.secure.js';
+    configScript.src = isProduction ? 'config.production.js?v=protegido-20261102' : 'config.secure.js';
     window.horasConfigReady = new Promise((resolve, reject) => {
         configScript.onload = resolve;
         configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
     });
     document.head.appendChild(configScript);
 </script>
-    <script src="locale-data.js?v=fase8-20261029"></script>
+    <script src="locale-data.js?v=protegido-20261102"></script>
     <script src="auth-session.js?v=auth-20261029"></script>
-    <script src="app-data.js?v=fase8-20261029"></script>
+    <script src="app-data.js?v=protegido-20261102"></script>
     <script src="group-identity.js?v=fase6-20261029"></script>
     <script src="calendar-linking.js?v=enlaces-20261029"></script>
     <script src="protected-review.js?v=fase7-20261029"></script>
-    <script src="sandbox/daily-editor.js?v=operativa-20261102" defer></script>
-    <script src="sandbox/panel.js?v=operativa-20261102" defer></script>
-    <script src="sandbox/performed-editor.js?v=fase8-20261029" defer></script>
+    <script src="sandbox/daily-editor.js?v=protegido-20261102" defer></script>
+    <script src="sandbox/panel.js?v=protegido-20261102" defer></script>
+    <script src="sandbox/performed-editor.js?v=protegido-20261102" defer></script>
     <script src="sandbox/identity-review.js?v=fase6-20261029" defer></script>
-    <script src="sandbox/group-editor.js?v=fase8-20261029" defer></script>
+    <script src="sandbox/group-editor.js?v=protegido-20261102" defer></script>
     <script src="sandbox/calendar-review.js?v=enlaces-20261029" defer></script>
-    <script src="sandbox/protected-editor.js?v=fase8-20261029" defer></script>
-    <script src="sandbox/locale-editor.js?v=fase8-20261029" defer></script>
+    <script src="sandbox/protected-editor.js?v=protegido-20261102" defer></script>
+    <script src="sandbox/locale-editor.js?v=protegido-20261102" defer></script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <!-- PWA Manifest and Icons -->
     <link rel="manifest" href="manifest.json">
@@ -428,7 +429,7 @@
     </main>
     <footer class="max-w-4xl mx-auto px-4 py-6 text-sm text-slate-600">
         <a href="inicio.html">Sobre Horas · PercuManager</a> · <a href="privacidad.html">Política de privacidad</a> · <a href="condiciones.html">Condiciones de uso</a>
-        <p>Google Calendar se consulta en modo de solo lectura. Los cambios en la hoja de pruebas requieren revisión. <a href="mailto:javat93@gmail.com">Contacto</a>.</p>
+        <p>Google Calendar se consulta en modo de solo lectura. Los cambios en la hoja requieren revisión. <a href="mailto:javat93@gmail.com">Contacto</a>.</p>
     </footer>
 
     <div id="modal-evento" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
@@ -773,7 +774,7 @@
 
         let tokenClient;
         function tokenStorageKey() {
-            return typeof CONFIG !== 'undefined' && CONFIG.TEST_MODE ? 'g_token_pruebas' : 'g_token';
+            return typeof CONFIG !== 'undefined' && CONFIG.DATA_MODE && CONFIG.DATA_MODE !== 'test' ? 'g_token_horas_'+CONFIG.DATA_MODE : typeof CONFIG !== 'undefined' && CONFIG.TEST_MODE ? 'g_token_pruebas' : 'g_token';
         }
         let gapiInited = false;
         let gisInited = false;
@@ -807,8 +808,9 @@
             return response;
             };
             if(AppData.mutatingRequest(url,options)){
+                if(CONFIG.PROTECTED_MODE&&window.horasWritesEnabled===false)throw new Error('Solo lectura: los cambios aún no están activados.');
                 if(syncInFlight)throw new Error('Espera a que termine la carga antes de guardar cambios.');
-                return mutationGate.run(()=>typeof navigator!=='undefined'&&navigator.locks?navigator.locks.request('horas-copia-write',{ifAvailable:true},lock=>{if(!lock)throw new Error('Otra pestaña está guardando. Espera a que termine.');return send();}):send());
+                return mutationGate.run(()=>typeof navigator!=='undefined'&&navigator.locks?navigator.locks.request('horas-write-'+CONFIG.SPREADSHEET_ID,{ifAvailable:true},lock=>{if(!lock)throw new Error('Otra pestaña está guardando. Espera a que termine.');return send();}):send());
             }
             return send();
         };
@@ -828,7 +830,7 @@
         function parseSpanishNumber(val) {
             if (val === undefined || val === null || val === '') return 0;
             if (typeof val === 'number') return val;
-            if (CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 4) return LocaleData.numeric(val) ?? 0;
+            if ((CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE) && CONFIG.TEST_PHASE >= 4) return LocaleData.numeric(val) ?? 0;
             
             // Eliminar espacios, símbolos de moneda y otros caracteres no numéricos excepto coma y punto
             let cleanVal = val.toString().replace(/[^\d,.-]/g, '').trim();
@@ -889,7 +891,7 @@
         }
 
         async function loadOAuthConfig() {
-            if (CONFIG.TEST_MODE) return;
+            if ((CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)) return;
             try {
                 if (CONFIG.ENVIRONMENT === 'production' && CONFIG.USE_PROXY) {
                     const response = await fetch(`${CONFIG.PROXY_URL}/api/oauth-config`);
@@ -916,7 +918,7 @@
                         document.getElementById('auth-btn').disabled=false;
                         hideLoading();
                         document.getElementById('auth-status').textContent='No se completó la conexión. Pulsa «Conectar Google» para volver a intentarlo.';
-                        if (CONFIG.TEST_MODE) document.getElementById('test-result').textContent = 'No se pudo completar la conexión de Google (' + (error.type || 'error de acceso') + ').';
+                        if ((CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)) document.getElementById('test-result').textContent = 'No se pudo completar la conexión de Google (' + (error.type || 'error de acceso') + ').';
                     },
                     client_id: CONFIG.CLIENT_ID,
                     scope: CONFIG.SCOPES,
@@ -1000,10 +1002,10 @@
         }
 		// FUNCIÓN CLAVE: Proxy para llamadas a Google APIs en producción
         async function proxyGoogleAPI(apiType, method, params = {}, body = null) {
-            if (CONFIG.TEST_MODE) {
-                if (!window.horasEnvironmentReady || !await window.horasEnvironmentReady) throw new Error('El entorno de pruebas no está verificado.');
-                if (apiType === 'sheets' && params.spreadsheetId !== CONFIG.SPREADSHEET_ID) throw new Error('Destino de hoja bloqueado en pruebas.');
-                if (!((apiType === 'sheets' && method === 'get') || (apiType === 'calendar' && method === 'list'))) throw new Error('Fase 1: escrituras ordinarias y cambios en Calendar bloqueados.');
+            if ((CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)) {
+                if (!window.horasEnvironmentReady || !await window.horasEnvironmentReady) throw new Error('El destino protegido no está verificado.');
+                if (apiType === 'sheets' && params.spreadsheetId !== CONFIG.SPREADSHEET_ID) throw new Error('Destino de hoja bloqueado.');
+                if (!((apiType === 'sheets' && method === 'get') || (apiType === 'calendar' && method === 'list'))) throw new Error('Usa la revisión protegida para guardar; Calendar es de solo lectura.');
             }
             if (CONFIG.ENVIRONMENT === 'production' && CONFIG.USE_PROXY) {
                 // En producción, usar el proxy
@@ -1189,14 +1191,14 @@
             return syncInFlight;
         }
         async function performDataSync(resolverCal = false, actualizarRealizadosFlag = false) {
-            if (CONFIG.TEST_MODE && resolverCal) {
+            if ((CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE) && resolverCal) {
                 if (CONFIG.TEST_PHASE >= 3 && window.prepareProtectedSync) return window.prepareProtectedSync();
-                showErrorModal('Fase 1', 'Usa «Recargar copia». La sincronización que modifica datos se probará en las siguientes fases.', 'info');
+                showErrorModal('Revisión pendiente', 'Espera a que se compruebe la conexión antes de revisar la sincronización.', 'info');
                 return;
             }
             showLoading('Sincronizando datos...');
             try {
-                const nativeData = CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 4 ? await window.loadNativeData() : null;
+                const nativeData = (CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE) && CONFIG.TEST_PHASE >= 4 ? await window.loadNativeData() : null;
                 if (nativeData) window.updateLocaleWarnings?.(nativeData);
                 // 1. Grupos
                 const resColes = nativeData ? {values:nativeData.groups} : await proxyGoogleAPI('sheets', 'get', {
@@ -1850,15 +1852,15 @@
             const previous=event.pagado;event.paymentSaving=true;event.pagado=newState;
             renderAll();updateFinancialStats();
             try {
-                if(CONFIG.TEST_MODE){
-                    if(!await window.horasEnvironmentReady)throw new Error('El entorno de pruebas no está verificado.');
+                if((CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)){
+                    if(!await window.horasEnvironmentReady)throw new Error('El destino protegido no está verificado.');
                     const token=window.horasAccessToken();if(!token)throw new Error('Primero conecta Google.');
                     const response=await window.horasFetch(CONFIG.STATE_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action:'setPayment',rowIdx,paid:newState,expectedVersion:event.sourceVersion})});
                     const saved=await AppData.readResponse(response);if(saved.paid!==newState||!saved.version||saved.spreadsheetId!==CONFIG.SPREADSHEET_ID||saved.calendarModified!==false)throw new Error('La respuesta no confirma el pago. Recarga para comprobarlo.');event.sourceVersion=saved.version;
                 }else{
                     await proxyGoogleAPI('sheets','update',{spreadsheetId:CONFIG.SPREADSHEET_ID,range:`Detalle!A${rowIdx}`,valueInputOption:'RAW'},{values:[[newState?'X':'']]});
                 }
-                const notice=document.getElementById('test-result');if(notice)notice.textContent='Estado de pago guardado y verificado en la copia. Calendar sin cambios.';
+                const notice=document.getElementById('test-result');if(notice)notice.textContent='Estado de pago guardado y verificado. Calendar sin cambios.';
             }catch(error){
                 event.pagado=previous;
                 event.paymentUncertain=true;
@@ -1970,8 +1972,8 @@
             document.getElementById('gr-name-info').textContent = GroupIdentity.description(g.nombre);
             document.getElementById('gr-precio').value = g.precio ?? '';
             document.getElementById('gr-precio-bolo').value = g.precioBolo ?? '';
-            document.getElementById('gr-nombre').disabled = CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 5;
-            document.getElementById('gr-sitio').disabled = CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 5 && CONFIG.TEST_PHASE < 7;
+            document.getElementById('gr-nombre').disabled = (CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE) && CONFIG.TEST_PHASE >= 5;
+            document.getElementById('gr-sitio').disabled = (CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE) && CONFIG.TEST_PHASE >= 5 && CONFIG.TEST_PHASE < 7;
             document.getElementById('gr-sitio').value = g.sitio;
             document.getElementById('gr-ubicacion').value = g.ubicacion;
             openModal('modal-grupo');
@@ -2177,7 +2179,7 @@
 
         document.getElementById('form-evento').onsubmit = async (e) => {
             e.preventDefault();
-            if (CONFIG.TEST_MODE && CONFIG.TEST_PHASE >= 3) return window.reviewSessionForm();
+            if ((CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE) && CONFIG.TEST_PHASE >= 3) return window.reviewSessionForm();
             if (!validarFormularioClase()) return;
             const rowIdx = document.getElementById('ev-rowIdx').value;
             const ev = eventos.find(e => e.rowIdx == rowIdx);
@@ -3265,7 +3267,7 @@
 
         window.onload = async () => {
             await window.horasConfigReady;
-            if (!CONFIG.TEST_MODE) loadGoogleMaps();
+            if (!(CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)) loadGoogleMaps();
             gapiLoaded();
             gisLoaded();
             ensureAuthButtonVisible();

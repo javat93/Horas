@@ -23,7 +23,7 @@ test('configuración y HTML servidos no apuntan al proxy de producción',()=>{
   assert(!html.includes("getItem('g_token')"));
   assert(!html.includes('config.secure.js'));
   assert.match(html,/actualizarRealizadosFlag = false/);
-  assert.match(html,/CONFIG.TEST_MODE && resolverCal/);
+  assert.match(html,/\(CONFIG.PROTECTED_MODE \|\| CONFIG.TEST_MODE\) && resolverCal/);
   assert.match(html,/sandbox\/panel.js/);
   for(const script of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(script[1]);
 });

@@ -1,11 +1,11 @@
 const D=require('../locale-data.js');
-const {TEST_ID,validateTarget}=require('./policy.cjs');
+const {targetId,validateTarget}=require('./policy.cjs');
 const {createHash}=require('node:crypto');
-const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`;
+const base=()=>`https://sheets.googleapis.com/v4/spreadsheets/${targetId()}`;
 const version=row=>createHash('sha256').update(JSON.stringify(row)).digest('hex');
 async function read(token,request){
   const q=new URLSearchParams({includeGridData:'true',fields:'sheets(properties(title),data(startRow,rowData(values(userEnteredValue,effectiveValue,formattedValue))))',ranges:'Coles!A:E'});
-  const result=await request(`${BASE}?${q}`,token),sheet=result.sheets?.find(s=>s.properties.title==='Coles');
+  const result=await request(`${base()}?${q}`,token),sheet=result.sheets?.find(s=>s.properties.title==='Coles');
   if(!sheet)throw new Error('No se pudo leer Coles.');
   const rows=[];for(const grid of sheet.data||[])for(const [i,r]of (grid.rowData||[]).entries())rows[(grid.startRow||0)+i]=Array.from({length:5},(_,c)=>r.values?.[c]||{});
   return rows;
@@ -28,24 +28,24 @@ async function runGroups(payload,token,request){
   validateTarget(payload.spreadsheetId);
   if(!['audit','preview','apply'].includes(payload.action))throw new Error('Acción no permitida.');
   const rows=await read(token,request);
-  if(payload.action==='audit')return {spreadsheetId:TEST_ID,groups:rows.slice(1).flatMap((row,i)=>{
+  if(payload.action==='audit')return {spreadsheetId:targetId(),groups:rows.slice(1).flatMap((row,i)=>{
     if(!row||!D.value(row[0]))return [];
     const d=D.value(row[3]),e=D.value(row[4]),suspected=String(d).trim()!==''&&D.numeric(d)===null&&typeof d==='string'&&String(e).trim()!==''&&D.numeric(e)!==null;
     const notes=[];if(D.numeric(D.value(row[2]))===null)notes.push('Precio de sesión vacío o no numérico.');if(D.numeric(d)===null)notes.push('Precio Bolo vacío o no numérico.');if(suspected)notes.push('Posible cruce D/E: requiere confirmar; no se intercambia automáticamente.');
     return [{rowIdx:i+2,name:String(D.value(row[0])),current:{price:D.value(row[2]),gigPrice:d,location:e},suspected,notes}];
   }),calendarModified:false};
   const p=plan(rows,payload);
-  if(payload.action==='preview')return {...p,spreadsheetId:TEST_ID};
+  if(payload.action==='preview')return {...p,spreadsheetId:targetId()};
   if(payload.expectedVersion!==p.expectedVersion)throw new Error('El grupo cambió desde la revisión. Vuelve a abrirlo antes de guardar.');
   const choices=payload.choices||{};if(Object.keys(choices).some(k=>!Object.hasOwn(columns,k))||Object.values(choices).some(v=>!['keep','use'].includes(v)))throw new Error('Decisión no válida.');
   const changes=[];for(const [key,col]of Object.entries(columns))if(choices[key]==='use'){
     if(!Object.hasOwn(p.proposal,key))throw new Error('No existe propuesta para ese campo.');
     if(p.diff[key])changes.push({key,col,value:p.proposal[key]});
   }
-  if(!changes.length)return {unchanged:true,cellsChanged:0,spreadsheetId:TEST_ID,calendarModified:false};
-  await request(`${BASE}:batchUpdate`,token,'POST',{requests:changes.map(c=>({updateCells:{range:{sheetId:758405382,startRowIndex:p.rowIdx-1,endRowIndex:p.rowIdx,startColumnIndex:c.col,endColumnIndex:c.col+1},rows:[{values:[{userEnteredValue:typeof c.value==='number'?{numberValue:c.value}:{stringValue:c.value},...(typeof c.value==='number'?{userEnteredFormat:{numberFormat:{type:'CURRENCY',pattern:'#,##0.00" €"'}}}:{})}]}],fields:'userEnteredValue'+(typeof c.value==='number'?',userEnteredFormat.numberFormat':'')}}))});
+  if(!changes.length)return {unchanged:true,cellsChanged:0,spreadsheetId:targetId(),calendarModified:false};
+  await request(`${base()}:batchUpdate`,token,'POST',{requests:changes.map(c=>({updateCells:{range:{sheetId:758405382,startRowIndex:p.rowIdx-1,endRowIndex:p.rowIdx,startColumnIndex:c.col,endColumnIndex:c.col+1},rows:[{values:[{userEnteredValue:typeof c.value==='number'?{numberValue:c.value}:{stringValue:c.value},...(typeof c.value==='number'?{userEnteredFormat:{numberFormat:{type:'CURRENCY',pattern:'#,##0.00" €"'}}}:{})}]}],fields:'userEnteredValue'+(typeof c.value==='number'?',userEnteredFormat.numberFormat':'')}}))});
   const after=(await read(token,request))[p.rowIdx-1];
   for(const c of changes)if(D.value(after?.[c.col])!==c.value)throw new Error('Cambio enviado, pero no verificado. Recarga antes de repetir.');
-  return {cellsChanged:changes.length,spreadsheetId:TEST_ID,calendarModified:false};
+  return {cellsChanged:changes.length,spreadsheetId:targetId(),calendarModified:false};
 }
 module.exports={runGroups,normalize,plan};

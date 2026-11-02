@@ -1,12 +1,18 @@
 window.horasEnvironmentReady = new Promise(resolveEnvironment => {
 document.addEventListener('DOMContentLoaded', async () => {
   await window.horasConfigReady;
-  if(!CONFIG.TEST_MODE){resolveEnvironment(true);return;}
+  const mode=CONFIG.DATA_MODE||'test',isTest=mode==='test';
+  window.horasWritesEnabled=false;
+  if(!(CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)){resolveEnvironment(true);return;}
   if(!document.getElementById('test-environment-banner')){
     const banner=document.createElement('div');
     banner.id='test-environment-banner';
     banner.style.cssText='padding:16px;background:#fff3cd;color:#312a12;position:relative;z-index:100';
     banner.innerHTML='<strong>PRUEBAS — Fase 8 — Calendar solo lectura</strong><div>Hoja: Horas Fran — PRUEBAS — 28-10-2026</div><div id="test-target-status">Comprobando destino del backend…</div><button id="test-reload" type="button">Recargar copia</button> · <button id="test-control" type="button">Probar escritura y restauración en la copia</button><div id="test-result" role="status" aria-live="polite"></div>';
+    if(!isTest){
+      banner.style.cssText='padding:16px;background:#eff6ff;color:#1e3a8a;position:relative;z-index:100';
+      banner.innerHTML='<strong>'+(mode==='production'?'Horas · Gestión protegida':'Ensayo · Gestión protegida')+'</strong><div id="test-target-status">Comprobando conexión…</div><button id="test-reload" type="button">Actualizar datos</button><button id="test-control" type="button" hidden></button><div id="test-result" role="status" aria-live="polite"></div>';
+    }
     document.body.prepend(banner);
   }
   const status=document.getElementById('test-target-status');
@@ -15,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   control.disabled=true;
   document.getElementById('auth-btn')?.addEventListener('click',()=>{
     setTimeout(()=>{
-      if(!localStorage.getItem('g_token_pruebas')){
+      if(!window.horasAccessToken?.()){
         hideLoading();
         result.textContent='La conexión de Google sigue pendiente. Si no se abrió la ventana de acceso, abre esta dirección en tu navegador habitual y pulsa «Conectar Google». No se ha escrito nada.';
       }
@@ -45,7 +51,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const response=await (window.horasFetch||fetch)(CONFIG.TEST_ENVIRONMENT_API_URL || `${CONFIG.PROXY_URL}/api/test-environment`);
     const env=await response.json();
-    if(!response.ok || env.mode!=='test' || env.spreadsheetId!==CONFIG.SPREADSHEET_ID || !env.calendarReadOnly || env.automaticWrites!==(CONFIG.TEST_PHASE>=8) || env.appWrites) throw new Error('El backend no coincide con la configuración de pruebas.');
+    if(!response.ok || env.mode!==mode || env.spreadsheetId!==CONFIG.SPREADSHEET_ID || !env.calendarReadOnly || env.automaticWrites!==((env.writeEnabled??true)&&CONFIG.TEST_PHASE>=8) || env.appWrites) throw new Error('El backend no coincide con el destino configurado.');
+    if(!isTest)HorasProtectedConfig.verify(CONFIG,env);
     if(CONFIG.TEST_PHASE===2 && (env.phase!==2||!env.linkReview))throw new Error('El backend aún no está preparado para la fase 2. Recarga en unos instantes.');
     if(CONFIG.TEST_PHASE>=3 && (env.phase!==CONFIG.TEST_PHASE||!env.protectedReview))throw new Error('El backend aún no está preparado para esta fase. Recarga en unos instantes.');
     if(CONFIG.TEST_PHASE>=4 && !env.localeReview)throw new Error('La revisión de fechas aún no está disponible.');
@@ -54,22 +61,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(CONFIG.TEST_PHASE>=7 && !env.addressReview)throw new Error('La revisión de direcciones aún no está disponible.');
     if(CONFIG.TEST_PHASE>=8 && (!env.stateReview||!env.performedAutomation))throw new Error('La edición segura de estados aún no está disponible.');
     status.textContent=`Backend comprobado: ${env.spreadsheetId}. ${CONFIG.TEST_PHASE>=8?'Realizado se marca automáticamente al terminar las sesiones verificadas; el resto de cambios requiere revisión.':'Los cambios requieren revisión; no hay escrituras automáticas.'} Calendar solo lectura.`;
-    control.disabled=false;
+    window.horasWritesEnabled=env.writeEnabled!==false;
+    if(!isTest)status.textContent=window.horasWritesEnabled?'Conexión verificada. Calendar solo lectura. Los cambios se revisan antes de guardar.':'Conexión verificada. Hoja y Calendar en solo lectura; cambios pendientes de activación.';
+    control.disabled=!isTest;
+    let audit=document.getElementById('test-environment-banner');
+    if(!isTest){const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Herramientas de revisión';details.append(summary);audit.append(details);audit=details;}
     window.horasDailyReady=env.dailyOperations===true&&!!CONFIG.DAILY_API_URL;
     if(window.horasDailyReady){window.mountDailyOperations?.(document.getElementById('test-environment-banner'));const future=document.getElementById('add-future-events-btn');if(future){future.disabled=false;future.title='Revisar importación sin modificar Calendar';}}
     resolveEnvironment(true);
-    window.mountCalendarReview?.(document.getElementById('test-environment-banner'));
-    if(CONFIG.TEST_PHASE>=5)window.mountGroupReview?.(document.getElementById('test-environment-banner'));
-    if(CONFIG.TEST_PHASE>=6)window.mountIdentityReview?.(document.getElementById('test-environment-banner'));
-    if(CONFIG.TEST_PHASE>=4)window.mountLocaleReview?.(document.getElementById('test-environment-banner'));
+    window.mountCalendarReview?.(audit);
+    if(CONFIG.TEST_PHASE>=5)window.mountGroupReview?.(audit);
+    if(CONFIG.TEST_PHASE>=6)window.mountIdentityReview?.(audit);
+    if(CONFIG.TEST_PHASE>=4)window.mountLocaleReview?.(audit);
     if(CONFIG.TEST_PHASE>=3){
-      window.mountProtectedReview?.(document.getElementById('test-environment-banner'));
+      window.mountProtectedReview?.(document.getElementById('test-environment-banner'),audit);
       const sync=document.getElementById('sync-btn');if(sync){sync.disabled=false;sync.title='Preparar revisión de sincronización, sin cambios automáticos';}
     }
   } catch(error){status.textContent=error.message;resolveEnvironment(false);return;}
   document.getElementById('test-reload').onclick=()=>syncData(false,false);
   control.onclick=async()=>{
-    let token;try{token=window.horasAccessToken ? window.horasAccessToken() : gapi.client?.getToken()?.access_token || localStorage.getItem('g_token_pruebas');}catch(error){result.textContent=error.message;return;}
+    let token;try{token=window.horasAccessToken?.();}catch(error){result.textContent=error.message;return;}
     if(!token){result.textContent='Primero pulsa «Conectar Google». No se ha escrito nada.';return;}
     control.disabled=true;
     result.textContent='Creando una pestaña temporal en la copia, verificando el valor 42 y retirándola…';

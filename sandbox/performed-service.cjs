@@ -1,4 +1,4 @@
-const {TEST_ID,validateTarget}=require('./policy.cjs');
+const {targetId,validateTarget}=require('./policy.cjs');
 const {snapshot}=require('./protected-service.cjs');
 const {fingerprint}=require('./locale-service.cjs');
 const D=require('../locale-data.js'),L=require('../calendar-linking.js');
@@ -27,15 +27,15 @@ async function runPerformed(payload,token,request,now=new Date()){
     const row={grupo:String(D.value(candidate.row[8])),fechaStr:D.display(D.dateISO(candidate.row[5])),horaInicio:D.time(D.value(candidate.row[12])),horaFin:D.time(D.value(candidate.row[13]))};
     if(event?.id===id&&L.compatible(row,event)&&event.end?.dateTime&&new Date(event.end.dateTime)<=now)verified.push(candidate);
   }}));
-  if(!verified.length)return {rowsChanged:0,performed:[],nextCursor,skipped:pending.length,spreadsheetId:TEST_ID,calendarModified:false};
+  if(!verified.length)return {rowsChanged:0,performed:[],nextCursor,skipped:pending.length,spreadsheetId:targetId(),calendarModified:false};
   const fresh=await snapshot(token,request),requests=[];const targets=[];
   if(fingerprint(fresh.rows[0])!==fingerprint(snap.rows[0]))throw Error('La cabecera cambió durante la comprobación. Recarga.');
   for(const candidate of verified){const current=fresh.rows[candidate.rowIdx-1],id=String(D.value(candidate.row[10]));if(!current||fingerprint(current)!==fingerprint(candidate.row)||!eligible(current,now,candidate.rowIdx)||fresh.rows.filter(row=>String(D.value(row?.[10]))===id).length!==1)continue;
     const value=typeof D.value(current[1])==='boolean'?{boolValue:true}:{stringValue:'X'};requests.push({updateCells:{range:{sheetId:0,startRowIndex:candidate.rowIdx-1,endRowIndex:candidate.rowIdx,startColumnIndex:1,endColumnIndex:2},rows:[{values:[{userEnteredValue:value}]}],fields:'userEnteredValue'}});targets.push(candidate.rowIdx);
   }
-  if(!requests.length)return {rowsChanged:0,performed:[],nextCursor,skipped:pending.length,spreadsheetId:TEST_ID,calendarModified:false};
-  try{await request(`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}:batchUpdate`,token,'POST',{requests});}catch(error){throw new Error('El marcado automático no pudo confirmarse. Recarga antes de reintentarlo. '+error.message);}
+  if(!requests.length)return {rowsChanged:0,performed:[],nextCursor,skipped:pending.length,spreadsheetId:targetId(),calendarModified:false};
+  try{await request(`https://sheets.googleapis.com/v4/spreadsheets/${targetId()}:batchUpdate`,token,'POST',{requests});}catch(error){throw new Error('El marcado automático no pudo confirmarse. Recarga antes de reintentarlo. '+error.message);}
   const after=await snapshot(token,request),performed=[];for(const rowIdx of targets){const row=after.rows[rowIdx-1],previous=fresh.rows[rowIdx-1];if(!row||!['X',true].includes(D.value(row[1]))||fingerprint(row.filter((_,i)=>i!==1))!==fingerprint(previous.filter((_,i)=>i!==1)))throw new Error('Se envió el marcado automático, pero falta verificar la sesión completa. Recarga.');performed.push({rowIdx,version:fingerprint(row)});}
-  return {rowsChanged:performed.length,performed,nextCursor,skipped:pending.length-performed.length,spreadsheetId:TEST_ID,calendarModified:false};
+  return {rowsChanged:performed.length,performed,nextCursor,skipped:pending.length-performed.length,spreadsheetId:targetId(),calendarModified:false};
 }
 module.exports={runPerformed,madridNow,ended,eligible,excluded};

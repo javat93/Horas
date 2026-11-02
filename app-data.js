@@ -12,7 +12,7 @@
   function mutatingRequest(url,options={}){
     if(String(options.method||'GET').toUpperCase()!=='POST')return false;
     let body;try{body=JSON.parse(options.body||'{}');}catch{return false;}
-    if(body.action)return !['data','audit','numbersAudit','preview','candidates'].includes(body.action);
+    if(body.action)return !['data','audit','numbersAudit','preview','candidates','trash'].includes(body.action);
     if(body.method)return !['get','list'].includes(body.method);
     return /(?:api=control|test-control)/.test(String(url));
   }

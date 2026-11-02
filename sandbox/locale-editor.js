@@ -1,8 +1,8 @@
 (function(){
   const node=(tag,text)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;return el;};
   async function api(action,extra={}){
-    if(!await window.horasEnvironmentReady)throw new Error('El entorno de pruebas no está verificado.');
-    const token=window.horasAccessToken ? window.horasAccessToken() : gapi.client?.getToken()?.access_token||localStorage.getItem('g_token_pruebas');if(!token)throw new Error('Primero conecta Google.');
+    if(!await window.horasEnvironmentReady)throw new Error('El entorno protegido no está verificado.');
+    const token=window.horasAccessToken?.();if(!token)throw new Error('Primero conecta Google.');
     const response=await (window.horasFetch||fetch)(CONFIG.LOCALE_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action,...extra})});
     const data=await response.json();if(!response.ok)throw new Error(data.error||'No se pudo completar la revisión de fechas.');return data;
   }
@@ -48,7 +48,7 @@
     prepare.onclick=()=>{
       confirmation.replaceChildren();confirmation.append(node('h3','Confirmación de las fechas elegidas'));
       for(const decision of selected.values()){const plan=review.dates.find(p=>p.rowIdx===decision.rowIdx),choice=plan.choices.find(c=>c.key===decision.choice);confirmation.append(node('p',`F${plan.rowIdx}: ${LocaleData.display(plan.internal)||'(texto)'} → ${LocaleData.display(choice.iso)}${plan.internal===choice.iso?' (solo formato)':''}`));}
-      const confirm=node('button','Confirmar fechas en la copia'),cancel=node('button','Cancelar selección');confirm.type=cancel.type='button';confirmation.append(confirm,cancel);
+      const confirm=node('button','Confirmar fechas en la hoja seleccionada'),cancel=node('button','Cancelar selección');confirm.type=cancel.type='button';confirmation.append(confirm,cancel);
       cancel.onclick=()=>{selected.clear();confirmation.replaceChildren();draw();status.textContent='Selección cancelada. Sin cambios.';};
       confirm.onclick=()=>action(async()=>{status.textContent='Aplicando únicamente las fechas seleccionadas y verificando el resultado…';const result=await api('applyDates',{decisions:[...selected.values()]});const saved=`${result.cellsChanged||0} fechas o formatos guardados y verificados. Calendar no cambia.`;try{await analyze();await syncData(false,false);status.textContent=saved;}catch(error){status.textContent=saved+' Falta refrescar el análisis: '+error.message;}});
       confirmation.scrollIntoView({block:'nearest'});

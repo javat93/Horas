@@ -1,6 +1,6 @@
 const Links=require('../calendar-linking.js');
-const {TEST_ID,validateTarget}=require('./policy.cjs');
-const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`;
+const {targetId,validateTarget}=require('./policy.cjs');
+const base=()=>`https://sheets.googleapis.com/v4/spreadsheets/${targetId()}`;
 const CAL='https://www.googleapis.com/calendar/v3/calendars/primary/events';
 const {snapshot:readSnapshot}=require('./protected-service.cjs');
 const D=require('../locale-data.js');
@@ -11,7 +11,7 @@ async function runLinks(payload,token,request){
   if(!['audit','candidates','apply'].includes(payload.action))throw new Error('Acción de vínculos no permitida.');
   const snapshot=await readNative(token,request);
   const rows=snapshot.details.map((v,i)=>Links.rowFromValues(v,i+2));
-  if(payload.action==='audit')return {rows:rows.filter(r=>r.grupo||r.fechaStr),shared:Links.sharedIds(rows),missing:rows.filter(r=>r.grupo&&!r.calEventId),spreadsheetId:TEST_ID};
+  if(payload.action==='audit')return {rows:rows.filter(r=>r.grupo||r.fechaStr),shared:Links.sharedIds(rows),missing:rows.filter(r=>r.grupo&&!r.calEventId),spreadsheetId:targetId()};
   const row=rows.find(r=>r.rowIdx===payload.rowIdx);
   if(!row || !sameRow(row.expectedRow,payload.expectedRow))throw new Error('La fila cambió desde la revisión. Recarga el análisis antes de continuar.');
   async function getEvent(id){
@@ -44,9 +44,9 @@ async function runLinks(payload,token,request){
   if(!current||!sameRow(current.expectedRow,payload.expectedRow))throw new Error('La fila cambió durante la revisión. No se guardó nada.');
   if(newId&&freshRows.some(other=>other.rowIdx!==row.rowIdx&&other.calEventId===newId))throw new Error('Otra fila ya usa ese evento. Recarga el análisis.');
   const range=`Detalle!K${row.rowIdx}`;
-  await request(`${BASE}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,token,'PUT',{values:[[newId]]});
-  const read=await request(`${BASE}/values/${encodeURIComponent(range)}`,token);
+  await request(`${base()}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,token,'PUT',{values:[[newId]]});
+  const read=await request(`${base()}/values/${encodeURIComponent(range)}`,token);
   if((read.values?.[0]?.[0]||'')!==newId)throw new Error('No se pudo verificar el vínculo guardado. Recarga el análisis.');
-  return {rowIdx:row.rowIdx,previousId:row.calEventId,newEventId:newId,range,spreadsheetId:TEST_ID,calendarModified:false};
+  return {rowIdx:row.rowIdx,previousId:row.calEventId,newEventId:newId,range,spreadsheetId:targetId(),calendarModified:false};
 }
 module.exports={runLinks};

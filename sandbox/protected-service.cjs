@@ -1,7 +1,7 @@
 const P=require('../protected-review.js');
 const L=require('../calendar-linking.js');
-const {TEST_ID,validateTarget}=require('./policy.cjs');
-const BASE=`https://sheets.googleapis.com/v4/spreadsheets/${TEST_ID}`;
+const {targetId,validateTarget}=require('./policy.cjs');
+const base=()=>`https://sheets.googleapis.com/v4/spreadsheets/${targetId()}`;
 const CAL='https://www.googleapis.com/calendar/v3/calendars/primary/events';
 const D=require('../locale-data.js');
 const G=require('../group-identity.js');
@@ -10,12 +10,12 @@ const {createHash}=require('node:crypto');
 const fingerprint=cells=>createHash('sha256').update(P.version(cells)).digest('hex');
 async function snapshot(token,request){
   const extentQuery=new URLSearchParams({valueRenderOption:'UNFORMATTED_VALUE'});extentQuery.append('ranges','Detalle!A:O');extentQuery.append('ranges','Coles!A:E');
-  const extent=await request(`${BASE}/values:batchGet?${extentQuery}`,token);
+  const extent=await request(`${base()}/values:batchGet?${extentQuery}`,token);
   if(!Array.isArray(extent.valueRanges)||extent.valueRanges.length!==2)throw new Error('No se pudo determinar el alcance de las filas de la copia.');
   const counts=extent.valueRanges.map(range=>Math.max(1,A.trimRows(range.values||[],v=>v).length));
   const query=new URLSearchParams({includeGridData:'true',fields:'sheets(properties(title),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue,formattedValue,effectiveFormat(numberFormat)))))'});
   query.append('ranges',`Detalle!A1:O${counts[0]}`);query.append('ranges',`Coles!A1:E${counts[1]}`);
-  const data=await request(`${BASE}?${query}`,token);
+  const data=await request(`${base()}?${query}`,token);
   function rows(title,width){const sheet=data.sheets?.find(s=>s.properties.title===title);if(!sheet)throw new Error(`No se pudo leer ${title}.`);const result=[];for(const grid of sheet.data||[]){for(const [i,row]of (grid.rowData||[]).entries())result[(grid.startRow||0)+i]=Array.from({length:width},(_,c)=>row.values?.[c]||{});}return result;}
   return {rows:A.trimRows(rows('Detalle',15),D.value),groups:A.trimRows(rows('Coles',5),D.value)};
 }
@@ -69,7 +69,7 @@ async function build(payload,snap,token,request){
     plan.group=G.label(plan.group,D.dateISO(cells[5]));
     plan.expectedVersion=fingerprint(cells);plans.push(plan);
   }
-  return {plans,catalogVersion,mode:payload.mode,month:payload.month,spreadsheetId:TEST_ID,calendarReadOnly:true};
+  return {plans,catalogVersion,mode:payload.mode,month:payload.month,spreadsheetId:targetId(),calendarReadOnly:true};
 }
 async function runProtected(payload,token,request){
   validateTarget(payload.spreadsheetId);
@@ -94,9 +94,9 @@ async function runProtected(payload,token,request){
   const fresh=await snapshot(token,request);
   if(payload.mode==='sync'&&fingerprint(fresh.groups.flat())!==review.catalogVersion)throw new Error('El catálogo cambió durante la confirmación. No se guardó nada.');
   for(const decision of payload.decisions)if(fingerprint(fresh.rows[decision.rowIdx-1]||[])!==decision.expectedVersion)throw new Error('Se editó una fila durante la confirmación. No se guardó nada.');
-  await request(`${BASE}:batchUpdate`,token,'POST',{requests});
+  await request(`${base()}:batchUpdate`,token,'POST',{requests});
   const verified=await snapshot(token,request);
   for(const entry of expected)if(JSON.stringify(verified.rows[entry.rowIdx-1]?.[entry.column]?.userEnteredValue)!==JSON.stringify(entry.value))throw new Error('El cambio se envió pero no se pudo verificar. Recarga antes de reintentar.');
-  return {rowsChanged:new Set(expected.map(e=>e.rowIdx)).size,cellsChanged:expected.length,calendarModified:false,spreadsheetId:TEST_ID};
+  return {rowsChanged:new Set(expected.map(e=>e.rowIdx)).size,cellsChanged:expected.length,calendarModified:false,spreadsheetId:targetId()};
 }
 module.exports={runProtected,snapshot,build};
