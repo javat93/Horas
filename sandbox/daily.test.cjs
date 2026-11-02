@@ -9,6 +9,7 @@ function fake(){
     calls.push({url,method,body:clone(body||{})});const u=new URL(url);
     if(url.startsWith('https://www.googleapis.com/calendar')){assert.equal(method,'GET');const p=u.searchParams.get('pageToken');return clone(p?{items:events2}:{items:events,...(events2.length?{nextPageToken:'page2'}:{})});}
     assert(url.startsWith(S.BASE),'Solo la copia');
+    if(u.pathname.endsWith('/developerMetadata:search'))return {matchedDeveloperMetadata:clone(meta).map(developerMetadata=>({developerMetadata}))};
     if(method==='POST'){
       for(const r of body.requests){
         if(r.addSheet){const p=clone(r.addSheet.properties);props.set(p.sheetId,p);grids.set(p.sheetId,[]);}
@@ -32,7 +33,7 @@ const payload=(kind,input,rest={})=>({spreadsheetId:TEST_ID,kind,input,...rest})
 const preview=(f,kind,input)=>S.runDaily(payload(kind,input,{action:'preview'}),'token',f.request,new Date('2026-11-02T12:00:00Z'));
 const apply=(f,kind,input,p,extra={})=>S.runDaily(payload(kind,input,{action:'apply',expectedVersion:p.version,operationId:randomUUID(),...extra}),'token',f.request,new Date('2026-11-02T12:00:00Z'));
 test('alta nativa conserva precio especial, total independiente, barrio y H=1; Calendar no escribe',async()=>{
-  const f=fake(),p=await preview(f,'session',input);assert.equal(f.calls.filter(c=>c.method==='POST').length,0);
+  const f=fake(),p=await preview(f,'session',input);assert.equal(f.calls.filter(c=>c.url.endsWith(':batchUpdate')).length,0);
   const r=await apply(f,'session',input,p),row=f.grids.get(0)[1];assert.equal(r.saved,1);assert.equal(D.value(row[4]),33.75);assert.equal(D.value(row[6]),40.25);assert.equal(D.value(row[7]),1);assert.equal(D.value(row[8]),'Moli de finestrelles');assert.equal(D.value(row[9]),'Barrio especial');assert.equal(D.value(row[11]),'Dirección especial');assert.equal(D.value(row[5]),D.serial(input.date));assert.equal(row[5].userEnteredFormat.numberFormat.pattern,'dd/mm/yyyy');
 });
 test('altas de grupo no duplican alias y permiten tarifas vacías sin inventarlas',async()=>{
@@ -47,7 +48,7 @@ test('repeticiones calculan desde la fecha original y omiten el 31 inexistente; 
 });
 test('rechaza original, campos adicionales, importes ambiguos y horarios inseguros sin escribir',async()=>{
   const f=fake();await assert.rejects(S.runDaily({...payload('session',input),spreadsheetId:ORIGINAL_ID,action:'preview'},'',f.request),/bloqueado/);assert.equal(f.calls.length,0);
-  for(const bad of [{...input,price:'1,2,3'},{...input,start:'23:30',end:'00:30'},{...input,calendarId:'personal'},{...input,group:'No existe'}])await assert.rejects(preview(f,'session',bad));assert.equal(f.calls.filter(c=>c.method==='POST').length,0);
+  for(const bad of [{...input,price:'1,2,3'},{...input,start:'23:30',end:'00:30'},{...input,calendarId:'personal'},{...input,group:'No existe'}])await assert.rejects(preview(f,'session',bad));assert.equal(f.calls.filter(c=>c.url.endsWith(':batchUpdate')).length,0);
 });
 test('una edición posterior invalida la revisión; partidas similares exigen consentimiento y se conservan',async()=>{
   const f=fake(),p=await preview(f,'session',input);f.grids.get(758405382)[1][4]=c('Barrio manual');await assert.rejects(apply(f,'session',input,p),/cambió/);

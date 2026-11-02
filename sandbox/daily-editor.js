@@ -14,7 +14,7 @@
     const title={group:'Nuevo grupo',session:'Nuevas sesiones',import:'Importar desde Calendar',delete:'Enviar sesión a la papelera',restore:'Restaurar sesión'}[kind];
     d.append(node('h2',title),node('p','Destino: copia de pruebas. Calendar se consulta, sin crear, editar ni eliminar eventos. Las sesiones ya existentes conservan sus precios, barrios y direcciones.'));
     for(const s of plan.summary){
-      const label=kind==='group'?`${s.name} · sesión: ${s.price===''?'sin tarifa':LocaleData.currency(s.price)} · bolo: ${s.gigPrice===''?'sin tarifa':LocaleData.currency(s.gigPrice)}`:`${s.group} · ${LocaleData.display(s.date)} · ${s.start||''}–${s.end||''} · ${LocaleData.numeric(s.total)===null?'sin importe':LocaleData.currency(LocaleData.numeric(s.total))}`;
+      const label=kind==='group'?`${GroupIdentity.catalogLabel(s.name)} · sesión: ${s.price===''?'sin tarifa':LocaleData.currency(s.price)} · bolo: ${s.gigPrice===''?'sin tarifa':LocaleData.currency(s.gigPrice)}`:`${GroupIdentity.label(s.group,s.date)} · ${LocaleData.display(s.date)} · ${s.start||''}–${s.end||''} · ${LocaleData.numeric(s.total)===null?'sin importe':LocaleData.currency(LocaleData.numeric(s.total))}`;
       d.append(node('p',label));if(s.district||s.address)d.append(node('p',`Barrio: ${s.district||'(vacío)'} · Dirección: ${s.address||'(vacía)'}`));
     }
     if(kind==='delete')d.append(node('p','Se conserva una copia recuperable y se vacía únicamente esta fila, sin desplazar otras filas ni borrar el evento de Calendar.'));
@@ -52,7 +52,7 @@
     b.onclick=async()=>{if(busy)return;busy=true;try{
       const result=await api({action:'trash'}),d=node('dialog');d.setAttribute('aria-label','Papelera de sesiones');d.style.cssText='padding:24px;max-height:90vh;overflow:auto';d.append(node('h2','Sesiones archivadas'));
       if(!result.items.length)d.append(node('p','La papelera está vacía.'));
-      for(const r of result.items){d.append(node('p',`${r.group} · ${LocaleData.display(r.date)} · fila ${r.rowIdx}`));const restore=node('button','Revisar restauración');restore.type='button';restore.onclick=()=>{d.close();d.remove();review('restore',{operationId:r.operationId}).catch(e=>showErrorModal('Papelera',e.message,'warning'));};d.append(restore);}
+      for(const r of result.items){d.append(node('p',`${GroupIdentity.label(r.group,r.date)} · ${LocaleData.display(r.date)} · fila ${r.rowIdx}`));const restore=node('button','Revisar restauración');restore.type='button';restore.onclick=()=>{d.close();d.remove();review('restore',{operationId:r.operationId}).catch(e=>showErrorModal('Papelera',e.message,'warning'));};d.append(restore);}
       const close=node('button','Cerrar');close.type='button';close.onclick=()=>{d.close();d.remove();};d.append(close);document.body.append(d);d.showModal();
     }catch(e){showErrorModal('Papelera',e.message,'warning');}finally{busy=false;}};
   };

@@ -49,7 +49,8 @@ function rowFor(s){
 async function metadata(token,request){
   const m=await request(`${BASE}?fields=properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties),developerMetadata),developerMetadata`,token);
   if(m.properties?.locale!=='es_ES'||m.properties?.timeZone!=='Europe/Madrid'||!m.sheets?.some(s=>s.properties.sheetId===0&&s.properties.title==='Detalle')||!m.sheets.some(s=>s.properties.sheetId===758405382&&s.properties.title==='Coles'))throw Error('Estructura o configuración de la hoja no reconocida.');
-  m.developerMetadata=[...(m.developerMetadata||[]),...m.sheets.flatMap(s=>s.developerMetadata||[])];return m;
+  const found=await request(`${BASE}/developerMetadata:search`,token,'POST',{dataFilters:[{developerMetadataLookup:{visibility:'DOCUMENT'}}]});
+  m.developerMetadata=(found.matchedDeveloperMetadata||[]).map(r=>r.developerMetadata).filter(Boolean);return m;
 }
 async function trashRows(token,request,meta){
   const sheet=meta.sheets.find(s=>s.properties.title===TRASH);if(!sheet)return [];
