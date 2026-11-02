@@ -47,8 +47,9 @@ function rowFor(s){
   row[7].userEnteredFormat={numberFormat:{type:'NUMBER',pattern:'0'}};return row;
 }
 async function metadata(token,request){
-  const m=await request(`${BASE}?fields=properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties)),developerMetadata`,token);
-  if(m.properties?.locale!=='es_ES'||m.properties?.timeZone!=='Europe/Madrid'||!m.sheets?.some(s=>s.properties.sheetId===0&&s.properties.title==='Detalle')||!m.sheets.some(s=>s.properties.sheetId===758405382&&s.properties.title==='Coles'))throw Error('Estructura o configuración de la hoja no reconocida.');return m;
+  const m=await request(`${BASE}?fields=properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties),developerMetadata),developerMetadata`,token);
+  if(m.properties?.locale!=='es_ES'||m.properties?.timeZone!=='Europe/Madrid'||!m.sheets?.some(s=>s.properties.sheetId===0&&s.properties.title==='Detalle')||!m.sheets.some(s=>s.properties.sheetId===758405382&&s.properties.title==='Coles'))throw Error('Estructura o configuración de la hoja no reconocida.');
+  m.developerMetadata=[...(m.developerMetadata||[]),...m.sheets.flatMap(s=>s.developerMetadata||[])];return m;
 }
 async function trashRows(token,request,meta){
   const sheet=meta.sheets.find(s=>s.properties.title===TRASH);if(!sheet)return [];
