@@ -1,6 +1,7 @@
 # Activación del modo protegido
 
 Estado preparado, sin activar: la app publicada sigue usando la copia. La migración de datos es una operación aparte y no se ejecuta con este código.
+Actualización de migración del 02/11/2026: los 17 lotes se aplicaron a la hoja real y la verificación nativa coincide exactamente con el ensayo (1534 fechas, 1292 fórmulas, 51015,16 €, 239 referencias protegidas). El usuario autorizó específicamente las 28 celdas de enlaces/horarios tras la revisión automática. `activation.json` registra la activación gradual; las tres variables equivalentes de entorno prevalecen sobre ese archivo y permiten retirar escrituras con un valor vacío. No contiene secretos. La configuración del frontend se cambia en una etapa posterior a comprobar el backend en solo lectura.
 
 ## Perfiles
 
