@@ -37,7 +37,11 @@ function dates(first,repeat){
   }return out;
 }
 function rowFor(s){
-  const row=['','',s.gig?'X':'',s.gig?'':'X',s.price,D.serial(s.date),s.total,1,s.group,s.district,s.calendarId,s.address,s.start,s.end,''].map(cell);
+  const serialTime=t=>t?t.split(':').map(Number).reduce((h,m)=>h*60+m)/1440:'';
+  const row=['','',s.gig?'X':'',s.gig?'':'X',s.price,D.serial(s.date),s.total,1,s.group,s.district,s.calendarId,s.address,serialTime(s.start),serialTime(s.end),''].map(cell);
+  for(const i of [0,1,2,3])row[i].dataValidation={condition:{type:'BOOLEAN',values:[{userEnteredValue:'X'}]}};
+  row[8].dataValidation={condition:{type:'ONE_OF_RANGE',values:[{userEnteredValue:'=Coles!$A$2:$A'}]},showCustomUi:true};
+  for(const i of [12,13])row[i].userEnteredFormat={numberFormat:{type:'TIME',pattern:'hh:mm'}};
   row[5].userEnteredFormat={numberFormat:{type:'DATE',pattern:'dd/mm/yyyy'}};
   for(const i of [4,6])row[i].userEnteredFormat={numberFormat:{type:'CURRENCY',pattern:'#,##0.00" €"'}};
   row[7].userEnteredFormat={numberFormat:{type:'NUMBER',pattern:'0'}};return row;
@@ -140,7 +144,7 @@ async function runDaily(payload,token,request,now=new Date()){
       const rowIdx=p.summary[0].rowIdx;
       requests.push({updateCells:{range:{sheetId:0,startRowIndex:rowIdx-1,endRowIndex:rowIdx,startColumnIndex:0,endColumnIndex:15},rows:[{values:p.rows[0]}],fields:'userEnteredValue,userEnteredFormat,dataValidation,note'}});
       requests.push({createDeveloperMetadata:{developerMetadata:{metadataKey:'horas_restored_'+payload.input.operationId,metadataValue:payload.operationId,visibility:'DOCUMENT',location:{sheetId:0}}}});
-    }else requests.push({appendCells:{sheetId:p.sheetId,rows:p.rows.map(values=>({values})),fields:'userEnteredValue,userEnteredFormat.numberFormat'}});
+    }else requests.push({appendCells:{sheetId:p.sheetId,rows:p.rows.map(values=>({values})),fields:'userEnteredValue,userEnteredFormat.numberFormat,dataValidation'}});
     requests.push({createDeveloperMetadata:{developerMetadata:{metadataKey:operationKey,metadataValue:requestHash,visibility:'DOCUMENT',location:{sheetId:p.sheetId}}}});
     try{await request(`${BASE}:batchUpdate`,token,'POST',{requests});}catch(e){throw Error('Resultado de guardado incierto. Conserva esta revisión y comprueba antes de reintentar: '+e.message);}
     meta=await metadata(token,request);if(!meta.developerMetadata?.some(m=>m.metadataKey===operationKey&&m.metadataValue===requestHash))throw Error('Petición enviada; falta verificarla. No crees otra revisión.');
