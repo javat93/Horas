@@ -12,8 +12,9 @@ const cell=v=>v===''?{}:({userEnteredValue:typeof v==='number'?{numberValue:v}:{
 const catalog=rows=>rows.slice(1).filter(r=>D.value(r?.[0])).map(r=>({nombre:String(D.value(r[0])),sitio:String(D.value(r[1])),precio:D.value(r[2]),precioBolo:D.value(r[3]),ubicacion:String(D.value(r[4]))}));
 const key=r=>[G.id(D.value(r?.[8])),D.dateISO(r?.[5]),D.time(D.value(r?.[12])),D.time(D.value(r?.[13]))].join('|');
 async function rawRow(rowIdx,token,request){
-  const result=await request(`${BASE}?includeGridData=true&ranges=${encodeURIComponent(`Detalle!A${rowIdx}:O${rowIdx}`)}&fields=sheets(data(rowData(values(userEnteredValue,userEnteredFormat,dataValidation,note))))`,token);
-  return Array.from({length:15},(_,i)=>result.sheets?.[0]?.data?.[0]?.rowData?.[0]?.values?.[i]||{});
+  const result=await request(`${BASE}?includeGridData=true&ranges=${encodeURIComponent(`Detalle!A${rowIdx}:O${rowIdx}`)}&fields=sheets(properties(sheetId,title),data(rowData(values(userEnteredValue,userEnteredFormat,dataValidation,note))))`,token);
+  const sheet=result.sheets?.find(s=>s.properties?.sheetId===0&&s.properties?.title==='Detalle');if(!sheet)throw Error('No se pudo comprobar la fila de Detalle.');
+  return Array.from({length:15},(_,i)=>sheet.data?.[0]?.rowData?.[0]?.values?.[i]||{});
 }
 function session(input,groups){
   if(!input||Object.keys(input).some(k=>!['group','date','start','end','price','total','district','address','gig','repeat'].includes(k)))throw Error('Campos de sesión no permitidos.');
