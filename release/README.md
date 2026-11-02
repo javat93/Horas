@@ -1,6 +1,6 @@
 # Activación del modo protegido
 
-Estado preparado, sin activar: la app publicada sigue usando la copia. La migración de datos es una operación aparte y no se ejecuta con este código.
+Estado configurado el02/11/2026: hoja real migrada y verificada; interfaz de producción con revisiones protegidas. Se comprobó primero la lectura autenticada antes de habilitar escrituras. La migración se ejecutó aparte; desplegar código no vuelve a aplicar lotes.
 Actualización de migración del 02/11/2026: los 17 lotes se aplicaron a la hoja real y la verificación nativa coincide exactamente con el ensayo (1534 fechas, 1292 fórmulas, 51015,16 €, 239 referencias protegidas). El usuario autorizó específicamente las 28 celdas de enlaces/horarios tras la revisión automática. `activation.json` registra la activación gradual; las tres variables equivalentes de entorno prevalecen sobre ese archivo y permiten retirar escrituras con un valor vacío. No contiene secretos. La configuración del frontend se cambia en una etapa posterior a comprobar el backend en solo lectura.
 
 ## Perfiles
@@ -22,6 +22,8 @@ Los IDs se fijan en código y nunca se aceptan desde parámetros de perfil envia
 7. Después de verificar lectura, establecer `HORAS_PROTECTED_WRITES=enabled`, recargar y confirmar que frontend y backend coinciden. Probar una operación recuperable expresamente acordada, sin modificar Calendar.
 
 La interfaz normal muestra «Horas · Gestión protegida», sincronización y papelera. Los controles históricos de auditoría quedan en Herramientas de revisión, plegadas. La prueba temporal del valor 42 no se habilita en producción ni en ensayo; tampoco la prueba temporal numérica/gráfico.
+
+La app habitual utiliza el perfil real. `?pruebas=copia` conserva la copia anterior y `?ensayo=protegido` abre el clon del ensayo, que quedó en solo lectura tras completar alta, pago/reversión, archivo/restauración y comprobación del histórico. Realizado automático permanece pausado en ese clon. Google Cloud y la verificación de marca no forman parte de esta activación.
 
 ## Volver a solo lectura
 
