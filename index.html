@@ -11,7 +11,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 	<!-- Carga del archivo de configuración -->
-    <script src="protected-config.js?v=protegido-20261102"></script>
+    <script src="protected-config.js?v=ensayo-20261102"></script>
     <!-- Configuración segura según entorno -->
 <script>
     // Detectar si estamos en producción
@@ -20,7 +20,8 @@
     
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
-    configScript.src = isProduction ? 'config.production.js?v=protegido-20261102' : 'config.secure.js';
+    const rehearsalRequested = new URLSearchParams(window.location.search).get('ensayo') === 'protegido';
+    configScript.src = rehearsalRequested ? 'release/config.rehearsal.candidate.js?v=ensayo-20261102' : isProduction ? 'config.production.js?v=protegido-20261102' : 'config.secure.js';
     window.horasConfigReady = new Promise((resolve, reject) => {
         configScript.onload = resolve;
         configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
@@ -34,8 +35,8 @@
     <script src="calendar-linking.js?v=enlaces-20261029"></script>
     <script src="protected-review.js?v=fase7-20261029"></script>
     <script src="sandbox/daily-editor.js?v=protegido-20261102" defer></script>
-    <script src="sandbox/panel.js?v=protegido-20261102" defer></script>
-    <script src="sandbox/performed-editor.js?v=protegido-20261102" defer></script>
+    <script src="sandbox/panel.js?v=ensayo-20261102" defer></script>
+    <script src="sandbox/performed-editor.js?v=ensayo-20261102" defer></script>
     <script src="sandbox/identity-review.js?v=fase6-20261029" defer></script>
     <script src="sandbox/group-editor.js?v=protegido-20261102" defer></script>
     <script src="sandbox/calendar-review.js?v=enlaces-20261029" defer></script>

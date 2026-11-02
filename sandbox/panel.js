@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const response=await (window.horasFetch||fetch)(CONFIG.TEST_ENVIRONMENT_API_URL || `${CONFIG.PROXY_URL}/api/test-environment`);
     const env=await response.json();
-    if(!response.ok || env.mode!==mode || env.spreadsheetId!==CONFIG.SPREADSHEET_ID || !env.calendarReadOnly || env.automaticWrites!==((env.writeEnabled??true)&&CONFIG.TEST_PHASE>=8) || env.appWrites) throw new Error('El backend no coincide con el destino configurado.');
+    if(!response.ok || env.mode!==mode || env.spreadsheetId!==CONFIG.SPREADSHEET_ID || !env.calendarReadOnly || env.automaticWrites!==((env.writeEnabled??true)&&env.autoPerformedEnabled!==false&&CONFIG.TEST_PHASE>=8) || env.appWrites) throw new Error('El backend no coincide con el destino configurado.');
     if(!isTest)HorasProtectedConfig.verify(CONFIG,env);
     if(CONFIG.TEST_PHASE===2 && (env.phase!==2||!env.linkReview))throw new Error('El backend aún no está preparado para la fase 2. Recarga en unos instantes.');
     if(CONFIG.TEST_PHASE>=3 && (env.phase!==CONFIG.TEST_PHASE||!env.protectedReview))throw new Error('El backend aún no está preparado para esta fase. Recarga en unos instantes.');

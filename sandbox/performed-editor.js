@@ -2,6 +2,7 @@
   let busy=false,blocked=false,lastRun=0,beforeRow=0;
   const notice=text=>{const el=document.getElementById('performed-status');if(el)el.textContent=text;};
   window.runAutoPerformed=async function(){
+    if(CONFIG.DATA_MODE==='rehearsal')return;
     if(!(CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)||CONFIG.TEST_PHASE<8||busy||blocked||document.hidden||Date.now()-lastRun<60000)return;
     if(!eventos.some(e=>!e.realizado&&!e.autoExcluded&&!e.dateWarning&&e.calEventId&&e.horaFin))return;
     if(window.horasOperationBusy?.())return;
@@ -22,6 +23,7 @@
     const status=document.createElement('p');status.id='performed-status';status.setAttribute('role','status');
     status.textContent='Realizado automático al terminar (hora de Madrid), al abrir la app o mientras siga abierta. Solo sesiones con evento amarillo verificado y fecha y horario seguros. Cancelaciones y discrepancias quedan pendientes. Para una excepción, escribe NO en Detalle, columna O; no se usará H como duración.';
     if(CONFIG.DATA_MODE&&CONFIG.DATA_MODE!=='test')status.textContent='Realizado se marca al terminar las sesiones verificadas. Las discrepancias quedan pendientes de revisión.';
+    if(CONFIG.DATA_MODE==='rehearsal')status.textContent='Realizado automático pausado durante el ensayo para conservar el histórico.';
     window.horasEnvironmentReady.then(ready=>{if(ready){if(window.horasWritesEnabled===false)status.textContent='Realizado automático pendiente de activación.';document.getElementById('test-environment-banner')?.append(status);}});
     setInterval(()=>window.runAutoPerformed(),60000);
   });

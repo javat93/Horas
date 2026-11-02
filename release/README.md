@@ -5,7 +5,7 @@ Estado preparado, sin activar: la app publicada sigue usando la copia. La migrac
 ## Perfiles
 
 - `test`: copia actual; `/api/test`. Sigue bloqueando el ID real y el de ensayo.
-- `rehearsal`: clon del ensayo 29/10; `/api/production` únicamente cuando el servidor selecciona este perfil.
+- `rehearsal`: clon del ensayo 29/10; acceso separado `/api/rehearsal`, inicialmente solo lectura. Realizado automático pausado en servidor e interfaz durante el ensayo.
 - `production`: hoja real; `/api/production`, cerrado por defecto.
 
 Los IDs se fijan en código y nunca se aceptan desde parámetros de perfil enviados por el navegador. AsyncLocalStorage aísla el destino durante cada petición. Los servicios comparten las mismas revisiones, lectura nativa, papelera y protección de operaciones inciertas. Una barrera adicional comprueba cada URL remota y mantiene Calendar en GET.
@@ -13,7 +13,7 @@ Los IDs se fijan en código y nunca se aceptan desde parámetros de perfil envia
 ## Orden de activación
 
 1. Conservar `config.production.js` actual hasta completar el ensayo/migración acordados. `config.production.candidate.js` y `config.rehearsal.candidate.js` son candidatos, no se cargan automáticamente.
-2. Para el ensayo, establecer en el backend `HORAS_PROTECTED_PROFILE=rehearsal`. La ausencia de `HORAS_PROTECTED_WRITES` deja el clon en solo lectura. Tras comprobar lectura, `HORAS_PROTECTED_WRITES=enabled` permite las operaciones protegidas. Usar el candidato rehearsal en una versión de ensayo, sin sustituir la app habitual hasta revisar resultados.
+2. Abrir `index.html?ensayo=protegido`, que carga únicamente el candidato rehearsal. `/api/rehearsal` fija el clon en servidor y arranca con writeEnabled=false. Tras comprobar lectura autenticada, se habilita de forma explícita writeEnabled en ese endpoint para el ensayo recuperable. Nunca se cambia el destino habitual ni se habilita /api/production. Puede retirarse de nuevo la escritura al cerrar el ensayo. No se permiten IDs o perfiles arbitrarios por query.
 3. Revalidar y aplicar la migración de datos únicamente cuando el usuario solicite la ejecución. Crear respaldo reciente, aplicar los lotes ya ensayados y verificar datos/resúmenes. Este repositorio no contiene datos privados ni esos lotes.
 4. Para la hoja real, establecer `HORAS_PROTECTED_PROFILE=production` y, solo después de verificar la migración, `HORAS_MIGRATION_VERIFIED=migracion-20261102`. Mantener `HORAS_PROTECTED_WRITES` sin activar inicialmente. Este marcador es una confirmación operativa, no una consulta automática de hashes a Google.
 5. Comprobar `/api/production?api=environment`: modo production, ID real, protectedMode=true, writeEnabled=false, Calendar solo lectura, appWrites=false. El navegador comprueba modo, ID, fase y capacidades y bloquea destinos cruzados.
