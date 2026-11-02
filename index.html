@@ -21,7 +21,8 @@
     // Cargar configuración adecuada
     const configScript = document.createElement('script');
     const rehearsalRequested = new URLSearchParams(window.location.search).get('ensayo') === 'protegido';
-    configScript.src = rehearsalRequested ? 'release/config.rehearsal.candidate.js?v=ensayo-20261102' : isProduction ? 'config.production.js?v=protegido-20261102' : 'config.secure.js';
+    const copyRequested = new URLSearchParams(window.location.search).get('pruebas') === 'copia';
+    configScript.src = rehearsalRequested ? 'release/config.rehearsal.candidate.js?v=ensayo-20261102' : copyRequested ? 'release/config.test.candidate.js?v=real-20261102' : isProduction ? 'config.production.js?v=real-20261102' : 'config.secure.js';
     window.horasConfigReady = new Promise((resolve, reject) => {
         configScript.onload = resolve;
         configScript.onerror = () => reject(new Error('No se pudo cargar la configuración.'));
