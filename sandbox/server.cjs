@@ -63,7 +63,7 @@ function testConfig(origin) {
     API_KEY:null, CLIENT_ID, SPREADSHEET_ID:TEST_ID, SCOPES,
     DISCOVERY_DOCS:['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest','https://sheets.googleapis.com/$discovery/rest?version=v4'],
     PROXY_URL:origin,GOOGLE_SHEETS_API_URL:`${origin}/api/sheets`,GOOGLE_CALENDAR_API_URL:`${origin}/api/calendar`,
-    USE_PROXY:true,ENVIRONMENT:'production',TEST_MODE:true,TEST_PHASE:8,STATE_API_URL:`${origin}/api/test-state`,GROUPS_API_URL:`${origin}/api/test-groups`,CALENDAR_LINKS_API_URL:`${origin}/api/test-links`,PROTECTED_REVIEW_API_URL:`${origin}/api/test-protected`,LOCALE_API_URL:`${origin}/api/test-locale`
+    USE_PROXY:true,ENVIRONMENT:'production',TEST_MODE:true,TEST_PHASE:8,DAILY_API_URL:`${origin}/api/test-daily`,STATE_API_URL:`${origin}/api/test-state`,GROUPS_API_URL:`${origin}/api/test-groups`,CALENDAR_LINKS_API_URL:`${origin}/api/test-links`,PROTECTED_REVIEW_API_URL:`${origin}/api/test-protected`,LOCALE_API_URL:`${origin}/api/test-locale`
   })});`;
 }
 function testPage() {
@@ -81,13 +81,13 @@ function createServer(fetchImpl = fetch) {
       const allowedHosts = new Set([`localhost:${actualPort}`,`127.0.0.1:${actualPort}`]);
       if (!allowedHosts.has(req.headers.host) || (req.headers.origin && ![origin,`http://127.0.0.1:${actualPort}`].includes(req.headers.origin))) return send(res,403,{error:'Origen no permitido.'});
       const url = new URL(req.url,origin);
-      if (req.method === 'GET' && url.pathname === '/api/test-environment') return send(res,200,{mode:'test',phase:8,stateReview:true,performedAutomation:true,addressReview:true,identityReview:true,groupReview:true,linkReview:true,protectedReview:true,localeReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:true,appWrites:false});
+      if (req.method === 'GET' && url.pathname === '/api/test-environment') return send(res,200,{mode:'test',phase:8,dailyOperations:true,stateReview:true,performedAutomation:true,addressReview:true,identityReview:true,groupReview:true,linkReview:true,protectedReview:true,localeReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:true,appWrites:false});
       if (req.method === 'GET' && url.pathname === '/api/oauth-config') return send(res,200,{client_id:CLIENT_ID,scopes:SCOPES});
-      if (req.method === 'POST' && ['/api/sheets','/api/calendar','/api/test-control','/api/test-links','/api/test-protected','/api/test-locale','/api/test-groups','/api/test-state'].includes(url.pathname)) {
+      if (req.method === 'POST' && ['/api/sheets','/api/calendar','/api/test-control','/api/test-links','/api/test-protected','/api/test-locale','/api/test-groups','/api/test-state','/api/test-daily'].includes(url.pathname)) {
         const payload = await readBody(req);
         // Rechazar operaciones peligrosas antes de autenticación y antes de cualquier llamada remota.
         try {
-          if (['/api/test-control','/api/test-links','/api/test-protected','/api/test-locale','/api/test-groups','/api/test-state'].includes(url.pathname)) validateTarget(payload.spreadsheetId);
+          if (['/api/test-control','/api/test-links','/api/test-protected','/api/test-locale','/api/test-groups','/api/test-state','/api/test-daily'].includes(url.pathname)) validateTarget(payload.spreadsheetId);
           else validateOperation(url.pathname.slice(5),payload.method,payload.params);
         } catch (error) { return send(res,403,{error:error.message}); }
         const token = req.headers.authorization;
@@ -98,6 +98,7 @@ function createServer(fetchImpl = fetch) {
         if (url.pathname === '/api/test-locale') return send(res,200,await require('./locale-service.cjs').runLocale(payload,token,(url,token,method='GET',body)=>googleRequest(url,token,method,body,fetchImpl)));
         if (url.pathname === '/api/test-groups') return send(res,200,await require('./group-service.cjs').runGroups(payload,token,(url,token,method='GET',body)=>googleRequest(url,token,method,body,fetchImpl)));
         if (url.pathname === '/api/test-state') return send(res,200,await require('./state-service.cjs').runState(payload,token,(url,token,method='GET',body)=>googleRequest(url,token,method,body,fetchImpl)));
+        if (url.pathname === '/api/test-daily') return send(res,200,await require('./daily-service.cjs').runDaily(payload,token,(url,token,method='GET',body)=>googleRequest(url,token,method,body,fetchImpl)));
         let upstream;
         if (url.pathname === '/api/sheets') {
           const query = new URLSearchParams();
@@ -124,6 +125,7 @@ function createServer(fetchImpl = fetch) {
       files['/group-identity.js']=['group-identity.js','text/javascript'];files['/sandbox/identity-review.js']=['sandbox/identity-review.js','text/javascript'];
       files['/auth-session.js']=['auth-session.js','text/javascript'];
       files['/app-data.js']=['app-data.js','text/javascript'];
+      files['/sandbox/daily-editor.js']=['sandbox/daily-editor.js','text/javascript'];
       for(const name of ['inicio.html','privacidad.html','condiciones.html'])files['/'+name]=[name,'text/html; charset=utf-8'];files['/informacion.css']=['informacion.css','text/css'];
       const file=files[url.pathname];
       if (!file) return send(res,404,{error:'Recurso no disponible en pruebas.'});

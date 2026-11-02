@@ -32,7 +32,8 @@
     <script src="group-identity.js?v=fase6-20261029"></script>
     <script src="calendar-linking.js?v=enlaces-20261029"></script>
     <script src="protected-review.js?v=fase7-20261029"></script>
-    <script src="sandbox/panel.js?v=fase8-20261029" defer></script>
+    <script src="sandbox/daily-editor.js?v=operativa-20261102" defer></script>
+    <script src="sandbox/panel.js?v=operativa-20261102" defer></script>
     <script src="sandbox/performed-editor.js?v=fase8-20261029" defer></script>
     <script src="sandbox/identity-review.js?v=fase6-20261029" defer></script>
     <script src="sandbox/group-editor.js?v=fase8-20261029" defer></script>
@@ -1875,6 +1876,10 @@
         }
 
         function openNewSesionModal() {
+            for(const id of ['ev-fecha','ev-grupo','ev-grupo-search','ev-bolo','ev-sitio','ev-repite','ev-freq','ev-interval','ev-until'])document.getElementById(id).disabled=false;
+            document.getElementById('protected-session-fields').hidden=false;
+            document.getElementById('ev-total').value='';
+            for(const id of ['ev-hora-inicio','ev-hora-fin'])document.getElementById(id).required=true;
             document.getElementById('modal-evento-title').innerText = "Nueva clase";
             document.getElementById('form-evento').reset();
             document.getElementById('ev-rowIdx').value = "";
@@ -1887,7 +1892,8 @@
             const minutosActuales = Math.floor(now.getMinutes() / 15) * 15; // Redondear a 15 minutos
             const minutosStr = minutosActuales.toString().padStart(2, '0');
             
-            document.getElementById('ev-fecha').value = now.toISOString().split('T')[0];
+            const madridParts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
+            document.getElementById('ev-fecha').value=['year','month','day'].map(type=>madridParts.find(p=>p.type===type).value).join('-');
             refreshGroupLabels();
             document.getElementById('ev-hora-inicio').value = `${horaActual}:${minutosStr}`;
             
@@ -1946,6 +1952,9 @@
         }
 
         function openNewGrupoModal() {
+            document.getElementById('gr-nombre').disabled=false;
+            document.getElementById('gr-sitio').disabled=false;
+            document.getElementById('gr-name-info').textContent='';
             document.getElementById('modal-grupo-title').innerText = "Nuevo Grupo";
             document.getElementById('form-grupo').reset();
             document.getElementById('gr-rowIdx').value = "";

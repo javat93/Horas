@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   for (const id of ['form-evento','form-grupo','form-future-events']) {
     document.getElementById(id)?.addEventListener('submit',e=>{
       e.preventDefault();e.stopImmediatePropagation();
+      if(id==='form-grupo'&&window.horasDailyReady&&!document.getElementById('gr-rowIdx').value){window.reviewNewGroupForm().catch(error=>showErrorModal('Revisión pendiente',error.message,'warning'));return;}
+      if(id==='form-evento'&&window.horasDailyReady&&!document.getElementById('ev-rowIdx').value){window.reviewNewSessionForm().catch(error=>showErrorModal('Revisión pendiente',error.message,'warning'));return;}
+      if(id==='form-future-events'&&window.horasDailyReady){window.reviewFutureImport().catch(error=>showErrorModal('Revisión pendiente',error.message,'warning'));return;}
       if(id==='form-grupo'&&CONFIG.TEST_PHASE>=5&&window.reviewGroupForm){window.reviewGroupForm().catch(error=>showErrorModal('Revisión pendiente',error.message,'warning'));return;}
       if(id==='form-evento'&&CONFIG.TEST_PHASE>=3&&window.reviewSessionForm){window.reviewSessionForm().catch(error=>showErrorModal('Revisión pendiente',error.message,'warning'));return;}
       result.textContent='Esta operación se habilitará al probar las siguientes fases.';
@@ -36,6 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Incluye acciones inline de pago y borrado antes de que alteren la interfaz.
   document.addEventListener('click',e=>{
     const target=e.target.closest('[onclick]');
+    if(target&&target.getAttribute('onclick').includes('confirmarBorrar(')&&window.horasDailyReady){e.preventDefault();e.stopImmediatePropagation();const rowIdx=Number(target.getAttribute('onclick').match(/confirmarBorrar\((\d+)\)/)?.[1]);window.reviewDeleteSession(rowIdx).catch(error=>showErrorModal('Papelera',error.message,'warning'));return;}
     if(target && (target.getAttribute('onclick').includes('confirmarBorrar(')||(CONFIG.TEST_PHASE<8&&target.getAttribute('onclick').includes('togglePago(')))){e.preventDefault();e.stopImmediatePropagation();result.textContent='Borrado bloqueado; los pagos solo se habilitan en fase 8.';}
   },true);
   try {
@@ -51,6 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(CONFIG.TEST_PHASE>=8 && (!env.stateReview||!env.performedAutomation))throw new Error('La edición segura de estados aún no está disponible.');
     status.textContent=`Backend comprobado: ${env.spreadsheetId}. ${CONFIG.TEST_PHASE>=8?'Realizado se marca automáticamente al terminar las sesiones verificadas; el resto de cambios requiere revisión.':'Los cambios requieren revisión; no hay escrituras automáticas.'} Calendar solo lectura.`;
     control.disabled=false;
+    window.horasDailyReady=env.dailyOperations===true&&!!CONFIG.DAILY_API_URL;
+    if(window.horasDailyReady){window.mountDailyOperations?.(document.getElementById('test-environment-banner'));const future=document.getElementById('add-future-events-btn');if(future){future.disabled=false;future.title='Revisar importación sin modificar Calendar';}}
     resolveEnvironment(true);
     window.mountCalendarReview?.(document.getElementById('test-environment-banner'));
     if(CONFIG.TEST_PHASE>=5)window.mountGroupReview?.(document.getElementById('test-environment-banner'));

@@ -6,6 +6,7 @@ const {runProtected}=require('../sandbox/protected-service.cjs');
 const {runLocale}=require('../sandbox/locale-service.cjs');
 const {runGroups}=require('../sandbox/group-service.cjs');
 const {runState}=require('../sandbox/state-service.cjs');
+const {runDaily}=require('../sandbox/daily-service.cjs');
 
 module.exports = async (req,res) => {
   const allowedOrigins = ['https://javat93.github.io','https://horas-git-main-javat93s-projects.vercel.app',`https://${req.headers.host}`];
@@ -18,12 +19,12 @@ module.exports = async (req,res) => {
   res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');
   if(req.method==='OPTIONS')return res.status(204).end();
   const api=req.query?.api;
-  if(req.method==='GET' && api==='environment')return res.json({mode:'test',phase:8,stateReview:true,performedAutomation:true,addressReview:true,identityReview:true,groupReview:true,linkReview:true,protectedReview:true,localeReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:true,appWrites:false});
+  if(req.method==='GET' && api==='environment')return res.json({mode:'test',phase:8,dailyOperations:true,stateReview:true,performedAutomation:true,addressReview:true,identityReview:true,groupReview:true,linkReview:true,protectedReview:true,localeReview:true,spreadsheetId:TEST_ID,spreadsheetName:'Horas Fran — PRUEBAS — 28-10-2026',calendarReadOnly:true,automaticWrites:true,appWrites:false});
   if(req.method==='GET' && api==='oauth')return res.json({client_id:'367465910816-1epkiok8ntvrphrv08b4g6amh0u9knpv.apps.googleusercontent.com',scopes:SCOPES});
   if(req.method!=='POST')return res.status(405).json({error:'Método no permitido.'});
   const payload=req.body || {};
   try {
-    if(['control','links','protected','locale','groups','state'].includes(api))validateTarget(payload.spreadsheetId);
+    if(['control','links','protected','locale','groups','state','daily'].includes(api))validateTarget(payload.spreadsheetId);
     else validateOperation(api,payload.method,payload.params);
   } catch(error){return res.status(403).json({error:error.message});}
   const token=req.headers.authorization;
@@ -35,6 +36,7 @@ module.exports = async (req,res) => {
     if(api==='locale')return res.json(await runLocale(payload,token,googleRequest));
     if(api==='groups')return res.json(await runGroups(payload,token,googleRequest));
     if(api==='state')return res.json(await runState(payload,token,googleRequest));
+    if(api==='daily')return res.json(await runDaily(payload,token,googleRequest));
     let url;
     if(api==='sheets'){
       const query=new URLSearchParams();

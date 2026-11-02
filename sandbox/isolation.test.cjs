@@ -67,6 +67,8 @@ test('el endpoint Vercel rechaza original y Calendar antes de autenticación o r
   assert.equal((await call('control',{spreadsheetId:ORIGINAL_ID})).code,403);
   assert.equal((await call('groups',{spreadsheetId:ORIGINAL_ID,action:'apply'})).code,403);
   assert.equal((await call('groups',{spreadsheetId:TEST_ID,action:'audit'})).code,401);
+  assert.equal((await call('daily',{spreadsheetId:ORIGINAL_ID,action:'apply'})).code,403);
+  assert.equal((await call('daily',{spreadsheetId:TEST_ID,action:'trash'})).code,401);
   assert.equal((await call('sheets',{method:'get',params:{spreadsheetId:TEST_ID,range:'Detalle!A1'}})).code,401);
   assert.equal((await call('environment',null,'GET','https://ajeno.example')).code,403);
 });
@@ -83,6 +85,7 @@ test('HTTP bloquea el original, Calendar y archivos sensibles antes de llamar a 
     ['calendar',{method:'delete',params:{calendarId:'primary',eventId:'personal'}}],
     ['calendar',{method:'insert',params:{calendarId:'primary'}}],
     ['test-control',{spreadsheetId:ORIGINAL_ID}],
+    ['test-daily',{spreadsheetId:ORIGINAL_ID}],
   ]){const r=await fetch(`${base}/api/${api}`,{method:'POST',headers,body:JSON.stringify(payload)});assert.equal(r.status,403);}
   for(const name of ['config.secure.js','.env','api/proxy.js.bak','sandbox/server.cjs']){
     const r=await fetch(`${base}/${name}`);assert.equal(r.status,404);
