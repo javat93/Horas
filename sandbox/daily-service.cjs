@@ -76,14 +76,16 @@ async function build(p,snap,token,request,now){
     const s=session(p.input,groups),sessions=dates(s.date,p.input.repeat).map(date=>({...s,date}));
     for(const s of sessions){const row=rowFor(s);if(snap.rows.slice(1).some(r=>key(r)===key(row)))duplicates++;rows.push(row);summary.push(s);}
   }else if(p.kind==='import'){
-    if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(p.input?.month||'')||Object.keys(p.input).some(k=>k!=='month'))throw Error('Selecciona un mes válido.');
+    if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(p.input?.month||'')||Object.keys(p.input).some(k=>!['month','includePast'].includes(k))||(p.input.includePast!==undefined&&typeof p.input.includePast!=='boolean'))throw Error('Selecciona un mes válido.');
     const [y,m]=p.input.month.split('-').map(Number);if(y<1900||y>2100)throw Error('Año no válido.');
     const start=new Date(Date.UTC(y,m-1,1)-86400000),end=new Date(Date.UTC(y,m,1)+86400000);
     const events=(await L.listAll(params=>request(`${CAL}?${new URLSearchParams(params)}`,token),{timeMin:start.toISOString(),timeMax:end.toISOString(),singleEvents:true,orderBy:'startTime'})).items;
     const proposed=new Set();
     for(const e of events){
       if(String(e.colorId)!=='5'||e.status==='cancelled')continue;
-      const date=L.calendarDate(e),h=L.hours(e);if(!date.startsWith(p.input.month)||!e.end?.dateTime||new Date(e.end.dateTime)<=now)continue;
+      const date=L.calendarDate(e),h=L.hours(e);if(!date.startsWith(p.input.month))continue;
+      if(!e.end?.dateTime){skipped.push({title:e.summary||'',date,reason:'Evento de todo el día: añade horas de inicio y fin para poder incorporarlo'});continue;}
+      if(!p.input.includePast&&new Date(e.end.dateTime)<=now)continue;
       const matches=groups.filter(g=>L.groupMatches(e.summary,g.nombre,date));let reason='';
       if(matches.length!==1)reason='Grupo inexistente o ambiguo';
       else if(!h.horaInicio||!h.horaFin||h.horaFin<=h.horaInicio||L.calendarDate({start:e.end})!==date)reason='Horario sin inicio/fin seguro en el mismo día';

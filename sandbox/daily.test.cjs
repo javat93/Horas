@@ -53,3 +53,12 @@ test('importación respeta sesión manual sin CalendarId y bloquea propuesta si 
   const f=fake();f.setEvents([event('work')]);const p=await preview(f,'import',{month:'2026-11'});f.setEvents([event('work',{location:'otro lugar'})]);await assert.rejects(apply(f,'import',{month:'2026-11'},p),/cambió/);
   f.grids.get(0).push(S.rowFor({...input,group:'Moli de finestrelles',start:'18:00',end:'19:00',price:100,total:100,district:'Barrio manual'}));const skipped=await preview(f,'import',{month:'2026-11'});assert.equal(skipped.summary.length,0);assert.equal(D.value(f.grids.get(0)[1][4]),100);assert.equal(D.value(f.grids.get(0)[1][9]),'Barrio manual');
 });
+test('sincronización incluye eventos nuevos pasados del mes sin cambiar las sesiones existentes',async()=>{
+  const f=fake();f.setEvents([event('past',{start:{dateTime:'2026-11-01T18:00:00+01:00'},end:{dateTime:'2026-11-01T19:00:00+01:00'}})]);
+  f.grids.get(0).push(S.rowFor({...input,group:'Moli de finestrelles',price:99,total:100,district:'Barrio manual'}));const before=clone(f.grids.get(0)[1]);
+  assert.equal((await preview(f,'import',{month:'2026-11'})).summary.length,0);
+  const options={month:'2026-11',includePast:true},plan=await preview(f,'import',options);assert.equal(plan.summary.length,1);assert.equal(plan.summary[0].calendarId,'past');
+  await apply(f,'import',options,plan);assert.deepEqual(f.grids.get(0)[1],before);assert.equal(D.value(f.grids.get(0)[2][10]),'past');
+  assert.equal((await preview(f,'import',options)).summary.length,0);
+  await assert.rejects(preview(f,'import',{month:'2026-11',includePast:'sí'}),/mes válido/);
+});

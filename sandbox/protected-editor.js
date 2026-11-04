@@ -11,19 +11,35 @@
   async function launch(payload){
     if(working)return;working=true;
     try{
+      if(payload.mode==='sync'&&typeof showLoading==='function')showLoading('Buscando eventos nuevos y cambios del mes…');
       const review=await api({...payload,action:'preview'});
+      const imports=payload.mode==='sync'?await window.previewCalendarImport(payload.month):null;
       closeModal('modal-evento');
-      showReview(review,payload);
+      showReview(review,payload,imports);
     }catch(error){showErrorModal('Revisión pendiente',error.message,'warning');}
-    finally{working=false;}
+    finally{working=false;if(typeof hideLoading==='function')hideLoading();}
   }
-  function showReview(review,payload){
+  function showReview(review,payload,imports){
     document.getElementById('protected-review-dialog')?.remove();
     const overlay=node('div');overlay.id='protected-review-dialog';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby','protected-review-title');overlay.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px';
     const body=node('div');body.style.cssText='background:white;color:#0f172a;border-radius:12px;padding:24px;width:100%;max-width:850px;max-height:90vh;overflow:auto';overlay.append(body);
     const title=node('h2','Revisar antes de guardar');title.id='protected-review-title';title.style.cssText='font-size:22px;font-weight:bold';body.append(title);
     body.append(node('p','Por defecto se conserva todo. Precio e importe son por sesión: la duración no los multiplica. Conservar mantiene tus fórmulas; aceptar la propuesta económica fija el importe elegido. Solo se guarda en la hoja seleccionada; Calendar no cambia.'));
     const status=node('p');status.setAttribute('role','status');body.append(status);
+    const newCount=imports?.summary?.length||0;
+    if(imports){
+      body.append(node('h2',`Eventos nuevos de Calendar (${newCount})`));
+      body.append(node('p',newCount?'Estas sesiones amarillas aún no están en la hoja. Revisa su incorporación antes de guardarlas.':'No se han encontrado sesiones nuevas incorporables en este mes.'));
+      if(newCount){
+        const details=node('details');details.append(node('summary',`Ver ${newCount} ${newCount===1?'sesión nueva':'sesiones nuevas'}`));
+        for(const s of imports.summary)details.append(node('p',`${s.group} · ${s.date} · ${s.start}–${s.end} · ${currency(s.total)}`));body.append(details);
+        const add=node('button',`Revisar incorporación de ${newCount} ${newCount===1?'sesión':'sesiones'}`);add.type='button';add.className='review-primary';
+        add.onclick=async()=>{if(saving)return;close();try{await window.reviewCalendarImport(payload.month);}catch(error){showErrorModal('No se pudieron revisar los eventos',error.message,'warning');}};body.append(add);
+      }
+      const skipped=imports.skipped.filter(s=>!['CalendarId ya registrado','Sesión con el mismo grupo, fecha y horario; se conserva la existente'].includes(s.reason));
+      if(skipped.length){const details=node('details');details.append(node('summary',`${skipped.length} eventos requieren revisión para incorporarse`));for(const s of skipped)details.append(node('p',`${s.title} · ${s.date}: ${s.reason}`));body.append(details);}
+      body.append(node('h2','Cambios en sesiones existentes'));
+    }
     const decisions=[];let differences=0;
     for(const plan of review.plans){
       if(!Object.values(plan.diff).some(Boolean)&&!plan.notes.length&&payload.mode==='sync')continue;
@@ -42,10 +58,10 @@
       for(const note of plan.notes)details.append(node('p',note));
     }
     const warnings=review.plans.filter(p=>p.notes.length).length;
-    status.textContent=(differences?`${differences} ${differences===1?'diferencia':'diferencias'} para revisar. Nada se ha escrito.`:'No hay diferencias que guardar.')+(warnings?` Hay avisos en ${warnings} sesión(es).`:'');
-    const save=node('button','Confirmar decisiones en la hoja seleccionada'),cancel=node('button','Cancelar sin guardar');save.className='review-primary';save.type=cancel.type='button';save.style.cssText='padding:10px;margin:12px 12px 0 0;border:1px solid #475569;border-radius:6px;font-weight:bold';cancel.style.cssText='padding:10px;border:1px solid #94a3b8;border-radius:6px';body.append(save,cancel);
+    status.textContent=(imports?`${newCount} ${newCount===1?'sesión nueva':'sesiones nuevas'} de Calendar. `:'')+(differences?`${differences} ${differences===1?'diferencia':'diferencias'} en sesiones existentes para revisar. Nada se ha escrito.`:'Sin cambios en las sesiones existentes.')+(warnings?` Hay avisos en ${warnings} sesión(es).`:'');
+    const save=node('button',imports?'Guardar cambios en sesiones existentes':'Confirmar decisiones en la hoja seleccionada'),cancel=node('button','Cancelar sin guardar');save.className='review-primary';save.type=cancel.type='button';save.style.cssText='padding:10px;margin:12px 12px 0 0;border:1px solid #475569;border-radius:6px;font-weight:bold';cancel.style.cssText='padding:10px;border:1px solid #94a3b8;border-radius:6px';body.append(save,cancel);
     let saving=false;const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
-    if(window.horasWritesEnabled===false){save.disabled=true;save.title='Solo lectura: cambios pendientes de activación.';}
+    if(window.horasWritesEnabled===false||!differences){save.disabled=true;save.title= !differences?'No hay cambios en sesiones existentes.':'Solo lectura: cambios pendientes de activación.';}
     const close=()=>{overlay.remove();document.body.style.overflow=previousOverflow;};
     cancel.onclick=()=>{if(!saving){close();document.getElementById('test-result').textContent='Revisión cancelada. No se ha guardado nada.';}};
     overlay.addEventListener('keydown',e=>{if(e.key==='Escape'&&!saving)cancel.click();});
@@ -57,7 +73,7 @@
         close();document.getElementById('test-result').textContent=result.unchanged?'Se ha conservado todo. Ninguna celda modificada.':`Guardado y verificado: ${result.rowsChanged} sesión(es), ${result.cellsChanged} celda(s). Calendar sin cambios.`;
         if(!result.unchanged){try{await syncData(false,false);}catch(error){document.getElementById('test-result').textContent=`Guardado y verificado: ${result.rowsChanged} sesión(es), ${result.cellsChanged} celda(s). Falta recargar la vista: ${error.message}`;}}
       }catch(error){status.textContent=error.message;status.scrollIntoView({block:'nearest'});}
-      finally{saving=false;save.disabled=window.horasWritesEnabled===false;cancel.disabled=false;for(const select of body.querySelectorAll('select'))select.disabled=false;}
+      finally{saving=false;save.disabled=window.horasWritesEnabled===false||!differences;cancel.disabled=false;for(const select of body.querySelectorAll('select'))select.disabled=false;}
     };
     document.body.append(overlay);title.tabIndex=-1;title.focus({preventScroll:true});body.scrollTop=0;
   }
@@ -83,7 +99,7 @@
     if(CONFIG.DATA_MODE!=='production'){await launch({mode:'sync',month:monthInput.value});return;}
     if(document.getElementById('sync-month-dialog'))return;
     const dialog=node('dialog');dialog.id='sync-month-dialog';dialog.setAttribute('aria-label','Sincronizar sesiones');dialog.style.cssText='padding:24px;border-radius:16px;width:min(420px,95vw)';
-    dialog.append(node('h2','Sincronizar sesiones'));const label=node('label','Mes: '),input=node('input');input.type='month';input.required=true;input.value=monthInput.value;label.append(input);dialog.append(label);
+    dialog.append(node('h2','Sincronizar sesiones'),node('p','Buscaremos eventos amarillos nuevos y cambios en las sesiones existentes del mes seleccionado, incluidos los eventos que ya hayan pasado.'));const label=node('label','Mes: '),input=node('input');input.type='month';input.required=true;input.value=monthInput.value;label.append(input);dialog.append(label);
     const review=node('button','Revisar cambios'),cancel=node('button','Cancelar');review.className='review-primary';for(const b of [review,cancel]){b.type='button';b.style.cssText='padding:10px;margin:12px 8px 0 0;border:1px solid #94a3b8;border-radius:8px';}dialog.append(review,cancel);
     const close=()=>{dialog.close();dialog.remove();};cancel.onclick=close;dialog.addEventListener('cancel',()=>dialog.remove());
     review.onclick=async()=>{if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(input.value)){input.reportValidity();return;}monthInput.value=input.value;close();await launch({mode:'sync',month:monthInput.value});};

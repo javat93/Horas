@@ -47,6 +47,8 @@
   };
   window.reviewNewGroupForm=()=>review('group',{name:value('gr-nombre'),price:value('gr-precio'),gigPrice:value('gr-precio-bolo'),address:value('gr-sitio'),district:value('gr-ubicacion')});
   window.reviewFutureImport=()=>review('import',{month:value('future-year')+'-'+value('future-month').padStart(2,'0')});
+  window.previewCalendarImport=month=>api({action:'preview',kind:'import',input:{month,includePast:true}});
+  window.reviewCalendarImport=month=>review('import',{month,includePast:true});
   window.reviewDeleteSession=rowIdx=>review('delete',{rowIdx});
   window.mountDailyOperations=banner=>{
     const production=CONFIG.DATA_MODE==='production',b=node('button',production?'Papelera':'Abrir papelera de sesiones');b.type='button';if(production)b.className='bg-white text-slate-700 font-bold px-4 py-2.5 rounded-xl hover:bg-slate-50 transition-all text-sm';else b.style.cssText='padding:8px;margin-top:12px;border:1px solid currentColor;border-radius:6px';banner.append(b);
