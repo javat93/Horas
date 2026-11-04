@@ -32,6 +32,14 @@ test('pago solo modifica A y conserva toda la sesión, con ida y vuelta y sin du
   const again=await runState(f.payload(),'Bearer fake',f.request);assert.equal(again.unchanged,true);assert.equal(f.calls.filter(c=>c.method==='POST').length,1);
   await runState({...f.payload(),paid:false},'Bearer fake',f.request);assert.deepEqual(f.rows[1],before);
 });
+test('cada pago consulta únicamente su fila y permite conciliar una respuesta perdida sin escribir',async()=>{
+  const f=fixture();await runState(f.payload(),'Bearer fake',f.request);
+  assert.equal(f.calls.filter(c=>c.method==='GET').length,2);
+  for(const c of f.calls.filter(c=>c.method==='GET'))assert.deepEqual(new URL(c.url).searchParams.getAll('ranges'),['Detalle!A2:O2']);
+  const count=f.calls.filter(c=>c.method==='POST').length;
+  const result=await runState({spreadsheetId:TEST_ID,action:'getPayment',rowIdx:2},'Bearer fake',f.request);
+  assert.equal(result.paid,true);assert.equal(result.version,fingerprint(f.row));assert.equal(f.calls.filter(c=>c.method==='POST').length,count);
+});
 test('pago booleano se conserva; fórmulas, original y revisiones antiguas no se sobrescriben',async()=>{
   const f=fixture();f.row[0]=cell(false);await runState(f.payload(),'',f.request);assert.equal(f.row[0].userEnteredValue.boolValue,true);
   const stale=f.payload();f.row[9]=cell('Barrio manual nuevo');await assert.rejects(()=>runState(stale,'',f.request),/cambió/);
@@ -57,7 +65,7 @@ test('recargas simultáneas se agrupan; error de carga mantiene los datos anteri
 test('pago fallido restaura vista y resumen, bloqueando dobles envíos',async()=>{
   const fn=html.slice(html.indexOf('        async function togglePago('),html.indexOf('        function toggleRecurrence('));let reject,calls=0,lastTotal;
   const event={rowIdx:2,pagado:false,total:50},errors=[];const c=vm.createContext({eventos:[event],CONFIG:{TEST_MODE:false},renderAll(){},updateFinancialStats(){lastTotal=event.pagado?0:50;},proxyGoogleAPI:()=>{calls++;return new Promise((_,r)=>reject=r);},showErrorModal:(...args)=>errors.push(args),document:{getElementById:()=>({})}});vm.runInContext(fn,c);
-  const pending=c.togglePago(2,true);assert.equal(lastTotal,0);await c.togglePago(2,true);assert.equal(calls,1);reject(Error('Fallo'));await pending;assert.equal(lastTotal,50);assert.equal(event.pagado,false);assert.equal(event.paymentUncertain,true);assert.equal(errors.length,1);
+  const pending=c.togglePago(2,true);assert.equal(lastTotal,0);await c.togglePago(2,true);assert.equal(calls,1);reject(Error('Fallo'));await pending;assert.equal(lastTotal,50);assert.equal(event.pagado,false);assert.equal(event.paymentUncertain,false);assert.equal(errors.length,0);
 });
 test('lectura nativa conserva el número de una fila posterior a 3000 y acota los metadatos',async()=>{
   const rows=Array.from({length:4002},()=>[]);rows[0]=[cell('Pagado')];rows[4001]=Array.from({length:14},()=>({}));rows[4001][8]=cell('Último');rows[4001][5]=cell(D.serial('2026-10-29'));let bounded=false;

@@ -31,7 +31,7 @@
 </script>
     <script src="locale-data.js?v=protegido-20261102"></script>
     <script src="auth-session.js?v=auth-20261029"></script>
-    <script src="app-data.js?v=pagos-20261104"></script>
+    <script src="app-data.js?v=pagos-cola-20261104"></script>
     <script src="group-identity.js?v=fase6-20261029"></script>
     <script src="calendar-linking.js?v=enlaces-20261029"></script>
     <script src="protected-review.js?v=fase7-20261029"></script>
@@ -822,9 +822,15 @@
                     catch(error){if(controller.signal.aborted)throw new Error('El guardado ha tardado demasiado. Recarga para comprobar si se completó.');throw error;}
                     finally{clearTimeout(timer);}
                 };
-                try{return await mutationGate.run(()=>{
+                try{return await mutationGate.enqueue(()=>{
                     if(typeof renderAll==='function')renderAll();
-                    return typeof navigator!=='undefined'&&navigator.locks?navigator.locks.request('horas-write-'+CONFIG.SPREADSHEET_ID,{ifAvailable:true},lock=>{if(!lock)throw AppData.notSent('Otra pestaña está guardando. Espera a que termine.');return save();}):save();
+                    if(typeof navigator==='undefined'||!navigator.locks)return save();
+                    return (async()=>{
+                        const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);let acquired=false;
+                        try{return await navigator.locks.request('horas-write-'+CONFIG.SPREADSHEET_ID,{signal:controller.signal},()=>{acquired=true;clearTimeout(timer);return save();});}
+                        catch(error){if(!acquired&&controller.signal.aborted)throw AppData.notSent('Otra pestaña sigue guardando. Cierra esa pestaña o vuelve a intentarlo.');throw error;}
+                        finally{clearTimeout(timer);}
+                    })();
                 });}finally{if(typeof renderAll==='function')renderAll();}
             }
             return send();
@@ -1705,7 +1711,7 @@
                         <div>
                             <h4 class="font-extrabold text-slate-900">${sessionGroupName(ev)}</h4>
                             <div class="flex gap-3 mt-1">
-                                <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${ev.fechaStr||'Fecha pendiente'}${ev.dateWarning ? ' · Revisar fecha' : ''}${ev.paymentSaving?' · Guardando pago…':ev.paymentUncertain?' · Pago por comprobar':''}</span>
+                                <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${ev.fechaStr||'Fecha pendiente'}${ev.dateWarning ? ' · Revisar fecha' : ''}${ev.paymentSaving?' · Guardando pago…':ev.paymentError?' · Pago no guardado; vuelve a intentarlo':''}</span>
                                 <span class="text-xs font-bold ${ev.realizado ? 'text-blue-500' : 'text-slate-400'} flex items-center gap-1">
                                     <i data-lucide="${ev.realizado ? 'flag' : 'hourglass'}" class="w-3 h-3"></i> 
                                     ${ev.realizado ? 'Realizado' : 'Pendiente'}
@@ -1719,7 +1725,7 @@
                             <p class="text-lg font-black text-slate-800">${ev.amountWarning ? 'Revisar importe' : LocaleData.currency(ev.total)}</p>
                         </div>
                         <div class="flex gap-1">
-                            <button aria-label="Cambiar estado de pago, fila ${ev.rowIdx}" ${ev.paymentSaving||ev.paymentUncertain||window.horasOperationBusy?.()||!ev.fechaObj||!ev.grupo?.trim()?'disabled':''} onclick="togglePago(${ev.rowIdx}, ${!ev.pagado})" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800' : 'bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600'} hover:scale-110 transition-all">
+                            <button aria-label="Cambiar estado de pago, fila ${ev.rowIdx}" ${ev.paymentSaving||!ev.fechaObj||!ev.grupo?.trim()?'disabled':''} onclick="togglePago(${ev.rowIdx}, ${!ev.pagado})" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800' : 'bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600'} hover:scale-110 transition-all">
                                 <i data-lucide="euro" class="w-5 h-5"></i>
                             </button>
                             <button onclick="confirmarBorrar(${ev.rowIdx})" class="p-2.5 rounded-xl bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
@@ -1861,28 +1867,26 @@
             }
         }
         // Helpers UI Finales
-        async function togglePago(rowIdx, newState) {
-            const event=eventos.find(e=>e.rowIdx===rowIdx);
-            if(!event||event.paymentSaving||event.paymentUncertain)return;
-            let attempted=false;
-            const previous=event.pagado;event.paymentSaving=true;event.pagado=newState;
-            renderAll();updateFinancialStats();
-            try {
-                if((CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)){
-                    if(!await window.horasEnvironmentReady)throw new Error('El destino protegido no está verificado.');
-                    const token=window.horasAccessToken();if(!token)throw new Error('Primero conecta Google.');
-                    attempted=true;
-                    const response=await window.horasFetch(CONFIG.STATE_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action:'setPayment',rowIdx,paid:newState,expectedVersion:event.sourceVersion})});
-                    const saved=await AppData.readResponse(response);if(saved.paid!==newState||!saved.version||saved.spreadsheetId!==CONFIG.SPREADSHEET_ID||saved.calendarModified!==false)throw new Error('La respuesta no confirma el pago. Recarga para comprobarlo.');event.sourceVersion=saved.version;
-                }else{
-                    attempted=true;
-                    await proxyGoogleAPI('sheets','update',{spreadsheetId:CONFIG.SPREADSHEET_ID,range:`Detalle!A${rowIdx}`,valueInputOption:'RAW'},{values:[[newState?'X':'']]});
-                }
-                const notice=document.getElementById('test-result');if(notice)notice.textContent='Estado de pago guardado y verificado. Calendar sin cambios.';
+        async function togglePago(rowIdx,newState){
+            const event=eventos.find(e=>e.rowIdx===rowIdx);if(!event||event.paymentSaving)return;
+            const previous=event.pagado;event.paymentSaving=true;event.paymentUncertain=false;event.paymentError=false;event.pagado=newState;renderAll();updateFinancialStats();
+            const notice=document.getElementById('test-result');
+            try{
+                if(CONFIG.PROTECTED_MODE||CONFIG.TEST_MODE){
+                    if(!await window.horasEnvironmentReady)throw Error('La conexión aún no está preparada.');
+                    const token=window.horasAccessToken();if(!token)throw Error('Conecta Google para guardar los pagos.');
+                    const response=await window.horasFetch(CONFIG.STATE_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action:'setPayment',rowIdx,paid:newState,expectedVersion:event.sourceVersion})});
+                    const saved=await AppData.readResponse(response);if(saved.paid!==newState||!saved.version||saved.spreadsheetId!==CONFIG.SPREADSHEET_ID||saved.calendarModified!==false)throw Error('Falta confirmar el pago.');event.sourceVersion=saved.version;
+                }else await proxyGoogleAPI('sheets','update',{spreadsheetId:CONFIG.SPREADSHEET_ID,range:'Detalle!A'+rowIdx,valueInputOption:'RAW'},{values:[[newState?'X':'']]});
+                if(notice)notice.textContent='Pago guardado.';
             }catch(error){
                 event.pagado=previous;
-                event.paymentUncertain=attempted&&error.notSent!==true&&![401,403,405].includes(error.status);
-                showErrorModal(event.paymentUncertain?'Pago sin confirmar':'Pago no enviado',error.message+(event.paymentUncertain?' Se ha restaurado la vista anterior. Recarga antes de repetir.':' El pago no se ha enviado. Puedes volver a intentarlo cuando termine la operación o renueves la conexión.'),'warning');
+                let verified=false;
+                if((CONFIG.PROTECTED_MODE||CONFIG.TEST_MODE)&&!error.notSent){
+                    try{const token=window.horasAccessToken();if(token){const response=await window.horasFetch(CONFIG.STATE_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action:'getPayment',rowIdx})});const saved=await AppData.readResponse(response);if(typeof saved.paid==='boolean'&&saved.version&&saved.spreadsheetId===CONFIG.SPREADSHEET_ID&&saved.calendarModified===false){event.pagado=saved.paid;event.sourceVersion=saved.version;verified=true;}}}catch{}
+                }
+                event.paymentError=!verified||event.pagado!==newState;
+                if(notice)notice.textContent=verified&&event.pagado===newState?'Pago comprobado y guardado.':('No se pudo guardar el pago de '+(event.grupo||'la sesión')+'. '+(verified?'Se muestra el estado de la hoja.':'Se ha restaurado su estado anterior; vuelve a intentarlo.')+' '+error.message);
             }finally{event.paymentSaving=false;renderAll();updateFinancialStats();}
         }
         function toggleRecurrence() {

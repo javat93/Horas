@@ -19,6 +19,6 @@ function releaseSettings(env){
   if(profile==='production'&&env.HORAS_MIGRATION_VERIFIED!=='migracion-20261102')throw Error('Falta verificar la migración antes de habilitar la hoja real.');
   return {profile,writeEnabled:env.HORAS_PROTECTED_WRITES==='enabled'};
 }
-const readActions={links:['audit','candidates'],protected:['preview'],locale:['data','audit','numbersAudit'],groups:['audit','preview'],daily:['preview','trash']};
+const readActions={links:['audit','candidates'],protected:['preview'],locale:['data','audit','numbersAudit'],groups:['audit','preview'],daily:['preview','trash'],state:['getPayment']};
 function isReadAction(api,payload){return api==='sheets'||api==='calendar'||readActions[api]?.includes(payload.action)===true;}
 module.exports={scopedRequest,releaseSettings,isReadAction};

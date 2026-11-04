@@ -9,11 +9,15 @@
     return data;
   }
   const notSent=message=>Object.assign(new Error(message),{notSent:true});
-  function createGate(){let busy=false;return {async run(work){if(busy)throw notSent('Hay otra operación guardando cambios. Espera a que termine.');busy=true;try{return await work();}finally{busy=false;}},isBusy:()=>busy};}
+  function createGate(){
+    let busy=false,queued=0,tail=Promise.resolve();const waiters=[];
+    async function run(work){if(busy)throw notSent('Hay otra operación guardando cambios. Espera a que termine.');busy=true;try{return await work();}finally{busy=false;for(const wake of waiters.splice(0))wake();}}
+    return {run,enqueue(work){queued++;const job=tail.then(async()=>{while(busy)await new Promise(resolve=>waiters.push(resolve));return run(work);}).finally(()=>queued--);tail=job.catch(()=>{});return job;},isBusy:()=>busy||queued>0};
+  }
   function mutatingRequest(url,options={}){
     if(String(options.method||'GET').toUpperCase()!=='POST')return false;
     let body;try{body=JSON.parse(options.body||'{}');}catch{return false;}
-    if(body.action)return !['data','audit','numbersAudit','preview','candidates','trash'].includes(body.action);
+    if(body.action)return !['data','audit','numbersAudit','preview','candidates','trash','getPayment'].includes(body.action);
     if(body.method)return !['get','list'].includes(body.method);
     return /(?:api=control|test-control)/.test(String(url));
   }
