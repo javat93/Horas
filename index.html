@@ -672,7 +672,7 @@
     </div>
 
     <!-- Modal de Error/Notificación Moderno -->
-    <div id="modal-error" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+    <div id="modal-error" role="alertdialog" aria-modal="true" aria-labelledby="error-title" aria-describedby="error-message" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl transform transition-all">
             <div class="flex justify-center mb-6">
                 <div id="error-icon" class="w-16 h-16 rounded-full flex items-center justify-center">
@@ -1870,7 +1870,6 @@
         async function togglePago(rowIdx,newState){
             const event=eventos.find(e=>e.rowIdx===rowIdx);if(!event||event.paymentSaving)return;
             const previous=event.pagado;event.paymentSaving=true;event.paymentUncertain=false;event.paymentError=false;event.pagado=newState;renderAll();updateFinancialStats();
-            const notice=document.getElementById('test-result');
             try{
                 if(CONFIG.PROTECTED_MODE||CONFIG.TEST_MODE){
                     if(!await window.horasEnvironmentReady)throw Error('La conexión aún no está preparada.');
@@ -1878,7 +1877,6 @@
                     const response=await window.horasFetch(CONFIG.STATE_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action:'setPayment',rowIdx,paid:newState,expectedVersion:event.sourceVersion})});
                     const saved=await AppData.readResponse(response);if(saved.paid!==newState||!saved.version||saved.spreadsheetId!==CONFIG.SPREADSHEET_ID||saved.calendarModified!==false)throw Error('Falta confirmar el pago.');event.sourceVersion=saved.version;
                 }else await proxyGoogleAPI('sheets','update',{spreadsheetId:CONFIG.SPREADSHEET_ID,range:'Detalle!A'+rowIdx,valueInputOption:'RAW'},{values:[[newState?'X':'']]});
-                if(notice)notice.textContent='Pago guardado.';
             }catch(error){
                 event.pagado=previous;
                 let verified=false;
@@ -1886,7 +1884,10 @@
                     try{const token=window.horasAccessToken();if(token){const response=await window.horasFetch(CONFIG.STATE_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,action:'getPayment',rowIdx})});const saved=await AppData.readResponse(response);if(typeof saved.paid==='boolean'&&saved.version&&saved.spreadsheetId===CONFIG.SPREADSHEET_ID&&saved.calendarModified===false){event.pagado=saved.paid;event.sourceVersion=saved.version;verified=true;}}}catch{}
                 }
                 event.paymentError=!verified||event.pagado!==newState;
-                if(notice)notice.textContent=verified&&event.pagado===newState?'Pago comprobado y guardado.':('No se pudo guardar el pago de '+(event.grupo||'la sesión')+'. '+(verified?'Se muestra el estado de la hoja.':'Se ha restaurado su estado anterior; vuelve a intentarlo.')+' '+error.message);
+                if(event.paymentError){
+                    const reason=/429|quota|cuota/i.test(error.message)?'Google ha limitado temporalmente las consultas. Espera un minuto antes de volver a intentarlo.':/cambi[oó]|recarga/i.test(error.message)?'Actualiza los datos antes de volver a intentarlo.':'Comprueba la conexión con Google y vuelve a intentarlo.';
+                    showErrorModal('Pago no guardado','No se pudo guardar el pago de '+(event.grupo||'la sesión')+(event.fechaStr?' ('+event.fechaStr+')':'')+'. '+(verified?'Se muestra el estado de la hoja. ':'Se ha restaurado su estado anterior. ')+reason,'warning');
+                }
             }finally{event.paymentSaving=false;renderAll();updateFinancialStats();}
         }
         function toggleRecurrence() {

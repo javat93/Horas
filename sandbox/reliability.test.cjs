@@ -65,7 +65,7 @@ test('recargas simultáneas se agrupan; error de carga mantiene los datos anteri
 test('pago fallido restaura vista y resumen, bloqueando dobles envíos',async()=>{
   const fn=html.slice(html.indexOf('        async function togglePago('),html.indexOf('        function toggleRecurrence('));let reject,calls=0,lastTotal;
   const event={rowIdx:2,pagado:false,total:50},errors=[];const c=vm.createContext({eventos:[event],CONFIG:{TEST_MODE:false},renderAll(){},updateFinancialStats(){lastTotal=event.pagado?0:50;},proxyGoogleAPI:()=>{calls++;return new Promise((_,r)=>reject=r);},showErrorModal:(...args)=>errors.push(args),document:{getElementById:()=>({})}});vm.runInContext(fn,c);
-  const pending=c.togglePago(2,true);assert.equal(lastTotal,0);await c.togglePago(2,true);assert.equal(calls,1);reject(Error('Fallo'));await pending;assert.equal(lastTotal,50);assert.equal(event.pagado,false);assert.equal(event.paymentUncertain,false);assert.equal(errors.length,0);
+  const pending=c.togglePago(2,true);assert.equal(lastTotal,0);await c.togglePago(2,true);assert.equal(calls,1);reject(Error('Fallo'));await pending;assert.equal(lastTotal,50);assert.equal(event.pagado,false);assert.equal(event.paymentUncertain,false);assert.equal(errors.length,1);
 });
 test('lectura nativa conserva el número de una fila posterior a 3000 y acota los metadatos',async()=>{
   const rows=Array.from({length:4002},()=>[]);rows[0]=[cell('Pagado')];rows[4001]=Array.from({length:14},()=>({}));rows[4001][8]=cell('Último');rows[4001][5]=cell(D.serial('2026-10-29'));let bounded=false;
