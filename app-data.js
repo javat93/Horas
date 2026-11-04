@@ -8,7 +8,8 @@
     if(!response.ok){const detail=typeof data.error==='string'?data.error:data.error?.message||data.message||response.statusText;const error=new Error(`Error ${response.status}: ${detail||'No se pudo completar la operación.'}`);error.status=response.status;throw error;}
     return data;
   }
-  function createGate(){let busy=false;return {async run(work){if(busy)throw new Error('Hay otra operación guardando cambios. Espera a que termine.');busy=true;try{return await work();}finally{busy=false;}},isBusy:()=>busy};}
+  const notSent=message=>Object.assign(new Error(message),{notSent:true});
+  function createGate(){let busy=false;return {async run(work){if(busy)throw notSent('Hay otra operación guardando cambios. Espera a que termine.');busy=true;try{return await work();}finally{busy=false;}},isBusy:()=>busy};}
   function mutatingRequest(url,options={}){
     if(String(options.method||'GET').toUpperCase()!=='POST')return false;
     let body;try{body=JSON.parse(options.body||'{}');}catch{return false;}
@@ -16,5 +17,5 @@
     if(body.method)return !['get','list'].includes(body.method);
     return /(?:api=control|test-control)/.test(String(url));
   }
-  return {meaningful,hasContent,trimRows,readResponse,createGate,mutatingRequest};
+  return {meaningful,hasContent,trimRows,readResponse,createGate,mutatingRequest,notSent};
 });

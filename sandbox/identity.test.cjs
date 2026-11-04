@@ -46,6 +46,6 @@ test('filtro real reúne años y alias una sola vez, con los dos nombres según 
   const renderer=html.slice(html.indexOf('        function renderEventos('),html.indexOf('        function renderGrupos('));
   const fields={'lista-eventos':{},'filter-cobrados':{value:'all'},'filter-realizados':{value:'all'},'filter-grupo':{value:G.school.id}};
   const events=[{rowIdx:2,grupo:'Moli de finestrelles',fechaStr:'31/12/2025',total:24},{rowIdx:3,grupo:'Tramuntana',fechaStr:'01/01/2026',total:80},{rowIdx:4,grupo:'Slap Martes',fechaStr:'01/01/2026',total:22}];
-  const context=vm.createContext({document:{getElementById:id=>fields[id]},eventos:events,GroupIdentity:G,LocaleData:D,lucide:{createIcons(){}}});vm.runInContext(helper+renderer,context);context.renderEventos();const result=fields['lista-eventos'].innerHTML;
+  const context=vm.createContext({window:{},document:{getElementById:id=>fields[id]},eventos:events,GroupIdentity:G,LocaleData:D,lucide:{createIcons(){}}});vm.runInContext(helper+renderer,context);context.renderEventos();const result=fields['lista-eventos'].innerHTML;
   assert.equal((result.match(/openEditSesionModal/g)||[]).length,2);assert.match(result,/Molí de finestrelles/);assert.match(result,/Tramuntana/);assert(!result.includes('Slap Martes'));assert.equal(events.length,3);assert.equal(events[0].grupo,'Moli de finestrelles');
 });
