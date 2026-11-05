@@ -102,4 +102,12 @@ for(const profile of ['rehearsal','production']){
     f.grids.get(0)[1][9]=c('Nueva edición en Sheets');decisions[0].choices.district='accept';assert.equal((await call(handler,'protected',{...body,action:'apply',catalogVersion:p.body.catalogVersion,decisions})).code,502);
     assert(!f.calls.some(c=>c.url.endsWith(':batchUpdate')));
   });
+  test(profile+': sincronización completa archiva el evento eliminado y añade su sustituto solo en su destino',async()=>{
+    const f=fake(),handler=createHandler({profile,writeEnabled:true,request:f.request});
+    f.grids.get(0).push(S.rowFor({...session,group:'Moli de finestrelles',price:40,total:40,calendarId:'old'}));
+    f.setEvents([{id:'new',summary:'Tramuntana',colorId:'5',start:{dateTime:'2099-01-02T10:00:00+01:00'},end:{dateTime:'2099-01-02T11:15:00+01:00'}}]);
+    const body={spreadsheetId:id,action:'preview',kind:'sync',input:{month:'2099-01'}},p=await call(handler,'daily',body);assert.equal(p.code,200,JSON.stringify(p.body));assert.equal(p.body.removals.length,1);assert.equal(p.body.summary.length,1);
+    const saved=await call(handler,'daily',{...body,action:'apply',expectedVersion:p.body.version,operationId:randomUUID()});assert.equal(saved.code,200,JSON.stringify(saved.body));assert.equal(saved.body.removed,1);assert.equal(saved.body.added,1);assert(S.values(f.grids.get(0)[1]).every(v=>!Object.keys(v).length));
+    assert(f.calls.filter(c=>c.url.includes('sheets.googleapis.com')).every(c=>c.url.includes('/'+id)));assert(!f.calls.some(c=>c.url.includes('/calendar/')&&c.method!=='GET'));
+  });
 }

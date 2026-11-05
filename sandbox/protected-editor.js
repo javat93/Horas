@@ -1,6 +1,7 @@
 (function(){
   const node=(tag,text)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;return el;};
   const currency=value=>value===null?'Sin importe numérico':new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(value);
+  const groupLabel=(name,date)=>typeof GroupIdentity==='undefined'?name:GroupIdentity.label(name,date);
   let working=false,monthInput;
   async function api(payload){
     if(!await window.horasEnvironmentReady)throw new Error('El entorno protegido no está verificado.');
@@ -24,24 +25,30 @@
     const overlay=node('div');overlay.id='protected-review-dialog';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby','protected-review-title');overlay.style.cssText='position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px';
     const body=node('div');body.style.cssText='background:white;color:#0f172a;border-radius:12px;padding:24px;width:100%;max-width:850px;max-height:90vh;overflow:auto';overlay.append(body);
     const title=node('h2','Revisar antes de guardar');title.id='protected-review-title';title.style.cssText='font-size:22px;font-weight:bold';body.append(title);
-    body.append(node('p','Por defecto se conserva todo. Precio e importe son por sesión: la duración no los multiplica. Conservar mantiene tus fórmulas; aceptar la propuesta económica fija el importe elegido. Solo se guarda en la hoja seleccionada; Calendar no cambia.'));
+    body.append(node('p','Los precios, importes, barrios y direcciones se conservan salvo que aceptes una propuesta. Precio e importe son por sesión: la duración no los multiplica. Los eventos eliminados se retiran a una papelera recuperable. Solo se guarda en la hoja seleccionada; Calendar no cambia.'));
     const status=node('p');status.setAttribute('role','status');body.append(status);
-    const newCount=imports?.summary?.length||0;
+    const newCount=imports?.summary?.length||0,movedCount=imports?.moves?.length||0,removedCount=imports?.removals?.length||0;
+    const reconciled=new Set([...(imports?.moves||[]),...(imports?.removals||[])].map(s=>s.rowIdx));
+    const activePlans=review.plans.filter(p=>!reconciled.has(p.rowIdx));
     if(imports){
       body.append(node('h2',`Eventos nuevos de Calendar (${newCount})`));
       body.append(node('p',newCount?'Estas sesiones amarillas aún no están en la hoja. Revisa su incorporación antes de guardarlas.':'No se han encontrado sesiones nuevas incorporables en este mes.'));
       if(newCount){
         const details=node('details');details.append(node('summary',`Ver ${newCount} ${newCount===1?'sesión nueva':'sesiones nuevas'}`));
-        for(const s of imports.summary)details.append(node('p',`${s.group} · ${s.date} · ${s.start}–${s.end} · ${currency(s.total)}`));body.append(details);
-        const add=node('button',`Revisar incorporación de ${newCount} ${newCount===1?'sesión':'sesiones'}`);add.type='button';add.className='review-primary';
+        for(const s of imports.summary)details.append(node('p',`${groupLabel(s.group,s.date)} · ${s.date.split('-').reverse().join('/')} · ${s.start}–${s.end} · ${currency(s.total)}`));body.append(details);
+      }
+      if(movedCount){body.append(node('h2',`Cambios de fecha u horario (${movedCount})`));for(const s of imports.moves)body.append(node('p',`${groupLabel(s.group,s.date)} · ${s.previous.date.split('-').reverse().join('/')} ${s.previous.start}–${s.previous.end} → ${s.date.split('-').reverse().join('/')} ${s.start}–${s.end}. Se actualiza la misma fila.`));}
+      if(removedCount){body.append(node('h2',`Sesiones eliminadas de Calendar (${removedCount})`));for(const s of imports.removals)body.append(node('p',`${groupLabel(s.group,s.date)} · ${s.date.split('-').reverse().join('/')} · ${s.start}–${s.end}`));body.append(node('p','Se retirarán de la hoja y sus totales, con una copia recuperable en «Sesiones archivadas».'));}
+      if(newCount||movedCount||removedCount){
+        const add=node('button',movedCount||removedCount?'Revisar sincronización de Calendar':`Revisar incorporación de ${newCount} ${newCount===1?'sesión':'sesiones'}`);add.type='button';add.className='review-primary';
         add.onclick=async()=>{if(saving)return;close();try{await window.reviewCalendarImport(payload.month);}catch(error){showErrorModal('No se pudieron revisar los eventos',error.message,'warning');}};body.append(add);
       }
       const skipped=imports.skipped.filter(s=>!['CalendarId ya registrado','Sesión con el mismo grupo, fecha y horario; se conserva la existente'].includes(s.reason));
-      if(skipped.length){const details=node('details');details.append(node('summary',`${skipped.length} eventos requieren revisión para incorporarse`));for(const s of skipped)details.append(node('p',`${s.title} · ${s.date}: ${s.reason}`));body.append(details);}
+      if(skipped.length){const details=node('details');details.append(node('summary',`${skipped.length} eventos se conservan o requieren revisión`));for(const s of skipped)details.append(node('p',`${s.title} · ${s.date.split('-').reverse().join('/')}: ${s.reason}`));body.append(details);}
       body.append(node('h2','Cambios en sesiones existentes'));
     }
     const decisions=[];let differences=0;
-    for(const plan of review.plans){
+    for(const plan of activePlans){
       if(!Object.values(plan.diff).some(Boolean)&&!plan.notes.length&&payload.mode==='sync')continue;
       const details=node('details');details.open=review.plans.length===1;details.style.cssText='border-top:1px solid #cbd5e1;padding:12px 0';
       details.append(node('summary',`Fila ${plan.rowIdx} · ${plan.group} · ${plan.date}`));body.append(details);
@@ -57,8 +64,8 @@
       }
       for(const note of plan.notes)details.append(node('p',note));
     }
-    const warnings=review.plans.filter(p=>p.notes.length).length;
-    status.textContent=(imports?`${newCount} ${newCount===1?'sesión nueva':'sesiones nuevas'} de Calendar. `:'')+(differences?`${differences} ${differences===1?'diferencia':'diferencias'} en sesiones existentes para revisar. Nada se ha escrito.`:'Sin cambios en las sesiones existentes.')+(warnings?` Hay avisos en ${warnings} sesión(es).`:'');
+    const warnings=activePlans.filter(p=>p.notes.length).length;
+    status.textContent=(imports?`${newCount} ${newCount===1?'sesión nueva':'sesiones nuevas'} de Calendar. ${movedCount} ${movedCount===1?'cambio':'cambios'} de fecha u horario. ${removedCount} ${removedCount===1?'sesión':'sesiones'} para retirar. `:'')+(differences?`${differences} ${differences===1?'diferencia':'diferencias'} en datos manuales para revisar. Nada se ha escrito.`:'Sin otros cambios en los datos manuales.')+(warnings?` Hay avisos en ${warnings} sesión(es).`:'');
     const save=node('button',imports?'Guardar cambios en sesiones existentes':'Confirmar decisiones en la hoja seleccionada'),cancel=node('button','Cancelar sin guardar');save.className='review-primary';save.type=cancel.type='button';save.style.cssText='padding:10px;margin:12px 12px 0 0;border:1px solid #475569;border-radius:6px;font-weight:bold';cancel.style.cssText='padding:10px;border:1px solid #94a3b8;border-radius:6px';body.append(save,cancel);
     let saving=false;const previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
     if(window.horasWritesEnabled===false||!differences){save.disabled=true;save.title= !differences?'No hay cambios en sesiones existentes.':'Solo lectura: cambios pendientes de activación.';}
@@ -99,7 +106,7 @@
     if(CONFIG.DATA_MODE!=='production'){await launch({mode:'sync',month:monthInput.value});return;}
     if(document.getElementById('sync-month-dialog'))return;
     const dialog=node('dialog');dialog.id='sync-month-dialog';dialog.setAttribute('aria-label','Sincronizar sesiones');dialog.style.cssText='padding:24px;border-radius:16px;width:min(420px,95vw)';
-    dialog.append(node('h2','Sincronizar sesiones'),node('p','Buscaremos eventos amarillos nuevos y cambios en las sesiones existentes del mes seleccionado, incluidos los eventos que ya hayan pasado.'));const label=node('label','Mes: '),input=node('input');input.type='month';input.required=true;input.value=monthInput.value;label.append(input);dialog.append(label);
+    dialog.append(node('h2','Sincronizar sesiones'),node('p','Revisaremos altas, cambios de fecha u horario y eventos eliminados del mes seleccionado. Las bajas se retiran a una papelera recuperable. Los eventos trasladados a otro mes actualizan su misma fila; las filas manuales y referencias históricas se conservan.'));const label=node('label','Mes: '),input=node('input');input.type='month';input.required=true;input.value=monthInput.value;label.append(input);dialog.append(label);
     const review=node('button','Revisar cambios'),cancel=node('button','Cancelar');review.className='review-primary';for(const b of [review,cancel]){b.type='button';b.style.cssText='padding:10px;margin:12px 8px 0 0;border:1px solid #94a3b8;border-radius:8px';}dialog.append(review,cancel);
     const close=()=>{dialog.close();dialog.remove();};cancel.onclick=close;dialog.addEventListener('cancel',()=>dialog.remove());
     review.onclick=async()=>{if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(input.value)){input.reportValidity();return;}monthInput.value=input.value;close();await launch({mode:'sync',month:monthInput.value});};
