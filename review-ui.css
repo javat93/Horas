@@ -9,6 +9,7 @@
 #production-actions button:focus-visible, .archive-link:focus-visible { outline: 3px solid #93c5fd; outline-offset: 3px; }
 .archive-link { display: inline-flex; align-items: center; gap: 6px; margin: 12px 0 0; padding: 6px 0; font: inherit; color: #64748b; }
 .archive-link:hover { color: #2563eb; text-decoration: underline; }
+#calendar-write-option[hidden], .archive-link[hidden] { display: none !important; }
 .archive-link svg { width: 16px; height: 16px; flex: none; }
 
 dialog, #protected-review-dialog > div {

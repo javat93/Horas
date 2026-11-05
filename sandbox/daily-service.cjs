@@ -64,7 +64,7 @@ async function trashRows(token,request,meta){
     return {operationId:r[0],archivedAt:r[1],rowIdx:start+1,cells};
   });
 }
-async function build(p,snap,token,request,now){
+async function build(p,snap,token,request,now,meta){
   const groups=catalog(snap.groups),summary=[],skipped=[];let rows=[],sheetId=0,duplicates=0,removals=[],moves=[];
   if(p.kind==='group'){
     const v=p.input;if(!v||Object.keys(v).some(k=>!['name','address','price','gigPrice','district'].includes(k)))throw Error('Campos de grupo no válidos.');
@@ -80,14 +80,16 @@ async function build(p,snap,token,request,now){
     const [y,m]=p.input.month.split('-').map(Number);if(y<1900||y>2100)throw Error('Año no válido.');
     const start=new Date(Date.UTC(y,m-1,1)-86400000),end=new Date(Date.UTC(y,m,1)+86400000);
     const events=(await L.listAll(params=>request(`${CAL}?${new URLSearchParams(params)}`,token),{timeMin:start.toISOString(),timeMax:end.toISOString(),singleEvents:true,orderBy:'startTime'})).items;
+    const pendingIds=meta?await require('./calendar-crud.cjs').pendingCalendarIds(meta,token,request):new Set();
     if(p.kind==='sync'){
-      const changes=await require('./calendar-sync.cjs').reconcile(p.input.month,snap,events,token,request);
+      const changes=await require('./calendar-sync.cjs').reconcile(p.input.month,snap,events,token,request,pendingIds);
       removals=changes.removals;moves=changes.moves;skipped.push(...changes.skipped);
     }
     const existing=snap.rows.filter((r,i)=>!removals.some(s=>s.rowIdx===i+1));
     const proposed=new Set();
     for(const e of events){
       if(String(e.colorId)!=='5'||e.status==='cancelled')continue;
+      if(pendingIds.has(e.id)){skipped.push({title:e.summary||'',date:L.calendarDate(e),reason:'Cambio pendiente entre la hoja y Calendar: utiliza «Completar cambios pendientes»'});continue;}
       const date=L.calendarDate(e),h=L.hours(e);if(!date.startsWith(p.input.month))continue;
       if(!e.end?.dateTime){skipped.push({title:e.summary||'',date,reason:'Evento de todo el día: añade horas de inicio y fin para poder incorporarlo'});continue;}
       if(p.kind!=='sync'&&!p.input.includePast&&new Date(e.end.dateTime)<=now)continue;
@@ -144,7 +146,7 @@ async function runDaily(payload,token,request,now=new Date()){
     return {items:(await trashRows(token,request,await metadata(token,request))).map(({cells,...r})=>({...r,group:D.value(cells[8]),date:D.dateISO(cells[5]),total:D.value(cells[6])})),spreadsheetId:targetId()};
   }
   if(!payload||Object.keys(payload).some(k=>!['spreadsheetId','action','kind','input','expectedVersion','operationId','allowSimilar'].includes(k))||!['preview','apply'].includes(payload.action))throw Error('Petición diaria no válida.');
-  if(payload.action==='preview'){const snap=await snapshot(token,request);await metadata(token,request);const p=await build(payload,snap,token,request,now);return {...p,rows:undefined,spreadsheetId:targetId(),calendarModified:false};}
+  if(payload.action==='preview'){const snap=await snapshot(token,request),meta=await metadata(token,request),p=await build(payload,snap,token,request,now,meta);return {...p,rows:undefined,spreadsheetId:targetId(),calendarModified:false};}
   if(!/^[a-f0-9-]{36}$/.test(payload.operationId||'')||typeof payload.expectedVersion!=='string'||(payload.allowSimilar!==undefined&&typeof payload.allowSimilar!=='boolean'))throw Error('Falta la revisión u operación válida.');
   const previous=pending;let unlock;pending=new Promise(r=>unlock=r);await previous;
   try{
@@ -152,7 +154,7 @@ async function runDaily(payload,token,request,now=new Date()){
     const operationKey='horas_daily_'+payload.operationId,requestHash=hash({kind:payload.kind,input:payload.input,version:payload.expectedVersion,allowSimilar:payload.allowSimilar===true});
     const recorded=meta.developerMetadata?.find(m=>m.metadataKey===operationKey);
     if(recorded){if(recorded.metadataValue!==requestHash)throw Error('El identificador ya se usó para otra revisión.');return {alreadyApplied:true,spreadsheetId:targetId(),calendarModified:false};}
-    const snap=await snapshot(token,request),p=await build(payload,snap,token,request,now);
+    const snap=await snapshot(token,request),p=await build(payload,snap,token,request,now,meta);
     if(p.version!==payload.expectedVersion)throw Error('La hoja o Calendar cambió desde la revisión. Analiza de nuevo antes de guardar.');
     if(p.duplicates&&!payload.allowSimilar)throw Error('Hay sesiones con el mismo grupo, fecha y horario. Confirma expresamente una partida adicional.');
     if(!p.rows.length&&!p.removals.length&&!p.moves.length&&p.kind!=='delete')return {unchanged:true,spreadsheetId:targetId(),calendarModified:false};
@@ -196,4 +198,4 @@ async function runDaily(payload,token,request,now=new Date()){
     return {saved:p.kind==='delete'?1:p.rows.length+p.removals.length+p.moves.length,added:p.rows.length,removed:p.removals.length,moved:p.moves.length,operationId:payload.operationId,archived:archived.length>0,spreadsheetId:targetId(),calendarModified:false};
   }finally{unlock();}
 }
-module.exports={runDaily,session,dates,rowFor,build,hash,values,metadata,trashRows,TRASH,get BASE(){return base();}};
+module.exports={runDaily,session,dates,rowFor,build,hash,values,metadata,trashRows,rawRow,archiveRequests,TRASH,get BASE(){return base();}};

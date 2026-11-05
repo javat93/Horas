@@ -9,13 +9,24 @@ function updateFields(current,incoming,mask){
   }
   return result;
 }
-function fake(){
+function fake({calendarWrites=false}={}){
   const grids=new Map([[0,[['Pago','Hecho','Bolo','Clase','Precio','Fecha','Total','H','Grupo','Barrio','CalendarId','Dirección','Inicio','Fin','Excepción'].map(c)]],[758405382,[['Grupo','Dirección','Precio','Bolo','Barrio'].map(c),['Moli de finestrelles','Dirección de catálogo',24,50,'Barrio catálogo'].map(c)]]]);
   const props=new Map([[0,{sheetId:0,title:'Detalle',gridProperties:{rowCount:2000,columnCount:15}}],[758405382,{sheetId:758405382,title:'Coles',gridProperties:{rowCount:100,columnCount:5}}]]),meta=[],calls=[];let throwAfterWrite=false;
   const native=rows=>rows.map(row=>({values:row.map(cell=>({...clone(cell),...(cell.userEnteredValue?{effectiveValue:clone(cell.userEnteredValue)}:{}),...(cell.userEnteredFormat?{effectiveFormat:clone(cell.userEnteredFormat)}:{})}))}));
-  const request=async(url,token,method='GET',body)=>{
+  let calendarRevision=0;
+  const request=async(url,token,method='GET',body,headers={})=>{
     calls.push({url,method,body:clone(body||{})});const u=new URL(url);
-    if(url.startsWith('https://www.googleapis.com/calendar')){assert.equal(method,'GET');if(u.pathname.includes('/events/')){const id=decodeURIComponent(u.pathname.split('/events/')[1]);return clone([...events,...events2].find(e=>e.id===id)||{id,status:'cancelled'});}const p=u.searchParams.get('pageToken');return clone(p?{items:events2}:{items:events,...(events2.length?{nextPageToken:'page2'}:{})});}
+    if(url.startsWith('https://www.googleapis.com/calendar')){
+      const id=u.pathname.includes('/events/')?decodeURIComponent(u.pathname.split('/events/')[1]):body?.id,all=[...events,...events2],current=all.find(e=>e.id===id);
+      if(method==='GET'){if(id)return clone(current||{id,status:'cancelled'});const p=u.searchParams.get('pageToken');return clone(p?{items:events2}:{items:events,...(events2.length?{nextPageToken:'page2'}:{})});}
+      assert(calendarWrites,'Calendar de solo lectura');
+      if(headers['If-Match']&&headers['If-Match']!==current?.etag)throw Object.assign(Error('Precondition failed'),{status:412});
+      if(method==='POST'){if(current)throw Object.assign(Error('Already exists'),{status:409});const added={...clone(body),status:'confirmed',etag:'revision-'+ ++calendarRevision};events.push(added);return clone(added);}
+      if(!current)throw Object.assign(Error('Not found'),{status:404});
+      if(method==='PATCH'){Object.assign(current,clone(body),{etag:'revision-'+ ++calendarRevision});return clone(current);}
+      if(method==='DELETE'){current.status='cancelled';current.etag='revision-'+ ++calendarRevision;return {};}
+      assert.fail('Método de Calendar no simulado');
+    }
     assert(url.startsWith(S.BASE),'Solo la copia');
     if(u.pathname.endsWith('/developerMetadata:search'))return {matchedDeveloperMetadata:clone(meta).map(developerMetadata=>{if(developerMetadata.location.dimensionRange?.sheetId===0)delete developerMetadata.location.dimensionRange.sheetId;return {developerMetadata};})};
     if(method==='POST'){

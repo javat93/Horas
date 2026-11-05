@@ -4,7 +4,7 @@ const history=new Set(require('./calendar-history.json').eventHashes);
 const protectedReference=id=>history.has(createHash('sha256').update(id).digest('hex'));
 const value=(row,i)=>D.value(row?.[i]);
 const rowKey=(group,date,start,end)=>[G.id(group),date,start,end].join('|');
-async function reconcile(month,snap,events,token,request){
+async function reconcile(month,snap,events,token,request,pendingIds=new Set()){
   const removals=[],moves=[],skipped=[],ids=new Map(),listed=new Map(events.map(e=>[e.id,e]));
   for(const row of snap.rows.slice(1)){const id=String(value(row,10));if(id)ids.set(id,(ids.get(id)||0)+1);}
   const selected=snap.rows.map((row,i)=>({row,rowIdx:i+1})).filter(({row,rowIdx})=>rowIdx>1&&value(row,8)&&value(row,10)&&(D.dateISO(row[5]).startsWith(month)||L.calendarDate(listed.get(String(value(row,10)))||{}).startsWith(month)));
@@ -13,6 +13,7 @@ async function reconcile(month,snap,events,token,request){
     const {row,rowIdx}=selected[cursor++],id=String(value(row,10));
     const current={rowIdx,group:String(value(row,8)),date:D.dateISO(row[5]),start:D.time(value(row,12)),end:D.time(value(row,13)),total:D.numeric(value(row,6)),calendarId:id};
     const omit=reason=>skipped.push({title:current.group,date:current.date,rowIdx,reason});
+    if(pendingIds.has(id)){omit('Cambio pendiente entre la hoja y Calendar: utiliza «Completar cambios pendientes»');continue;}
     if(protectedReference(id)){omit('Referencia histórica protegida: se conserva');continue;}
     if(ids.get(id)!==1){omit('Evento compartido por varias partidas: se conservan');continue;}
     let event=listed.get(id);

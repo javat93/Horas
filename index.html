@@ -11,7 +11,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 	<!-- Carga del archivo de configuración -->
-    <script src="protected-config.js?v=ensayo-20261102"></script>
+    <script src="protected-config.js?v=calendar-crud-20261105"></script>
     <!-- Configuración segura según entorno -->
 <script>
     // Detectar si estamos en producción
@@ -35,13 +35,13 @@
     <script src="group-identity.js?v=fase6-20261029"></script>
     <script src="calendar-linking.js?v=enlaces-20261029"></script>
     <script src="protected-review.js?v=fase7-20261029"></script>
-    <script src="sandbox/daily-editor.js?v=sync-20261105" defer></script>
-    <script src="sandbox/panel.js?v=productiva-20261102" defer></script>
+    <script src="sandbox/daily-editor.js?v=calendar-crud-20261105" defer></script>
+    <script src="sandbox/panel.js?v=calendar-crud-20261105" defer></script>
     <script src="sandbox/performed-editor.js?v=productiva-20261102" defer></script>
     <script src="sandbox/identity-review.js?v=fase6-20261029" defer></script>
     <script src="sandbox/group-editor.js?v=ui-20261102" defer></script>
     <script src="sandbox/calendar-review.js?v=enlaces-20261029" defer></script>
-    <script src="sandbox/protected-editor.js?v=sync-20261105" defer></script>
+    <script src="sandbox/protected-editor.js?v=calendar-crud-20261105" defer></script>
     <script src="sandbox/locale-editor.js?v=protegido-20261102" defer></script>
     <link rel="icon" type="image/png" href="favicon.ico">
     <!-- PWA Manifest and Icons -->
@@ -321,7 +321,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="review-ui.css?v=ui-20261102">
+    <link rel="stylesheet" href="review-ui.css?v=calendar-crud-20261105">
 </head>
 <body class="pb-20">
 
@@ -494,7 +494,7 @@
                     <input type="text" inputmode="decimal" id="ev-total" class="w-full rounded-2xl p-4 input-modern text-sm font-medium">
                     <label for="ev-barrio">Barrio / zona de esta sesión</label>
                     <input type="text" id="ev-barrio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium">
-                    <p>Se revisan barrio y dirección por separado. Un campo vacío conserva el dato existente. Calendar no cambia; la fecha y el grupo se conservan.</p>
+                    <p>El barrio y la dirección son independientes. Comprueba el importe por sesión y el destino antes de guardar.</p>
                 </div>
                 
                 <div class="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
@@ -517,10 +517,10 @@
                 </div>
                 
                 <div id="sync-calendar-wrapper" class="space-y-3 mt-6">
-                    <!--<div class="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                    <div id="calendar-write-option" hidden class="flex items-center gap-3 p-4 bg-blue-50 rounded-2xl border border-blue-100">
                         <input type="checkbox" id="ev-calendar" checked class="w-5 h-5 accent-blue-600 rounded">
-                        <label for="ev-calendar" class="text-sm font-bold text-blue-800">Crear evento en Google Calendar</label>
-                    </div>-->
+                        <label for="ev-calendar" class="text-sm font-bold text-blue-800">Guardar también en Google Calendar</label>
+                    </div>
 
                     <div id="recurrence-panel" class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                         <div class="flex items-center gap-2 mb-3">
@@ -779,7 +779,7 @@
 
         let tokenClient;
         function tokenStorageKey() {
-            return typeof CONFIG !== 'undefined' && CONFIG.DATA_MODE && CONFIG.DATA_MODE !== 'test' ? 'g_token_horas_'+CONFIG.DATA_MODE : typeof CONFIG !== 'undefined' && CONFIG.TEST_MODE ? 'g_token_pruebas' : 'g_token';
+            return typeof CONFIG !== 'undefined' && CONFIG.DATA_MODE && CONFIG.DATA_MODE !== 'test' ? 'g_token_horas_'+CONFIG.DATA_MODE+(CONFIG.SCOPES.includes('calendar.events.owned')?'_calendar_v1':'') : typeof CONFIG !== 'undefined' && CONFIG.TEST_MODE ? 'g_token_pruebas' : 'g_token';
         }
         let gapiInited = false;
         let gisInited = false;
@@ -961,7 +961,7 @@
             tokenClient.callback = async (resp) => {
                 try {
                     if (resp.error !== undefined) throw (resp);
-                    if(!google.accounts.oauth2.hasGrantedAllScopes(resp,...CONFIG.SCOPES.split(/\s+/).filter(Boolean)))throw new Error('Faltan permisos necesarios para leer Calendar y trabajar con la hoja. Vuelve a conectar y revisa los permisos.');
+                    if(!google.accounts.oauth2.hasGrantedAllScopes(resp,...CONFIG.SCOPES.split(/\s+/).filter(Boolean)))throw new Error('Faltan permisos necesarios para Calendar y la hoja. Vuelve a conectar y permite crear, editar y eliminar eventos en tus calendarios.');
                     savedSession().save(resp);
                     gapi.client.setToken({access_token:resp.access_token});
                     showGoogleConnection(true);
@@ -1555,6 +1555,7 @@
 
                 renderAll();
                 updateFinancialStats();
+                window.refreshCalendarPending?.().catch(error=>console.warn("No se pudieron consultar los cambios pendientes",error.message));
                 
                 // 4. Actualizar automáticamente las clases realizadas (solo en la carga inicial)
                 if (actualizarRealizadosFlag) {
@@ -1907,6 +1908,7 @@
             for(const id of ['ev-hora-inicio','ev-hora-fin'])document.getElementById(id).required=true;
             document.getElementById('modal-evento-title').innerText = "Nueva clase";
             document.getElementById('form-evento').reset();
+            document.getElementById('ev-calendar').checked=true;
             document.getElementById('ev-rowIdx').value = "";
             document.getElementById('sync-calendar-wrapper').classList.remove('hidden');
             document.getElementById('recurrence-options').classList.add('hidden');

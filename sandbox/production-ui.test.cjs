@@ -28,6 +28,11 @@ test('destino distinto o backend antiguo mantienen los cambios bloqueados',async
 test('lectura inicial de producción permite consultar pero no activa escrituras automáticas',async()=>{
   const h=await mount('production',{writeEnabled:false,automaticWrites:false});assert.equal(await h.window.horasEnvironmentReady,true);assert.equal(h.window.horasWritesEnabled,false);assert.match(h.elements['test-target-status'].textContent,/solo lectura/);
 });
+test('backend con Calendar habilitado muestra su opción y activa únicamente las operaciones revisadas',async()=>{
+  const h=await mount('production',{calendarReadOnly:false,calendarWrites:true});assert.equal(await h.window.horasEnvironmentReady,true);assert.equal(h.window.horasCalendarWritesEnabled,true);assert.equal(h.elements['calendar-write-option'].hidden,false);
+  const config=C.create('production');assert(config.SCOPES.includes('calendar.events.owned'));
+  const key=html.slice(html.indexOf('        function tokenStorageKey()'),html.indexOf('        let gapiInited'));assert.equal(vm.runInNewContext(key+';tokenStorageKey();',{CONFIG:config}),'g_token_horas_production_calendar_v1');
+});
 test('proxy antiguo permanece bloqueado con TEST_MODE=false y sesión almacenada separada por entorno',async()=>{
   const code=html.slice(html.indexOf('        async function proxyGoogleAPI('),html.indexOf('        async function listAllCalendarEvents('));
   // Compile just this complete function, using its next known boundary in the source.

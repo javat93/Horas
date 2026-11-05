@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const response=await (window.horasFetch||fetch)(CONFIG.TEST_ENVIRONMENT_API_URL || `${CONFIG.PROXY_URL}/api/test-environment`);
     const env=await response.json();
-    if(!response.ok || env.mode!==mode || env.spreadsheetId!==CONFIG.SPREADSHEET_ID || !env.calendarReadOnly || env.automaticWrites!==((env.writeEnabled??true)&&env.autoPerformedEnabled!==false&&CONFIG.TEST_PHASE>=8) || env.appWrites) throw new Error('El backend no coincide con el destino configurado.');
+    if(!response.ok || env.mode!==mode || env.spreadsheetId!==CONFIG.SPREADSHEET_ID || env.calendarReadOnly!==(env.calendarWrites!==true) || env.automaticWrites!==((env.writeEnabled??true)&&env.autoPerformedEnabled!==false&&CONFIG.TEST_PHASE>=8) || env.appWrites) throw new Error('El backend no coincide con el destino configurado.');
     if(!isTest)HorasProtectedConfig.verify(CONFIG,env);
     if(CONFIG.TEST_PHASE===2 && (env.phase!==2||!env.linkReview))throw new Error('El backend aún no está preparado para la fase 2. Recarga en unos instantes.');
     if(CONFIG.TEST_PHASE>=3 && (env.phase!==CONFIG.TEST_PHASE||!env.protectedReview))throw new Error('El backend aún no está preparado para esta fase. Recarga en unos instantes.');
@@ -69,7 +69,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(CONFIG.TEST_PHASE>=8 && (!env.stateReview||!env.performedAutomation))throw new Error('La edición segura de estados aún no está disponible.');
     status.textContent=`Backend comprobado: ${env.spreadsheetId}. ${CONFIG.TEST_PHASE>=8?'Realizado se marca automáticamente al terminar las sesiones verificadas; el resto de cambios requiere revisión.':'Los cambios requieren revisión; no hay escrituras automáticas.'} Calendar solo lectura.`;
     window.horasWritesEnabled=env.writeEnabled!==false;
-    if(!isTest)status.textContent=window.horasWritesEnabled?'Conexión verificada. Calendar solo lectura. Los cambios se revisan antes de guardar.':'Conexión verificada. Hoja y Calendar en solo lectura; cambios pendientes de activación.';
+    window.horasCalendarWritesEnabled=env.calendarWrites===true;
+    const calendarOption=document.getElementById('calendar-write-option');if(calendarOption)calendarOption.hidden=!window.horasCalendarWritesEnabled;
+    if(!isTest)status.textContent=window.horasWritesEnabled?(window.horasCalendarWritesEnabled?'Conexión verificada. Los cambios en la hoja y Calendar se revisan antes de guardar.':'Conexión verificada. Calendar solo lectura. Los cambios se revisan antes de guardar.'):'Conexión verificada. Hoja y Calendar en solo lectura; cambios pendientes de activación.';
     if(isProduction){status.hidden=window.horasWritesEnabled;status.textContent=window.horasWritesEnabled?'':'Modo de solo lectura.';}
     control.disabled=!isTest;
     let audit=document.getElementById('test-environment-banner');

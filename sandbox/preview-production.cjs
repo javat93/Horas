@@ -2,12 +2,12 @@
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 const {createHandler}=require('../api/test.js'),C=require('../protected-config.js'),{fake,c}=require('./fixtures/daily.cjs');
 const root=path.resolve(__dirname,'..'),port=Number(process.env.HORAS_PREVIEW_PORT||3011),origin=`http://localhost:${port}`;
-const fixture=fake();
+const fixture=fake({calendarWrites:true});
 fixture.grids.get(0)[0][14]=c('Realizado automático');
 fixture.setEvents([{id:'visual-calendar-new',summary:'Clases Tramuntana',colorId:'5',start:{dateTime:'2026-11-05T18:00:00+01:00'},end:{dateTime:'2026-11-05T19:00:00+01:00'},location:'Dirección de prueba de Calendar'},{id:'visual-calendar-move',summary:'Clases Tramuntana',colorId:'5',start:{dateTime:'2026-11-06T18:00:00+01:00'},end:{dateTime:'2026-11-06T19:00:00+01:00'}}]);
 fixture.grids.get(0).push([false,false,false,true,24,'02/11/2026',24,1,'Moli de finestrelles','Barrio de ejemplo','','Dirección de ejemplo','17:00','18:00',''].map(c));
 for(const [id,date]of [['visual-calendar-move','03/11/2026'],['visual-calendar-deleted','04/11/2026']])fixture.grids.get(0).push([false,false,false,true,24,date,24,1,'Moli de finestrelles','Barrio de ejemplo',id,'Dirección de ejemplo','18:00','19:00',''].map(c));
-const handler=createHandler({profile:'production',writeEnabled:true,request:fixture.request});
+const handler=createHandler({profile:'production',writeEnabled:true,calendarWriteEnabled:true,request:fixture.request});
 const files=new Set(['styles.css','locale-data.js','auth-session.js','app-data.js','group-identity.js','calendar-linking.js','protected-review.js','protected-config.js','sandbox/daily-editor.js','sandbox/panel.js','sandbox/performed-editor.js','sandbox/identity-review.js','sandbox/group-editor.js','sandbox/calendar-review.js','sandbox/protected-editor.js','sandbox/locale-editor.js','favicon.ico','manifest.json','icon-192.png','icon-512.png']);
 const server=http.createServer(async(req,res)=>{
   try{

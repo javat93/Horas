@@ -92,9 +92,14 @@
     document.getElementById('ev-sitio').value=ev.direccion||'';
     if(CONFIG.TEST_PHASE>=7)document.getElementById('ev-sitio').disabled=false;
     for(const id of ['ev-hora-inicio','ev-hora-fin'])document.getElementById(id).required=false;
+    if(window.horasCalendarWritesEnabled){
+      for(const id of ['ev-fecha','ev-grupo','ev-grupo-search','ev-bolo','ev-sitio'])document.getElementById(id).disabled=false;
+      document.getElementById('ev-calendar').checked=!!ev.calEventId;
+    }
     document.getElementById('ev-hora-inicio').value=CalendarLinking.time(ev.horaInicio);document.getElementById('ev-hora-fin').value=CalendarLinking.time(ev.horaFin);
   };
   window.reviewSessionForm=async function(){
+    if(window.horasCalendarWritesEnabled)return window.reviewCalendarSessionForm();
     const rowIdx=Number(document.getElementById('ev-rowIdx').value);if(!rowIdx){showErrorModal('Sesión pendiente','Abre de nuevo el formulario para revisar una sesión existente.','info');return;}
     const proposal={price:document.getElementById('ev-precio').value,total:document.getElementById('ev-total').value,district:document.getElementById('ev-barrio').value};
     if(CONFIG.TEST_PHASE>=7)proposal.address=document.getElementById('ev-sitio').value;

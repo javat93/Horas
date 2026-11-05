@@ -18,8 +18,8 @@ async function readBody(req) {
   }
   return JSON.parse(value || '{}');
 }
-async function googleRequest(url, token, method = 'GET', body, fetchImpl = fetch) {
-  const response = await fetchImpl(url, { method, headers: { Authorization: token, 'Content-Type': 'application/json' }, ...(body ? {body: JSON.stringify(body)} : {}) });
+async function googleRequest(url, token, method = 'GET', body, fetchImpl = fetch, headers = {}) {
+  const response = await fetchImpl(url, { method, headers: { Authorization: token, 'Content-Type': 'application/json', ...headers }, ...(body ? {body: JSON.stringify(body)} : {}) });
   const text = await response.text();
   const data = text ? JSON.parse(text) : {};
   if (!response.ok) {

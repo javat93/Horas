@@ -7,11 +7,11 @@ async function call(handler,api,body,method='POST'){
   await handler({method,query:{api},body,headers:{host:'example.invalid',origin:'https://javat93.github.io',authorization:'Bearer synthetic-token'}},res);return res;
 }
 const session={group:'Tramuntana',date:'2099-01-02',start:'10:00',end:'11:15',price:'33,75',total:'40,25',district:'Barrio manual',address:'Dirección manual',gig:true};
-test('configuración activada conserva el perfil real exacto, revisiones y permisos de solo lectura de Calendar',async()=>{
+test('configuración activada conserva el perfil real exacto y habilita escrituras revisadas de Calendar',async()=>{
   const fs=require('node:fs'),vm=require('node:vm'),config=vm.runInNewContext(fs.readFileSync(require.resolve('../config.production.js'),'utf8')+';CONFIG',{HorasProtectedConfig:C});
   assert.equal(config.SPREADSHEET_ID,P.ORIGINAL_ID);assert.equal(config.PROTECTED_MODE,true);assert.equal(config.TEST_MODE,false);
   const release=require('../release/activation.json'),settings=releaseSettings(release);assert.equal(settings.profile,'production');assert.equal(settings.writeEnabled,true);
-  const env=(await call(createHandler(settings),'environment',null,'GET')).body;C.verify(config,env);assert.equal(env.calendarReadOnly,true);assert.equal(env.appWrites,false);
+  const env=(await call(createHandler(settings),'environment',null,'GET')).body;C.verify(config,env);assert.equal(env.calendarReadOnly,false);assert.equal(env.calendarWrites,true);assert.equal(env.appWrites,false);assert(config.SCOPES.includes('calendar.events.owned'));
 });
 test('producción queda cerrada por defecto y exige verificación de migración antes de lectura real',()=>{
   assert.throws(()=>releaseSettings({}),/pendiente/);

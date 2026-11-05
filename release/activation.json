@@ -1,5 +1,6 @@
 {
   "HORAS_PROTECTED_PROFILE": "production",
   "HORAS_MIGRATION_VERIFIED": "migracion-20261102",
-  "HORAS_PROTECTED_WRITES": "enabled"
+  "HORAS_PROTECTED_WRITES": "enabled",
+  "HORAS_CALENDAR_WRITES": "enabled"
 }
