@@ -17,7 +17,22 @@
     if(calendarActions.length){const counts=calendarActions.reduce((a,k)=>(a[k]=(a[k]||0)+1,a),{});d.append(node('p',`Calendar · Nuevos: ${counts.create||0}. Editar: ${counts.patch||0}. Eliminar: ${counts.delete||0}. Los cambios de una sesión no alteran el resto de una serie.`));}
     for(const warning of plan.warnings||[])d.append(node('p',warning));
     if(kind==='sync')d.append(node('h3',`Nuevas sesiones (${plan.summary.length})`));
-    for(const s of plan.summary){
+    if(kind==='edit'){
+      const s=plan.summary[0],current=eventos.find(event=>event.rowIdx===input.rowIdx),card=node('div');card.className='review-record';
+      const currentDate=current?.fechaObj instanceof Date?`${current.fechaObj.getFullYear()}-${String(current.fechaObj.getMonth()+1).padStart(2,'0')}-${String(current.fechaObj.getDate()).padStart(2,'0')}`:LocaleData.parseSpanish(current?.fechaStr||'');
+      const changes=[];
+      const text=(label,before,after,format=value=>String(value??''),same=(a,b)=>String(a??'').trim()===String(b??'').trim())=>{if(!same(before,after))changes.push(`${label}: ${format(before)} → ${format(after)}`);};
+      const number=(a,b)=>{const left=LocaleData.numeric(a),right=LocaleData.numeric(b);return left===right;};
+      text('Tipo',current?.boloCole==='X','gig' in s?!!s.gig:!!input.gig,value=>value?'Bolo':'Clase');
+      text('Grupo',current?.grupo,s.group,value=>GroupIdentity.label(value,s.date),(a,b)=>GroupIdentity.id(a)===GroupIdentity.id(b));
+      text('Fecha',currentDate,s.date,value=>LocaleData.display(value));
+      text('Horario',`${CalendarLinking.time(current?.horaInicio)}-${CalendarLinking.time(current?.horaFin)}`,`${s.start||''}-${s.end||''}`);
+      text('Precio',current?.precioHora,s.price,value=>LocaleData.numeric(value)===null?'sin tarifa':LocaleData.currency(LocaleData.numeric(value)),number);
+      text('Importe total',current?.total,s.total,value=>LocaleData.numeric(value)===null?'sin importe':LocaleData.currency(LocaleData.numeric(value)),number);
+      text('Barrio',current?.sitio,s.district,value=>String(value||'(vacío)'));
+      text('Dirección',current?.direccion,s.address,value=>String(value||'(vacía)'));
+      if(changes.length){for(const change of changes)card.append(node('p',change));d.append(card);}else d.append(node('p','No hay cambios en los datos de la sesión.'));
+    }else for(const s of plan.summary){
       const card=node('div');card.className='review-record';d.append(card);
       const label=kind==='group'?`${GroupIdentity.catalogLabel(s.name)} · sesión: ${s.price===''?'sin tarifa':LocaleData.currency(s.price)} · bolo: ${s.gigPrice===''?'sin tarifa':LocaleData.currency(s.gigPrice)}`:`${GroupIdentity.label(s.group,s.date)} · ${LocaleData.display(s.date)} · ${s.start||''}–${s.end||''} · ${LocaleData.numeric(s.total)===null?'sin importe':LocaleData.currency(LocaleData.numeric(s.total))}`;
       card.append(node('p',label));if(s.district||s.address)card.append(node('p',`Barrio: ${s.district||'(vacío)'} · Dirección: ${s.address||'(vacía)'}`));
@@ -39,13 +54,13 @@
     save.onclick=async()=>{
       if(saving||busy)return;if(plan.duplicates&&!extra.checked){status.textContent='Confirma la partida adicional o cancela.';return;}
       saving=busy=true;save.disabled=cancel.disabled=extra.disabled=true;status.textContent='Releyendo y comprobando antes de guardar…';
+      const request=api({action:'apply',kind,input,expectedVersion:plan.version,operationId,allowSimilar:extra.checked});d.close();d.remove();if(kind==='session'||kind==='edit')closeModal('modal-evento');if(kind==='group')closeModal('modal-grupo');if(kind==='import')closeModal('modal-future-events');const resultHost=document.getElementById('test-result');resultHost.textContent='Guardando los cambios…';
       try{
-        const result=await api({action:'apply',kind,input,expectedVersion:plan.version,operationId,allowSimilar:extra.checked});
+        const result=await request;
         save.hidden=true;cancel.textContent='Cerrar';const message=result.alreadyApplied?'Esta operación ya se registró; no se ha repetido.':result.unchanged?'No hay cambios que guardar.':kind==='sync'?`Sincronización verificada. Altas: ${result.added}. Cambios de fecha u horario: ${result.moved}. Sesiones retiradas: ${result.removed}. Calendar sin cambios.`:`Operación guardada y verificada: ${result.saved} registro(s). ${result.calendarModified?'Calendar actualizado.':'Calendar sin cambios.'}`;
         status.textContent=message;document.getElementById('test-result').textContent=message;
-        if(kind==='session'||kind==='edit')closeModal('modal-evento');if(kind==='group')closeModal('modal-grupo');if(kind==='import')closeModal('modal-future-events');
-        try{await syncData(false,false);}catch(e){status.textContent=message+' Falta recargar la vista: '+e.message;}
-      }catch(e){uncertain=true;status.textContent=e.message;if(e.code==='REVIEW_EXPIRED'){save.hidden=true;cancel.textContent='Cerrar y revisar de nuevo';}else{status.textContent+=' Puedes comprobar la misma operación con este botón.';save.textContent='Comprobar la misma operación';}window.refreshCalendarPending?.().catch(()=>{});}
+        try{await syncData(false,false);}catch(e){resultHost.textContent=message+' Falta recargar la vista: '+e.message;}
+      }catch(e){uncertain=true;resultHost.textContent='No se pudo completar la operación.';showErrorModal('No se pudo guardar el cambio',e.message,'warning');window.refreshCalendarPending?.().catch(()=>{});}
       finally{saving=busy=false;save.disabled=window.horasWritesEnabled===false;cancel.disabled=false;extra.disabled=uncertain;}
     };
     document.body.append(d);d.showModal();heading.tabIndex=-1;heading.focus({preventScroll:true});d.scrollTop=0;
