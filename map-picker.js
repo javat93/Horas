@@ -1,4 +1,10 @@
 (() => {
+    const MAPLIBRE_MODULE_URL = 'https://unpkg.com/maplibre-gl@6.17.0/dist/maplibre-gl.mjs';
+    const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+    const NOMINATIM_URL = 'https://nominatim.openstreetmap.org';
+    const defaultCenter = { lat: 41.3874, lng: 2.1686 };
+    const manualMessage = 'Puedes escribir la direcci�n y confirmarla manualmente.';
+
     const byId = id => document.getElementById(id);
     const dialog = byId('modal-mapa');
     const address = byId('map-search');
@@ -10,126 +16,170 @@
     const panel = unavailable.parentElement;
     const externalLink = byId('map-external');
     const retryButton = byId('map-retry');
-    const defaultCenter = { lat: 41.3874, lng: 2.1686 };
-    const manualMessage = 'Puedes escribir la dirección y confirmarla manualmente.';
+
     let target;
     let revision = 0;
-    let mapsRequest;
-    let rejectLoad;
-    let authFailed = false;
+    let mapLibreRequest;
     let map;
     let marker;
-    let geocoder;
-
-    function showUnavailable() {
-        searchButton.disabled = true;
-        locateButton.disabled = true;
-        unavailable.hidden = false;
-        panel.classList.add('map-panel--unavailable');
-        searchButton.hidden = true;
-        locateButton.hidden = true;
-        updateExternalLink();
-        retryButton.hidden = authFailed;
-        status.textContent = manualMessage;
-    }
-
-    window.gm_authFailure = () => {
-        authFailed = true;
-        rejectLoad?.(new Error('Google Maps authentication failed'));
-        if (dialog.open) showUnavailable();
-    };
-
-    function loadMaps() {
-        if (authFailed) return Promise.reject(new Error('Google Maps authentication failed'));
-        if (mapsRequest) return mapsRequest;
-        mapsRequest = (async () => {
-            await window.horasConfigReady;
-            const endpoint = CONFIG.GOOGLE_MAPS_API_URL;
-            if (!endpoint) throw new Error('Missing Google Maps endpoint');
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                let settled = false;
-                const finish = error => {
-                    if (settled) return;
-                    settled = true;
-                    clearTimeout(timer);
-                    rejectLoad = undefined;
-                    if (error) {
-                        script.remove();
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
-                };
-                const timer = setTimeout(() => finish(new Error('Google Maps load timed out')), 10000);
-                rejectLoad = finish;
-                // The existing proxy redirects Google Maps to this callback.
-                window.initMap = () => finish();
-                script.async = true;
-                script.onerror = () => finish(new Error('Google Maps script could not load'));
-                const url = new URL(endpoint, window.location.href);
-                url.searchParams.set('libraries', 'places');
-                script.src = url.href;
-                document.head.append(script);
-            });
-        })().catch(error => {
-            mapsRequest = undefined;
-            throw error;
-        });
-        return mapsRequest;
-    }
+    let nominatimQueue = Promise.resolve();
+    let lastNominatimRequest = 0;
 
     function isCurrent(request) {
         return dialog.open && request === revision;
     }
 
     function updateExternalLink() {
-        if (!externalLink) return;
         const query = address.value.trim();
-        const url = new URL('https://www.google.com/maps/search/');
-        url.searchParams.set('api', '1');
+        const url = new URL('https://www.openstreetmap.org/search');
         if (query) url.searchParams.set('query', query);
-        externalLink.href = query ? url.href : 'https://www.google.com/maps/';
+        externalLink.href = query ? url.href : 'https://www.openstreetmap.org/';
     }
 
     function setAddress(value) {
         address.value = value;
         confirmButton.disabled = !value.trim();
+        updateExternalLink();
     }
 
-    function geocode(query, request) {
-        if (!isCurrent(request) || authFailed) return;
-        status.textContent = 'Buscando dirección…';
-        const timer = setTimeout(() => {
-            if (!isCurrent(request) || authFailed) return;
-            revision++;
-            status.textContent = 'La búsqueda tarda demasiado. Puedes reintentar o usar la dirección escrita.';
-        }, 8000);
-        geocoder.geocode(query, (results, resultStatus) => {
-            clearTimeout(timer);
-            if (!isCurrent(request) || authFailed) return;
+    function showUnavailable() {
+        searchButton.disabled = false;
+        locateButton.disabled = !navigator.geolocation;
+        unavailable.hidden = false;
+        panel.classList.add('map-panel--unavailable');
+        retryButton.hidden = false;
+        updateExternalLink();
+        status.textContent = 'No se pudo cargar el mapa. ' + manualMessage;
+    }
+
+    function loadMapLibre() {
+        if (!mapLibreRequest) {
+            mapLibreRequest = import(MAPLIBRE_MODULE_URL).catch(error => {
+                mapLibreRequest = undefined;
+                throw error;
+            });
+        }
+        return mapLibreRequest;
+    }
+
+    function wait(milliseconds) {
+        return new Promise(resolve => setTimeout(resolve, milliseconds));
+    }
+
+    function nominatimFetch(url) {
+        const request = nominatimQueue.then(async () => {
+            const elapsed = Date.now() - lastNominatimRequest;
+            if (elapsed < 1000) await wait(1000 - elapsed);
+            lastNominatimRequest = Date.now();
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 10000);
+            try {
+                const response = await fetch(url, {
+                    headers: { Accept: 'application/json' },
+                    signal: controller.signal
+                });
+                if (!response.ok) throw new Error(`Nominatim returned ${response.status}`);
+                return response.json();
+            } finally {
+                clearTimeout(timeout);
+            }
+        });
+        nominatimQueue = request.catch(() => undefined);
+        return request;
+    }
+
+    function placeMarker(location, moveMap = false) {
+        if (!map || !marker) return;
+        marker.setLngLat([location.lng, location.lat]).addTo(map);
+        if (moveMap) map.flyTo({ center: [location.lng, location.lat], zoom: 16 });
+    }
+
+    async function searchAddress(query, request) {
+        if (!isCurrent(request)) return;
+        status.textContent = 'Buscando direcci�n.';
+
+        const url = new URL('/search', NOMINATIM_URL);
+        url.searchParams.set('format', 'jsonv2');
+        url.searchParams.set('q', query);
+        url.searchParams.set('countrycodes', 'es');
+        url.searchParams.set('limit', '1');
+        url.searchParams.set('addressdetails', '1');
+        url.searchParams.set('accept-language', 'es');
+
+        try {
+            const results = await nominatimFetch(url);
+            if (!isCurrent(request)) return;
             const result = results?.[0];
-            if (resultStatus !== 'OK' || !result) {
-                status.textContent = resultStatus === 'ZERO_RESULTS'
-                    ? 'No se encontró la dirección. Prueba añadiendo el municipio.'
-                    : 'No se pudo buscar la dirección. ' + manualMessage;
+            if (!result) {
+                status.textContent = 'No se encontr� la direcci�n. Prueba a�adiendo el municipio.';
                 return;
             }
-            setAddress(result.formatted_address);
-            marker.setPosition(query.location || result.geometry.location);
-            marker.setMap(map);
-            if (query.address) {
-                map.panTo(result.geometry.location);
-                map.setZoom(16);
+
+            const location = { lat: Number(result.lat), lng: Number(result.lon) };
+            setAddress(result.display_name);
+            placeMarker(location, true);
+            status.textContent = 'Direcci�n encontrada. Puedes corregirla antes de confirmar.';
+        } catch (error) {
+            if (isCurrent(request)) {
+                status.textContent = 'No se pudo buscar la direcci�n. ' + manualMessage;
             }
-            status.textContent = 'Dirección encontrada. Puedes corregirla antes de confirmar.';
-        });
+        }
+    }
+
+    async function reverseGeocode(location, request) {
+        if (!isCurrent(request)) return;
+        placeMarker(location);
+        status.textContent = 'Obteniendo direcci�n.';
+
+        const url = new URL('/reverse', NOMINATIM_URL);
+        url.searchParams.set('format', 'jsonv2');
+        url.searchParams.set('lat', String(location.lat));
+        url.searchParams.set('lon', String(location.lng));
+        url.searchParams.set('zoom', '18');
+        url.searchParams.set('addressdetails', '1');
+        url.searchParams.set('accept-language', 'es');
+
+        try {
+            const result = await nominatimFetch(url);
+            if (!isCurrent(request)) return;
+            if (result?.display_name) {
+                setAddress(result.display_name);
+                status.textContent = 'Ubicaci�n seleccionada. Puedes corregir la direcci�n antes de confirmar.';
+            } else {
+                status.textContent = 'No se encontr� una direcci�n para este punto. ' + manualMessage;
+            }
+        } catch (error) {
+            if (isCurrent(request)) {
+                status.textContent = 'No se pudo obtener la direcci�n. ' + manualMessage;
+            }
+        }
     }
 
     function selectPoint(location) {
-        marker.setPosition(location);
-        marker.setMap(map);
-        geocode({ location }, ++revision);
+        const point = { lat: Number(location.lat), lng: Number(location.lng) };
+        placeMarker(point);
+        reverseGeocode(point, ++revision);
+    }
+
+    async function createMap() {
+        const maplibregl = await loadMapLibre();
+        map = new maplibregl.Map({
+            container: 'map-container',
+            style: MAP_STYLE_URL,
+            center: [defaultCenter.lng, defaultCenter.lat],
+            zoom: 11,
+            attributionControl: true
+        });
+        marker = new maplibregl.Marker({ draggable: true });
+        map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+        map.on('click', event => selectPoint(event.lngLat));
+        marker.on('dragend', () => selectPoint(marker.getLngLat()));
+
+        await Promise.race([
+            new Promise(resolve => map.once('load', resolve)),
+            wait(10000).then(() => { throw new Error('OpenFreeMap load timed out'); })
+        ]);
     }
 
     async function prepareMap() {
@@ -138,35 +188,22 @@
         locateButton.disabled = true;
         unavailable.hidden = true;
         panel.classList.remove('map-panel--unavailable');
-        searchButton.hidden = false;
-        locateButton.hidden = false;
-        status.textContent = 'Cargando mapa…';
+        status.textContent = 'Cargando mapa.';
+
         try {
-            await loadMaps();
+            if (!map) await createMap();
             if (!dialog.open || target !== field) return;
-            if (authFailed) throw new Error('Google Maps authentication failed');
-            const maps = window.google.maps;
-            if (!map) {
-                geocoder = new maps.Geocoder();
-                marker = new maps.Marker({ draggable: true, title: 'Ubicación seleccionada' });
-                map = new maps.Map(byId('map-container'), {
-                    center: defaultCenter,
-                    zoom: 11,
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: false,
-                    gestureHandling: 'cooperative'
-                });
-                map.addListener('click', event => selectPoint(event.latLng));
-                marker.addListener('dragend', event => selectPoint(event.latLng));
-            }
-            marker.setMap(null);
-            map.setCenter(defaultCenter);
-            map.setZoom(11);
+
+            marker.remove();
+            map.jumpTo({ center: [defaultCenter.lng, defaultCenter.lat], zoom: 11 });
+            map.resize();
             searchButton.disabled = false;
             locateButton.disabled = !navigator.geolocation;
-            status.textContent = 'Busca una dirección o toca un punto en el mapa.';
+            status.textContent = 'Busca una direcci�n o toca un punto en el mapa.';
         } catch (error) {
+            map?.remove();
+            map = undefined;
+            marker = undefined;
             if (dialog.open && target === field) showUnavailable();
         }
     }
@@ -181,46 +218,36 @@
             dialog.showModal();
             prepareMap();
         });
-        // Keep inline suggestions optional. The text field works without Places.
-        const addAutocomplete = async () => {
-            try {
-                await loadMaps();
-                const { Autocomplete } = await window.google.maps.importLibrary('places');
-                new Autocomplete(field, { fields: ['formatted_address'] });
-                field.removeEventListener('focus', addAutocomplete);
-            } catch (error) {
-                // The picker reports Maps failures and supports manual entry.
-            }
-        };
-        field.addEventListener('focus', addAutocomplete);
     });
 
     address.addEventListener('input', () => {
         revision++;
-        if (!unavailable.hidden) updateExternalLink();
+        updateExternalLink();
         confirmButton.disabled = !address.value.trim();
-        if (!searchButton.disabled) status.textContent = 'Busca o confirma la dirección escrita.';
+        status.textContent = 'Busca o confirma la direcci�n escrita.';
     });
+
     byId('map-search-form').addEventListener('submit', event => {
         event.preventDefault();
         const query = address.value.trim();
-        if (query && !searchButton.disabled) geocode({ address: query, region: 'es' }, ++revision);
+        if (query && !searchButton.disabled) searchAddress(query, ++revision);
     });
+
     locateButton.addEventListener('click', () => {
         const request = ++revision;
-        status.textContent = 'Obteniendo tu ubicación…';
+        status.textContent = 'Obteniendo tu ubicaci�n.';
         navigator.geolocation.getCurrentPosition(position => {
-            if (!isCurrent(request) || authFailed) return;
+            if (!isCurrent(request)) return;
             const point = { lat: position.coords.latitude, lng: position.coords.longitude };
-            map.panTo(point);
-            map.setZoom(16);
-            selectPoint(point);
+            if (map) map.flyTo({ center: [point.lng, point.lat], zoom: 16 });
+            reverseGeocode(point, request);
         }, () => {
-            if (isCurrent(request) && !authFailed) {
-                status.textContent = 'No se pudo obtener tu ubicación. Busca una dirección o elige un punto.';
+            if (isCurrent(request)) {
+                status.textContent = 'No se pudo obtener tu ubicaci�n. Busca una direcci�n o elige un punto.';
             }
         }, { timeout: 8000 });
     });
+
     retryButton.addEventListener('click', prepareMap);
     byId('map-close').addEventListener('click', () => dialog.close());
     confirmButton.addEventListener('click', () => {
@@ -232,3 +259,4 @@
         dialog.close();
     });
 })();
+
