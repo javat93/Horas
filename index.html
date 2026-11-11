@@ -6,8 +6,8 @@
     <title>Horas · PercuManager</title>
     <!-- Tailwind CSS compilado para producción (17KB minificado, sin CDN) -->
 <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="map-picker.css?v=20261111">
-    <script src="map-picker.js?v=20261111" defer></script>
+    <link rel="stylesheet" href="map-picker.css?v=20261111-mobile-map">
+    <script src="map-picker.js?v=20261111-mobile-map" defer></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
@@ -357,7 +357,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="review-ui.css?v=calendar-crud-20261105">
+    <link rel="stylesheet" href="review-ui.css?v=20261111-mobile-map">
 </head>
 <body class="pb-20">
 
@@ -658,7 +658,8 @@
             <div class="map-panel">
                 <div id="map-container"></div>
                 <div id="map-unavailable" class="map-placeholder" hidden>
-                    <p>El mapa no está disponible.</p>
+                    <p>El mapa integrado no está disponible.</p>
+                    <a id="map-external" href="https://www.google.com/maps/" target="_blank" rel="noopener noreferrer">Abrir Google Maps</a>
                     <button id="map-retry" type="button">Reintentar</button>
                 </div>
             </div>
