@@ -7,6 +7,8 @@
     const locateButton = byId('map-locate');
     const confirmButton = byId('map-confirm');
     const unavailable = byId('map-unavailable');
+    const panel = unavailable.parentElement;
+    const externalLink = byId('map-external');
     const retryButton = byId('map-retry');
     const defaultCenter = { lat: 41.3874, lng: 2.1686 };
     const manualMessage = 'Puedes escribir la dirección y confirmarla manualmente.';
@@ -23,6 +25,10 @@
         searchButton.disabled = true;
         locateButton.disabled = true;
         unavailable.hidden = false;
+        panel.classList.add('map-panel--unavailable');
+        searchButton.hidden = true;
+        locateButton.hidden = true;
+        updateExternalLink();
         retryButton.hidden = authFailed;
         status.textContent = manualMessage;
     }
@@ -77,6 +83,15 @@
         return dialog.open && request === revision;
     }
 
+    function updateExternalLink() {
+        if (!externalLink) return;
+        const query = address.value.trim();
+        const url = new URL('https://www.google.com/maps/search/');
+        url.searchParams.set('api', '1');
+        if (query) url.searchParams.set('query', query);
+        externalLink.href = query ? url.href : 'https://www.google.com/maps/';
+    }
+
     function setAddress(value) {
         address.value = value;
         confirmButton.disabled = !value.trim();
@@ -122,6 +137,9 @@
         searchButton.disabled = true;
         locateButton.disabled = true;
         unavailable.hidden = true;
+        panel.classList.remove('map-panel--unavailable');
+        searchButton.hidden = false;
+        locateButton.hidden = false;
         status.textContent = 'Cargando mapa…';
         try {
             await loadMaps();
@@ -179,6 +197,7 @@
 
     address.addEventListener('input', () => {
         revision++;
+        if (!unavailable.hidden) updateExternalLink();
         confirmButton.disabled = !address.value.trim();
         if (!searchButton.disabled) status.textContent = 'Busca o confirma la dirección escrita.';
     });
