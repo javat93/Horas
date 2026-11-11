@@ -45,7 +45,7 @@
     border-bottom: 1px solid #e2e8f0;
 }
 
-.map-header h3 { margin: 0; font-size: 1.2rem; font-weight: 750; }
+.map-header h3 { margin: 0; font-size: 1.2rem; font-weight: 750; overflow-wrap: normal; }
 
 .map-controls {
     grid-area: controls;
@@ -58,8 +58,8 @@
 
 #map-search-form { width: 100%; min-width: 0; }
 #map-search-form label { display: block; margin-bottom: 6px; font-weight: 650; }
-.map-search-row { display: flex; align-items: stretch; gap: 8px; }
-#map-search { flex: 1; width: 0; min-width: 0; padding: 8px 10px; border-radius: 10px; font-size: 1rem; }
+.map-search-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+#map-search { width: 100%; box-sizing: border-box; min-height: 44px; min-width: 0; padding: 8px 10px; border-radius: 10px; font-size: 1rem; }
 #map-status { margin: 0; color: #475569; font-size: .875rem; }
 
 .map-panel { grid-area: map; position: relative; height: clamp(220px, 52dvh, 440px); background: #f1f5f9; }
@@ -96,7 +96,7 @@
     font-weight: 650;
 }
 
-#map-close { display: grid; place-items: center; min-width: 44px; padding: 0; }
+#map-close { display: grid; place-items: center; flex: 0 0 44px; width: 44px; padding: 0; }
 #map-search-button, #map-confirm { background: #1d4ed8; color: white; }
 #map-search-button:disabled, #map-confirm:disabled, #map-locate:disabled { opacity: .55; cursor: default; }
 
@@ -108,3 +108,25 @@
     .map-panel { height: clamp(180px, 39dvh, 340px); }
     #map-confirm { width: 100%; }
 }
+
+#modal-mapa .map-panel--unavailable {
+    height: auto;
+    background: transparent;
+}
+.map-panel--unavailable #map-container { display: none; }
+.map-panel--unavailable .map-placeholder:not([hidden]) {
+    position: static;
+    background: transparent;
+    padding: 4px 16px 12px;
+}
+.map-placeholder p { margin: 0; }
+#map-external {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    color: #1d4ed8;
+    font-weight: 650;
+    text-decoration: underline;
+}
+#modal-mapa .map-controls [hidden], #modal-mapa .map-placeholder [hidden] { display: none; }
