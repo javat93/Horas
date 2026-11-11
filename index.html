@@ -6,6 +6,8 @@
     <title>Horas · PercuManager</title>
     <!-- Tailwind CSS compilado para producción (17KB minificado, sin CDN) -->
 <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="map-picker.css?v=20261111">
+    <script src="map-picker.js?v=20261111" defer></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
@@ -544,7 +546,7 @@
                         <div id="maracuya-gps-hint" class="hidden absolute right-4 top-4 text-blue-500">
                              <i data-lucide="map" class="w-5 h-5"></i>
                         </div>
-                        <button type="button" onclick="openMapModal('ev-sitio')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600">
+                        <button type="button" data-map-target="ev-sitio" aria-label="Buscar dirección en el mapa" class="map-trigger">
     <i data-lucide="map-pin" class="w-5 h-5"></i>
 </button>
                     </div>
@@ -622,8 +624,8 @@
                 <div>
                     <label for="gr-sitio" class="block text-xs font-bold text-slate-400 uppercase mb-2">Dirección habitual del grupo</label>
                     <div class="relative">
-                        <input type="text" id="gr-sitio" class="w-full rounded-2xl p-4 pr-12 input-modern text-sm font-medium" placeholder="Empieza a escribir para buscar...">
-                        <button type="button" onclick="openMapModal('gr-sitio')" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600">
+                        <input type="text" id="gr-sitio" class="w-full rounded-2xl p-4 pr-12 input-modern text-sm font-medium" placeholder="Dirección o nombre del lugar">
+                        <button type="button" data-map-target="gr-sitio" aria-label="Buscar dirección en el mapa" class="map-trigger">
     <i data-lucide="map-pin" class="w-5 h-5"></i>
 </button>
                     </div>
@@ -635,52 +637,36 @@
         </div>
     </div>
 
-    <!-- Modal de Mapa Interactivo -->
-    <div id="modal-mapa" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-[2rem] w-full max-w-4xl h-[600px] flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center p-6 border-b">
-                <h3 class="text-2xl font-extrabold text-slate-900">Seleccionar Ubicación</h3>
-                <button type="button" onclick="closeModal('modal-mapa')" class="text-slate-400 hover:text-red-500">
-                    <i data-lucide="x"></i>
-                </button>
+
+    <dialog id="modal-mapa" aria-labelledby="map-title">
+        <div class="map-layout">
+            <header class="map-header">
+                <h3 id="map-title">Seleccionar ubicación</h3>
+                <button id="map-close" type="button" aria-label="Cerrar selector de ubicación"><i data-lucide="x"></i></button>
+            </header>
+            <div class="map-controls">
+                <form id="map-search-form" role="search">
+                    <label for="map-search">Dirección o lugar</label>
+                    <div class="map-search-row">
+                        <input id="map-search" type="text" class="input-modern" placeholder="Calle, número y municipio" autocomplete="off" enterkeyhint="search">
+                        <button id="map-search-button" type="submit" disabled>Buscar</button>
+                    </div>
+                </form>
+                <button id="map-locate" type="button" disabled>Usar mi ubicación</button>
+                <p id="map-status" role="status"></p>
             </div>
-            <div class="flex-1 flex">
-                <div class="w-1/3 p-4 border-r">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Buscar Dirección</label>
-                            <div class="relative">
-                                <input type="text" id="map-search" class="w-full rounded-xl p-3 pr-10 input-modern text-sm" placeholder="Escribe una dirección...">
-                                <button onclick="searchOnMap()" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                                    <i data-lucide="search" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Dirección Seleccionada</label>
-                            <textarea id="map-selected-address" class="w-full rounded-xl p-3 input-modern text-sm h-20 resize-none" readonly placeholder="Selecciona una ubicación en el mapa..."></textarea>
-                        </div>
-                        <button onclick="getCurrentLocation()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="map-pin" class="w-4 h-4"></i>
-                            Usar Ubicación Actual
-                        </button>
-                        <button onclick="confirmMapSelection()" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">
-                            Confirmar Selección
-                        </button>
-                    </div>
-                </div>
-                <div class="w-2/3 relative">
-                    <div id="map-container" class="w-full h-full rounded-r-[2rem]"></div>
-                    <div id="map-loading" class="absolute inset-0 bg-white/80 flex items-center justify-center rounded-r-[2rem]">
-                        <div class="text-center">
-                            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                            <p class="text-slate-600 font-medium">Cargando mapa...</p>
-                        </div>
-                    </div>
+            <div class="map-panel">
+                <div id="map-container"></div>
+                <div id="map-unavailable" class="map-placeholder" hidden>
+                    <p>El mapa no está disponible.</p>
+                    <button id="map-retry" type="button">Reintentar</button>
                 </div>
             </div>
+            <footer class="map-footer">
+                <button id="map-confirm" type="button" disabled>Usar esta dirección</button>
+            </footer>
         </div>
-    </div>
+    </dialog>
 
     <!-- Modal de Confirmación Moderno -->
     <div id="modal-confirm" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
@@ -872,15 +858,6 @@
         let eventos = [];
         let grupos = [];
         let calendar;
-        let autocompleteSesion;
-        let autocompleteGrupo;
-        
-        // Variables para el Mapa Interactivo
-        let map;
-        let marker;
-        let geocoder;
-        let currentTargetField = null;
-        
         // Función para parsear números de Google Sheets (soporta formato español con coma y símbolos de moneda)
         function parseSpanishNumber(val) {
             if (val === undefined || val === null || val === '') return 0;
@@ -900,39 +877,6 @@
             
             const result = parseFloat(cleanVal);
             return isNaN(result) ? 0 : result;
-        }
-		
-		// --- 1. CARGA DINÁMICA DE GOOGLE MAPS UTILIZANDO PROXY EN PRODUCCIÓN ---
-        function loadGoogleMaps() {
-            if (typeof CONFIG !== 'undefined') {
-                // Usar el método async recomendado por Google Maps API
-                (g => {
-                    var h, a, k, p = "The Google Maps JavaScript API",
-                        c = "google",
-                        l = "importLibrary",
-                        q = "__ib__",
-                        m = document,
-                        b = window;
-                    b = b[c] || (b[c] = {});
-                    var d = b.maps || (b.maps = {}),
-                        r = new Set,
-                        e = new URLSearchParams,
-                        u = () => h || (h = new Promise(async (f, n) => {
-                            await (a = m.createElement("script"));
-                            e.set("libraries", [...r] + "");
-                            e.set("callback", g);
-                            a.src = CONFIG.ENVIRONMENT === 'production' && CONFIG.GOOGLE_MAPS_API_URL 
-                                ? `${CONFIG.GOOGLE_MAPS_API_URL}?` + e 
-                                : `https://maps.googleapis.com/maps/api/js?` + e;
-                            d[q] = f;
-                            a.onerror = () => h = n(Error(p + " could not load."));
-                            a.type = "module";
-                            a.dataset.async = "";
-                            m.head.append(a)
-                        }));
-                    d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))
-                })(initMap);
-            }
         }
 		
         function gapiLoaded() {
@@ -1120,80 +1064,6 @@
                 }
             }
         }
-		// Callback para Google Maps API
-        function initMap() {
-            // Llamar a initializeMap si está disponible
-            if (typeof initializeMap === 'function') {
-                initializeMap();
-            } else {
-                // Intentar inicialización básica si initializeMap no está disponible
-                const mapContainer = document.getElementById('map-container');
-                const loading = document.getElementById('map-loading');
-                if (mapContainer && loading) {
-                    loading.classList.add('hidden');
-                }
-            }
-        }
-
-        // Función para inicializar el mapa interactivo
-        async function initializeMap() {
-            const mapContainer = document.getElementById('map-container');
-            const loading = document.getElementById('map-loading');
-            
-            if (mapContainer && !map) {
-                // Asignar un ID al contenedor del mapa para AdvancedMarkerElement
-                mapContainer.id = 'percumanager-map';
-                
-                // Crear mapa con configuración por defecto y ID
-                map = new google.maps.Map(mapContainer, {
-                    mapId: 'PERCU_MANAGER_MAP', // ID del mapa para AdvancedMarkerElement
-                    center: { lat: 40.4168, lng: -3.7038 }, // Madrid por defecto
-                    zoom: 13,
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: false
-                });
-                
-                // Cargar la librería de marcadores avanzados
-                try {
-                    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-                    
-                    // Crear marcador inicial con AdvancedMarkerElement
-                    marker = new AdvancedMarkerElement({
-                        map: map,
-                        position: { lat: 40.4168, lng: -3.7038 },
-                        gmpDraggable: true
-                    });
-                    
-                    // Añadir evento de arrastre al marcador
-                    marker.addEventListener('dragend', function(event) {
-                        const position = event.latLng || event.position;
-                        if (position) {
-                            getAddressFromLatLng(position);
-                        }
-                    });
-                } catch (error) {
-                    // Fallback a Marker tradicional si AdvancedMarkerElement falla
-                    console.warn('AdvancedMarkerElement no disponible, usando Marker tradicional:', error);
-                    marker = new google.maps.Marker({
-                        map: map,
-                        draggable: true,
-                        position: { lat: 40.4168, lng: -3.7038 }
-                    });
-                    
-                    // Añadir evento de arrastre al marcador tradicional
-                    marker.addListener('dragend', function(event) {
-                        getAddressFromLatLng(event.latLng);
-                    });
-                }
-                
-                // Ocultar loading
-                if (loading) {
-                    loading.classList.add('hidden');
-                }
-            }
-        }
-
 		// Limpia tildes y caracteres especiales para comparaciones robustas
         function limpiarTexto(texto) {
             if (!texto) return '';
@@ -1683,35 +1553,7 @@
             renderGrupos();
             renderCalendar();
             populateSelects();
-            initGoogleMapsUI();
             lucide.createIcons();
-        }
-
-        async function initGoogleMapsUI() {
-            try {
-                // Cargar la librería places usando importLibrary
-                const { Autocomplete } = await google.maps.importLibrary("places");
-                
-                if (!autocompleteSesion) {
-                    autocompleteSesion = new Autocomplete(document.getElementById('ev-sitio'));
-                }
-                if (!autocompleteGrupo) {
-                    autocompleteGrupo = new Autocomplete(document.getElementById('gr-sitio'));
-                }
-            } catch (error) {
-                console.error('Error inicializando Google Places Autocomplete:', error);
-                // Fallback: intentar método antiguo si el nuevo falla
-                try {
-                    if (!autocompleteSesion && google.maps.places && google.maps.places.Autocomplete) {
-                        autocompleteSesion = new google.maps.places.Autocomplete(document.getElementById('ev-sitio'));
-                    }
-                    if (!autocompleteGrupo && google.maps.places && google.maps.places.Autocomplete) {
-                        autocompleteGrupo = new google.maps.places.Autocomplete(document.getElementById('gr-sitio'));
-                    }
-                } catch (fallbackError) {
-                    console.error('Error en fallback de Autocomplete:', fallbackError);
-                }
-            }
         }
 
         function renderEventos() {
@@ -2803,159 +2645,6 @@
             }
         });
 
-        // Funciones para el Mapa Interactivo
-        function openMapModal(targetFieldId) {
-            currentTargetField = targetFieldId;
-            document.getElementById('modal-mapa').classList.remove('hidden');
-            document.getElementById('map-search').value = '';
-            document.getElementById('map-selected-address').value = '';
-            
-            // Inicializar mapa si no está creado
-            if (!map) {
-                initializeMap();
-            } else {
-                // Centrar en ubicación actual o predeterminada
-                getCurrentLocation();
-            }
-            
-            // Crear geocoder
-            geocoder = new google.maps.Geocoder();
-            
-            // Añadir evento de clic en el mapa
-            map.addListener('click', function(event) {
-                placeMarker(event.latLng);
-                getAddressFromLatLng(event.latLng);
-            });
-            
-            // Ocultar loading
-            const loading = document.getElementById('map-loading');
-            if (loading) {
-                loading.classList.add('hidden');
-            }
-            
-            // Obtener ubicación actual
-            getCurrentLocation();
-        }
-
-        async function placeMarker(location) {
-            // Eliminar marcador existente
-            if (marker) {
-                if (marker.setMap) {
-                    marker.setMap(null); // Marker tradicional
-                } else if (marker.map) {
-                    marker.map = null; // AdvancedMarkerElement
-                }
-            }
-            
-            // Intentar usar AdvancedMarkerElement primero
-            try {
-                const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-                
-                marker = new AdvancedMarkerElement({
-                    map: map,
-                    position: location,
-                    gmpDraggable: true
-                });
-                
-                // Añadir evento de arrastre al marcador avanzado
-                marker.addEventListener('dragend', function(event) {
-                    const position = event.latLng || event.position;
-                    if (position) {
-                        getAddressFromLatLng(position);
-                    }
-                });
-            } catch (error) {
-                // Fallback a Marker tradicional si AdvancedMarkerElement falla
-                console.warn('AdvancedMarkerElement no disponible en placeMarker, usando Marker tradicional:', error);
-                marker = new google.maps.Marker({
-                    position: location,
-                    map: map,
-                    draggable: true,
-                    animation: google.maps.Animation.DROP
-                });
-                
-                // Añadir evento de arrastre al marcador tradicional
-                marker.addListener('dragend', function(event) {
-                    getAddressFromLatLng(event.latLng);
-                });
-            }
-        }
-
-        function getAddressFromLatLng(latlng) {
-            geocoder.geocode({ location: latlng }, function(results, status) {
-                if (status === 'OK' && results[0]) {
-                    const address = results[0].formatted_address;
-                    document.getElementById('map-selected-address').value = address;
-                } else {
-                }
-            });
-        }
-
-        function getCurrentLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        const pos = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        
-                        map.setCenter(pos);
-                        placeMarker(pos);
-                        getAddressFromLatLng(pos);
-                    },
-                    function(error) {
-                        // En caso de error, centrar en Madrid
-                        map.setCenter({ lat: 40.4168, lng: -3.7038 });
-                    }
-                );
-            } else {
-            }
-        }
-
-        function searchOnMap() {
-            const address = document.getElementById('map-search').value;
-            if (!address) return;
-            
-            geocoder.geocode({ 'address': address }, (results, status) => {
-                if (status === 'OK') {
-                    const location = results[0].geometry.location;
-                    placeMarker(location);
-                    map.setCenter(location); // Mover el mapa al marcador
-                    document.getElementById('map-selected-address').value = results[0].formatted_address;
-                } else {
-                    showErrorModal('Dirección No Encontrada', 'No se encontró la dirección. Por favor, intenta con otra búsqueda.', 'warning', document.getElementById('map-search'));
-                }
-            });
-        }
-
-        function confirmMapSelection() {
-            const selectedAddress = document.getElementById('map-selected-address').value;
-            if (!selectedAddress) {
-                showErrorModal('Ubicación No Seleccionada', 'Por favor, selecciona una ubicación en el mapa antes de continuar.', 'warning');
-                return;
-            }
-            
-            if (currentTargetField) {
-                document.getElementById(currentTargetField).value = selectedAddress;
-            }
-            
-            closeModal('modal-mapa');
-        }
-
-        // Manejar Enter en el campo de búsqueda
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('map-search');
-            if (searchInput) {
-                searchInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        searchOnMap();
-                    }
-                });
-            }
-        });
-
         // Función principal para importar eventos futuros de Google Calendar
         async function importFutureEvents(month, year) {
             showLoading('Importando eventos...');
@@ -3333,7 +3022,6 @@
 
         window.onload = async () => {
             await window.horasConfigReady;
-            if (!(CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)) loadGoogleMaps();
             gapiLoaded();
             gisLoaded();
             ensureAuthButtonVisible();

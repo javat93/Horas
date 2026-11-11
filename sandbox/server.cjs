@@ -125,6 +125,8 @@ function createServer(fetchImpl = fetch) {
       files['/group-identity.js']=['group-identity.js','text/javascript'];files['/sandbox/identity-review.js']=['sandbox/identity-review.js','text/javascript'];
       files['/auth-session.js']=['auth-session.js','text/javascript'];
       files['/app-data.js']=['app-data.js','text/javascript'];
+      files['/map-picker.js']=['map-picker.js','text/javascript'];
+      files['/map-picker.css']=['map-picker.css','text/css'];
       files['/sandbox/daily-editor.js']=['sandbox/daily-editor.js','text/javascript'];
       for(const name of ['inicio.html','privacidad.html','condiciones.html'])files['/'+name]=[name,'text/html; charset=utf-8'];files['/informacion.css']=['informacion.css','text/css'];
       const file=files[url.pathname];
