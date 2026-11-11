@@ -178,6 +178,40 @@
         .tab-active { color: var(--brand-blue); background-color: var(--brand-light); font-weight: 700; }
         .card-modern { background: white; border-radius: 1.25rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.2s; }
         .card-modern:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+        .session-card--typed {
+            --session-type-bg: #dbeafe;
+            --session-type-text: #1e40af;
+        }
+        .session-card--bolo {
+            --session-type-bg: #fef3c7;
+            --session-type-text: #92400e;
+        }
+        .session-card--typed .session-card-main,
+        .session-card--typed .session-card-details { min-width: 0; }
+        .session-card--typed .session-card-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .25rem .5rem;
+            overflow-wrap: anywhere;
+        }
+        .session-card--typed .session-card-icon,
+        .session-card--typed .session-type-label {
+            flex-shrink: 0;
+            background-color: var(--session-type-bg);
+            color: var(--session-type-text);
+        }
+        .session-type-label {
+            padding: .125rem .5rem;
+            border-radius: 999px;
+            font-size: .6875rem;
+            font-weight: 700;
+            line-height: 1rem;
+        }
+        .session-card--typed .session-card-meta { flex-wrap: wrap; row-gap: .25rem; }
+        @media (max-width: 639px) {
+            .session-card--typed .session-card-main { flex-basis: 100%; }
+        }
         .btn-blue { background-color: var(--brand-blue); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
         .input-modern { border: 2px solid #f1f5f9; background-color: #f8fafc; transition: all 0.2s; }
         .input-modern:focus { border-color: var(--brand-blue); background-color: white; outline: none; }
@@ -1681,6 +1715,7 @@
         }
 
         function renderEventos() {
+            const SHOW_SESSION_TYPES = true;
             const container = document.getElementById('lista-eventos');
             const fCobrados = document.getElementById('filter-cobrados').value;
             const fRealizados = document.getElementById('filter-realizados').value;
@@ -1703,15 +1738,20 @@
                 return;
             }
 
-            container.innerHTML = filtered.map(ev => `
-                <div class="card-modern p-5 flex flex-wrap md:flex-nowrap justify-between items-center gap-4 ${ev.realizado ? 'bg-emerald-50/30' : ''}">
-                    <div class="flex items-center gap-4 cursor-pointer flex-1" onclick="openEditSesionModal(${ev.rowIdx})">
-                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${ev.realizado ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}">
-                            <i data-lucide="${ev.realizado ? 'check-circle' : 'clock'}"></i>
+            container.innerHTML = filtered.map(ev => {
+                const isBolo = ev.boloCole === 'X';
+                const typeClass = SHOW_SESSION_TYPES ? (isBolo ? 'session-card--typed session-card--bolo' : 'session-card--typed') : '';
+                const icon = SHOW_SESSION_TYPES ? (isBolo ? 'drum' : 'book-open') : (ev.realizado ? 'check-circle' : 'clock');
+                const iconColor = ev.realizado ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600';
+                return `
+                <div class="card-modern p-5 flex flex-wrap md:flex-nowrap justify-between items-center gap-4 ${ev.realizado ? 'bg-emerald-50/30' : ''} ${typeClass}">
+                    <div class="session-card-main flex items-center gap-4 cursor-pointer flex-1" onclick="openEditSesionModal(${ev.rowIdx})">
+                        <div class="session-card-icon w-12 h-12 rounded-2xl flex items-center justify-center ${SHOW_SESSION_TYPES ? '' : iconColor}" aria-hidden="true">
+                            <i data-lucide="${icon}"></i>
                         </div>
-                        <div>
-                            <h4 class="font-extrabold text-slate-900">${sessionGroupName(ev)}</h4>
-                            <div class="flex gap-3 mt-1">
+                        <div class="session-card-details">
+                            <h4 class="session-card-title font-extrabold text-slate-900"><span>${sessionGroupName(ev)}</span>${SHOW_SESSION_TYPES ? `<span class="session-type-label">${isBolo ? 'Bolo' : 'Clase'}</span>` : ''}</h4>
+                            <div class="session-card-meta flex gap-3 mt-1">
                                 <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${ev.fechaStr||'Fecha pendiente'}${ev.dateWarning ? ' · Revisar fecha' : ''}${ev.paymentSaving?' · Guardando pago…':ev.paymentError?' · Pago no guardado; vuelve a intentarlo':''}</span>
                                 <span class="text-xs font-bold ${ev.realizado ? 'text-blue-500' : 'text-slate-400'} flex items-center gap-1">
                                     <i data-lucide="${ev.realizado ? 'flag' : 'hourglass'}" class="w-3 h-3"></i> 
@@ -1734,7 +1774,8 @@
                             </button>
                         </div>
                     </div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
             lucide.createIcons();
         }
 
