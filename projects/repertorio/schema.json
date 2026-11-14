@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "locale": "es_ES",
+  "timeZone": "Europe/Madrid",
+  "sheets": {
+    "Temas": [
+      "TemaID",
+      "Nombre",
+      "NumeroOrden",
+      "TemaGaleta",
+      "TemaSlap",
+      "TemaPropio",
+      "Activo",
+      "Notas"
+    ],
+    "GrupoTemas": [
+      "VinculoID",
+      "Grupo",
+      "TemaID",
+      "NombreTema",
+      "Realizado",
+      "Repasando",
+      "FechaRealizado",
+      "UltimoRepaso",
+      "ProximoObjetivo",
+      "MotivoRepaso",
+      "Notas",
+      "ActualizadoEn",
+      "Activo"
+    ]
+  },
+  "rowDetection": {
+    "Temas": "A non-empty TemaID identifies a persisted theme. Boolean-only placeholder rows are not records; a named row without ID is an import candidate.",
+    "GrupoTemas": "A non-empty VinculoID identifies a persisted assignment. Boolean-only placeholder rows are not records; Group or TemaID without VinculoID requires validation."
+  },
+  "types": {
+    "Temas": {
+      "TemaID": "uuid",
+      "Nombre": "string",
+      "NumeroOrden": "positive integer",
+      "TemaGaleta": "boolean",
+      "TemaSlap": "boolean",
+      "TemaPropio": "boolean",
+      "Activo": "boolean",
+      "Notas": "string"
+    },
+    "GrupoTemas": {
+      "VinculoID": "uuid",
+      "Grupo": "canonical Coles name; resolve aliases on read",
+      "TemaID": "Temas.TemaID",
+      "NombreTema": "lookup; not editable input",
+      "Realizado": "boolean",
+      "Repasando": "boolean",
+      "FechaRealizado": "nullable date",
+      "UltimoRepaso": "nullable date",
+      "ProximoObjetivo": "string",
+      "MotivoRepaso": "string",
+      "Notas": "string",
+      "ActualizadoEn": "nullable datetime",
+      "Activo": "boolean"
+    }
+  },
+  "constraints": [
+    "Each active theme has a positive integer order and at least one type.",
+    "Boolean types are independent and may overlap.",
+    "Equal orders conflict only when active themes share a selected type.",
+    "One assignment per normalized group identity and TemaID, including archived assignments.",
+    "Realizado and Repasando are independent.",
+    "Marking Repasando does not set UltimoRepaso.",
+    "Never infer repertoire from Detalle.",
+    "Never write to Detalle or Coles."
+  ]
+}

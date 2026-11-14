@@ -1,0 +1,74 @@
+{
+  "project": "PercuManager · Repertorio por grupo",
+  "projectVersion": 1,
+  "preparedOn": "2026-11-14",
+  "timezone": "Europe/Madrid",
+  "branch": "feature/repertorio-grupos",
+  "baseCommit": "d601809c06d31df0d4352e12f612323c8691a2fd",
+  "development": {
+    "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+    "url": "https://docs.google.com/spreadsheets/d/1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k/edit",
+    "title": "Horas Fran — REPERTORIO · DESARROLLO · 14-11-2026",
+    "readOnlySheets": [
+      "Coles"
+    ],
+    "writableSheets": [
+      "Temas",
+      "GrupoTemas"
+    ],
+    "sheetIds": {
+      "Temas": 142601101,
+      "GrupoTemas": 142601102
+    },
+    "applicationConnected": false,
+    "calendarAccess": false,
+    "legacyOperationsEnabled": false
+  },
+  "production": {
+    "spreadsheetId": "1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60",
+    "url": "https://docs.google.com/spreadsheets/d/1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60/edit",
+    "migrationExecuted": false,
+    "moduleActivated": false
+  },
+  "restrictions": {
+    "modifyDetalle": false,
+    "modifyColes": false,
+    "trackStudents": false,
+    "copyWholeDevelopmentWorkbookToProduction": false,
+    "copyCalendarLinksToNewEvents": false
+  },
+  "phases": [
+    {
+      "id": 0,
+      "name": "Preparación y copia aislada",
+      "status": "complete"
+    },
+    {
+      "id": 1,
+      "name": "Estructura del libro de desarrollo",
+      "status": "complete",
+      "limitation": "Sin catálogo real, sin fórmulas de asignación ni validación cruzada del módulo; estructura y presentación verificadas"
+    },
+    {
+      "id": 2,
+      "name": "Modelo y API limitada a la copia",
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "name": "Interfaz funcional de repertorio",
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "name": "Piloto y pruebas de aceptación",
+      "status": "pending"
+    },
+    {
+      "id": 5,
+      "name": "Migración y activación en el original",
+      "status": "pending"
+    }
+  ],
+  "nextPhase": 2
+}

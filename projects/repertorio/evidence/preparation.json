@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-14",
+  "originalSpreadsheetId": "1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60",
+  "copySpreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+  "distinctIds": true,
+  "originalModifiedTimeBefore": "2026-11-12T20:16:28.506Z",
+  "originalModifiedTimeAfter": "2026-11-12T20:16:28.506Z",
+  "originalTabPropertiesPreservedInCopy": true,
+  "newSheetIds": {
+    "Temas": 142601101,
+    "GrupoTemas": 142601102
+  },
+  "newHeadersReadBack": true,
+  "checkboxesReadBack": true,
+  "groupDropdownReadBack": true,
+  "defaultBooleanCellsAreNotRecords": true,
+  "visualReview": "passed: native Google Sheets at 100%; Temas and both horizontal views of GrupoTemas inspected on 2026-11-14",
+  "formulaLookup": "phase2",
+  "crossTypeOrderValidation": "phase2",
+  "runtimeApplicationTest": "not run; module is pending",
+  "productionMigrationExecuted": false
+}
