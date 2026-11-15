@@ -1,0 +1,6262 @@
+{
+  "initialPlan": {
+    "kind": "repertoire-production-v1",
+    "sourceId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+    "destinationId": "1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60",
+    "allowDemo": false,
+    "sourceFingerprint": "7e4137ddf5ddda5325e4d64121803873f4c85c3b1f692ea8cf79bf2f14401235",
+    "destinationFingerprint": "67ec76f97681cbb6e369696e7e5b6fb5c50e1bb89ce8e95f8bcb794a01a4283f",
+    "counts": {
+      "sourceThemes": 21,
+      "sourceAssignments": 15,
+      "themesToInsert": 21,
+      "assignmentsToInsert": 15
+    },
+    "writes": [
+      {
+        "name": "Temas",
+        "rowIdx": 2,
+        "data": {
+          "id": "7486f7c4-ddcd-406a-a684-b933d2621a71",
+          "nombre": "Batucada",
+          "numeroOrden": 1,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 3,
+        "data": {
+          "id": "20ca0627-c746-4059-947d-d407d6976459",
+          "nombre": "Samba reggae (Galeta)",
+          "numeroOrden": 2,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 4,
+        "data": {
+          "id": "10cd5072-2ef3-4d74-92a0-4ae5f3521402",
+          "nombre": "Conga",
+          "numeroOrden": 3,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 5,
+        "data": {
+          "id": "91be0c6a-4473-459e-b8b6-f90869643e9d",
+          "nombre": "Tarantela",
+          "numeroOrden": 4,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 6,
+        "data": {
+          "id": "0a4203b5-cb54-4cd5-ac6c-4964e7db4039",
+          "nombre": "Son",
+          "numeroOrden": 5,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 7,
+        "data": {
+          "id": "5c44e5cb-0f34-4ff6-8a8c-b0e517895e03",
+          "nombre": "Partido Alto",
+          "numeroOrden": 6,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 8,
+        "data": {
+          "id": "87011a69-0c0a-41f1-87c0-2610ca52928e",
+          "nombre": "Safriduo",
+          "numeroOrden": 7,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 9,
+        "data": {
+          "id": "2711269d-dc6c-4ab9-8615-d2d3e7e01a60",
+          "nombre": "Merengue (Galeta)",
+          "numeroOrden": 8,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 10,
+        "data": {
+          "id": "2c124761-c4af-4d50-88b8-2078e01a29de",
+          "nombre": "Olodum",
+          "numeroOrden": 9,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 11,
+        "data": {
+          "id": "c07c66b9-b438-42ab-8340-476737249c59",
+          "nombre": "Bahiao (Maracuyá)",
+          "numeroOrden": 10,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 12,
+        "data": {
+          "id": "42ae419f-d7f3-4a33-90e6-1dad2df95008",
+          "nombre": "Latin (Maracuyá)",
+          "numeroOrden": 13,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 13,
+        "data": {
+          "id": "9e4b1916-ff58-463a-a01b-55e0d38cb00c",
+          "nombre": "Sambaduro (Maracuyá)",
+          "numeroOrden": 14,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 14,
+        "data": {
+          "id": "1118a62f-7a42-448b-ad3f-69dcb7af1f5b",
+          "nombre": "Markatu (Maracuyá)",
+          "numeroOrden": 15,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 15,
+        "data": {
+          "id": "11a86d3b-3eef-4380-8deb-47999f07bfc8",
+          "nombre": "Sambareggae (Slap)",
+          "numeroOrden": 2,
+          "temaGaleta": false,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 16,
+        "data": {
+          "id": "aae029fa-b450-43b0-b378-f51063050a92",
+          "nombre": "Merengue (Maracuyá)",
+          "numeroOrden": 11,
+          "temaGaleta": false,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 17,
+        "data": {
+          "id": "7958f25d-2c3c-4ce3-9a49-56024680998c",
+          "nombre": "PimPamPum (Maracuyá)",
+          "numeroOrden": 12,
+          "temaGaleta": false,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 18,
+        "data": {
+          "id": "807aed3f-93d5-4f73-ad3c-41f6289a8964",
+          "nombre": "Sambaregae (propio)",
+          "numeroOrden": 1,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 19,
+        "data": {
+          "id": "9ce51e1e-69be-4262-85ca-1db902308e9c",
+          "nombre": "Samba (propio)",
+          "numeroOrden": 2,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 20,
+        "data": {
+          "id": "60b3af43-3902-4e03-a923-9e7d4711bab7",
+          "nombre": "Conga (propio)",
+          "numeroOrden": 3,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 21,
+        "data": {
+          "id": "d9451c6c-5bef-4b45-a648-7c0c649501a2",
+          "nombre": "Tarantela (propio)",
+          "numeroOrden": 4,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 22,
+        "data": {
+          "id": "1e6970b7-d58c-4592-b5ec-7e59178fd3ab",
+          "nombre": "Merengue (propio)",
+          "numeroOrden": 5,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 2,
+        "data": {
+          "id": "b4d97347-0382-4cef-8418-4ced3ca0866e",
+          "grupo": "Slap Lunes",
+          "temaId": "7486f7c4-ddcd-406a-a684-b933d2621a71",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:10:59.880Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 3,
+        "data": {
+          "id": "f1e74570-18a1-4ca6-ba43-ca12e2ccc489",
+          "grupo": "Slap Lunes",
+          "temaId": "10cd5072-2ef3-4d74-92a0-4ae5f3521402",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 4,
+        "data": {
+          "id": "76163553-1bf7-4f6e-94b7-a23b6b12e430",
+          "grupo": "Slap Lunes",
+          "temaId": "91be0c6a-4473-459e-b8b6-f90869643e9d",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 5,
+        "data": {
+          "id": "7ab4b6aa-a75d-4acb-ae2c-ee4fe2300d16",
+          "grupo": "Slap Lunes",
+          "temaId": "c07c66b9-b438-42ab-8340-476737249c59",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 6,
+        "data": {
+          "id": "a5d5f30d-6f47-436c-9446-1550a755d636",
+          "grupo": "Slap Lunes",
+          "temaId": "42ae419f-d7f3-4a33-90e6-1dad2df95008",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 7,
+        "data": {
+          "id": "ca1d4276-f356-4d03-ba4e-eed2668b81a6",
+          "grupo": "Slap Lunes",
+          "temaId": "9e4b1916-ff58-463a-a01b-55e0d38cb00c",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 8,
+        "data": {
+          "id": "99c85930-d407-4af9-8dd5-83e29c0df6b3",
+          "grupo": "Slap Lunes",
+          "temaId": "1118a62f-7a42-448b-ad3f-69dcb7af1f5b",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 9,
+        "data": {
+          "id": "b15d7203-2294-4cd4-9fc0-b7441b8283c2",
+          "grupo": "Slap Lunes",
+          "temaId": "11a86d3b-3eef-4380-8deb-47999f07bfc8",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 10,
+        "data": {
+          "id": "ea3f53c6-98fc-48fd-b5f0-b93dc8fc2302",
+          "grupo": "Slap Lunes",
+          "temaId": "aae029fa-b450-43b0-b378-f51063050a92",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 11,
+        "data": {
+          "id": "2c030192-073e-406b-a0f1-219a35ff7cb7",
+          "grupo": "Slap Lunes",
+          "temaId": "7958f25d-2c3c-4ce3-9a49-56024680998c",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 12,
+        "data": {
+          "id": "a36f5fc9-aad1-44a5-a6aa-cab794e2d819",
+          "grupo": "La Maquinista",
+          "temaId": "d9451c6c-5bef-4b45-a648-7c0c649501a2",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 13,
+        "data": {
+          "id": "78607916-e424-4bf4-b2ef-4c7bc638778b",
+          "grupo": "La Maquinista",
+          "temaId": "60b3af43-3902-4e03-a923-9e7d4711bab7",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 14,
+        "data": {
+          "id": "71a0dcf3-4e46-441e-b186-6e28ce571d66",
+          "grupo": "La Maquinista",
+          "temaId": "9ce51e1e-69be-4262-85ca-1db902308e9c",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 15,
+        "data": {
+          "id": "1ce53e6e-4432-4424-8116-f2c3c179f882",
+          "grupo": "La Maquinista",
+          "temaId": "11a86d3b-3eef-4380-8deb-47999f07bfc8",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 16,
+        "data": {
+          "id": "1773b823-c371-49c5-9afc-cd9576505c31",
+          "grupo": "La Maquinista",
+          "temaId": "7486f7c4-ddcd-406a-a684-b933d2621a71",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      }
+    ],
+    "digest": "714cd599477a271774310c6daa4e6101708ea46cab30c25d316128a95e689d1d"
+  },
+  "finalReceipt": {
+    "kind": "repertoire-production-receipt-v1",
+    "sourceId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+    "destinationId": "1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60",
+    "sourceFingerprint": "7e4137ddf5ddda5325e4d64121803873f4c85c3b1f692ea8cf79bf2f14401235",
+    "beforeFingerprint": "67ec76f97681cbb6e369696e7e5b6fb5c50e1bb89ce8e95f8bcb794a01a4283f",
+    "afterFingerprint": "06827045c99bfd9b723c64741cdbaede113ef605ea59254827107d064e3a681a",
+    "writes": [
+      {
+        "name": "Temas",
+        "rowIdx": 2,
+        "data": {
+          "id": "7486f7c4-ddcd-406a-a684-b933d2621a71",
+          "nombre": "Batucada",
+          "numeroOrden": 1,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 3,
+        "data": {
+          "id": "20ca0627-c746-4059-947d-d407d6976459",
+          "nombre": "Samba reggae (Galeta)",
+          "numeroOrden": 2,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 4,
+        "data": {
+          "id": "10cd5072-2ef3-4d74-92a0-4ae5f3521402",
+          "nombre": "Conga",
+          "numeroOrden": 3,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 5,
+        "data": {
+          "id": "91be0c6a-4473-459e-b8b6-f90869643e9d",
+          "nombre": "Tarantela",
+          "numeroOrden": 4,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 6,
+        "data": {
+          "id": "0a4203b5-cb54-4cd5-ac6c-4964e7db4039",
+          "nombre": "Son",
+          "numeroOrden": 5,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 7,
+        "data": {
+          "id": "5c44e5cb-0f34-4ff6-8a8c-b0e517895e03",
+          "nombre": "Partido Alto",
+          "numeroOrden": 6,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 8,
+        "data": {
+          "id": "87011a69-0c0a-41f1-87c0-2610ca52928e",
+          "nombre": "Safriduo",
+          "numeroOrden": 7,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 9,
+        "data": {
+          "id": "2711269d-dc6c-4ab9-8615-d2d3e7e01a60",
+          "nombre": "Merengue (Galeta)",
+          "numeroOrden": 8,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 10,
+        "data": {
+          "id": "2c124761-c4af-4d50-88b8-2078e01a29de",
+          "nombre": "Olodum",
+          "numeroOrden": 9,
+          "temaGaleta": true,
+          "temaSlap": false,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 11,
+        "data": {
+          "id": "c07c66b9-b438-42ab-8340-476737249c59",
+          "nombre": "Bahiao (Maracuyá)",
+          "numeroOrden": 10,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 12,
+        "data": {
+          "id": "42ae419f-d7f3-4a33-90e6-1dad2df95008",
+          "nombre": "Latin (Maracuyá)",
+          "numeroOrden": 13,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 13,
+        "data": {
+          "id": "9e4b1916-ff58-463a-a01b-55e0d38cb00c",
+          "nombre": "Sambaduro (Maracuyá)",
+          "numeroOrden": 14,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 14,
+        "data": {
+          "id": "1118a62f-7a42-448b-ad3f-69dcb7af1f5b",
+          "nombre": "Markatu (Maracuyá)",
+          "numeroOrden": 15,
+          "temaGaleta": true,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 15,
+        "data": {
+          "id": "11a86d3b-3eef-4380-8deb-47999f07bfc8",
+          "nombre": "Sambareggae (Slap)",
+          "numeroOrden": 2,
+          "temaGaleta": false,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 16,
+        "data": {
+          "id": "aae029fa-b450-43b0-b378-f51063050a92",
+          "nombre": "Merengue (Maracuyá)",
+          "numeroOrden": 11,
+          "temaGaleta": false,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 17,
+        "data": {
+          "id": "7958f25d-2c3c-4ce3-9a49-56024680998c",
+          "nombre": "PimPamPum (Maracuyá)",
+          "numeroOrden": 12,
+          "temaGaleta": false,
+          "temaSlap": true,
+          "temaPropio": false,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 18,
+        "data": {
+          "id": "807aed3f-93d5-4f73-ad3c-41f6289a8964",
+          "nombre": "Sambaregae (propio)",
+          "numeroOrden": 1,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 19,
+        "data": {
+          "id": "9ce51e1e-69be-4262-85ca-1db902308e9c",
+          "nombre": "Samba (propio)",
+          "numeroOrden": 2,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 20,
+        "data": {
+          "id": "60b3af43-3902-4e03-a923-9e7d4711bab7",
+          "nombre": "Conga (propio)",
+          "numeroOrden": 3,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 21,
+        "data": {
+          "id": "d9451c6c-5bef-4b45-a648-7c0c649501a2",
+          "nombre": "Tarantela (propio)",
+          "numeroOrden": 4,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "Temas",
+        "rowIdx": 22,
+        "data": {
+          "id": "1e6970b7-d58c-4592-b5ec-7e59178fd3ab",
+          "nombre": "Merengue (propio)",
+          "numeroOrden": 5,
+          "temaGaleta": false,
+          "temaSlap": false,
+          "temaPropio": true,
+          "activo": true,
+          "notas": ""
+        },
+        "sheetId": 155111501,
+        "before": [
+          {},
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "NUMBER_GREATER",
+                "values": [
+                  {
+                    "userEnteredValue": "0"
+                  }
+                ]
+              },
+              "inputMessage": "Número positivo. El módulo comprobará que sea entero y no se repita dentro de cada tipo.",
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {}
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 2,
+        "data": {
+          "id": "b4d97347-0382-4cef-8418-4ced3ca0866e",
+          "grupo": "Slap Lunes",
+          "temaId": "7486f7c4-ddcd-406a-a684-b933d2621a71",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:10:59.880Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 3,
+        "data": {
+          "id": "f1e74570-18a1-4ca6-ba43-ca12e2ccc489",
+          "grupo": "Slap Lunes",
+          "temaId": "10cd5072-2ef3-4d74-92a0-4ae5f3521402",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 4,
+        "data": {
+          "id": "76163553-1bf7-4f6e-94b7-a23b6b12e430",
+          "grupo": "Slap Lunes",
+          "temaId": "91be0c6a-4473-459e-b8b6-f90869643e9d",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 5,
+        "data": {
+          "id": "7ab4b6aa-a75d-4acb-ae2c-ee4fe2300d16",
+          "grupo": "Slap Lunes",
+          "temaId": "c07c66b9-b438-42ab-8340-476737249c59",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 6,
+        "data": {
+          "id": "a5d5f30d-6f47-436c-9446-1550a755d636",
+          "grupo": "Slap Lunes",
+          "temaId": "42ae419f-d7f3-4a33-90e6-1dad2df95008",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 7,
+        "data": {
+          "id": "ca1d4276-f356-4d03-ba4e-eed2668b81a6",
+          "grupo": "Slap Lunes",
+          "temaId": "9e4b1916-ff58-463a-a01b-55e0d38cb00c",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 8,
+        "data": {
+          "id": "99c85930-d407-4af9-8dd5-83e29c0df6b3",
+          "grupo": "Slap Lunes",
+          "temaId": "1118a62f-7a42-448b-ad3f-69dcb7af1f5b",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 9,
+        "data": {
+          "id": "b15d7203-2294-4cd4-9fc0-b7441b8283c2",
+          "grupo": "Slap Lunes",
+          "temaId": "11a86d3b-3eef-4380-8deb-47999f07bfc8",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 10,
+        "data": {
+          "id": "ea3f53c6-98fc-48fd-b5f0-b93dc8fc2302",
+          "grupo": "Slap Lunes",
+          "temaId": "aae029fa-b450-43b0-b378-f51063050a92",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 11,
+        "data": {
+          "id": "2c030192-073e-406b-a0f1-219a35ff7cb7",
+          "grupo": "Slap Lunes",
+          "temaId": "7958f25d-2c3c-4ce3-9a49-56024680998c",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 12,
+        "data": {
+          "id": "a36f5fc9-aad1-44a5-a6aa-cab794e2d819",
+          "grupo": "La Maquinista",
+          "temaId": "d9451c6c-5bef-4b45-a648-7c0c649501a2",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 13,
+        "data": {
+          "id": "78607916-e424-4bf4-b2ef-4c7bc638778b",
+          "grupo": "La Maquinista",
+          "temaId": "60b3af43-3902-4e03-a923-9e7d4711bab7",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 14,
+        "data": {
+          "id": "71a0dcf3-4e46-441e-b186-6e28ce571d66",
+          "grupo": "La Maquinista",
+          "temaId": "9ce51e1e-69be-4262-85ca-1db902308e9c",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 15,
+        "data": {
+          "id": "1ce53e6e-4432-4424-8116-f2c3c179f882",
+          "grupo": "La Maquinista",
+          "temaId": "11a86d3b-3eef-4380-8deb-47999f07bfc8",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "GrupoTemas",
+        "rowIdx": 16,
+        "data": {
+          "id": "1773b823-c371-49c5-9afc-cd9576505c31",
+          "grupo": "La Maquinista",
+          "temaId": "7486f7c4-ddcd-406a-a684-b933d2621a71",
+          "realizado": false,
+          "repasando": false,
+          "fechaRealizado": "",
+          "ultimoRepaso": "",
+          "proximoObjetivo": "",
+          "motivoRepaso": "",
+          "notas": "Repertorio indicado por el usuario. Estado de aprendizaje pendiente de confirmar en el piloto.",
+          "actualizadoEn": "2026-11-15T21:01:03.932Z",
+          "activo": true
+        },
+        "sheetId": 155111502,
+        "before": [
+          {},
+          {
+            "dataValidation": {
+              "condition": {
+                "type": "ONE_OF_RANGE",
+                "values": [
+                  {
+                    "userEnteredValue": "=Coles!$A$2:$A$1220"
+                  }
+                ]
+              },
+              "strict": true,
+              "showCustomUi": true
+            }
+          },
+          {},
+          {},
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE",
+                "pattern": "dd/mm/yyyy"
+              }
+            }
+          },
+          {},
+          {},
+          {},
+          {
+            "userEnteredFormat": {
+              "numberFormat": {
+                "type": "DATE_TIME",
+                "pattern": "dd/mm/yyyy hh:mm"
+              }
+            }
+          },
+          {
+            "userEnteredValue": {
+              "boolValue": false
+            },
+            "dataValidation": {
+              "condition": {
+                "type": "BOOLEAN"
+              },
+              "strict": true
+            }
+          }
+        ]
+      }
+    ],
+    "digest": "ddd04b0be0fdff05cf1223573991bb8f169af4941a6e576a4d31b858f1ccd7d5"
+  },
+  "finalDryRun": {
+    "kind": "repertoire-production-v1",
+    "sourceId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+    "destinationId": "1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60",
+    "allowDemo": false,
+    "sourceFingerprint": "7e4137ddf5ddda5325e4d64121803873f4c85c3b1f692ea8cf79bf2f14401235",
+    "destinationFingerprint": "06827045c99bfd9b723c64741cdbaede113ef605ea59254827107d064e3a681a",
+    "counts": {
+      "sourceThemes": 21,
+      "sourceAssignments": 15,
+      "themesToInsert": 0,
+      "assignmentsToInsert": 0
+    },
+    "writes": [],
+    "digest": "9364bbcde955dad3b9a4e3b12adb6f601d423d755d4b41205e58c11e56c163e9"
+  }
+}

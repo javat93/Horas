@@ -4,8 +4,9 @@
 // then reapplies to the pinned rehearsal copy, never to production.
 const http = require('node:http');
 const assert = require('node:assert/strict');
-const X = require('./repertoire-migration.cjs');
-function startProbe({ port = 3005, exercise = false } = {}) {
+function startProbe({ port = 3005, exercise = false, profile = 'rehearsal', apply = false } = {}) {
+  if (profile === 'production' && exercise) throw Error('La reversión de ensayo no se ejecuta automáticamente en producción.');
+  const X = require('./repertoire-migration.cjs').createMigration(profile);
   const queue = [], calls = [], steps = [];
   let current, waiting, sequence = 0, finished = false, failure = '', evidence = null, artifacts = null;
   const request = (url, unusedToken, method = 'GET', body) => new Promise((resolve, reject) => {
@@ -40,6 +41,19 @@ function startProbe({ port = 3005, exercise = false } = {}) {
   (async () => {
     const initial = await X.prepare(request); steps.push({ action: 'dry-run', ...initial.counts, digest: initial.digest });
     artifacts = { initialPlan: initial };
+    if (apply && !exercise) {
+      const applied = await X.apply(initial, request); artifacts.finalReceipt = applied.receipt;
+      steps.push({ action: 'apply', rowsChanged: applied.rowsChanged });
+      const replay = await X.apply(initial, request); assert.equal(replay.rowsChanged, 0);
+      const source = await X.read(X.SOURCE, request), destination = await X.read(X.DESTINATION, request);
+      assert.equal(source.fingerprint, initial.sourceFingerprint);
+      const clean = rows => rows.map(({rowIdx,...v})=>v).sort((a,b)=>a.id.localeCompare(b.id));
+      assert.equal(X.hash(clean(source.themes)),X.hash(clean(destination.themes)));
+      assert.equal(X.hash(clean(source.assignments)),X.hash(clean(destination.assignments)));
+      steps.push({ action: 'repeat-and-verify', rowsChanged: 0, sourceUnchanged: true, allRecordsMatch: true });
+      artifacts.finalDryRun = await X.prepare(request);
+      assert.equal(artifacts.finalDryRun.writes.length,0);
+    }
     if (exercise) {
       const applied = await X.apply(initial, request); assert.equal(applied.rowsChanged, initial.writes.length);
       assert(applied.receipt, 'Use a fresh empty rehearsal copy for the recovery exercise.');
@@ -59,9 +73,9 @@ function startProbe({ port = 3005, exercise = false } = {}) {
       steps.push({ action: 'reapply-and-verify', rowsChanged: final.rowsChanged, pendingInsertions: 0, sourceUnchanged: true, allRecordsMatch: true });
       artifacts.finalDryRun = finalPlan;
     }
-    evidence = { date: new Date().toISOString(), mode: exercise ? 'exercise' : 'dry-run', sourceId: X.SOURCE, destinationId: X.DESTINATION, transport: 'Authenticated Sheets connector; real migration module', steps, calls, sourceWrites: 0, productionWrites: 0, detalleReads: 0, detalleWrites: 0, calendarCalls: 0 };
+    evidence = { date: new Date().toISOString(), mode: exercise ? 'exercise' : apply ? 'apply' : 'dry-run', sourceId: X.SOURCE, destinationId: X.DESTINATION, transport: 'Authenticated Sheets connector; real migration module', steps, calls, sourceWrites: 0, productionWrites: profile === 'production' ? calls.filter(c=>c.method==='POST').length : 0, detalleReads: 0, detalleWrites: 0, calendarCalls: 0 };
   })().catch(e => { failure = e.message; console.error('Migration exercise failed:', failure); }).finally(() => { finished = true; if (waiting) { waiting(); waiting = null; } });
   return server;
 }
-if (require.main === module) startProbe({ exercise: process.argv.includes('--exercise') });
+if (require.main === module) startProbe({ exercise: process.argv.includes('--exercise'), profile: process.argv.includes('--production') ? 'production' : 'rehearsal', apply: process.argv.includes('--apply') });
 module.exports = { startProbe };

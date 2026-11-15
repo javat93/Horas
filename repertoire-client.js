@@ -1,8 +1,10 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.RepertoireClient=factory();})(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const TARGET='1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k';
-  function verifyEnvironment(e){if(e?.mode!=='repertoire-development'||e.spreadsheetId!==TARGET||e.calendarAccess!==false||e.legacyOperationsEnabled!==false||typeof e.writeEnabled!=='boolean'||JSON.stringify(e.writableSheets)!==JSON.stringify(['Temas','GrupoTemas']))throw Error('No se ha podido confirmar la copia de desarrollo.');return e;}
-  function verifyData(d){if(d?.mode!=='repertoire-development'||d.spreadsheetId!==TARGET||d.calendarModified!==false||d.legacyModified!==false||!/^[a-f0-9]{64}$/.test(d.version)||!['themes','assignments','groups','issues'].every(k=>Array.isArray(d[k])))throw Object.assign(Error('La respuesta no confirma los datos guardados en la copia.'),{code:'UNVERIFIED_RESPONSE'});return d;}
+  function forProfile(profile='development'){
+  if(!['development','production'].includes(profile))throw Error('Perfil de repertorio no permitido.');
+  const TARGET=profile==='production'?'1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60':'1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k',mode='repertoire-'+profile;
+  function verifyEnvironment(e){if(e?.mode!==mode||e.spreadsheetId!==TARGET||e.calendarAccess!==false||e.legacyOperationsEnabled!==false||typeof e.writeEnabled!=='boolean'||JSON.stringify(e.writableSheets)!==JSON.stringify(['Temas','GrupoTemas']))throw Error('No se ha podido confirmar el destino de repertorio.');return e;}
+  function verifyData(d){if(d?.mode!==mode||d.spreadsheetId!==TARGET||d.calendarModified!==false||d.legacyModified!==false||!/^[a-f0-9]{64}$/.test(d.version)||!['themes','assignments','groups','issues'].every(k=>Array.isArray(d[k])))throw Object.assign(Error('La respuesta no confirma los datos guardados del repertorio.'),{code:'UNVERIFIED_RESPONSE'});return d;}
   function create({transport,writeEnabled=false,onChange=()=>{}}){
     let data=null,busy=false,needsReload=false;
     const state=()=>({data,busy,needsReload,canWrite:writeEnabled&&!!data&&!busy&&!needsReload&&!data.issues.length});
@@ -16,4 +18,6 @@
     return{state,load,save,clear(){if(busy)throw Error('Espera a que termine la operación.');data=null;needsReload=false;notify();}};
   }
   return{TARGET,verifyEnvironment,verifyData,create};
+  }
+  return{...forProfile(),forProfile};
 });

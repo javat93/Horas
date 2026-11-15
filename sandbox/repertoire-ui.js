@@ -1,7 +1,9 @@
 /* global RepertoireClient, RepertoireModel, GroupIdentity */
 (function () {
   'use strict';
-  const C = RepertoireClient, M = RepertoireModel, G = GroupIdentity;
+  const page = window.RepertoirePage || { profile: 'development', endpoint: '/api/repertorio-test' };
+  const C = RepertoireClient.forProfile(page.profile), M = RepertoireModel, G = GroupIdentity;
+  const endpoint = page.endpoint, production = page.profile === 'production';
   const $ = id => document.getElementById(id), dialog = $('editor'), form = $('editor-form');
   let client, env, token = '', expires = 0, view = 'repertoire', groupId = '', search = '', type = '', filter = 'all', archived = false;
   let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false, oauthClient = null;
@@ -42,7 +44,7 @@
   }
   async function transport(payload) {
     if (!authenticated()) throw Object.assign(Error('La sesión ha caducado. Vuelve a conectar Google; tus cambios sin guardar se conservan.'), { status: 401, code: 'AUTH_REQUIRED' });
-    try { return await json('/api/repertorio-test', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(payload) }); }
+    try { return await json(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(payload) }); }
     catch (error) { if (error.status === 401) { token = ''; expires = 0; } throw error; }
   }
   async function reload(keepDraft = false) {
@@ -51,7 +53,7 @@
       await client.load();
       if (!groupId || !currentGroup()) groupId = data().groups[0]?.id || '';
       selected.clear(); render();
-      say(env.preview ? 'Simulación local: todos los cambios se guardan solo en memoria.' : 'Datos de la copia actualizados.');
+      say(env.preview ? 'Simulación local: todos los cambios se guardan solo en memoria.' : production ? 'Repertorio actualizado.' : 'Datos de la copia actualizados.');
       if (keepDraft && draft) {
         // Rebase explicitly against the fresh version while preserving only fields the user edited.
         draft.rebased = true; $('dialog-error').hidden = false;
@@ -83,7 +85,7 @@
     document.querySelectorAll('.tabs button').forEach(b => { if (b.dataset.tab === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     const workspace = $('workspace'); workspace.replaceChildren();
     $('issue-panel').hidden = true;
-    if (!data()) { workspace.append(empty('Todo tu repertorio en un lugar', 'Conecta Google para consultar los temas de la copia de desarrollo.')); controls(); return; }
+    if (!data()) { workspace.append(empty('Todo tu repertorio en un lugar', production ? 'Conecta Google para consultar el repertorio de tus grupos.' : 'Conecta Google para consultar los temas de la copia de desarrollo.')); controls(); return; }
     if (!groupId) groupId = data().groups[0]?.id || '';
     if (data().issues.length) {
       const p = $('issue-panel'); p.hidden = false; p.replaceChildren(el('strong', { textContent: 'Hay datos que necesitan revisión. Los guardados están pausados.' }));
@@ -256,8 +258,8 @@
   window.addEventListener('beforeunload', e => { if (dirty || client?.state().busy) { e.preventDefault(); e.returnValue = ''; } });
   $('disconnect').onclick = () => { if (client?.state().busy || (dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres desconectar y descartarlos?'))) return; if (dialog.open) dialog.close(); token = ''; expires = 0; draft = null; dirty = false; selected.clear(); client.clear(); say('Sesión de desarrollo cerrada.'); };
   async function prepareOAuth() {
-    const config = await json('/api/repertorio-test?api=oauth');
-    if (config.sessionKey !== 'horas-repertoire-development-token' || config.scopes !== 'https://www.googleapis.com/auth/spreadsheets') throw Error('Sesión de desarrollo no reconocida.');
+    const config = await json(endpoint + '?api=oauth');
+    if (config.sessionKey !== 'horas-repertoire-' + page.profile + '-token' || config.scopes !== 'https://www.googleapis.com/auth/spreadsheets') throw Error('Sesión de repertorio no reconocida.');
     if (!window.google?.accounts?.oauth2) await new Promise((resolve, reject) => { const script = el('script', { src: 'https://accounts.google.com/gsi/client', onload: resolve, onerror: () => reject(Error('No se pudo cargar el acceso de Google.')) }); document.head.append(script); });
     oauthClient = window.google.accounts.oauth2.initTokenClient({ client_id: config.clientId, scope: config.scopes, include_granted_scopes: false,
       callback: async r => { connecting = false; const seconds = Number(r.expires_in); if (r.error || !r.access_token || !Number.isFinite(seconds) || seconds <= 30 || !(r.scope || '').split(' ').includes(config.scopes)) { say(r.error || 'Falta el permiso de Sheets.', true); controls(); return; } token = r.access_token; expires = Date.now() + (seconds - 30) * 1000; await reload(true); },
@@ -275,7 +277,7 @@
       awaitingGoogle = true;
     } catch (error) { say(error.message, true); } finally { if (!awaitingGoogle) connecting = false; controls(); }
   };
-  json('/api/repertorio-test?api=environment').then(e => {
+  json(endpoint + '?api=environment').then(e => {
     env = C.verifyEnvironment(e); client = C.create({ transport, writeEnabled: env.writeEnabled, onChange: render });
     if (env.preview) { $('mode-badge').textContent = 'SIMULACIÓN'; $('copy-link').hidden = true; $('connect').textContent = 'Abrir simulación'; say('Datos ficticios en memoria. Esta vista no escribe en Google Sheets.'); }
     else prepareOAuth().catch(error => say(error.message, true));

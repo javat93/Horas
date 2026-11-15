@@ -1,0 +1,11 @@
+{
+  "preparedOn": "2026-11-15",
+  "sourceSpreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+  "destinationSpreadsheetId": "1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60",
+  "backupSpreadsheetId": "15nQWzwWX8jUFSfXeTkZx9-J0u7snzMlXxn7o4_Y0GdA",
+  "backupVerified": true,
+  "productionAllowed": true,
+  "sheetIds": { "Temas": 155111501, "GrupoTemas": 155111502 },
+  "writableSheets": ["Temas", "GrupoTemas"],
+  "userAuthorization": "Explicit request in this chat to execute phase 5 and migrate to the original without changing Detalle or sessions/Calendar."
+}

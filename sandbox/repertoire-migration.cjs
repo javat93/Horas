@@ -1,9 +1,12 @@
 'use strict';
 const { createHash } = require('node:crypto');
 const M = require('../repertoire-model.js'), S = require('./repertoire-service.cjs');
-const config = require('../projects/repertorio/rehearsal.json');
+function createMigration(profile = 'rehearsal') {
+if (!['rehearsal', 'production'].includes(profile)) throw Error('Perfil de migración no permitido.');
+const config = require('../projects/repertorio/' + (profile === 'production' ? 'production' : 'rehearsal') + '.json');
 const SOURCE = '1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k';
-const DESTINATION = '1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI';
+const DESTINATION = profile === 'production' ? '1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60' : '1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI';
+const kind = profile === 'production' ? 'repertoire-production-v1' : 'repertoire-rehearsal-v1';
 const API = 'https://sheets.googleapis.com/v4/spreadsheets/';
 const FIELDS = 'userEnteredValue,userEnteredFormat.numberFormat,dataValidation';
 const names = ['Temas', 'GrupoTemas', 'Coles'];
@@ -12,7 +15,7 @@ const hash = v => createHash('sha256').update(JSON.stringify(canonical(v))).dige
 const theme = t => Object.fromEntries(M.THEME_FIELDS.map(k => [k, t[k]]));
 const assignment = a => Object.fromEntries(M.ASSIGNMENT_FIELDS.map(k => [k, a[k]]));
 const beforeCell = c => ({ ...(c.userEnteredValue ? { userEnteredValue: c.userEnteredValue } : {}), ...(c.userEnteredFormat?.numberFormat ? { userEnteredFormat: { numberFormat: c.userEnteredFormat.numberFormat } } : {}), ...(c.dataValidation ? { dataValidation: c.dataValidation } : {}) });
-function configured() { if (config.sourceSpreadsheetId !== SOURCE || config.destinationSpreadsheetId !== DESTINATION || SOURCE === DESTINATION || config.productionAllowed !== false) M.fail('El manifiesto de ensayo no coincide con los destinos fijados.', 'FORBIDDEN_TARGET', 403); }
+function configured() { if (config.sourceSpreadsheetId !== SOURCE || config.destinationSpreadsheetId !== DESTINATION || SOURCE === DESTINATION || config.productionAllowed !== (profile === 'production') || (profile === 'production' && (config.backupSpreadsheetId !== '15nQWzwWX8jUFSfXeTkZx9-J0u7snzMlXxn7o4_Y0GdA' || config.backupVerified !== true))) M.fail('El manifiesto no coincide con los destinos y respaldo verificados.', 'FORBIDDEN_TARGET', 403); }
 function scoped(request, destinationIds) {
   configured();
   return async (url, token, method = 'GET', body) => {
@@ -24,6 +27,7 @@ function scoped(request, destinationIds) {
       if ([...u.searchParams.keys()].some(k => !['fields', 'includeGridData', 'ranges'].includes(k)) || u.searchParams.get('fields') !== allowedFields || (grid && ranges.length !== 3) || ranges.some(r => !/^(Temas!A1:H|GrupoTemas!A1:M|Coles!A1:A)[1-9]\d{0,4}$/.test(r) || +r.match(/\d+$/)[0] > 10000)) M.fail('Lectura de migración fuera de repertorio.', 'FORBIDDEN_RANGE', 403);
     } else if (method === 'POST' && u.href === API + DESTINATION + ':batchUpdate') {
       if (!destinationIds || !body || Object.keys(body).some(k => k !== 'requests') || !Array.isArray(body.requests) || !body.requests.length || body.requests.length > 50) M.fail('Lote de migración bloqueado.', 'FORBIDDEN_WRITE', 403);
+      if (profile === 'production' && Object.keys(config.sheetIds).some(n => destinationIds[n] !== config.sheetIds[n])) M.fail('Solo las dos pestañas productivas fijadas.', 'FORBIDDEN_WRITE', 403);
       for (const item of body.requests) {
         const w = item.updateCells, r = w?.range, name = Object.keys(destinationIds).find(n => destinationIds[n] === r?.sheetId), width = M.HEADERS[name]?.length;
         if (Object.keys(item).length !== 1 || !width || !w || [0, 758405382, 1532527911, 359152999, 1391231953, 901061693].includes(r.sheetId) || w.fields !== FIELDS || Object.keys(w).some(k => !['range', 'rows', 'fields'].includes(k)) || Object.keys(r).some(k => !['sheetId', 'startRowIndex', 'endRowIndex', 'startColumnIndex', 'endColumnIndex'].includes(k)) || !Number.isInteger(r.startRowIndex) || r.startRowIndex < 1 || r.endRowIndex !== r.startRowIndex + 1 || r.endRowIndex > 10000 || r.startColumnIndex !== 0 || r.endColumnIndex !== width || w.rows?.length !== 1 || w.rows[0].values?.length !== width) M.fail('Escritura de migración fuera de las pestañas nuevas.', 'FORBIDDEN_WRITE', 403);
@@ -42,6 +46,7 @@ async function read(id, request, token) {
     if (found.length !== 1 || !p || !Number.isInteger(p.gridProperties?.rowCount) || p.gridProperties.rowCount < 2 || p.gridProperties.rowCount > 10000 || p.gridProperties.columnCount < (M.HEADERS[name]?.length || 1)) M.fail('Inicializa y revisa las pestañas del ensayo: ' + name, 'SCHEMA_MISMATCH', 409);
     // Never accept an old tab masquerading as a new repertoire tab in a copied workbook.
     if (name !== 'Coles' && [0, 758405382, 1532527911, 359152999, 1391231953, 901061693].includes(p.sheetId)) M.fail('Identificador de pestaña heredada bloqueado.', 'FORBIDDEN_WRITE', 403);
+    if (profile === 'production' && id === DESTINATION && name !== 'Coles' && p.sheetId !== config.sheetIds[name]) M.fail('Pestaña productiva no reconocida.', 'FORBIDDEN_WRITE', 403);
     specs[name] = p;
   }
   const gridQuery = new URLSearchParams({ includeGridData: 'true', fields: 'spreadsheetId,sheets(properties(sheetId,title),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue,userEnteredFormat(numberFormat),dataValidation))))' });
@@ -71,6 +76,7 @@ async function read(id, request, token) {
 }
 function build(source, destination, { allowDemo = false } = {}) {
   configured();
+  if (profile === 'production' && allowDemo) M.fail('Producción nunca admite datos DEMO.', 'DEMO_DATA', 403);
   if (source.id !== SOURCE || destination.id !== DESTINATION) M.fail('Los destinos del plan no están autorizados.', 'FORBIDDEN_TARGET', 403);
   if (source.issues.length || destination.issues.length) M.fail('Hay incidencias sin resolver. No se prepara una migración.', 'DATA_ISSUES', 409);
   if (!allowDemo && source.themes.some(t => /\bDEMO\b|SIMULACI[ÓO]N/i.test(t.nombre))) M.fail('Hay datos DEMO. Excluirlos o limitar el ensayo explícitamente.', 'DEMO_DATA', 409);
@@ -93,7 +99,7 @@ function build(source, destination, { allowDemo = false } = {}) {
   }
   const issues = M.integrity(themes, assignments, destination.groups);
   if (issues.length) M.fail('La unión no es válida: ' + issues[0].code, issues[0].code, 409);
-  const plan = { kind: 'repertoire-rehearsal-v1', sourceId: SOURCE, destinationId: DESTINATION, allowDemo, sourceFingerprint: source.fingerprint, destinationFingerprint: destination.fingerprint,
+  const plan = { kind, sourceId: SOURCE, destinationId: DESTINATION, allowDemo, sourceFingerprint: source.fingerprint, destinationFingerprint: destination.fingerprint,
     counts: { sourceThemes: source.themes.length, sourceAssignments: source.assignments.length, themesToInsert: writes.filter(w => w.name === 'Temas').length, assignmentsToInsert: writes.filter(w => w.name === 'GrupoTemas').length },
     writes: writes.map(w => ({ ...w, sheetId: destination.specs[w.name].sheetId, before: destination.rows[w.name][w.rowIdx - 1].map(beforeCell) })) };
   return { ...plan, digest: hash(plan) };
@@ -115,7 +121,7 @@ async function verify(plan, request, token) {
   return snapshot;
 }
 async function apply(plan, request, token) {
-  checkArtifact(plan, 'repertoire-rehearsal-v1');
+  checkArtifact(plan, kind);
   const fresh = await prepare(request, token, { allowDemo: plan.allowDemo });
   if (fresh.digest !== plan.digest) {
     if (!fresh.writes.length && fresh.sourceFingerprint === plan.sourceFingerprint) return { unchanged: true, rowsChanged: 0, destinationId: DESTINATION };
@@ -126,11 +132,11 @@ async function apply(plan, request, token) {
   // API batches are limited. Partial outcomes require a new dry-run, never an automatic replay.
   for (let i = 0; i < plan.writes.length; i += 50) await safe(API + DESTINATION + ':batchUpdate', token, 'POST', { requests: plan.writes.slice(i, i + 50).map(w => requestFor(w)) });
   const after = await verify(plan, request, token);
-  const receipt = { kind: 'repertoire-rehearsal-receipt-v1', sourceId: SOURCE, destinationId: DESTINATION, sourceFingerprint: plan.sourceFingerprint, beforeFingerprint: plan.destinationFingerprint, afterFingerprint: after.fingerprint, writes: plan.writes };
+  const receipt = { kind: kind.replace('-v1', '-receipt-v1'), sourceId: SOURCE, destinationId: DESTINATION, sourceFingerprint: plan.sourceFingerprint, beforeFingerprint: plan.destinationFingerprint, afterFingerprint: after.fingerprint, writes: plan.writes };
   return { rowsChanged: plan.writes.length, receipt: { ...receipt, digest: hash(receipt) } };
 }
 async function rollback(receipt, request, token) {
-  checkArtifact(receipt, 'repertoire-rehearsal-receipt-v1');
+  checkArtifact(receipt, kind.replace('-v1', '-receipt-v1'));
   const dest = await read(DESTINATION, request, token);
   if (dest.fingerprint === receipt.beforeFingerprint) return { unchanged: true, restored: true };
   if (dest.fingerprint !== receipt.afterFingerprint) M.fail('El destino tiene cambios posteriores. No se sobrescriben.', 'REVIEW_EXPIRED', 409);
@@ -140,5 +146,7 @@ async function rollback(receipt, request, token) {
   if (after.fingerprint !== receipt.beforeFingerprint) M.fail('No se pudo verificar la recuperación.', 'VERIFY_FAILED', 503);
   return { restored: true, destinationId: DESTINATION };
 }
-if (require.main === module) console.log(JSON.stringify({ mode: 'dry-run', sourceId: SOURCE, destinationId: DESTINATION, writesExecuted: false, usage: 'Use prepare(request, token) or the authenticated connector bridge. No production target is supported.' }));
-module.exports = { SOURCE, DESTINATION, hash, read, build, prepare, apply, rollback, scoped, requestFor };
+return { SOURCE, DESTINATION, hash, read, build, prepare, apply, rollback, scoped, requestFor };
+}
+module.exports = { ...createMigration(), createMigration };
+if (require.main === module) console.log(JSON.stringify({ mode: 'dry-run', sourceId: module.exports.SOURCE, destinationId: module.exports.DESTINATION, writesExecuted: false, usage: 'Use prepare(request, token). Production requires the explicit verified phase-5 manifest and factory.' }));

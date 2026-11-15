@@ -397,7 +397,7 @@
     </div>
 
     <main class="max-w-4xl mx-auto px-4">
-        <div class="flex p-1.5 bg-white rounded-2xl shadow-sm border border-slate-100 mb-8 max-w-md mx-auto">
+        <div class="flex flex-wrap p-1.5 bg-white rounded-2xl shadow-sm border border-slate-100 mb-8 max-w-lg mx-auto">
             <button onclick="switchTab('eventos')" id="btn-eventos" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 tab-active">
                 <i data-lucide="layout-list" class="w-4 h-4"></i> Lista
             </button>
@@ -407,6 +407,8 @@
             <button onclick="switchTab('maestros')" id="btn-maestros" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2">
                 <i data-lucide="users" class="w-4 h-4"></i> Grupos
             </button>
+            <a id="repertoire-entry" href="repertorio.html" class="hidden flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2"><i data-lucide="music" class="w-4 h-4"></i> Repertorio</a>
+            <script>window.horasConfigReady.then(() => { if (typeof CONFIG !== 'undefined' && CONFIG.DATA_MODE === 'production') document.getElementById('repertoire-entry').classList.remove('hidden'); }).catch(() => {});</script>
         </div>
 
         <div id="tab-eventos" class="space-y-6">

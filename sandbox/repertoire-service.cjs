@@ -3,7 +3,8 @@ const { createHash } = require('node:crypto');
 const M = require('../repertoire-model.js');
 const G = require('../group-identity.js');
 const D = require('../locale-data.js');
-const P = require('./repertoire-policy.cjs');
+const defaultPolicy = require('./repertoire-policy.cjs');
+function createService(P = defaultPolicy) {
 const READ_ACTIONS = Object.freeze(['catalog', 'groupRepertoire', 'validate']);
 const FIELDS = Object.freeze({
   catalog: ['includeArchived'], validate: [], groupRepertoire: ['grupo', 'includeArchived'],
@@ -70,18 +71,18 @@ function assignmentCells(a, rowIdx) {
 async function snapshot(token, request) {
   const q = new URLSearchParams({ fields: 'spreadsheetId,properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties))' });
   const meta = await request(P.BASE + '?' + q, token);
-  if (meta.spreadsheetId !== P.DEVELOPMENT_ID || meta.properties?.locale !== 'es_ES' || meta.properties?.timeZone !== 'Europe/Madrid') M.fail('Libro de desarrollo o configuración no reconocidos.', 'SCHEMA_MISMATCH', 409);
+  if (meta.spreadsheetId !== P.TARGET_ID || meta.properties?.locale !== 'es_ES' || meta.properties?.timeZone !== 'Europe/Madrid') M.fail('Libro de repertorio o configuración no reconocidos.', 'SCHEMA_MISMATCH', 409);
   const sheets = {};
   for (const name of ['Temas', 'GrupoTemas', 'Coles']) {
     const matches = meta.sheets?.filter(s => s.properties?.title === name) || [];
     const p = matches[0]?.properties;
-    if (matches.length !== 1 || !p || !Number.isInteger(p.gridProperties?.rowCount) || p.gridProperties.rowCount < 2 || p.gridProperties.rowCount > P.LIMIT || (name !== 'Coles' && p.sheetId !== (name === 'Temas' ? 142601101 : 142601102)) || p.gridProperties.columnCount < (M.HEADERS[name]?.length || 1)) M.fail('Estructura no reconocida: ' + name, 'SCHEMA_MISMATCH', 409);
+    if (matches.length !== 1 || !p || !Number.isInteger(p.gridProperties?.rowCount) || p.gridProperties.rowCount < 2 || p.gridProperties.rowCount > P.LIMIT || (name !== 'Coles' && p.sheetId !== P.SHEET_IDS[name]) || p.gridProperties.columnCount < (M.HEADERS[name]?.length || 1)) M.fail('Estructura no reconocida: ' + name, 'SCHEMA_MISMATCH', 409);
     sheets[name] = p;
   }
   const gridQuery = new URLSearchParams({ includeGridData: 'true', fields: 'spreadsheetId,sheets(properties(sheetId,title),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue))))' });
   for (const name of ['Temas', 'GrupoTemas', 'Coles']) gridQuery.append('ranges', `${name}!A1:${name === 'Temas' ? 'H' : name === 'GrupoTemas' ? 'M' : 'A'}${sheets[name].gridProperties.rowCount}`);
   const result = await request(P.BASE + '?' + gridQuery, token);
-  if (result.spreadsheetId !== P.DEVELOPMENT_ID) M.fail('Respuesta de otro libro.', 'FORBIDDEN_TARGET', 403);
+  if (result.spreadsheetId !== P.TARGET_ID) M.fail('Respuesta de otro libro.', 'FORBIDDEN_TARGET', 403);
   const rows = {};
   for (const name of ['Temas', 'GrupoTemas', 'Coles']) {
     const found = result.sheets?.filter(s => s.properties?.title === name && s.properties?.sheetId === sheets[name].sheetId) || [];
@@ -105,7 +106,7 @@ async function snapshot(token, request) {
   return { ...parsed, issues, groups, rows, sheets, version };
 }
 function response(snap) {
-  return { mode: 'repertoire-development', spreadsheetId: P.DEVELOPMENT_ID, calendarModified: false, legacyModified: false, version: snap.version,
+  return { mode: P.MODE, spreadsheetId: P.TARGET_ID, calendarModified: false, legacyModified: false, version: snap.version,
     groups: snap.groups.map(nombre => ({ nombre, label: G.catalogLabel(nombre), id: G.id(nombre) })),
     themes: snap.themes.map(cleanTheme), assignments: snap.assignments.map(a => ({ ...cleanAssignment(a), estado: M.state(a) })), issues: snap.issues };
 }
@@ -219,4 +220,6 @@ function runRepertoire(payload, token, transport, now = new Date()) {
   pending = job.catch(() => {});
   return job;
 }
-module.exports = { READ_ACTIONS, validatePayload, snapshot, plan, runRepertoire, themeCells, assignmentCells, lookupFormula };
+return { READ_ACTIONS, validatePayload, snapshot, plan, runRepertoire, themeCells, assignmentCells, lookupFormula };
+}
+module.exports = { ...createService(), createService };
