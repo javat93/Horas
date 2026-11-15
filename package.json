@@ -4,6 +4,8 @@
   "description": "Backend proxy seguro para PercuManager",
   "main": "sandbox/server.cjs",
   "scripts": {
+    "start:repertorio": "node sandbox/repertoire-server.cjs",
+    "test:repertorio": "node --test sandbox/repertoire*.test.cjs",
     "start:pruebas": "node sandbox/server.cjs",
     "test:pruebas": "node --test sandbox/*.test.cjs",
     "start": "node sandbox/server.cjs",

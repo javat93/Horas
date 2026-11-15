@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-15",
+  "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+  "transport": "Authenticated Google Sheets connector bridge. Executed the real API handler, service and policy in a local Node process; no browser OAuth credentials extracted or used.",
+  "scope": "API/service integration with native Sheets. Browser OAuth and remote deployment were not tested.",
+  "status": "passed",
+  "steps": [
+    {
+      "action": "saveTheme",
+      "rowsChanged": 1,
+      "unchanged": false
+    },
+    {
+      "action": "assignThemes",
+      "rowsChanged": 1,
+      "unchanged": false
+    },
+    {
+      "action": "updateProgress",
+      "rowsChanged": 1,
+      "unchanged": false
+    },
+    {
+      "action": "recordRehearsal",
+      "rowsChanged": 1,
+      "unchanged": false
+    },
+    {
+      "action": "assignThemes",
+      "rowsChanged": 0,
+      "unchanged": true
+    },
+    {
+      "action": "archiveAssignment",
+      "rowsChanged": 1,
+      "unchanged": false
+    },
+    {
+      "action": "assignThemes",
+      "rowsChanged": 1,
+      "unchanged": false
+    },
+    {
+      "action": "archiveAssignment",
+      "rowsChanged": 1,
+      "unchanged": false
+    },
+    {
+      "action": "archiveTheme",
+      "rowsChanged": 1,
+      "unchanged": false
+    }
+  ],
+  "googleCalls": 78,
+  "writeBatches": 8,
+  "allowedSheetIds": [
+    142601101,
+    142601102
+  ],
+  "formulaAndNativeDatesVerified": true,
+  "demoIds": {
+    "Temas": "43f7b39b-ecf0-4f11-b849-211908fca525",
+    "GrupoTemas": "4005876c-d1b1-4426-a661-71a99d378d33"
+  },
+  "demoCleanup": "Completed via ID-verified connector write limited to Temas!A2:H2 and GrupoTemas!A2:M2. Values re-read; no demo records remain.",
+  "originalWrites": 0,
+  "detalleReads": 0,
+  "detalleWrites": 0,
+  "colesWrites": 0,
+  "calendarCalls": 0,
+  "infrastructureNote": "The probe completed all functional assertions. Its initial attempt to create a local evidence file failed with ENOENT; evidence was recovered from the recorded replies and saved with the file tool. The probe now returns evidence in its protocol instead of creating a file."
+}

@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-15",
+  "phase": 2,
+  "status": "complete",
+  "branch": "feature/repertorio-grupos",
+  "implemented": [
+    "Strict shared model with type/order rules, group aliases and placeholder/import detection",
+    "Fixed-copy policy with per-sheet and bounded-range restrictions",
+    "Domain API, readonly default and verification after writes",
+    "Dedicated loopback server and in-memory development OAuth session",
+    "Native boolean/date writing and es_ES lookup formula"
+  ],
+  "verification": {
+    "command": "node --test --test-reporter=spec",
+    "total": 222,
+    "passed": 222,
+    "failed": 0,
+    "repertoireTests": 49,
+    "googleSimulation": true,
+    "authenticatedCopyProbe": "phase2-live.json",
+    "browserLocalEnvironment": "Verified displayed fixed copy ID, write-enabled repertoire scope and disabled legacy/Calendar capabilities; no Google sign-in attempted",
+    "browserSheetsCleanup": "Visually inspected Temas and GrupoTemas in native Sheets after restoring template values"
+  },
+  "restrictions": {
+    "originalWrites": 0,
+    "detalleReads": 0,
+    "detalleWrites": 0,
+    "colesWrites": 0,
+    "calendarCalls": 0,
+    "productionActivated": false,
+    "productionDeployed": false
+  },
+  "existingTestFixtureCorrection": "identity.test.cjs now supplies SHOW_SESSION_TYPES=false when extracting the existing session renderer into its VM. The missing variable failed before repertoire changes; production renderer code is unchanged.",
+  "limits": [
+    "Browser OAuth grant has not been tested; Google Cloud configuration unchanged",
+    "No distributed transaction/lock against other Sheets writers",
+    "Every persisted record is located by UUID; no automatic import of incomplete manual rows",
+    "Phase 3 user interface and phase 5 migration remain pending"
+  ]
+}

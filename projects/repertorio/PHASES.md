@@ -25,7 +25,7 @@ Entregado en la copia:
 
 No se ha introducido catálogo, realizado asignaciones ni calculado estados a partir de Detalle. El modelo de relaciones, la fórmula NombreTema, la validación del número entero y la comprobación de órdenes por tipo corresponden a la fase 2. Se revisaron visualmente Temas y las dos zonas horizontales de GrupoTemas en Google Sheets al 100%, comprobando cabeceras, casillas y presentación.
 
-## Fase 2 — Modelo y servicio aislado · PENDIENTE
+## Fase 2 — Modelo y servicio aislado · COMPLETADA EL 15/11/2026
 
 Objetivo: poder leer y guardar repertorio en la copia con reglas fiables, antes de conectarlo a la interfaz.
 
@@ -47,6 +47,8 @@ Cierre:
 - Pruebas de modelo y de servicio con Google simulado, incluidos rechazos antes de llamar a Google para un destino o pestaña no permitidos.
 - Prueba autenticada acotada en las pestañas nuevas de la copia, con datos DEMO identificados y retirada posterior.
 - Guardar evidencia de la prueba y confirmar que no se escribe en Detalle, Coles ni Calendar.
+
+Evidencia de cierre: modelo y API implementados; pruebas automáticas del módulo y regresión completa aprobadas; ciclo autenticado del handler/servicio a través del conector de Sheets, con ocho lotes de escritura limitados a las dos pestañas nuevas, fórmula calculada y fechas nativas verificadas. Datos temporales retirados tras comprobar sus IDs. Acceso técnico local revisado en navegador. No se ha desplegado el endpoint ni validado un nuevo inicio de sesión OAuth desde el navegador; el alcance de esa comprobación queda explícito en API.md y en las evidencias.
 
 ## Fase 3 — Interfaz funcional · PENDIENTE
 

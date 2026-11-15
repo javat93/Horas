@@ -21,6 +21,10 @@
       "GrupoTemas": 142601102
     },
     "applicationConnected": false,
+    "apiImplemented": true,
+    "apiEndpoint": "/api/repertorio-test",
+    "localUrl": "http://localhost:3002",
+    "browserOAuthTested": false,
     "calendarAccess": false,
     "legacyOperationsEnabled": false
   },
@@ -52,7 +56,9 @@
     {
       "id": 2,
       "name": "Modelo y API limitada a la copia",
-      "status": "pending"
+      "status": "complete",
+      "completedOn": "2026-11-15",
+      "evidence": ["evidence/phase2.json", "evidence/phase2-live.json"]
     },
     {
       "id": 3,
@@ -70,5 +76,5 @@
       "status": "pending"
     }
   ],
-  "nextPhase": 2
+  "nextPhase": 3
 }

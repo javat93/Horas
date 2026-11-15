@@ -6,7 +6,8 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 
 - Fase 0 completada: libro original identificado en Drive, copia completa creada y verificada, rama de código independiente preparada.
 - Fase 1 completada como plantilla: Temas y GrupoTemas creadas en la copia, con cabeceras, casillas nativas, filtros, fechas y validaciones básicas. No contiene temas o estados de aprendizaje inventados.
-- Fases 2 a 5 pendientes: el módulo funcional y la conexión de la app a la copia todavía no están implementados. La fórmula NombreTema y las reglas cruzadas se implementarán con el módulo.
+- Fase 2 completada el 15/11/2026: modelo, API y acceso técnico local limitados a la copia, con fórmula NombreTema y reglas de integridad implementadas. Prueba autenticada mediada por el conector de Sheets completada y datos DEMO retirados.
+- Fases 3 a 5 pendientes: interfaz cotidiana, piloto y migración. El módulo no está integrado en la app productiva.
 - No se ha desplegado, activado ni migrado repertorio en producción.
 
 ## Ubicaciones
@@ -36,10 +37,13 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 - [Evidencia de la preparación](evidence/preparation.json).
 - [Peticiones ya ejecutadas al preparar la copia](bootstrap-copy.requests.json): registro de auditoría, no volver a ejecutar.
 - [Diseño funcional y técnico completo](DESIGN.md).
+- [API, arranque local y límites de validación](API.md).
+- [Evidencia de la fase 2](evidence/phase2.json).
+- [Prueba autenticada sobre la copia](evidence/phase2-live.json).
 
-## Siguiente trabajo: fase 2
+## Siguiente trabajo: fase 3
 
-Implementar primero el modelo y un servicio que solo opere sobre el ID de desarrollo fijado en project.json. Crear un acceso de pruebas específico de repertorio; no sustituir los IDs de producción o de los entornos anteriores.
+Implementar la interfaz de repertorio utilizando el modelo y la API existentes. El acceso técnico ya está disponible con `node sandbox/repertoire-server.cjs --write` en http://localhost:3002. No sustituir los IDs de producción o de los entornos anteriores. El inicio de sesión OAuth del navegador no se ha probado ni se ha modificado Google Cloud; la verificación autenticada de Sheets se realizó mediante el conector.
 
 La copia conserva los vínculos de Calendar del libro original. No se debe arrancar la app normal contra ella con altas, bajas, sincronización o realizado automático habilitados. El nuevo acceso de desarrollo debe limitarse a repertorio, sin exponer operaciones de sesiones o Calendar.
 
