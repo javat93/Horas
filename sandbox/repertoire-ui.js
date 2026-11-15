@@ -8,7 +8,6 @@
   let client, env, token = '', expires = 0, view = 'repertoire', groupId = '', search = '', type = '', filter = 'all', archived = false;
   let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false, oauthClient = null;
   const types = [['temaGaleta', 'Galeta'], ['temaSlap', 'Slap'], ['temaPropio', 'Propio']];
-  const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const uid = () => crypto.randomUUID();
   function el(tag, props = {}, children = []) {
     const n = document.createElement(tag);
@@ -24,7 +23,6 @@
   const themeById = id => data()?.themes.find(t => t.id === id);
   const sortThemes = (a, b) => a.numeroOrden - b.numeroOrden || a.nombre.localeCompare(b.nombre, 'es') || a.id.localeCompare(b.id);
   function matching(t) { return (!type || t[type]) && (!search || G.normalize(t.nombre).includes(G.normalize(search))); }
-  const dateLabel = d => d ? d.split('-').reverse().join('/') : 'Sin registrar';
   function say(message, error = false) {
     $('status').replaceChildren(document.createTextNode(message)); $('status').className = 'status' + (error ? ' error' : ''); $('status').hidden = !message;
     if (client?.state().needsReload) $('status').append(button('Actualizar datos', () => reload(true), '', client.state().busy));
@@ -131,33 +129,34 @@
     root.append(el('div', { class: 'toolbar' }, [el('h2', { textContent: 'Tus grupos' }), refreshButton()])); filters(root, false);
     const groups = data().groups.filter(g => !search || G.matches(g.nombre, search));
     if (!groups.length) { root.append(empty('No se han encontrado grupos', 'Los grupos se consultan desde el catálogo de la copia.')); return; }
-    root.append(el('div', { class: 'group-grid' }, groups.map(g => { const s = M.summary(activeForGroup(g.id)); return el('article', { class: 'group-card' }, [el('h3', { textContent: g.label }), el('p', { textContent: `${s.asignados} temas · ${s.realizados} realizados · ${s.repasando} en repaso` }), button('Ver repertorio', () => { groupId = g.id; view = 'repertoire'; search = ''; selected.clear(); render(); }, '')]); })));
+    root.append(el('div', { class: 'group-grid' }, groups.map(g => { const s = M.summary(activeForGroup(g.id)); return el('article', { class: 'group-card' }, [el('h3', { textContent: g.label }), el('p', { textContent: `${s.asignados} temas · ${s.realizados} ya los saben · ${s.asignados - s.realizados} por aprender · ${s.repasando} repasando` }), button('Ver repertorio', () => { groupId = g.id; view = 'repertoire'; search = ''; selected.clear(); render(); }, '')]); })));
   }
   function renderRepertoire(root) {
     const g = currentGroup();
     if (!g) { root.append(empty('Todavía no hay grupos', 'Primero necesitas un grupo en el catálogo de la copia.')); return; }
     const groupPicker = selectControl(data().groups.map(g => [g.id, g.label]), g.id, 'Seleccionar grupo', v => { groupId = v; selected.clear(); render(); }, 'group-picker');
     root.append(el('div', { class: 'toolbar' }, [el('div', { class: 'toolbar-title' }, [groupPicker]), el('div', { class: 'toolbar-actions' }, [refreshButton(), button('Añadir temas', assignThemes, 'primary', !canWrite())])]));
-    const summary = M.summary(activeForGroup(g.id));
-    root.append(el('div', { class: 'stats' }, [['asignados', 'Temas asignados'], ['realizados', 'Realizados'], ['repasando', 'En repaso']].map(([key, label]) => el('div', { class: 'stat' }, [el('strong', { textContent: String(summary[key]) }), el('span', { textContent: label })]))));
-    root.append(el('p', { class: 'stat-note', textContent: 'Un tema realizado también puede estar en repaso.' }));
+    const summary = M.summary(activeForGroup(g.id)); summary.pendientes = summary.asignados - summary.realizados;
+    root.append(el('div', { class: 'stats' }, [['asignados', 'Temas del grupo'], ['realizados', 'Ya lo saben'], ['pendientes', 'Aún no lo saben'], ['repasando', 'Repasando']].map(([key, label]) => el('div', { class: 'stat' }, [el('strong', { textContent: String(summary[key]) }), el('span', { textContent: label })]))));
+    root.append(el('p', { class: 'stat-note', textContent: 'Puedes marcar «Repasando» aunque ya lo sepan. Los cambios se guardan automáticamente.' }));
     filters(root);
-    root.append(el('div', { class: 'state-tabs', 'aria-label': 'Filtrar por seguimiento' }, [['all', 'Todos'], ['pending', 'Pendientes'], ['done', 'Realizados'], ['review', 'Repasando']].map(([v, label]) => el('button', { textContent: label, 'aria-pressed': String(filter === v), onclick: () => { filter = v; selected.clear(); render(); } }))));
+    root.append(el('div', { class: 'state-tabs', 'aria-label': 'Filtrar por seguimiento' }, [['all', 'Todos'], ['done', 'Ya lo saben'], ['pending', 'Aún no lo saben'], ['review', 'Repasando']].map(([v, label]) => el('button', { textContent: label, 'aria-pressed': String(filter === v), onclick: () => { filter = v; selected.clear(); render(); } }))));
     const rows = data().assignments.filter(a => {
       const t = themeById(a.temaId);
       return G.id(a.grupo) === g.id && t && (archived || (a.activo && t.activo)) && matching(t) && (filter === 'all' || (filter === 'pending' && !a.realizado) || (filter === 'done' && a.realizado) || (filter === 'review' && a.repasando));
     }).sort((a, b) => sortThemes(themeById(a.temaId), themeById(b.temaId)));
-    if (!rows.length) { root.append(empty(activeForGroup(g.id).length ? 'No hay temas con estos filtros' : 'Este grupo aún no tiene repertorio', 'Añade los temas que trabaja este grupo. Los nuevos empiezan pendientes.', button('Añadir temas', assignThemes, 'primary', !canWrite()))); return; }
+    if (!rows.length) { const hasThemes = activeForGroup(g.id).length > 0; root.append(empty(hasThemes ? 'No hay temas con estos filtros' : 'Este grupo aún no tiene repertorio', hasThemes ? 'Elige otro filtro para ver los demás temas del grupo.' : 'Añade los temas que trabaja este grupo y marca los que ya sabe.', hasThemes ? null : button('Añadir temas', assignThemes, 'primary', !canWrite()))); return; }
     const eligible = rows.filter(a => a.activo && themeById(a.temaId).activo);
     root.append(checkbox('Seleccionar visibles', !!eligible.length && eligible.every(a => selected.has(a.id)), checked => { for (const a of eligible) { if (checked) selected.add(a.id); else selected.delete(a.id); } render(); }, !canWrite() || !eligible.length));
-    if (selected.size) root.append(el('div', { class: 'selection-bar' }, [el('span', { textContent: selected.size + (selected.size === 1 ? ' tema seleccionado' : ' temas seleccionados') + (selected.size > 50 ? ' · Selecciona como máximo 50 por lote.' : '') }), button('Marcar para repasar', () => reviewDialog([...selected]), '', !canWrite() || selected.size > 50), button('Registrar repaso', () => rehearsalDialog([...selected]), '', !canWrite() || selected.size > 50), button('Limpiar selección', () => { selected.clear(); render(); }, 'subtle', client.state().busy)]));
+    if (selected.size) root.append(el('div', { class: 'selection-bar' }, [el('span', { textContent: selected.size + (selected.size === 1 ? ' tema seleccionado' : ' temas seleccionados') + (selected.size > 50 ? ' · Selecciona como máximo 50 por lote.' : '') }), button('Marcar como repasando', () => mutate({ action: 'markForReview', ids: [...selected] }, 'Temas marcados como repasando.'), '', !canWrite() || selected.size > 50), button('Limpiar selección', () => { selected.clear(); render(); }, 'subtle', client.state().busy)]));
     const list = el('div', { class: 'list' });
     for (const a of rows) {
       const t = themeById(a.temaId), enabled = canWrite() && a.activo && t.activo;
       const pick = el('input', { type: 'checkbox', checked: selected.has(a.id), disabled: !enabled, 'aria-label': 'Seleccionar ' + t.nombre, onchange: e => { if (e.target.checked) selected.add(a.id); else selected.delete(a.id); render(); } });
-      const checks = el('div', { class: 'song-checks' }, [checkbox('Realizado', a.realizado, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { realizado: v } }, 'Estado realizado guardado.'), !enabled, 'realizado-' + a.id), checkbox('Repasando', a.repasando, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { repasando: v } }, 'Estado de repaso guardado; se conserva Realizado.'), !enabled, 'repasando-' + a.id)]);
-      const name = el('div', { class: 'song-main' }, [el('div', { class: 'song-title' }, [el('span', { class: 'order', textContent: String(t.numeroOrden).padStart(2, '0') }), el('span', { textContent: t.nombre })]), tags(t), el('p', { class: 'status-copy', textContent: !a.activo ? 'Relación archivada' : !t.activo ? 'Tema archivado en el catálogo' : M.state(a) }), a.proximoObjetivo ? el('p', { class: 'goal', textContent: 'Próximo objetivo: ' + a.proximoObjetivo }) : null, el('p', { class: 'status-copy', textContent: 'Último repaso: ' + dateLabel(a.ultimoRepaso) })]);
-      list.append(el('article', { class: 'song', 'aria-label': t.nombre }, [pick, name, checks, el('div', { class: 'song-action' }, [button('Detalles', () => editProgress(a), 'subtle', !enabled), button('Registrar repaso', () => rehearsalDialog([a.id]), 'subtle', !enabled), button(a.activo ? 'Archivar' : 'Recuperar', () => confirmAction(a.activo ? 'Retirar del repertorio' : 'Recuperar relación', t.nombre, 'Se conservarán sus estados, fechas y notas.', { action: 'archiveAssignment', vinculoId: a.id, activo: !a.activo }), 'subtle', !canWrite() || (!a.activo && !t.activo))])]));
+      const checks = el('div', { class: 'song-checks' }, [checkbox('Ya lo saben', a.realizado, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { realizado: v } }, 'Estado de aprendizaje guardado.'), !enabled, 'realizado-' + a.id), checkbox('Repasando', a.repasando, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { repasando: v } }, 'Estado de repaso guardado.'), !enabled, 'repasando-' + a.id)]);
+      const state = (a.realizado ? 'Ya lo saben' : 'Aún no lo saben') + (a.repasando ? ' · Repasando' : '');
+      const name = el('div', { class: 'song-main' }, [el('div', { class: 'song-title' }, [el('span', { class: 'order', textContent: String(t.numeroOrden).padStart(2, '0') }), el('span', { textContent: t.nombre })]), tags(t), el('p', { class: 'status-copy', textContent: !a.activo ? 'Relación archivada' : !t.activo ? 'Tema archivado en el catálogo' : state })]);
+      list.append(el('article', { class: 'song', 'aria-label': t.nombre }, [pick, name, checks, el('div', { class: 'song-action' }, [button('Notas', () => editProgress(a), 'subtle', !enabled), button(a.activo ? 'Archivar' : 'Recuperar', () => confirmAction(a.activo ? 'Retirar del repertorio' : 'Recuperar relación', t.nombre, 'Se conservarán sus estados y notas.', { action: 'archiveAssignment', vinculoId: a.id, activo: !a.activo }), 'subtle', !canWrite() || (!a.activo && !t.activo))])]));
     }
     root.append(list);
   }
@@ -196,9 +195,9 @@
     });
   }
   function editProgress(a) {
-    const t = themeById(a.temaId), original = { fechaRealizado: a.fechaRealizado, ultimoRepaso: a.ultimoRepaso, proximoObjetivo: a.proximoObjetivo, motivoRepaso: a.motivoRepaso, notas: a.notas };
-    const grid = el('div', { class: 'form-grid' }, [field('Fecha realizado', 'fechaRealizado', a.fechaRealizado, 'date'), field('Último repaso', 'ultimoRepaso', a.ultimoRepaso, 'date'), field('Próximo objetivo', 'proximoObjetivo', a.proximoObjetivo, 'textarea', { maxLength: 2000 }), field('Motivo del repaso', 'motivoRepaso', a.motivoRepaso, 'text', { maxLength: 2000, placeholder: 'Por ejemplo, nuevas incorporaciones' }), field('Notas de este grupo', 'notas', a.notas, 'textarea', { maxLength: 2000 })]);
-    openDialog(t.nombre, currentGroup().label, [el('p', { class: 'explanation', textContent: 'Estas notas y fechas pertenecen únicamente a este grupo. Los estados se cambian desde el repertorio.' }), grid], values => {
+    const t = themeById(a.temaId), original = { notas: a.notas };
+    const grid = el('div', { class: 'form-grid' }, [field('Notas de este grupo', 'notas', a.notas, 'textarea', { maxLength: 2000 })]);
+    openDialog(t.nombre, currentGroup().label, [grid], values => {
       const changes = {}; for (const k of Object.keys(original)) if (values.get(k) !== original[k]) changes[k] = values.get(k);
       if (!Object.keys(changes).length) throw Object.assign(Error('No hay cambios en el formulario.'), { status: 400 });
       return { action: 'updateProgress', vinculoId: a.id, changes };
@@ -221,21 +220,11 @@
     }
     filterText.oninput = fill;
     fill();
-    openDialog('Añadir temas', g.label, [el('p', { class: 'explanation', textContent: 'Los temas nuevos empiezan pendientes. Las relaciones archivadas recuperan su seguimiento anterior.' }), filterText, typeFilter, list], () => {
+    openDialog('Añadir temas', g.label, [el('p', { class: 'explanation', textContent: 'Después de añadirlos, marca los que ya sabe el grupo. Los temas recuperados conservan sus estados anteriores.' }), filterText, typeFilter, list], () => {
       if (!choices.size || choices.size > 50) throw Object.assign(Error('Selecciona entre 1 y 50 temas.'), { status: 400 });
       for (const id of choices) if (!ids.has(id)) ids.set(id, uid());
       return { action: 'assignThemes', grupo: g.nombre, assignments: [...choices].map(temaId => ({ id: ids.get(temaId), temaId })) };
     }, 'Añadir seleccionados');
-  }
-  function reviewDialog(ids) {
-    openDialog('Marcar para repasar', currentGroup().label, [el('p', { class: 'explanation', textContent: `Se marcarán ${ids.length} temas para repasar. Realizado y Último repaso conservarán sus valores.` }), field('Motivo del repaso', 'motivoRepaso', '', 'text', { maxLength: 2000, placeholder: 'Nuevas incorporaciones' }), field('Próximo objetivo', 'proximoObjetivo', '', 'textarea', { maxLength: 2000 })], v => {
-      const payload = { action: 'markForReview', ids };
-      for (const key of ['motivoRepaso', 'proximoObjetivo']) if (v.get(key).trim()) payload[key] = v.get(key);
-      return payload;
-    }, 'Marcar para repasar');
-  }
-  function rehearsalDialog(ids) {
-    openDialog('Registrar repaso', currentGroup().label, [el('p', { class: 'explanation', textContent: `Registrarás un repaso para ${ids.length} temas. Las casillas Realizado y Repasando no cambian.` }), field('Fecha del repaso', 'date', today(), 'date', { required: true })], v => ({ action: 'recordRehearsal', ids, date: M.date(v.get('date')) }), 'Registrar repaso');
   }
   function confirmAction(title, name, explanation, payload) { openDialog(title, name, [el('p', { class: 'explanation', textContent: explanation })], () => payload, title.startsWith('Recuperar') ? 'Recuperar' : 'Archivar'); }
   form.oninput = () => { dirty = readForm() !== initialForm; $('dirty-label').textContent = dirty ? 'Cambios sin guardar' : ''; };
