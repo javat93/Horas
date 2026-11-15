@@ -74,7 +74,7 @@ Cierre:
 
 Evidencia de implementación: recorridos funcionales en navegador sobre un servidor de simulación sin Google, usando el mismo handler, servicio y modelo que desarrollo. Comprobados el alta con varios tipos, conflicto de orden, asignación múltiple, independencia entre dos grupos, estados, fechas, archivo/recuperación, acciones por lotes, filtros y notas. Un conflicto conserva el formulario y una respuesta perdida permite verificar y reintentar sin duplicar. Vista de escritorio y móvil 390 × 844 revisadas, sin desbordamiento horizontal. Interfaz de desarrollo real y sus capacidades comprobadas sin iniciar una nueva sesión de Google. El piloto autenticado por navegador se valida en la fase 4; no se presenta la simulación como una escritura real en Sheets. Ver UI.md y evidence/phase3.json.
 
-## Fase 4 — Piloto, aceptación y ensayo de migración · PREPARADA, ACEPTACIÓN PENDIENTE
+## Fase 4 — Piloto, aceptación y ensayo de migración · CERRADA PARA MIGRACIÓN
 
 Objetivo: validar el funcionamiento con repertorio real y ensayar el paso final antes de tocar producción.
 
@@ -98,7 +98,9 @@ Cierre:
 
 Verificación técnica realizada el 15/11/2026: OAuth real en Chrome sobre localhost:3002, carga de 21 temas y 15 relaciones confirmadas por el usuario, lectura de ambos grupos y guardado/restauración de una nota desde la interfaz. Una edición externa en Sheets provoca conflicto y conserva el borrador. El ensayo real en otro libro completó aplicar 36 filas, repetir sin duplicados, revertir con huella anterior verificada y reaplicar. 241 pruebas aprobadas. Ver PILOT.md y evidence/phase4*.json. No se inventaron estados Realizado/Repasando; su revisión y la aceptación del piloto siguen pendientes del usuario. No se activa automáticamente la fase 5.
 
-## Fase 5 — Migración y activación en el original · ÚLTIMA FASE, PENDIENTE
+El usuario autorizó expresamente empezar la fase 5 el 15/11/2026 con el repertorio validado. Esta autorización cierra la revisión necesaria para migrar los datos existentes, sin afirmar estados de aprendizaje no proporcionados.
+
+## Fase 5 — Migración y activación en el original · COMPLETADA EL 15/11/2026
 
 Objetivo: incorporar el repertorio validado al libro original sin sustituir sus pestañas existentes.
 
@@ -114,6 +116,8 @@ Orden obligatorio:
 8. Cerrar el informe de migración. El original pasa a ser el único maestro del repertorio y la copia queda como archivo de validación.
 
 Si falla la verificación, se detiene la activación y se aplica el procedimiento de recuperación de MIGRATION.md. No se restaura todo el libro sobre sesiones reales que hayan seguido cambiando.
+
+Resultado de la fase 5: respaldo nativo reciente de las seis pestañas originales, creación limitada a Temas/GrupoTemas, dry-run fresco y 36 filas migradas. Verificación por UUID, datos, fórmulas y repetición sin duplicados completadas. La aplicación publicada y el proyecto local original incorporan el acceso a Repertorio, primero consultado y después habilitado para guardar. Nota temporal escrita, releída y restaurada desde la app publicada; no quedaron datos de prueba. 249 pruebas de la rama de entrega aprobadas y despliegues comprobados. Las seis pestañas anteriores conservan sus metadatos; no hubo escrituras en ellas ni llamadas a Calendar. PHASE5.md y evidence/phase5*.json documentan el cierre y la recuperación.
 
 ## Ampliaciones fuera de estas fases
 

@@ -1,6 +1,6 @@
 {
   "project": "PercuManager · Repertorio por grupo",
-  "projectVersion": 1,
+  "projectVersion": 2,
   "preparedOn": "2026-11-14",
   "timezone": "Europe/Madrid",
   "branch": "feature/repertorio-grupos",
@@ -29,18 +29,33 @@
     "localUrl": "http://localhost:3002",
     "browserOAuthTested": true,
     "browserOAuthTestedOn": "2026-11-15",
-    "pilotGroups": ["Slap Lunes", "La Maquinista"],
+    "pilotGroups": [
+      "Slap Lunes",
+      "La Maquinista"
+    ],
     "pilotThemeCount": 21,
     "pilotAssignmentCount": 15,
     "pilotLearningStatesConfirmed": false,
     "calendarAccess": false,
-    "legacyOperationsEnabled": false
+    "legacyOperationsEnabled": false,
+    "writeEnabled": false,
+    "role": "validation-archive"
   },
   "production": {
     "spreadsheetId": "1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60",
     "url": "https://docs.google.com/spreadsheets/d/1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60/edit",
-    "migrationExecuted": false,
-    "moduleActivated": false
+    "migrationExecuted": true,
+    "moduleActivated": true,
+    "completedOn": "2026-11-15",
+    "backupSpreadsheetId": "15nQWzwWX8jUFSfXeTkZx9-J0u7snzMlXxn7o4_Y0GdA",
+    "repertoireUrl": "https://javat93.github.io/Horas/repertorio.html",
+    "repertoireApi": "/api/repertorio",
+    "repertoireWriteEnabled": true,
+    "repertoireIsSoleMaster": true,
+    "repertoireSheetIds": {
+      "Temas": 155111501,
+      "GrupoTemas": 155111502
+    }
   },
   "restrictions": {
     "modifyDetalle": false,
@@ -66,29 +81,47 @@
       "name": "Modelo y API limitada a la copia",
       "status": "complete",
       "completedOn": "2026-11-15",
-      "evidence": ["evidence/phase2.json", "evidence/phase2-live.json"]
+      "evidence": [
+        "evidence/phase2.json",
+        "evidence/phase2-live.json"
+      ]
     },
     {
       "id": 3,
       "name": "Interfaz funcional de repertorio",
       "status": "complete",
       "completedOn": "2026-11-15",
-      "evidence": ["evidence/phase3.json"],
+      "evidence": [
+        "evidence/phase3.json"
+      ],
       "validationScope": "Browser UI verified with offline simulated Sheets; live browser OAuth remains for phase 4"
     },
     {
       "id": 4,
       "name": "Piloto y pruebas de aceptación",
-      "status": "in_progress",
+      "status": "complete",
       "technicalPreparationComplete": true,
-      "userAcceptancePending": true,
-      "evidence": ["evidence/phase4.json", "evidence/phase4-migration.json", "evidence/phase4-migration-plan.json"]
+      "userAcceptancePending": false,
+      "evidence": [
+        "evidence/phase4.json",
+        "evidence/phase4-migration.json",
+        "evidence/phase4-migration-plan.json"
+      ],
+      "migrationAuthorizedOn": "2026-11-15",
+      "acceptanceScope": "User explicitly requested phase 5 with the validated repertoire; existing learning flags are preserved without inference."
     },
     {
       "id": 5,
       "name": "Migración y activación en el original",
-      "status": "pending"
+      "status": "complete",
+      "completedOn": "2026-11-15",
+      "evidence": [
+        "evidence/phase5.json",
+        "evidence/phase5-bootstrap.json",
+        "evidence/phase5-migration.json",
+        "evidence/phase5-migration-plan.json"
+      ]
     }
   ],
-  "nextPhase": 4
+  "nextPhase": null
 }

@@ -1,6 +1,6 @@
 # Fase 4: piloto y ensayo de migración
 
-Preparado y probado técnicamente el 15/11/2026. La aceptación del repertorio y sus estados corresponde al usuario. La fase 5 no se ha ejecutado.
+Preparado y probado técnicamente el 15/11/2026. Después, el usuario autorizó expresamente migrar el repertorio validado y se completó la fase 5: ver PHASE5.md. Este documento conserva el detalle del piloto previo. Los estados de aprendizaje siguen siendo los iniciales hasta que el usuario los cambie en el original.
 
 ## Acceso
 

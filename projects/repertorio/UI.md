@@ -1,4 +1,6 @@
-# Interfaz de repertorio · Fase 3
+# Interfaz de repertorio
+
+Estado actual desde el 15/11/2026: [Repertorio publicado](https://javat93.github.io/Horas/repertorio.html), conectado al original, con lectura y escritura verificadas. El acceso aparece en la navegación de Horas y abre el dominio autorizado también desde la copia local de la app. La sesión del módulo pide solo Sheets y conserva el aislamiento de Calendar. Desarrollo se mantiene en consulta como archivo. Ver PHASE5.md. Las instrucciones de la fase 3 que siguen describen el entorno de desarrollo histórico.
 
 Implementada el 15/11/2026. Funciona con el modelo y la API de la fase 2; el destino del servidor permanece fijado a la copia de desarrollo. No se han modificado index.html, las operaciones de sesiones, Detalle, Coles ni el libro original.
 

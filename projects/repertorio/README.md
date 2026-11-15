@@ -8,9 +8,9 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 - Fase 1 completada como plantilla: Temas y GrupoTemas creadas en la copia, con cabeceras, casillas nativas, filtros, fechas y validaciones básicas. No contiene temas o estados de aprendizaje inventados.
 - Fase 2 completada el 15/11/2026: modelo, API y acceso técnico local limitados a la copia, con fórmula NombreTema y reglas de integridad implementadas. Prueba autenticada mediada por el conector de Sheets completada y datos DEMO retirados.
 - Fase 3 implementada el 15/11/2026: catálogo, repertorio por grupo y lista de grupos, con pruebas funcionales de escritorio y móvil en un entorno simulado separado. La interfaz usa la API fijada a la copia de desarrollo.
-- Fase 4 preparada y verificada técnicamente el 15/11/2026: Google conectado desde Chrome, catálogo real de 21 temas, 15 asignaciones entre Slap Lunes y La Maquinista y ensayo de migración/reversión completo. Pendiente la aceptación del piloto y confirmar los estados de aprendizaje.
-- Fase 5 pendiente. El módulo no está integrado en la app productiva.
-- No se ha desplegado, activado ni migrado repertorio en producción.
+- Fase 4 cerrada para migración por la petición expresa del usuario del 15/11/2026. Conserva los estados iniciales sin afirmar que los temas estén aprendidos.
+- Fase 5 completada el 15/11/2026: respaldo reciente verificado, 21 temas y 15 relaciones migrados al original, acceso publicado primero en consulta y después en escritura y prueba reversible de nota verificada.
+- El original es el único maestro del repertorio. Desarrollo se conserva como archivo de validación, con el servidor local en consulta y sin sincronización de vuelta.
 
 ## Ubicaciones
 
@@ -48,10 +48,12 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 - [Evidencia de la fase 4](evidence/phase4.json).
 - [Registro de la migración de ensayo](evidence/phase4-migration.json).
 - [Plan y recibos de la instantánea ensayada](evidence/phase4-migration-plan.json).
+- [Cierre y recuperación de la migración final](PHASE5.md).
+- [Evidencia de cierre de la fase 5](evidence/phase5.json).
 
-## Siguiente trabajo: aceptar el piloto
+## Uso actual
 
-La interfaz está disponible con `node sandbox/repertoire-server.cjs --write` en http://localhost:3002; el acceso técnico por JSON se conserva en /tecnico. OAuth del navegador, lectura real, guardado reversible y conflicto con edición externa ya están comprobados. Revisar los dos grupos y marcar Realizado/Repasando según la situación real; los estados iniciales no se han inventado. PILOT.md explica las variantes, órdenes, comprobaciones y límites. No sustituir los IDs de producción o de los entornos anteriores. La fase 5 necesita respaldo reciente, revalidación de grupos y un nuevo dry-run; los recibos del ensayo no autorizan producción.
+Abrir [Repertorio en la aplicación](https://javat93.github.io/Horas/repertorio.html), también accesible desde la navegación de Horas. Conectar Google y elegir el grupo. Las casillas Realizado/Repasando se ajustan según la situación real; esta migración no las inventó. La sesión del módulo pide únicamente Sheets y no usa la sesión de Calendar. No editar desarrollo como segundo maestro. El servidor de archivo arranca con `node sandbox/repertoire-server.cjs`, sin --write, en http://localhost:3002. PHASE5.md contiene el respaldo, los recibos y el alcance exacto de las comprobaciones.
 
 La copia conserva los vínculos de Calendar del libro original. No se debe arrancar la app normal contra ella con altas, bajas, sincronización o realizado automático habilitados. El nuevo acceso de desarrollo debe limitarse a repertorio, sin exponer operaciones de sesiones o Calendar.
 

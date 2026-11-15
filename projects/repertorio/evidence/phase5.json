@@ -1,0 +1,102 @@
+{
+  "date": "2026-11-15",
+  "phase": 5,
+  "status": "complete",
+  "authorization": "Explicit user instruction to execute phase 5, back up and migrate to the original without changing Detalle or sessions/Calendar.",
+  "sourceSpreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+  "destinationSpreadsheetId": "1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60",
+  "backup": {
+    "id": "15nQWzwWX8jUFSfXeTkZx9-J0u7snzMlXxn7o4_Y0GdA",
+    "url": "https://docs.google.com/spreadsheets/d/15nQWzwWX8jUFSfXeTkZx9-J0u7snzMlXxn7o4_Y0GdA/edit?usp=drivesdk",
+    "nativeCopy": true,
+    "verifiedSixOriginalSheetProperties": true,
+    "originalModifiedBeforeAndAfter": "2026-11-15T20:44:26.392Z"
+  },
+  "migration": {
+    "themes": 21,
+    "assignments": 15,
+    "groups": [
+      {
+        "name": "Slap Lunes",
+        "assignments": 10
+      },
+      {
+        "name": "La Maquinista",
+        "assignments": 5
+      }
+    ],
+    "sheetIds": {
+      "Temas": 155111501,
+      "GrupoTemas": 155111502
+    },
+    "writtenRanges": [
+      "Temas!A2:H22",
+      "GrupoTemas!A2:M16"
+    ],
+    "dryRunDigest": "714cd599477a271774310c6daa4e6101708ea46cab30c25d316128a95e689d1d",
+    "executedDigest": "714cd599477a271774310c6daa4e6101708ea46cab30c25d316128a95e689d1d",
+    "repeatRowsChanged": 0,
+    "allFieldsByIdMatch": true,
+    "formulaLookupsVerified": true,
+    "sourceUnchangedDuringMigration": true,
+    "originalIsSoleMaster": true
+  },
+  "activation": {
+    "appUrl": "https://javat93.github.io/Horas/repertorio.html",
+    "endpoint": "https://horas-git-main-javat93s-projects.vercel.app/api/repertorio",
+    "readOnlyStageVerifiedInBrowser": true,
+    "writeEnabled": true,
+    "browserOAuthVerified": true,
+    "browserNoteWriteVerifiedByConnector": true,
+    "browserNoteRestored": true,
+    "lastNoteUpdatedAt": "2026-11-15T21:31:24.509Z",
+    "temporaryNotesRemaining": 0,
+    "learningFlagsChangedByTest": false,
+    "learningDatesChangedByTest": false,
+    "developmentLocalWriteEnabled": false,
+    "productionSessionKey": "horas-repertoire-production-token",
+    "googleCloudChanges": 0
+  },
+  "verification": {
+    "testsPassed": 249,
+    "localOriginalTestsPassed": 246,
+    "testsFailed": 0,
+    "newProductionTests": 5,
+    "productionCodeCommits": [
+      "5d708c1",
+      "79b43f6"
+    ],
+    "githubTestIsolation": "success",
+    "githubSecurityScan": "success",
+    "githubPages": "success",
+    "vercel": "success",
+    "visualNativeSheets": [
+      "Temas",
+      "GrupoTemas"
+    ],
+    "originalScreenshot": "C:/Users/Javat/.codex/visualizations/2026/11/14/01a1db0b-dca1-7ec0-a1dc-d539facac5d0/repertorio-original-activo.png"
+  },
+  "isolation": {
+    "detalleWrites": 0,
+    "colesWrites": 0,
+    "legacySheetWrites": 0,
+    "calendarCalls": 0,
+    "legacySheetMetadataUnchanged": true,
+    "detalle": {
+      "sheetId": 0,
+      "rows": 23884,
+      "columns": 29
+    },
+    "legacyRuntimeAndCalendarConfigDiffAgainstPreviousProduction": false,
+    "allDetalleCellsReadOrCompared": false,
+    "localOriginalIndexOnlyNavigationChanged": true,
+    "existingLocalServerAndMapFilesUnchanged": true,
+    "localCodeBackupDirectory": "C:/Users/Javat/.codex/visualizations/2026/11/14/01a1db0b-dca1-7ec0-a1dc-d539facac5d0/phase5-original-code"
+  },
+  "notes": [
+    "Existing false learning flags and blank dates migrated unchanged; users may update them in the original.",
+    "The production note test legitimately changed ActualizadoEn for one assignment after initial migration verification.",
+    "Rollback receipts are historical; later destination edits must be reconciled, never overwritten by forcing an old fingerprint.",
+    "The default migration factory still targets rehearsal. Production requires its explicit manifest and verified backup."
+  ]
+}

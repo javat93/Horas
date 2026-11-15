@@ -1,6 +1,6 @@
 # Migración final de repertorio
 
-Estado: procedimiento preparado y migrador de ensayo implementado y verificado en la fase 4. No se ha ejecutado sobre producción. El código actual rechaza el ID original como destino; requiere una adaptación explícita en la fase 5, tras aceptar el piloto y preparar su respaldo.
+Estado: migración a producción ejecutada y verificada el 15/11/2026 por petición expresa del usuario. Ver PHASE5.md y evidence/phase5*.json. El comportamiento por defecto del migrador sigue fijado al ensayo; createMigration('production') utiliza el manifiesto de fase 5 y exige el respaldo verificado. El siguiente procedimiento queda como registro y guía para futuras intervenciones; no se debe repetir ciegamente.
 
 ## Resultado del ensayo del 15/11/2026
 
