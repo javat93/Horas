@@ -50,7 +50,7 @@ Cierre:
 
 Evidencia de cierre: modelo y API implementados; pruebas automáticas del módulo y regresión completa aprobadas; ciclo autenticado del handler/servicio a través del conector de Sheets, con ocho lotes de escritura limitados a las dos pestañas nuevas, fórmula calculada y fechas nativas verificadas. Datos temporales retirados tras comprobar sus IDs. Acceso técnico local revisado en navegador. No se ha desplegado el endpoint ni validado un nuevo inicio de sesión OAuth desde el navegador; el alcance de esa comprobación queda explícito en API.md y en las evidencias.
 
-## Fase 3 — Interfaz funcional · PENDIENTE
+## Fase 3 — Interfaz funcional · IMPLEMENTADA EL 15/11/2026
 
 Objetivo: gestionar el repertorio desde la app de desarrollo con una interfaz cómoda en móvil y escritorio.
 
@@ -71,6 +71,8 @@ Cierre:
 - Dos grupos con un mismo tema y estados diferentes.
 - Flujo Realizado → Realizado + Repasando → Realizado, sin pérdida de estado.
 - El nuevo módulo funciona sin ejecutar sincronizaciones ni acciones de sesiones.
+
+Evidencia de implementación: recorridos funcionales en navegador sobre un servidor de simulación sin Google, usando el mismo handler, servicio y modelo que desarrollo. Comprobados el alta con varios tipos, conflicto de orden, asignación múltiple, independencia entre dos grupos, estados, fechas, archivo/recuperación, acciones por lotes, filtros y notas. Un conflicto conserva el formulario y una respuesta perdida permite verificar y reintentar sin duplicar. Vista de escritorio y móvil 390 × 844 revisadas, sin desbordamiento horizontal. Interfaz de desarrollo real y sus capacidades comprobadas sin iniciar una nueva sesión de Google. El piloto autenticado por navegador se valida en la fase 4; no se presenta la simulación como una escritura real en Sheets. Ver UI.md y evidence/phase3.json.
 
 ## Fase 4 — Piloto, aceptación y ensayo de migración · PENDIENTE
 

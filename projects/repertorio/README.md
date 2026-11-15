@@ -7,7 +7,8 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 - Fase 0 completada: libro original identificado en Drive, copia completa creada y verificada, rama de código independiente preparada.
 - Fase 1 completada como plantilla: Temas y GrupoTemas creadas en la copia, con cabeceras, casillas nativas, filtros, fechas y validaciones básicas. No contiene temas o estados de aprendizaje inventados.
 - Fase 2 completada el 15/11/2026: modelo, API y acceso técnico local limitados a la copia, con fórmula NombreTema y reglas de integridad implementadas. Prueba autenticada mediada por el conector de Sheets completada y datos DEMO retirados.
-- Fases 3 a 5 pendientes: interfaz cotidiana, piloto y migración. El módulo no está integrado en la app productiva.
+- Fase 3 implementada el 15/11/2026: catálogo, repertorio por grupo y lista de grupos, con pruebas funcionales de escritorio y móvil en un entorno simulado separado. La interfaz usa la API fijada a la copia de desarrollo.
+- Fases 4 y 5 pendientes: piloto con repertorio real y migración. El módulo no está integrado en la app productiva.
 - No se ha desplegado, activado ni migrado repertorio en producción.
 
 ## Ubicaciones
@@ -40,10 +41,12 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 - [API, arranque local y límites de validación](API.md).
 - [Evidencia de la fase 2](evidence/phase2.json).
 - [Prueba autenticada sobre la copia](evidence/phase2-live.json).
+- [Uso de la interfaz de desarrollo](UI.md).
+- [Evidencia de la fase 3](evidence/phase3.json).
 
-## Siguiente trabajo: fase 3
+## Siguiente trabajo: fase 4
 
-Implementar la interfaz de repertorio utilizando el modelo y la API existentes. El acceso técnico ya está disponible con `node sandbox/repertoire-server.cjs --write` en http://localhost:3002. No sustituir los IDs de producción o de los entornos anteriores. El inicio de sesión OAuth del navegador no se ha probado ni se ha modificado Google Cloud; la verificación autenticada de Sheets se realizó mediante el conector.
+Validar el inicio de sesión de Google y el recorrido real con un grupo piloto en la copia, cargar su repertorio y ensayar la migración. La interfaz está disponible con `node sandbox/repertoire-server.cjs --write` en http://localhost:3002; el acceso técnico por JSON se conserva en /tecnico. No sustituir los IDs de producción o de los entornos anteriores. El inicio de sesión OAuth del navegador no se ha probado ni se ha modificado Google Cloud; la prueba autenticada de Sheets de la fase 2 se realizó mediante el conector.
 
 La copia conserva los vínculos de Calendar del libro original. No se debe arrancar la app normal contra ella con altas, bajas, sincronización o realizado automático habilitados. El nuevo acceso de desarrollo debe limitarse a repertorio, sin exponer operaciones de sesiones o Calendar.
 

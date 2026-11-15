@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-15",
+  "phase": 3,
+  "status": "implemented",
+  "branch": "feature/repertorio-grupos",
+  "targetSpreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+  "verification": {
+    "command": "node --test --test-reporter=spec",
+    "total": 232,
+    "passed": 232,
+    "failed": 0,
+    "newClientAndIsolationTests": 10,
+    "browser": {
+      "transport": "Offline fixture through the real API handler, service and shared model. No Google credentials or Google network calls.",
+      "desktop": "Default browser viewport visually inspected",
+      "mobile": {
+        "width": 390,
+        "height": 844,
+        "documentWidth": 375,
+        "dialogWidth": 370,
+        "horizontalOverflow": false
+      },
+      "flows": [
+        "Theme creation with independent Galeta/Slap/Propio flags",
+        "Duplicate order within same type rejected and form retained",
+        "Theme belonging to two types saved",
+        "Multi-theme assignment; counts deduplicated across types",
+        "Same theme with independent states in two groups",
+        "Realizado -> Realizado+Repasando -> Realizado with date preserved",
+        "Explicit rehearsal date recorded without changing statuses",
+        "Mark-for-review batch with reason and next objective",
+        "Archive and restore assignment preserving statuses, goal and rehearsal date",
+        "Group list direct access to repertoire",
+        "Type and state filters and archive view",
+        "Notes preserved through an external-change conflict and saved after refresh",
+        "Uncertain write checked and retried with the same UUID, without duplicate creation",
+        "Single-theme rehearsal action",
+        "Mobile details dialog and controls inspected"
+      ],
+      "realDevelopmentEntry": "Verified DESARROLLO banner, configured copy link, own API environment, no active Google session",
+      "authenticatedBrowserOAuth": false
+    },
+    "productionModified": false,
+    "detalleModified": false,
+    "liveSpreadsheetWritesThisPhase": 0,
+    "simulationDataPersistedToSheets": false
+  },
+  "pending": [
+    "Phase 4: Google browser login on an authorized local origin, real repertoire and pilot",
+    "Phase 5: migration after rehearsal; not executed"
+  ],
+  "notes": [
+    "The production frontend and its configuration were not changed.",
+    "The old technical JSON entry remains under /tecnico.",
+    "The simulated server was used only for QA and is stopped after verification.",
+    "The local real-copy server is retained for the user at http://localhost:3002."
+  ]
+}

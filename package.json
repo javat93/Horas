@@ -5,6 +5,7 @@
   "main": "sandbox/server.cjs",
   "scripts": {
     "start:repertorio": "node sandbox/repertoire-server.cjs",
+    "preview:repertorio": "node sandbox/repertoire-preview.cjs",
     "test:repertorio": "node --test sandbox/repertoire*.test.cjs",
     "start:pruebas": "node sandbox/server.cjs",
     "test:pruebas": "node --test sandbox/*.test.cjs",

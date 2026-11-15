@@ -1,28 +1,7 @@
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Repertorio · Desarrollo · Fase 2</title>
-<style>body{font:16px system-ui;max-width:900px;margin:40px auto;padding:0 20px;color:#202124}button{font:inherit;margin:8px 8px 8px 0;padding:8px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f4f4;padding:16px}label{display:block;margin-top:16px}textarea{box-sizing:border-box;width:100%;min-height:160px;font:14px monospace}#status{min-height:24px}</style></head>
-<body><h1>Repertorio · DESARROLLO</h1><p>Acceso técnico de fase 2 a la copia. Solo están disponibles Temas y GrupoTemas; grupos de Coles en consulta.</p>
-<p>La interfaz funcional llegará en la fase 3.</p><button id="connect">Conectar Google</button><button id="disconnect">Desconectar</button><button id="validate" disabled>Consultar y validar</button>
-<p id="status" role="status"></p><pre id="environment">Comprobando el destino…</pre>
-<label for="payload">Petición JSON de repertorio</label><textarea id="payload" spellcheck="false">{"action":"catalog"}</textarea><button id="send" disabled>Enviar petición</button><pre id="result"></pre>
-<script>
-'use strict';
-const sessionKey = 'horas-repertoire-development-token';
-const target = '1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k';
-const $ = id => document.getElementById(id);
-let ready = false, busy = false, expiresAt = 0;
-// Token is held in memory only. Never read credentials from the normal app or persist them.
-let developmentToken = '';
-function controls(){for(const id of ['send','validate']) $(id).disabled = busy || !ready || !developmentToken || Date.now() >= expiresAt;}
-async function json(url, options){const r=await fetch(url,options), d=await r.json();if(!r.ok)throw Error(d.error||'Error del servicio');return d;}
-async function send(payload){if(busy||!ready||!developmentToken||Date.now()>=expiresAt)throw Error('Conecta Google en desarrollo.');busy=true;controls();try{$('result').textContent=JSON.stringify(await json('/api/repertorio-test',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+developmentToken},body:JSON.stringify(payload)}),null,2);$('status').textContent='Consulta o guardado verificado por el servidor.';}finally{busy=false;controls();}}
-$('connect').onclick=async()=>{try{
-  const c=await json('/api/repertorio-test?api=oauth');if(c.sessionKey!==sessionKey)throw Error('Sesión de desarrollo no reconocida.');
-  if(!window.google?.accounts?.oauth2){await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://accounts.google.com/gsi/client';script.onload=resolve;script.onerror=()=>reject(Error('No se pudo cargar Google'));document.head.append(script);});}
-  google.accounts.oauth2.initTokenClient({client_id:c.clientId,scope:c.scopes,include_granted_scopes:false,callback:r=>{const seconds=Number(r.expires_in);if(r.error||typeof r.access_token!=='string'||!r.access_token||!Number.isFinite(seconds)||seconds<=30||!(r.scope||'').split(' ').includes(c.scopes)){developmentToken='';expiresAt=0;controls();$('status').textContent=r.error||'Falta permiso de Sheets o una sesión válida.';return;}developmentToken=r.access_token;expiresAt=Date.now()+(seconds-30)*1000;controls();$('status').textContent='Google conectado solo para este acceso de desarrollo.';},error_callback:()=>{$('status').textContent='Conexión cancelada.';}}).requestAccessToken({prompt:''});
-}catch(e){$('status').textContent=e.message;}};
-$('disconnect').onclick=()=>{developmentToken='';expiresAt=0;controls();$('result').textContent='';$('status').textContent='Sesión local de desarrollo cerrada.';};
-$('validate').onclick=()=>send({action:'validate'}).catch(e=>$('status').textContent=e.message);
-$('send').onclick=()=>{try{send(JSON.parse($('payload').value)).catch(e=>$('status').textContent=e.message);}catch(e){$('status').textContent=e.message;}};
-json('/api/repertorio-test?api=environment').then(e=>{if(e.mode!=='repertoire-development'||e.spreadsheetId!==target||e.legacyOperationsEnabled!==false||e.calendarAccess!==false)throw Error('Destino no válido.');ready=true;$('environment').textContent=JSON.stringify(e,null,2);controls();}).catch(e=>$('status').textContent=e.message);
-</script></body></html>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Repertorio · PercuManager</title><link rel="stylesheet" href="/assets/repertoire.css"></head>
+<body><header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">P</span><div><strong>PercuManager</strong><span class="brand-sub">Repertorio</span></div></div><span id="mode-badge" class="badge">DESARROLLO</span><div class="connection"><span id="connection-label">Sin conexión</span><button id="connect" class="button primary" disabled>Conectar Google</button><button id="disconnect" class="button" hidden>Desconectar</button></div></header>
+<main class="shell"><div class="page-heading"><div><p class="eyebrow">TEMAS Y GRUPOS</p><h1>El repertorio, a tu ritmo.</h1><p class="intro">Lo que ya habéis aprendido y lo que toca repasar.</p></div><a id="copy-link" class="text-link" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k/edit">Abrir copia de desarrollo ↗</a></div>
+<nav class="tabs" aria-label="Secciones de repertorio"><button data-tab="repertoire" aria-current="page">Por grupo</button><button data-tab="catalog">Catálogo de temas</button><button data-tab="groups">Grupos</button></nav>
+<div id="status" class="status" role="status" aria-live="polite" hidden></div><div id="issue-panel" class="issues" hidden></div><section id="workspace" aria-busy="false"><div class="empty"><span class="empty-symbol" aria-hidden="true">♫</span><h2>Todo tu repertorio en un lugar</h2><p>Conecta Google para consultar los temas de la copia de desarrollo.</p></div></section><footer>Entorno de desarrollo · Repertorio independiente de las sesiones.</footer></main>
+<dialog id="editor" aria-labelledby="dialog-title"><form id="editor-form"><div class="dialog-heading"><div><p id="dialog-kicker" class="eyebrow"></p><h2 id="dialog-title"></h2></div><button id="close-dialog" type="button" class="icon-button" aria-label="Cerrar formulario">×</button></div><div id="dialog-body"></div><p id="dialog-error" class="form-error" role="alert" hidden></p><div class="dialog-footer"><span id="dirty-label" class="muted"></span><button id="cancel-dialog" type="button" class="button">Cancelar</button><button id="save-dialog" type="submit" class="button primary">Guardar</button></div></form></dialog>
+<script src="/preview-session.js"></script><script src="/assets/group-identity.js"></script><script src="/assets/locale-data.js"></script><script src="/assets/repertoire-model.js"></script><script src="/assets/repertoire-client.js"></script><script src="/assets/repertoire-ui.js"></script></body></html>

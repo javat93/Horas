@@ -18,7 +18,7 @@ Abrir http://localhost:3002. También existen npm run start:repertorio y npm run
 
 El servidor escucha únicamente en 127.0.0.1. No sirve index.html, archivos del repositorio ni endpoints de sesiones o Calendar. No se ha desplegado el endpoint remoto.
 
-El acceso técnico de esta fase muestra DESARROLLO, comprueba el destino y permite conectar Google y enviar peticiones JSON. Solicita solo el permiso de Sheets. El token permanece en memoria y se descarta al recargar/desconectar; nunca lee ni reutiliza el almacenamiento de la app normal. La interfaz de uso cotidiano queda para la fase 3.
+La interfaz de fase 3 está en la raíz. El acceso técnico por JSON se conserva en /tecnico. Ambos muestran DESARROLLO y comprueban el destino. Solicitan solo el permiso de Sheets. El token permanece en memoria y se descarta al recargar/desconectar; nunca leen ni reutilizan el almacenamiento de la app normal. Consulta UI.md para gestionar temas y grupos.
 
 El origen de OAuth debe estar autorizado en el cliente de Google. No se ha modificado Google Cloud ni probado una nueva concesión de OAuth en el navegador. Si 3002 no está autorizado pero ya lo está localhost:3000, se puede usar `node sandbox/repertoire-server.cjs --write --port=3000`, con ese puerto libre. No se cambia la configuración de la app normal para hacerlo.
 

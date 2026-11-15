@@ -19,7 +19,7 @@ function createHandler({ request = googleRequest, writeEnabled = false, origins 
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
     if (req.method === 'OPTIONS') return res.status(204).end();
-    const environment = { mode: 'repertoire-development', phase: 2, spreadsheetId: P.DEVELOPMENT_ID, writeEnabled, writableSheets: ['Temas', 'GrupoTemas'], legacyOperationsEnabled: false, calendarAccess: false, sessionKey: 'horas-repertoire-development-token' };
+    const environment = { mode: 'repertoire-development', phase: 3, spreadsheetId: P.DEVELOPMENT_ID, writeEnabled, writableSheets: ['Temas', 'GrupoTemas'], legacyOperationsEnabled: false, calendarAccess: false, sessionKey: 'horas-repertoire-development-token' };
     if (req.method === 'GET' && req.query?.api === 'environment') return res.json(environment);
     if (req.method === 'GET' && req.query?.api === 'oauth') return res.json({ clientId: '367465910816-1epkiok8ntvrphrv08b4g6amh0u9knpv.apps.googleusercontent.com', scopes: 'https://www.googleapis.com/auth/spreadsheets', sessionKey: environment.sessionKey });
     if (req.method !== 'POST' || Object.keys(req.query || {}).length) return res.status(405).json({ error: 'Ruta o método no permitido.' });

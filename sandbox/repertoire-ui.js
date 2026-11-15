@@ -1,0 +1,276 @@
+/* global RepertoireClient, RepertoireModel, GroupIdentity */
+(function () {
+  'use strict';
+  const C = RepertoireClient, M = RepertoireModel, G = GroupIdentity;
+  const $ = id => document.getElementById(id), dialog = $('editor'), form = $('editor-form');
+  let client, env, token = '', expires = 0, view = 'repertoire', groupId = '', search = '', type = '', filter = 'all', archived = false;
+  let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false;
+  const types = [['temaGaleta', 'Galeta'], ['temaSlap', 'Slap'], ['temaPropio', 'Propio']];
+  const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const uid = () => crypto.randomUUID();
+  function el(tag, props = {}, children = []) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2).toLowerCase(), v); else if (k in n && !k.startsWith('aria-')) n[k] = v; else n.setAttribute(k, v); }
+    for (const c of children) if (c !== null && c !== undefined) n.append(typeof c === 'string' ? document.createTextNode(c) : c);
+    return n;
+  }
+  function button(text, action, cls = '', disabled = false) { return el('button', { type: 'button', class: 'button ' + cls, textContent: text, disabled, onclick: action }); }
+  const canWrite = () => !!client?.state().canWrite && authenticated();
+  function authenticated() { return !!token && Date.now() < expires; }
+  const data = () => client?.state().data;
+  const currentGroup = () => data()?.groups.find(g => g.id === groupId);
+  const themeById = id => data()?.themes.find(t => t.id === id);
+  const sortThemes = (a, b) => a.numeroOrden - b.numeroOrden || a.nombre.localeCompare(b.nombre, 'es') || a.id.localeCompare(b.id);
+  function matching(t) { return (!type || t[type]) && (!search || G.normalize(t.nombre).includes(G.normalize(search))); }
+  const dateLabel = d => d ? d.split('-').reverse().join('/') : 'Sin registrar';
+  function say(message, error = false) {
+    $('status').replaceChildren(document.createTextNode(message)); $('status').className = 'status' + (error ? ' error' : ''); $('status').hidden = !message;
+    if (client?.state().needsReload) $('status').append(button('Actualizar datos', () => reload(true), '', client.state().busy));
+  }
+  function message(error) {
+    if (error.status === 401) return 'Vuelve a conectar Google. El formulario y sus cambios se conservan.';
+    if (error.code === 'REVIEW_EXPIRED') return 'Los datos han cambiado en la hoja. Tu formulario se conserva. Actualiza los datos y revisa los cambios antes de guardar.';
+    if (error.code === 'WRITE_UNCERTAIN' || error.code === 'UNVERIFIED_RESPONSE' || !error.status) return 'No se ha podido confirmar el guardado. Actualiza y comprueba el resultado antes de volver a guardar.';
+    if (error.code === 'ORDER_CONFLICT') return 'Ese número ya está ocupado dentro de uno de los tipos elegidos. Cambia el número o los tipos.';
+    return error.message;
+  }
+  async function json(url, options) {
+    const r = await fetch(url, options); let d;
+    try { d = await r.json(); } catch { throw Object.assign(Error('El servidor no ha devuelto una respuesta válida.'), { status: r.status, code: 'UNVERIFIED_RESPONSE' }); }
+    if (!r.ok) throw Object.assign(Error(d.error || 'No se ha podido completar la operación.'), { status: r.status, code: d.code });
+    return d;
+  }
+  async function transport(payload) {
+    if (!authenticated()) throw Object.assign(Error('La sesión ha caducado. Vuelve a conectar Google; tus cambios sin guardar se conservan.'), { status: 401, code: 'AUTH_REQUIRED' });
+    try { return await json('/api/repertorio-test', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(payload) }); }
+    catch (error) { if (error.status === 401) { token = ''; expires = 0; } throw error; }
+  }
+  async function reload(keepDraft = false) {
+    if (!client || client.state().busy) return;
+    try {
+      await client.load();
+      if (!groupId || !currentGroup()) groupId = data().groups[0]?.id || '';
+      selected.clear(); render();
+      say(env.preview ? 'Simulación local: todos los cambios se guardan solo en memoria.' : 'Datos de la copia actualizados.');
+      if (keepDraft && draft) {
+        // Rebase explicitly against the fresh version while preserving only fields the user edited.
+        draft.rebased = true; $('dialog-error').hidden = false;
+        $('dialog-error').textContent = 'Datos actualizados. Revisa el formulario conservado antes de volver a guardar. Si el guardado anterior sí se aplicó, los mismos identificadores evitan duplicarlo.';
+      }
+    } catch (error) { say(message(error), true); } finally { controls(); }
+  }
+  async function mutate(payload, success) {
+    try { await client.save(payload); selected.clear(); render(); say(success); return true; }
+    catch (error) { say(message(error), true); return false; }
+  }
+  function controls() {
+    const busy = !!client?.state().busy;
+    $('workspace').setAttribute('aria-busy', String(busy));
+    $('connect').disabled = !env || busy || connecting;
+    $('connect').hidden = authenticated(); $('disconnect').hidden = !authenticated(); $('disconnect').disabled = busy;
+    $('connection-label').textContent = busy ? 'Guardando o consultando…' : authenticated() ? (env?.preview ? 'Datos simulados' : 'Google conectado') : 'Sin conexión';
+    document.querySelectorAll('.tabs button').forEach(b => { b.disabled = busy; });
+    if (busy) $('workspace').querySelectorAll('input,select,textarea,button').forEach(n => { n.disabled = true; });
+    if (dialog.open) {
+      form.querySelectorAll('input,select,textarea,button').forEach(n => { n.disabled = busy; });
+      $('save-dialog').disabled = !canWrite();
+      $('dirty-label').textContent = busy ? 'Comprobando el guardado…' : dirty ? 'Cambios sin guardar' : '';
+    }
+  }
+  function render() {
+    const focused = document.activeElement, focusId = focused?.id;
+    const caret = focused instanceof HTMLInputElement && focused.type === 'search' ? focused.selectionStart : null;
+    document.querySelectorAll('.tabs button').forEach(b => { if (b.dataset.tab === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    const workspace = $('workspace'); workspace.replaceChildren();
+    $('issue-panel').hidden = true;
+    if (!data()) { workspace.append(empty('Todo tu repertorio en un lugar', 'Conecta Google para consultar los temas de la copia de desarrollo.')); controls(); return; }
+    if (!groupId) groupId = data().groups[0]?.id || '';
+    if (data().issues.length) {
+      const p = $('issue-panel'); p.hidden = false; p.replaceChildren(el('strong', { textContent: 'Hay datos que necesitan revisión. Los guardados están pausados.' }));
+      p.append(el('ul', {}, data().issues.map(i => el('li', { textContent: [i.sheet, i.rowIdx ? 'fila ' + i.rowIdx : '', i.message || i.code].filter(Boolean).join(' · ') }))));
+    }
+    if (!env.writeEnabled) workspace.append(el('p', { class: 'readonly-note', textContent: 'Este acceso está en modo de consulta.' }));
+    if (view === 'catalog') renderCatalog(workspace);
+    else if (view === 'groups') renderGroups(workspace);
+    else renderRepertoire(workspace);
+    controls();
+    if (focusId && document.getElementById(focusId) && document.getElementById(focusId) !== focused && !dialog.open) { const n = document.getElementById(focusId); n.focus(); if (caret !== null) n.setSelectionRange(caret, caret); }
+  }
+  function empty(title, text, action) { return el('div', { class: 'empty' }, [el('span', { class: 'empty-symbol', 'aria-hidden': 'true', textContent: '♫' }), el('h2', { textContent: title }), el('p', { textContent: text }), action]); }
+  function tags(t) { return el('div', { class: 'types' }, types.filter(([k]) => t[k]).map(([, label]) => el('span', { class: 'tag', textContent: label }))); }
+  function selectControl(options, value, label, action, cls = 'control') {
+    const s = el('select', { class: cls, 'aria-label': label, onchange: e => action(e.target.value) }, options.map(([v, text]) => el('option', { value: v, textContent: text })));
+    s.value = value; return s;
+  }
+  function checkbox(text, checked, action, disabled = false, id = '') {
+    return el('label', { class: 'check-label' }, [el('input', { type: 'checkbox', checked, disabled, ...(id ? { id } : {}), onchange: e => action(e.target.checked) }), el('span', { textContent: text })]);
+  }
+  function filters(root, withArchived = true) {
+    const bar = el('div', { class: 'filters' }, [el('input', { id: 'theme-search', class: 'control search', type: 'search', placeholder: view === 'groups' ? 'Buscar grupo…' : 'Buscar tema…', 'aria-label': view === 'groups' ? 'Buscar grupo' : 'Buscar tema', value: search, oninput: e => { search = e.target.value; selected.clear(); render(); } })]);
+    if (view !== 'groups') bar.append(selectControl([['', 'Todos los tipos'], ...types], type, 'Filtrar por tipo', v => { type = v; selected.clear(); render(); }));
+    if (withArchived) bar.append(checkbox('Mostrar archivados', archived, v => { archived = v; selected.clear(); render(); }));
+    root.append(bar);
+  }
+  function refreshButton() { return button('Actualizar', () => reload(), '', client.state().busy); }
+  function renderCatalog(root) {
+    root.append(el('div', { class: 'toolbar' }, [el('h2', { textContent: 'Catálogo de temas' }), el('div', { class: 'toolbar-actions' }, [refreshButton(), button('Nuevo tema', () => editTheme(), 'primary', !canWrite())])]));
+    filters(root);
+    const rows = data().themes.filter(t => (archived || t.activo) && matching(t)).sort(sortThemes);
+    if (!rows.length) { root.append(empty(data().themes.length ? 'No hay temas con estos filtros' : 'Empieza por el primer tema', 'Cada tema se crea una sola vez y después se asigna a los grupos que lo trabajan.', button('Crear un tema', () => editTheme(), 'primary', !canWrite()))); return; }
+    const list = el('div', { class: 'list' });
+    for (const t of rows) {
+      const count = new Set(data().assignments.filter(a => a.temaId === t.id && a.activo).map(a => G.id(a.grupo))).size;
+      list.append(el('article', { class: 'song catalog-row', 'aria-label': t.nombre }, [el('span', { class: 'order', textContent: String(t.numeroOrden).padStart(2, '0') }), el('div', { class: 'song-main' }, [el('div', { class: 'song-title', textContent: t.nombre }), tags(t), !t.activo ? el('p', { class: 'status-copy', textContent: 'Archivado' }) : null]), el('p', { class: 'muted', textContent: count + (count === 1 ? ' grupo' : ' grupos') }), el('div', { class: 'song-action' }, [button('Editar', () => editTheme(t), 'subtle', !canWrite()), button(t.activo ? 'Archivar' : 'Recuperar', () => confirmAction(t.activo ? 'Archivar tema' : 'Recuperar tema', t.nombre, t.activo ? 'Se conserva su seguimiento en todos los grupos. Podrás recuperarlo desde el catálogo.' : 'Se comprobará que su orden esté disponible en los tipos elegidos.', { action: 'archiveTheme', temaId: t.id, activo: !t.activo }), 'subtle', !canWrite())])]));
+    }
+    root.append(list);
+  }
+  function activeForGroup(id) { return data().assignments.filter(a => G.id(a.grupo) === id && a.activo && themeById(a.temaId)?.activo); }
+  function renderGroups(root) {
+    root.append(el('div', { class: 'toolbar' }, [el('h2', { textContent: 'Tus grupos' }), refreshButton()])); filters(root, false);
+    const groups = data().groups.filter(g => !search || G.matches(g.nombre, search));
+    if (!groups.length) { root.append(empty('No se han encontrado grupos', 'Los grupos se consultan desde el catálogo de la copia.')); return; }
+    root.append(el('div', { class: 'group-grid' }, groups.map(g => { const s = M.summary(activeForGroup(g.id)); return el('article', { class: 'group-card' }, [el('h3', { textContent: g.label }), el('p', { textContent: `${s.asignados} temas · ${s.realizados} realizados · ${s.repasando} en repaso` }), button('Ver repertorio', () => { groupId = g.id; view = 'repertoire'; search = ''; selected.clear(); render(); }, '')]); })));
+  }
+  function renderRepertoire(root) {
+    const g = currentGroup();
+    if (!g) { root.append(empty('Todavía no hay grupos', 'Primero necesitas un grupo en el catálogo de la copia.')); return; }
+    const groupPicker = selectControl(data().groups.map(g => [g.id, g.label]), g.id, 'Seleccionar grupo', v => { groupId = v; selected.clear(); render(); }, 'group-picker');
+    root.append(el('div', { class: 'toolbar' }, [el('div', { class: 'toolbar-title' }, [groupPicker]), el('div', { class: 'toolbar-actions' }, [refreshButton(), button('Añadir temas', assignThemes, 'primary', !canWrite())])]));
+    const summary = M.summary(activeForGroup(g.id));
+    root.append(el('div', { class: 'stats' }, [['asignados', 'Temas asignados'], ['realizados', 'Realizados'], ['repasando', 'En repaso']].map(([key, label]) => el('div', { class: 'stat' }, [el('strong', { textContent: String(summary[key]) }), el('span', { textContent: label })]))));
+    root.append(el('p', { class: 'stat-note', textContent: 'Un tema realizado también puede estar en repaso.' }));
+    filters(root);
+    root.append(el('div', { class: 'state-tabs', 'aria-label': 'Filtrar por seguimiento' }, [['all', 'Todos'], ['pending', 'Pendientes'], ['done', 'Realizados'], ['review', 'Repasando']].map(([v, label]) => el('button', { textContent: label, 'aria-pressed': String(filter === v), onclick: () => { filter = v; selected.clear(); render(); } }))));
+    const rows = data().assignments.filter(a => {
+      const t = themeById(a.temaId);
+      return G.id(a.grupo) === g.id && t && (archived || (a.activo && t.activo)) && matching(t) && (filter === 'all' || (filter === 'pending' && !a.realizado) || (filter === 'done' && a.realizado) || (filter === 'review' && a.repasando));
+    }).sort((a, b) => sortThemes(themeById(a.temaId), themeById(b.temaId)));
+    if (!rows.length) { root.append(empty(activeForGroup(g.id).length ? 'No hay temas con estos filtros' : 'Este grupo aún no tiene repertorio', 'Añade los temas que trabaja este grupo. Los nuevos empiezan pendientes.', button('Añadir temas', assignThemes, 'primary', !canWrite()))); return; }
+    const eligible = rows.filter(a => a.activo && themeById(a.temaId).activo);
+    root.append(checkbox('Seleccionar visibles', !!eligible.length && eligible.every(a => selected.has(a.id)), checked => { for (const a of eligible) { if (checked) selected.add(a.id); else selected.delete(a.id); } render(); }, !canWrite() || !eligible.length));
+    if (selected.size) root.append(el('div', { class: 'selection-bar' }, [el('span', { textContent: selected.size + (selected.size === 1 ? ' tema seleccionado' : ' temas seleccionados') + (selected.size > 50 ? ' · Selecciona como máximo 50 por lote.' : '') }), button('Marcar para repasar', () => reviewDialog([...selected]), '', !canWrite() || selected.size > 50), button('Registrar repaso', () => rehearsalDialog([...selected]), '', !canWrite() || selected.size > 50), button('Limpiar selección', () => { selected.clear(); render(); }, 'subtle', client.state().busy)]));
+    const list = el('div', { class: 'list' });
+    for (const a of rows) {
+      const t = themeById(a.temaId), enabled = canWrite() && a.activo && t.activo;
+      const pick = el('input', { type: 'checkbox', checked: selected.has(a.id), disabled: !enabled, 'aria-label': 'Seleccionar ' + t.nombre, onchange: e => { if (e.target.checked) selected.add(a.id); else selected.delete(a.id); render(); } });
+      const checks = el('div', { class: 'song-checks' }, [checkbox('Realizado', a.realizado, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { realizado: v } }, 'Estado realizado guardado.'), !enabled, 'realizado-' + a.id), checkbox('Repasando', a.repasando, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { repasando: v } }, 'Estado de repaso guardado; se conserva Realizado.'), !enabled, 'repasando-' + a.id)]);
+      const name = el('div', { class: 'song-main' }, [el('div', { class: 'song-title' }, [el('span', { class: 'order', textContent: String(t.numeroOrden).padStart(2, '0') }), el('span', { textContent: t.nombre })]), tags(t), el('p', { class: 'status-copy', textContent: !a.activo ? 'Relación archivada' : !t.activo ? 'Tema archivado en el catálogo' : M.state(a) }), a.proximoObjetivo ? el('p', { class: 'goal', textContent: 'Próximo objetivo: ' + a.proximoObjetivo }) : null, el('p', { class: 'status-copy', textContent: 'Último repaso: ' + dateLabel(a.ultimoRepaso) })]);
+      list.append(el('article', { class: 'song', 'aria-label': t.nombre }, [pick, name, checks, el('div', { class: 'song-action' }, [button('Detalles', () => editProgress(a), 'subtle', !enabled), button('Registrar repaso', () => rehearsalDialog([a.id]), 'subtle', !enabled), button(a.activo ? 'Archivar' : 'Recuperar', () => confirmAction(a.activo ? 'Retirar del repertorio' : 'Recuperar relación', t.nombre, 'Se conservarán sus estados, fechas y notas.', { action: 'archiveAssignment', vinculoId: a.id, activo: !a.activo }), 'subtle', !canWrite() || (!a.activo && !t.activo))])]));
+    }
+    root.append(list);
+  }
+  function field(label, name, value = '', typeName = 'text', options = {}) {
+    const input = el(typeName === 'textarea' ? 'textarea' : 'input', { class: 'control', name, id: 'field-' + name, ...(typeName !== 'textarea' ? { type: typeName } : {}), value, ...options });
+    return el('label', { class: 'field' + (typeName === 'textarea' ? ' full' : '') }, [el('span', { textContent: label }), input]);
+  }
+  const readForm = () => JSON.stringify([...new FormData(form).entries()]);
+  function openDialog(title, kicker, body, submit, label = 'Guardar') {
+    if (!canWrite()) return;
+    draft = { submit, rebased: false }; dirty = false;
+    $('dialog-title').textContent = title; $('dialog-kicker').textContent = kicker;
+    $('dialog-body').replaceChildren(...body); $('dialog-error').hidden = true; $('dialog-error').replaceChildren(); $('save-dialog').textContent = label;
+    $('cancel-dialog').textContent = 'Cancelar'; initialForm = readForm(); $('dirty-label').textContent = ''; dialog.showModal(); controls();
+  }
+  function closeDialog() {
+    if (client?.state().busy) return;
+    if (dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres descartarlos?')) return;
+    dialog.close(); draft = null; dirty = false;
+  }
+  function editTheme(t) {
+    const id = t?.id || uid();
+    const grid = el('div', { class: 'form-grid' }, [field('Nombre del tema', 'nombre', t?.nombre || '', 'text', { required: true, maxLength: 200 }), field('Número de orden', 'numeroOrden', t?.numeroOrden || 1, 'number', { required: true, min: 1, step: 1 })]);
+    const choices = el('fieldset', { class: 'fieldset field full' }, [el('legend', { textContent: 'Tipos de tema' }), el('div', { class: 'type-options' }, types.map(([k, label]) => { const check = checkbox(label, !!t?.[k], () => {}); check.querySelector('input').name = k; return check; })), el('p', { class: 'explanation', textContent: 'Puedes marcar varios. El número se aplica a todos los tipos elegidos y puede repetirse entre tipos distintos.' })]);
+    grid.append(choices, field('Notas generales del tema', 'notas', t?.notas || '', 'textarea', { maxLength: 2000 }));
+    openDialog(t ? 'Editar tema' : 'Nuevo tema', 'CATÁLOGO COMÚN', [grid], values => {
+      let input = { id, nombre: values.get('nombre'), numeroOrden: Number(values.get('numeroOrden')), temaGaleta: values.has('temaGaleta'), temaSlap: values.has('temaSlap'), temaPropio: values.has('temaPropio'), activo: t ? t.activo : true, notas: values.get('notas') };
+      if (draft.rebased && t) {
+        const latest = themeById(id); if (!latest) throw Object.assign(Error('El tema ya no está disponible. Cierra el formulario y revisa el catálogo.'), { status: 409 });
+        for (const key of Object.keys(input).filter(k => k !== 'id')) if (input[key] === t[key]) input[key] = latest[key];
+      }
+      const theme = M.theme(input);
+      const other = data().themes.filter(x => x.id !== id);
+      if (M.integrity([...other, theme], [], []).some(i => i.code === 'ORDER_CONFLICT')) throw Object.assign(Error('Ese número ya está ocupado dentro de uno de los tipos elegidos.'), { code: 'ORDER_CONFLICT', status: 400 });
+      return { action: 'saveTheme', theme };
+    });
+  }
+  function editProgress(a) {
+    const t = themeById(a.temaId), original = { fechaRealizado: a.fechaRealizado, ultimoRepaso: a.ultimoRepaso, proximoObjetivo: a.proximoObjetivo, motivoRepaso: a.motivoRepaso, notas: a.notas };
+    const grid = el('div', { class: 'form-grid' }, [field('Fecha realizado', 'fechaRealizado', a.fechaRealizado, 'date'), field('Último repaso', 'ultimoRepaso', a.ultimoRepaso, 'date'), field('Próximo objetivo', 'proximoObjetivo', a.proximoObjetivo, 'textarea', { maxLength: 2000 }), field('Motivo del repaso', 'motivoRepaso', a.motivoRepaso, 'text', { maxLength: 2000, placeholder: 'Por ejemplo, nuevas incorporaciones' }), field('Notas de este grupo', 'notas', a.notas, 'textarea', { maxLength: 2000 })]);
+    openDialog(t.nombre, currentGroup().label, [el('p', { class: 'explanation', textContent: 'Estas notas y fechas pertenecen únicamente a este grupo. Los estados se cambian desde el repertorio.' }), grid], values => {
+      const changes = {}; for (const k of Object.keys(original)) if (values.get(k) !== original[k]) changes[k] = values.get(k);
+      if (!Object.keys(changes).length) throw Object.assign(Error('No hay cambios en el formulario.'), { status: 400 });
+      return { action: 'updateProgress', vinculoId: a.id, changes };
+    });
+  }
+  function assignThemes() {
+    const g = currentGroup(); if (!g) return;
+    const choices = new Set(), ids = new Map(), candidates = data().themes.filter(t => t.activo && !data().assignments.some(a => G.id(a.grupo) === g.id && a.temaId === t.id && a.activo)).sort(sortThemes);
+    const list = el('div', { class: 'assign-list' });
+    const filterText = el('input', { class: 'control', type: 'search', placeholder: 'Buscar temas para añadir…', 'aria-label': 'Buscar temas para añadir' });
+    const typeFilter = selectControl([['', 'Todos los tipos'], ...types], '', 'Tipo para asignar', () => fill());
+    function fill() {
+      list.replaceChildren();
+      const visible = candidates.filter(t => (!typeFilter.value || t[typeFilter.value]) && (!filterText.value || G.normalize(t.nombre).includes(G.normalize(filterText.value))));
+      for (const t of visible) {
+        const recovering = data().assignments.some(a => G.id(a.grupo) === g.id && a.temaId === t.id && !a.activo);
+        list.append(el('label', { class: 'assign-option' }, [el('input', { type: 'checkbox', name: 'assign-choice', value: t.id, checked: choices.has(t.id), onchange: e => { if (e.target.checked) choices.add(t.id); else choices.delete(t.id); dirty = true; $('dirty-label').textContent = choices.size + ' temas seleccionados'; } }), el('span', { textContent: `${t.numeroOrden}. ${t.nombre}` }, [el('small', { textContent: types.filter(([k]) => t[k]).map(([, label]) => label).join(' · ') + (recovering ? ' · Recuperará el seguimiento anterior' : '') })]) ]));
+      }
+      if (!visible.length) list.append(el('p', { class: 'explanation', textContent: 'No quedan temas disponibles con este filtro.' }));
+    }
+    filterText.oninput = fill;
+    fill();
+    openDialog('Añadir temas', g.label, [el('p', { class: 'explanation', textContent: 'Los temas nuevos empiezan pendientes. Las relaciones archivadas recuperan su seguimiento anterior.' }), filterText, typeFilter, list], () => {
+      if (!choices.size || choices.size > 50) throw Object.assign(Error('Selecciona entre 1 y 50 temas.'), { status: 400 });
+      for (const id of choices) if (!ids.has(id)) ids.set(id, uid());
+      return { action: 'assignThemes', grupo: g.nombre, assignments: [...choices].map(temaId => ({ id: ids.get(temaId), temaId })) };
+    }, 'Añadir seleccionados');
+  }
+  function reviewDialog(ids) {
+    openDialog('Marcar para repasar', currentGroup().label, [el('p', { class: 'explanation', textContent: `Se marcarán ${ids.length} temas para repasar. Realizado y Último repaso conservarán sus valores.` }), field('Motivo del repaso', 'motivoRepaso', '', 'text', { maxLength: 2000, placeholder: 'Nuevas incorporaciones' }), field('Próximo objetivo', 'proximoObjetivo', '', 'textarea', { maxLength: 2000 })], v => {
+      const payload = { action: 'markForReview', ids };
+      for (const key of ['motivoRepaso', 'proximoObjetivo']) if (v.get(key).trim()) payload[key] = v.get(key);
+      return payload;
+    }, 'Marcar para repasar');
+  }
+  function rehearsalDialog(ids) {
+    openDialog('Registrar repaso', currentGroup().label, [el('p', { class: 'explanation', textContent: `Registrarás un repaso para ${ids.length} temas. Las casillas Realizado y Repasando no cambian.` }), field('Fecha del repaso', 'date', today(), 'date', { required: true })], v => ({ action: 'recordRehearsal', ids, date: M.date(v.get('date')) }), 'Registrar repaso');
+  }
+  function confirmAction(title, name, explanation, payload) { openDialog(title, name, [el('p', { class: 'explanation', textContent: explanation })], () => payload, title.startsWith('Recuperar') ? 'Recuperar' : 'Archivar'); }
+  form.oninput = () => { dirty = readForm() !== initialForm; $('dirty-label').textContent = dirty ? 'Cambios sin guardar' : ''; };
+  form.onchange = form.oninput;
+  form.onsubmit = async e => {
+    e.preventDefault(); if (!draft || client.state().busy) return;
+    try {
+      const payload = draft.submit(new FormData(form));
+      await client.save(payload); dialog.close(); draft = null; dirty = false; selected.clear(); render(); say('Cambios guardados y verificados.');
+    } catch (error) {
+      const errorBox = $('dialog-error'); errorBox.hidden = false; errorBox.replaceChildren(document.createTextNode(message(error)));
+      if (client.state().needsReload) errorBox.append(button('Actualizar y conservar formulario', () => reload(true)));
+      if (error.status === 401) errorBox.append(button('Reconectar Google', () => $('connect').click()));
+      say(message(error), true); controls();
+    }
+  };
+  $('close-dialog').onclick = closeDialog; $('cancel-dialog').onclick = closeDialog;
+  dialog.addEventListener('cancel', e => { e.preventDefault(); closeDialog(); });
+  document.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { if (client?.state().busy) return; view = b.dataset.tab; search = ''; type = ''; filter = 'all'; archived = false; selected.clear(); render(); }; });
+  window.addEventListener('beforeunload', e => { if (dirty || client?.state().busy) { e.preventDefault(); e.returnValue = ''; } });
+  $('disconnect').onclick = () => { if (client?.state().busy || (dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres desconectar y descartarlos?'))) return; if (dialog.open) dialog.close(); token = ''; expires = 0; draft = null; dirty = false; selected.clear(); client.clear(); say('Sesión de desarrollo cerrada.'); };
+  $('connect').onclick = async () => {
+    if (connecting) return; connecting = true; controls();
+    try {
+      if (env.preview) { const session = await json('/api/preview-session'); token = session.token; expires = Date.now() + 3600000; await reload(true); return; }
+      const config = await json('/api/repertorio-test?api=oauth');
+      if (config.sessionKey !== 'horas-repertoire-development-token' || config.scopes !== 'https://www.googleapis.com/auth/spreadsheets') throw Error('Sesión de desarrollo no reconocida.');
+      if (!window.google?.accounts?.oauth2) await new Promise((resolve, reject) => { const script = el('script', { src: 'https://accounts.google.com/gsi/client', onload: resolve, onerror: () => reject(Error('No se pudo conectar con Google.')) }); document.head.append(script); });
+      window.google.accounts.oauth2.initTokenClient({ client_id: config.clientId, scope: config.scopes, include_granted_scopes: false,
+        callback: async r => { connecting = false; const seconds = Number(r.expires_in); if (r.error || !r.access_token || !Number.isFinite(seconds) || seconds <= 30 || !(r.scope || '').split(' ').includes(config.scopes)) { say(r.error || 'Falta el permiso de Sheets.', true); controls(); return; } token = r.access_token; expires = Date.now() + (seconds - 30) * 1000; await reload(true); },
+        error_callback: () => { connecting = false; controls(); say('Conexión cancelada. Puedes volver a intentarlo.'); }
+      }).requestAccessToken({ prompt: '' });
+    } catch (error) { say(error.message, true); } finally { connecting = false; controls(); }
+  };
+  json('/api/repertorio-test?api=environment').then(e => {
+    env = C.verifyEnvironment(e); client = C.create({ transport, writeEnabled: env.writeEnabled, onChange: render });
+    if (env.preview) { $('mode-badge').textContent = 'SIMULACIÓN'; $('copy-link').hidden = true; $('connect').textContent = 'Abrir simulación'; say('Datos ficticios en memoria. Esta vista no escribe en Google Sheets.'); }
+    controls();
+  }).catch(error => say(error.message, true));
+})();
