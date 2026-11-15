@@ -19,3 +19,24 @@ test('formularios de altas y borrado pasan por revisión y no alcanzan las opera
   handlers['document:click']({target:{closest:()=>({getAttribute:()=> 'confirmarBorrar(1494)'})},preventDefault(){},stopImmediatePropagation(){}});
   assert.equal(JSON.stringify(calls),JSON.stringify(['session','group','import',['delete',1494]]));
 });
+
+test('editar muestra solo los datos modificados y cierra ambos diálogos al confirmar',async()=>{
+  const nodes=[],elements={};function createElement(tag){const n={tag,style:{},children:[],textContent:'',append(...items){for(const item of items){item.parent=this;this.children.push(item);}},setAttribute(k,v){this[k]=v;},addEventListener(){},focus(){},showModal(){this.open=true;},close(){this.open=false;},remove(){if(this.parent)this.parent.children=this.parent.children.filter(child=>child!==this);}};nodes.push(n);return n;}
+  const body=createElement('body'),result=createElement('p');result.id='test-result';body.append(result);
+  const values={'ev-rowIdx':'7','ev-grupo':'Cole','ev-fecha':'2026-11-04','ev-hora-inicio':'18:00','ev-hora-fin':'19:00','ev-precio':'20','ev-total':'20','ev-barrio':'Centro','ev-sitio':'Calle Mayor 12'};
+  for(const [id,value]of Object.entries(values)){const input=createElement('input');input.id=id;input.value=value;elements[id]=input;}for(const [id,checked]of [['ev-bolo',false],['ev-calendar',false]]){const input=createElement('input');input.id=id;input.checked=checked;elements[id]=input;}
+  const document={body,createElement,getElementById:id=>elements[id]||nodes.find(n=>n.id===id)};
+  const proposed={group:'Cole',date:'2026-11-04',start:'18:00',end:'19:00',price:20,total:20,district:'Centro',address:'Calle Mayor 12',gig:false};
+  let calls=0,finishApply;const gate=new Promise(resolve=>finishApply=resolve),closed=[];
+  const window={horasEnvironmentReady:Promise.resolve(true),horasDailyReady:true,horasWritesEnabled:true,horasAccessToken:()=> 'synthetic',horasFetch:async()=>{calls++;if(calls===1)return {ok:true,json:async()=>({summary:[proposed],calendarActions:[],warnings:[],skipped:[],duplicates:0,version:'review'})};await gate;return {ok:true,json:async()=>({unchanged:true})};}};
+  const LocaleData={numeric:value=>value===''||value===null||value===undefined?null:Number(value),currency:value=>`${Number(value).toFixed(2)} €`,display:value=>value==='2026-11-04'?'04/11/2026':value,parseSpanish:value=>value==='04/11/2026'?'2026-11-04':''};
+  const GroupIdentity={id:value=>String(value||'').toLowerCase(),same:(a,b)=>String(a).toLowerCase()===String(b).toLowerCase(),label:value=>value,catalogLabel:value=>value};
+  const CalendarLinking={time:value=>String(value||'')};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'daily-editor.js'),'utf8'),{window,document,CONFIG:{DAILY_API_URL:'/fake',SPREADSHEET_ID:'fixture',SPREADSHEET_NAME:'Horas'},crypto:{randomUUID:()=> 'operation'},eventos:[{rowIdx:7,boloCole:'',precioHora:20,fechaStr:'04/11/2026',fechaObj:new Date(2026,10,4),total:20,grupo:'Cole',sitio:'Centro',direccion:'Calle Mayor',horaInicio:'18:00',horaFin:'19:00'}],LocaleData,GroupIdentity,CalendarLinking,closeModal:id=>closed.push(id),async syncData(){},showErrorModal(...args){assert.fail(JSON.stringify(args));}});
+  await window.reviewCalendarSessionForm();
+  assert(nodes.some(n=>n.textContent==='Dirección: Calle Mayor → Calle Mayor 12'));
+  for(const label of ['Tipo:','Grupo:','Fecha:','Horario:','Precio:','Importe total:','Barrio:'])assert(!nodes.some(n=>n.textContent.startsWith(label)),label);
+  const dialog=nodes.find(n=>n.tag==='dialog'&&n.open),save=nodes.find(n=>n.tag==='button'&&n.textContent==='Confirmar en la hoja seleccionada');
+  const pending=save.onclick();assert(!dialog.parent.children.includes(dialog));assert.deepEqual(closed,['modal-evento']);assert.equal(result.textContent,'Guardando los cambios…');
+  finishApply();await pending;assert.equal(result.textContent,'No hay cambios que guardar.');
+});

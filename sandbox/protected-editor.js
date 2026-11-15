@@ -52,12 +52,12 @@
       if(!Object.values(plan.diff).some(Boolean)&&!plan.notes.length&&payload.mode==='sync')continue;
       const details=node('details');details.open=review.plans.length===1;details.style.cssText='border-top:1px solid #cbd5e1;padding:12px 0';
       details.append(node('summary',`Fila ${plan.rowIdx} · ${plan.group} · ${plan.date}`));body.append(details);
-      details.append(node('p',`Origen: ${plan.source}`));
       const decision={rowIdx:plan.rowIdx,expectedVersion:plan.expectedVersion,proposalVersion:plan.proposalVersion,choices:{money:'keep',district:'keep',address:'keep',time:'keep'}};decisions.push(decision);
       const fields=[['money','Precio e importe por sesión',`${currency(plan.current.price)} / ${currency(plan.current.total)}`,plan.proposal.money?`${currency(plan.proposal.money.price)} / ${currency(plan.proposal.money.total)}`:'Sin propuesta'],['district','Barrio',plan.current.district||'(vacío)',plan.proposal.district||'(sin propuesta; se conserva)'],['address','Dirección de esta sesión',plan.current.address||'(vacía)',plan.proposal.address||'(sin propuesta; se conserva)'],['time','Horario de la sesión',`${plan.current.start||'?'}–${plan.current.end||'?'}`,plan.proposal.time?`${plan.proposal.time.start}–${plan.proposal.time.end}`:'Sin propuesta']];
       for(const [field,label,current,next]of fields){
+        if(!plan.diff[field])continue;
         details.append(node('p',`${label}: actual ${current}${plan.diff[field]?` → propuesta ${next}`:' · se conserva'}`));
-        if(!plan.diff[field])continue;differences++;
+        differences++;
         const wrapper=node('label',`${label}, fila ${plan.rowIdx}: `),select=node('select');select.setAttribute('aria-label',`${label}, fila ${plan.rowIdx}`);select.style.cssText='border:1px solid #94a3b8;padding:8px;max-width:100%;margin:6px 0';
         for(const [value,text]of [['keep','Conservar actual'],['use','Usar propuesta']]){const option=node('option',text);option.value=value;select.append(option);}
         select.onchange=()=>{decision.choices[field]=select.value;};wrapper.append(select);details.append(wrapper);
@@ -73,13 +73,15 @@
     cancel.onclick=()=>{if(!saving){close();document.getElementById('test-result').textContent='Revisión cancelada. No se ha guardado nada.';}};
     overlay.addEventListener('keydown',e=>{if(e.key==='Escape'&&!saving)cancel.click();});
     save.onclick=async()=>{
+      const resultHost=document.getElementById('test-result');
       if(saving)return;saving=true;save.disabled=cancel.disabled=true;for(const select of body.querySelectorAll('select'))select.disabled=true;
+      const request=api({...payload,action:'apply',catalogVersion:review.catalogVersion,decisions});close();resultHost.textContent='Guardando los cambios...';
       status.textContent='Comprobando de nuevo los datos antes de guardar…';
       try{
-        const result=await api({...payload,action:'apply',catalogVersion:review.catalogVersion,decisions});
+        const result=await request;
         close();document.getElementById('test-result').textContent=result.unchanged?'Se ha conservado todo. Ninguna celda modificada.':`Guardado y verificado: ${result.rowsChanged} sesión(es), ${result.cellsChanged} celda(s). Calendar sin cambios.`;
         if(!result.unchanged){try{await syncData(false,false);}catch(error){document.getElementById('test-result').textContent=`Guardado y verificado: ${result.rowsChanged} sesión(es), ${result.cellsChanged} celda(s). Falta recargar la vista: ${error.message}`;}}
-      }catch(error){status.textContent=error.message;status.scrollIntoView({block:'nearest'});}
+      }catch(error){resultHost.textContent='No se pudieron guardar los cambios.';showErrorModal('No se pudieron guardar los cambios',error.message,'warning');}
       finally{saving=false;save.disabled=window.horasWritesEnabled===false||!differences;cancel.disabled=false;for(const select of body.querySelectorAll('select'))select.disabled=false;}
     };
     document.body.append(overlay);title.tabIndex=-1;title.focus({preventScroll:true});body.scrollTop=0;

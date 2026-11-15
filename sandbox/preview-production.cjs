@@ -9,6 +9,8 @@ fixture.grids.get(0).push([false,false,false,true,24,'02/11/2026',24,1,'Moli de 
 for(const [id,date]of [['visual-calendar-move','03/11/2026'],['visual-calendar-deleted','04/11/2026']])fixture.grids.get(0).push([false,false,false,true,24,date,24,1,'Moli de finestrelles','Barrio de ejemplo',id,'Dirección de ejemplo','18:00','19:00',''].map(c));
 const handler=createHandler({profile:'production',writeEnabled:true,calendarWriteEnabled:true,request:fixture.request});
 const files=new Set(['styles.css','locale-data.js','auth-session.js','app-data.js','group-identity.js','calendar-linking.js','protected-review.js','protected-config.js','sandbox/daily-editor.js','sandbox/panel.js','sandbox/performed-editor.js','sandbox/identity-review.js','sandbox/group-editor.js','sandbox/calendar-review.js','sandbox/protected-editor.js','sandbox/locale-editor.js','favicon.ico','manifest.json','icon-192.png','icon-512.png']);
+files.add('map-picker.js');
+files.add('map-picker.css');
 const server=http.createServer(async(req,res)=>{
   try{
     if(![`localhost:${port}`,`127.0.0.1:${port}`].includes(req.headers.host)){res.writeHead(403);return res.end();}
