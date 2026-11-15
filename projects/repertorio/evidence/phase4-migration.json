@@ -1,0 +1,572 @@
+{
+  "finished": true,
+  "failure": "",
+  "steps": [
+    {
+      "action": "dry-run",
+      "sourceThemes": 21,
+      "sourceAssignments": 15,
+      "themesToInsert": 21,
+      "assignmentsToInsert": 15,
+      "digest": "ec8865d22bb909af9c2fba78cb5831ba6edc78078a1e0637ea132198466cc94e"
+    },
+    {
+      "action": "apply",
+      "rowsChanged": 36
+    },
+    {
+      "action": "repeat",
+      "rowsChanged": 0,
+      "unchanged": true
+    },
+    {
+      "action": "rollback",
+      "restored": true,
+      "beforeFingerprintRestored": true
+    },
+    {
+      "action": "reapply-and-verify",
+      "rowsChanged": 36,
+      "pendingInsertions": 0,
+      "sourceUnchanged": true,
+      "allRecordsMatch": true
+    }
+  ],
+  "evidence": {
+    "date": "2026-11-15T21:09:15.013Z",
+    "mode": "exercise",
+    "sourceId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+    "destinationId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+    "transport": "Authenticated Sheets connector; real migration module",
+    "steps": [
+      {
+        "action": "dry-run",
+        "sourceThemes": 21,
+        "sourceAssignments": 15,
+        "themesToInsert": 21,
+        "assignmentsToInsert": 15,
+        "digest": "ec8865d22bb909af9c2fba78cb5831ba6edc78078a1e0637ea132198466cc94e"
+      },
+      {
+        "action": "apply",
+        "rowsChanged": 36
+      },
+      {
+        "action": "repeat",
+        "rowsChanged": 0,
+        "unchanged": true
+      },
+      {
+        "action": "rollback",
+        "restored": true,
+        "beforeFingerprintRestored": true
+      },
+      {
+        "action": "reapply-and-verify",
+        "rowsChanged": 36,
+        "pendingInsertions": 0,
+        "sourceUnchanged": true,
+        "allRecordsMatch": true
+      }
+    ],
+    "calls": [
+      {
+        "id": 1,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 2,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 3,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 4,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 5,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 6,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 7,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 8,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 9,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 10,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 11,
+        "method": "POST",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": [
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102
+        ]
+      },
+      {
+        "id": 12,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 13,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 14,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 15,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 16,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 17,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 18,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 19,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 20,
+        "method": "POST",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": [
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101
+        ]
+      },
+      {
+        "id": 21,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 22,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 23,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 24,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 25,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 26,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 27,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 28,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 29,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 30,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 31,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 32,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 33,
+        "method": "POST",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": [
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601101,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102,
+          142601102
+        ]
+      },
+      {
+        "id": 34,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 35,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 36,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 37,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 38,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 39,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 40,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 41,
+        "method": "GET",
+        "spreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      },
+      {
+        "id": 42,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [],
+        "writeSheetIds": []
+      },
+      {
+        "id": 43,
+        "method": "GET",
+        "spreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+        "ranges": [
+          "Temas!A1:H1001",
+          "GrupoTemas!A1:M1001",
+          "Coles!A1:A1220"
+        ],
+        "writeSheetIds": []
+      }
+    ],
+    "sourceWrites": 0,
+    "productionWrites": 0,
+    "detalleReads": 0,
+    "detalleWrites": 0,
+    "calendarCalls": 0
+  }
+}

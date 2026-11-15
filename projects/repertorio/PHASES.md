@@ -74,7 +74,7 @@ Cierre:
 
 Evidencia de implementación: recorridos funcionales en navegador sobre un servidor de simulación sin Google, usando el mismo handler, servicio y modelo que desarrollo. Comprobados el alta con varios tipos, conflicto de orden, asignación múltiple, independencia entre dos grupos, estados, fechas, archivo/recuperación, acciones por lotes, filtros y notas. Un conflicto conserva el formulario y una respuesta perdida permite verificar y reintentar sin duplicar. Vista de escritorio y móvil 390 × 844 revisadas, sin desbordamiento horizontal. Interfaz de desarrollo real y sus capacidades comprobadas sin iniciar una nueva sesión de Google. El piloto autenticado por navegador se valida en la fase 4; no se presenta la simulación como una escritura real en Sheets. Ver UI.md y evidence/phase3.json.
 
-## Fase 4 — Piloto, aceptación y ensayo de migración · PENDIENTE
+## Fase 4 — Piloto, aceptación y ensayo de migración · PREPARADA, ACEPTACIÓN PENDIENTE
 
 Objetivo: validar el funcionamiento con repertorio real y ensayar el paso final antes de tocar producción.
 
@@ -87,7 +87,7 @@ Tareas:
 - Verificar archivo/restauración de relaciones, reintentos y el comportamiento al cambiar nombre u orden de un tema.
 - Ejecutar pruebas de regresión pertinentes de la app actual. No modificar sus reglas económicas ni de Calendar.
 - Implementar el migrador con modo dry-run por defecto y lista cerrada de las dos pestañas nuevas.
-- Ensayar la migración sobre un segundo clon reciente del original: aplicar una vez, verificar, repetir sin duplicaciones y ensayar desactivación/recuperación.
+- Ensayar la migración sobre otra copia aislada con las dos pestañas nuevas: aplicar una vez, verificar, repetir sin duplicaciones y ensayar desactivación/recuperación. En esta fase se utilizó un clon nativo de desarrollo previo a cargar los temas; la copia reciente del original y su respaldo corresponden a la fase 5.
 - Separar y retirar datos DEMO del conjunto que va a migrarse.
 
 Cierre:
@@ -95,6 +95,8 @@ Cierre:
 - Informe de aceptación y evidencia del ensayo, con conteos por IDs y comparación de booleanos, fechas, referencias y notas.
 - Plan exacto de migración generado: origen, destino, rango por pestaña, huellas y conflictos resueltos.
 - Ninguna incidencia abierta que afecte a datos, aislamiento o el flujo principal.
+
+Verificación técnica realizada el 15/11/2026: OAuth real en Chrome sobre localhost:3002, carga de 21 temas y 15 relaciones confirmadas por el usuario, lectura de ambos grupos y guardado/restauración de una nota desde la interfaz. Una edición externa en Sheets provoca conflicto y conserva el borrador. El ensayo real en otro libro completó aplicar 36 filas, repetir sin duplicados, revertir con huella anterior verificada y reaplicar. 241 pruebas aprobadas. Ver PILOT.md y evidence/phase4*.json. No se inventaron estados Realizado/Repasando; su revisión y la aceptación del piloto siguen pendientes del usuario. No se activa automáticamente la fase 5.
 
 ## Fase 5 — Migración y activación en el original · ÚLTIMA FASE, PENDIENTE
 

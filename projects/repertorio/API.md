@@ -20,7 +20,7 @@ El servidor escucha únicamente en 127.0.0.1. No sirve index.html, archivos del 
 
 La interfaz de fase 3 está en la raíz. El acceso técnico por JSON se conserva en /tecnico. Ambos muestran DESARROLLO y comprueban el destino. Solicitan solo el permiso de Sheets. El token permanece en memoria y se descarta al recargar/desconectar; nunca leen ni reutilizan el almacenamiento de la app normal. Consulta UI.md para gestionar temas y grupos.
 
-El origen de OAuth debe estar autorizado en el cliente de Google. No se ha modificado Google Cloud ni probado una nueva concesión de OAuth en el navegador. Si 3002 no está autorizado pero ya lo está localhost:3000, se puede usar `node sandbox/repertoire-server.cjs --write --port=3000`, con ese puerto libre. No se cambia la configuración de la app normal para hacerlo.
+OAuth real fue validado el 15/11/2026 en Chrome desde http://localhost:3002, con lectura de la copia y un guardado reversible verificado en Sheets. Inicialmente Google rechazaba tanto 3002 como 3000 con origin_mismatch; se abrió el cliente de Cloud para que el usuario autorizase el origen. No se modificaron sus credenciales o configuración mediante automatización. La opción --port sigue disponible, pero no evita la necesidad de autorizar el origen exacto. Ver PILOT.md.
 
 ## Rutas
 

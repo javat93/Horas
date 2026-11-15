@@ -12,7 +12,7 @@ node sandbox/repertoire-server.cjs --write
 
 Abrir http://localhost:3002 y pulsar «Conectar Google». El distintivo DESARROLLO y el enlace «Abrir copia de desarrollo» permiten identificar el entorno. Sin --write se ofrece consulta. El acceso técnico anterior está en /tecnico.
 
-El cliente comprueba el destino y las capacidades antes de habilitar la conexión. No comparte tokens con la aplicación habitual ni los guarda de forma persistente. La autorización OAuth del navegador necesita un origen permitido por el cliente de Google; todavía no se ha validado ese inicio de sesión ni modificado Google Cloud. API.md documenta la opción de puerto si hace falta usar un origen ya registrado. La fase 4 contempla el recorrido autenticado con un grupo piloto.
+El cliente comprueba el destino y las capacidades antes de habilitar la conexión. No comparte tokens con la aplicación habitual ni los guarda de forma persistente. El SDK y el cliente OAuth se preparan antes del clic; la ventana de acceso se abre dentro del gesto del usuario. El inicio de sesión real desde http://localhost:3002 se validó en Chrome el 15/11/2026, con los dos grupos piloto, guardado reversible y conflicto con una edición externa de Sheets. Ver PILOT.md. La configuración de Google Cloud no se cambió mediante automatización.
 
 ## Catálogo de temas
 

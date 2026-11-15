@@ -4,7 +4,7 @@
   const C = RepertoireClient, M = RepertoireModel, G = GroupIdentity;
   const $ = id => document.getElementById(id), dialog = $('editor'), form = $('editor-form');
   let client, env, token = '', expires = 0, view = 'repertoire', groupId = '', search = '', type = '', filter = 'all', archived = false;
-  let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false;
+  let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false, oauthClient = null;
   const types = [['temaGaleta', 'Galeta'], ['temaSlap', 'Slap'], ['temaPropio', 'Propio']];
   const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const uid = () => crypto.randomUUID();
@@ -255,22 +255,30 @@
   document.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { if (client?.state().busy) return; view = b.dataset.tab; search = ''; type = ''; filter = 'all'; archived = false; selected.clear(); render(); }; });
   window.addEventListener('beforeunload', e => { if (dirty || client?.state().busy) { e.preventDefault(); e.returnValue = ''; } });
   $('disconnect').onclick = () => { if (client?.state().busy || (dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres desconectar y descartarlos?'))) return; if (dialog.open) dialog.close(); token = ''; expires = 0; draft = null; dirty = false; selected.clear(); client.clear(); say('Sesión de desarrollo cerrada.'); };
+  async function prepareOAuth() {
+    const config = await json('/api/repertorio-test?api=oauth');
+    if (config.sessionKey !== 'horas-repertoire-development-token' || config.scopes !== 'https://www.googleapis.com/auth/spreadsheets') throw Error('Sesión de desarrollo no reconocida.');
+    if (!window.google?.accounts?.oauth2) await new Promise((resolve, reject) => { const script = el('script', { src: 'https://accounts.google.com/gsi/client', onload: resolve, onerror: () => reject(Error('No se pudo cargar el acceso de Google.')) }); document.head.append(script); });
+    oauthClient = window.google.accounts.oauth2.initTokenClient({ client_id: config.clientId, scope: config.scopes, include_granted_scopes: false,
+      callback: async r => { connecting = false; const seconds = Number(r.expires_in); if (r.error || !r.access_token || !Number.isFinite(seconds) || seconds <= 30 || !(r.scope || '').split(' ').includes(config.scopes)) { say(r.error || 'Falta el permiso de Sheets.', true); controls(); return; } token = r.access_token; expires = Date.now() + (seconds - 30) * 1000; await reload(true); },
+      error_callback: error => { connecting = false; controls(); const kind = error?.type || 'unknown'; say(kind === 'popup_failed_to_open' ? 'Google no ha podido abrir su ventana. Abre este acceso en Chrome y vuelve a pulsar Conectar Google.' : kind === 'popup_closed' ? 'La ventana de Google se ha cerrado antes de completar la conexión.' : 'No se pudo completar la conexión con Google (' + kind + ').', true); }
+    });
+  }
   $('connect').onclick = async () => {
     if (connecting) return; connecting = true; controls();
+    let awaitingGoogle = false;
     try {
       if (env.preview) { const session = await json('/api/preview-session'); token = session.token; expires = Date.now() + 3600000; await reload(true); return; }
-      const config = await json('/api/repertorio-test?api=oauth');
-      if (config.sessionKey !== 'horas-repertoire-development-token' || config.scopes !== 'https://www.googleapis.com/auth/spreadsheets') throw Error('Sesión de desarrollo no reconocida.');
-      if (!window.google?.accounts?.oauth2) await new Promise((resolve, reject) => { const script = el('script', { src: 'https://accounts.google.com/gsi/client', onload: resolve, onerror: () => reject(Error('No se pudo conectar con Google.')) }); document.head.append(script); });
-      window.google.accounts.oauth2.initTokenClient({ client_id: config.clientId, scope: config.scopes, include_granted_scopes: false,
-        callback: async r => { connecting = false; const seconds = Number(r.expires_in); if (r.error || !r.access_token || !Number.isFinite(seconds) || seconds <= 30 || !(r.scope || '').split(' ').includes(config.scopes)) { say(r.error || 'Falta el permiso de Sheets.', true); controls(); return; } token = r.access_token; expires = Date.now() + (seconds - 30) * 1000; await reload(true); },
-        error_callback: () => { connecting = false; controls(); say('Conexión cancelada. Puedes volver a intentarlo.'); }
-      }).requestAccessToken({ prompt: '' });
-    } catch (error) { say(error.message, true); } finally { connecting = false; controls(); }
+      if (!oauthClient) { await prepareOAuth(); say('Google está preparado. Vuelve a pulsar Conectar Google.'); return; }
+      // Called synchronously within the click gesture, after SDK/config initialization.
+      oauthClient.requestAccessToken({ prompt: '' });
+      awaitingGoogle = true;
+    } catch (error) { say(error.message, true); } finally { if (!awaitingGoogle) connecting = false; controls(); }
   };
   json('/api/repertorio-test?api=environment').then(e => {
     env = C.verifyEnvironment(e); client = C.create({ transport, writeEnabled: env.writeEnabled, onChange: render });
     if (env.preview) { $('mode-badge').textContent = 'SIMULACIÓN'; $('copy-link').hidden = true; $('connect').textContent = 'Abrir simulación'; say('Datos ficticios en memoria. Esta vista no escribe en Google Sheets.'); }
+    else prepareOAuth().catch(error => say(error.message, true));
     controls();
   }).catch(error => say(error.message, true));
 })();

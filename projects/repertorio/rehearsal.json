@@ -1,0 +1,9 @@
+{
+  "preparedOn": "2026-11-15",
+  "sourceSpreadsheetId": "1oC7oISLsgDUlNEbx69HmAv04ztLweacmPpZtT6w1Y6k",
+  "destinationSpreadsheetId": "1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI",
+  "destinationUrl": "https://docs.google.com/spreadsheets/d/1MTNHpssZNYicFxc_vtlV16Insdk5m4NSd7_DRHhjUXI/edit",
+  "origin": "Native copy of the development workbook, not of the live original",
+  "writableSheets": ["Temas", "GrupoTemas"],
+  "productionAllowed": false
+}

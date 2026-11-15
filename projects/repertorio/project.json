@@ -20,14 +20,19 @@
       "Temas": 142601101,
       "GrupoTemas": 142601102
     },
-    "applicationConnected": false,
+    "applicationConnected": true,
     "interfaceImplemented": true,
     "interfaceApiConfigured": true,
     "interfacePreviewUrl": "http://localhost:3004",
     "apiImplemented": true,
     "apiEndpoint": "/api/repertorio-test",
     "localUrl": "http://localhost:3002",
-    "browserOAuthTested": false,
+    "browserOAuthTested": true,
+    "browserOAuthTestedOn": "2026-11-15",
+    "pilotGroups": ["Slap Lunes", "La Maquinista"],
+    "pilotThemeCount": 21,
+    "pilotAssignmentCount": 15,
+    "pilotLearningStatesConfirmed": false,
     "calendarAccess": false,
     "legacyOperationsEnabled": false
   },
@@ -74,7 +79,10 @@
     {
       "id": 4,
       "name": "Piloto y pruebas de aceptación",
-      "status": "pending"
+      "status": "in_progress",
+      "technicalPreparationComplete": true,
+      "userAcceptancePending": true,
+      "evidence": ["evidence/phase4.json", "evidence/phase4-migration.json", "evidence/phase4-migration-plan.json"]
     },
     {
       "id": 5,

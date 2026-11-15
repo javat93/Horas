@@ -8,7 +8,8 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 - Fase 1 completada como plantilla: Temas y GrupoTemas creadas en la copia, con cabeceras, casillas nativas, filtros, fechas y validaciones básicas. No contiene temas o estados de aprendizaje inventados.
 - Fase 2 completada el 15/11/2026: modelo, API y acceso técnico local limitados a la copia, con fórmula NombreTema y reglas de integridad implementadas. Prueba autenticada mediada por el conector de Sheets completada y datos DEMO retirados.
 - Fase 3 implementada el 15/11/2026: catálogo, repertorio por grupo y lista de grupos, con pruebas funcionales de escritorio y móvil en un entorno simulado separado. La interfaz usa la API fijada a la copia de desarrollo.
-- Fases 4 y 5 pendientes: piloto con repertorio real y migración. El módulo no está integrado en la app productiva.
+- Fase 4 preparada y verificada técnicamente el 15/11/2026: Google conectado desde Chrome, catálogo real de 21 temas, 15 asignaciones entre Slap Lunes y La Maquinista y ensayo de migración/reversión completo. Pendiente la aceptación del piloto y confirmar los estados de aprendizaje.
+- Fase 5 pendiente. El módulo no está integrado en la app productiva.
 - No se ha desplegado, activado ni migrado repertorio en producción.
 
 ## Ubicaciones
@@ -43,10 +44,14 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 - [Prueba autenticada sobre la copia](evidence/phase2-live.json).
 - [Uso de la interfaz de desarrollo](UI.md).
 - [Evidencia de la fase 3](evidence/phase3.json).
+- [Piloto real y resultado del ensayo](PILOT.md).
+- [Evidencia de la fase 4](evidence/phase4.json).
+- [Registro de la migración de ensayo](evidence/phase4-migration.json).
+- [Plan y recibos de la instantánea ensayada](evidence/phase4-migration-plan.json).
 
-## Siguiente trabajo: fase 4
+## Siguiente trabajo: aceptar el piloto
 
-Validar el inicio de sesión de Google y el recorrido real con un grupo piloto en la copia, cargar su repertorio y ensayar la migración. La interfaz está disponible con `node sandbox/repertoire-server.cjs --write` en http://localhost:3002; el acceso técnico por JSON se conserva en /tecnico. No sustituir los IDs de producción o de los entornos anteriores. El inicio de sesión OAuth del navegador no se ha probado ni se ha modificado Google Cloud; la prueba autenticada de Sheets de la fase 2 se realizó mediante el conector.
+La interfaz está disponible con `node sandbox/repertoire-server.cjs --write` en http://localhost:3002; el acceso técnico por JSON se conserva en /tecnico. OAuth del navegador, lectura real, guardado reversible y conflicto con edición externa ya están comprobados. Revisar los dos grupos y marcar Realizado/Repasando según la situación real; los estados iniciales no se han inventado. PILOT.md explica las variantes, órdenes, comprobaciones y límites. No sustituir los IDs de producción o de los entornos anteriores. La fase 5 necesita respaldo reciente, revalidación de grupos y un nuevo dry-run; los recibos del ensayo no autorizan producción.
 
 La copia conserva los vínculos de Calendar del libro original. No se debe arrancar la app normal contra ella con altas, bajas, sincronización o realizado automático habilitados. El nuevo acceso de desarrollo debe limitarse a repertorio, sin exponer operaciones de sesiones o Calendar.
 

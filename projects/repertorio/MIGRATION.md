@@ -1,6 +1,14 @@
 # Migración final de repertorio
 
-Estado: procedimiento preparado, migrador por implementar y ensayar en la fase 4. No se ha ejecutado sobre producción.
+Estado: procedimiento preparado y migrador de ensayo implementado y verificado en la fase 4. No se ha ejecutado sobre producción. El código actual rechaza el ID original como destino; requiere una adaptación explícita en la fase 5, tras aceptar el piloto y preparar su respaldo.
+
+## Resultado del ensayo del 15/11/2026
+
+Se copió nativamente el libro de desarrollo antes de cargar el catálogo. Sobre esa segunda copia se preparó un dry-run, se aplicaron 21 temas y 15 relaciones, se verificaron los datos y las fórmulas por ID, se repitió sin duplicar, se recuperó exactamente la huella anterior de las filas y se reaplicó. No se escribió en el original ni en Detalle. Evidencia: PILOT.md y evidence/phase4-migration*.json.
+
+El migrador de ensayo es sandbox/repertoire-migration.cjs; la CLI imprime un dry-run sin escribir. Sus funciones prepare/apply/rollback requieren un transporte autenticado; sandbox/repertoire-migration-probe.cjs permite comprobar el mismo módulo con el conector. --exercise en el probe solo actúa sobre el ID de ensayo fijado. No es una opción de la app ni un comando habilitado para producción.
+
+Los recibos conservan las celdas anteriores y las huellas de esa instantánea. Se rechaza revertir si el destino tiene cambios posteriores. Las escrituras de prueba del navegador se hicieron después del ensayo y actualizaron una marca ActualizadoEn en desarrollo; antes de otro paso hay que regenerar el plan y conciliar cualquier diferencia, sin sobrescribirla automáticamente. No se reutiliza este ensayo como respaldo actual de las sesiones reales.
 
 ## Origen y destino
 
