@@ -1,1 +1,21 @@
 :root{color-scheme:light;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#182739;background:#f3f6fa}*{box-sizing:border-box}body{margin:0;line-height:1.7}header,main,footer{max-width:900px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}header>a{font-weight:750;text-decoration:none;color:#183658}nav{display:flex;gap:20px;flex-wrap:wrap}a{color:#1656a8;text-underline-offset:3px}main{background:white;border:1px solid #dbe3ec;border-radius:20px;padding:clamp(24px,5vw,48px);margin:12px auto 28px}h1{line-height:1.2;font-size:clamp(30px,5vw,44px);margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}.intro{font-size:20px;color:#42566e}.badge{display:inline-block;background:#e8effb;color:#244878;border-radius:20px;padding:4px 12px;font-size:14px;font-weight:650}.action{display:inline-block;padding:12px 22px;background:#174a84;color:white;border-radius:10px;text-decoration:none;font-weight:650;margin:12px 0}.note{padding:16px 20px;background:#f1f6fd;border-left:4px solid #356fab;border-radius:6px}.date,footer{font-size:14px;color:#53657a}li{margin:8px 0}:focus-visible{outline:3px solid #bf7200;outline-offset:4px}@media(max-width:940px){main{margin:10px 16px 24px}header,footer{padding:20px}}
+:root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; background: #f5f7fb; color: #19283d; }
+header, main, footer { max-width: 1000px; }
+main { border-color: #dce3ee; box-shadow: 0 6px 24px #19283d04; }
+header a, footer a { display: inline-flex; align-items: center; min-height: 44px; }
+nav { gap: 8px 20px; }
+header > a { letter-spacing: -.4px; }
+.action { min-height: 48px; padding: 12px 22px; border-radius: 12px; background: #285ce4; }
+.badge { background: #edf2ff; color: #214fbd; border-radius: 9px; }
+.note { border-radius: 12px; border-color: #285ce4; }
+@media (max-width: 760px) {
+  header, footer { padding: 14px; }
+  header { gap: 4px 16px; }
+  main { margin: 8px 14px 20px; padding: 24px 18px; border-radius: 17px; }
+  h1 { font-size: 30px; letter-spacing: -.7px; }
+  h2 { font-size: 22px; }
+  .intro { font-size: 18px; }
+  .action { display: flex; align-items: center; justify-content: center; text-align: center; }
+  ul { padding-left: 22px; }
+  a { overflow-wrap: anywhere; }
+}

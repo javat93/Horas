@@ -11,6 +11,12 @@ const handler=createHandler({profile:'production',writeEnabled:true,calendarWrit
 const files=new Set(['styles.css','locale-data.js','auth-session.js','app-data.js','group-identity.js','calendar-linking.js','protected-review.js','protected-config.js','sandbox/daily-editor.js','sandbox/panel.js','sandbox/performed-editor.js','sandbox/identity-review.js','sandbox/group-editor.js','sandbox/calendar-review.js','sandbox/protected-editor.js','sandbox/locale-editor.js','favicon.ico','manifest.json','icon-192.png','icon-512.png']);
 files.add('map-picker.js');
 files.add('map-picker.css');
+files.add('app-ui.css');
+files.add('app-ui.js');
+files.add('informacion.css');
+files.add('inicio.html');
+files.add('privacidad.html');
+files.add('condiciones.html');
 const server=http.createServer(async(req,res)=>{
   try{
     if(![`localhost:${port}`,`127.0.0.1:${port}`].includes(req.headers.host)){res.writeHead(403);return res.end();}
@@ -34,7 +40,7 @@ const server=http.createServer(async(req,res)=>{
       res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(html);
     }
     const name=u.pathname.slice(1);if(!files.has(name)&&name!=='review-ui.css'){res.writeHead(404);return res.end();}
-    res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':'application/octet-stream');res.end(fs.readFileSync(path.join(root,name)));
+    res.setHeader('Content-Type',name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':name.endsWith('.html')?'text/html; charset=utf-8':'application/octet-stream');res.end(fs.readFileSync(path.join(root,name)));
   }catch(error){res.statusCode=500;res.end(error.message);}
 });
 if(require.main===module)server.listen(port,'127.0.0.1',()=>console.log('Vista protegida sin Google: '+origin));

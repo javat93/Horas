@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Horas · PercuManager</title>
     <!-- Tailwind CSS compilado para producción (17KB minificado, sin CDN) -->
 <link rel="stylesheet" href="styles.css">
@@ -359,6 +359,8 @@
         }
     </style>
     <link rel="stylesheet" href="review-ui.css?v=20261111-mobile-map">
+    <link rel="stylesheet" href="app-ui.css?v=mobile-20261116">
+    <script src="app-ui.js?v=mobile-20261116" defer></script>
 </head>
 <body class="pb-20">
 
@@ -397,7 +399,7 @@
     </div>
 
     <main class="max-w-4xl mx-auto px-4">
-        <div class="flex flex-wrap p-1.5 bg-white rounded-2xl shadow-sm border border-slate-100 mb-8 max-w-lg mx-auto">
+        <nav id="app-navigation" aria-label="Secciones de PercuManager" class="app-nav flex flex-wrap p-1.5 bg-white rounded-2xl shadow-sm border border-slate-100 mb-8 max-w-lg mx-auto">
             <button onclick="switchTab('eventos')" id="btn-eventos" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 tab-active">
                 <i data-lucide="layout-list" class="w-4 h-4"></i> Lista
             </button>
@@ -409,37 +411,32 @@
             </button>
             <a id="repertoire-entry" href="https://javat93.github.io/Horas/repertorio.html" class="hidden flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2"><i data-lucide="music" class="w-4 h-4"></i> Repertorio</a>
             <script>window.horasConfigReady.then(() => { if (typeof CONFIG !== 'undefined' && CONFIG.DATA_MODE === 'production') document.getElementById('repertoire-entry').classList.remove('hidden'); }).catch(() => {});</script>
-        </div>
+        </nav>
 
         <div id="tab-eventos" class="space-y-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end px-1 gap-4">
+            <div class="app-section-heading flex flex-col sm:flex-row justify-between items-start sm:items-end px-1 gap-4">
                 <div>
                     <h2 class="text-2xl font-extrabold text-slate-900">Clases</h2>
-                    <p class="text-sm text-slate-500" id="stats-info">Cargando datos...</p>
                 </div>
                 <button onclick="openNewSesionModal()" class="btn-blue w-full sm:w-auto px-6 py-3 rounded-2xl text-sm font-bold flex items-center justify-center gap-2">
                     <i data-lucide="plus" class="w-5 h-5"></i> Nueva Clase
                 </button>
             </div>
             
-            <div class="flex flex-wrap gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
-                    <span class="text-xs font-bold text-slate-400 uppercase">Filtros:</span>
-                </div>
-                <select id="filter-cobrados" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700 outline-none focus:border-blue-400">
+            <div id="stats-info" aria-live="polite">Cargando datos...</div>
+            <div class="session-filters">
+                <div><label for="filter-grupo">Grupo</label><select id="filter-grupo" aria-label="Filtrar sesiones por grupo" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700">
+                    <option value="">Todos los grupos</option>
+                </select></div>
+                <details class="session-filter-details"><summary id="session-filter-summary">Cobros pendientes · Filtros</summary><div class="session-filter-fields"><div><label for="filter-cobrados">Estado del cobro</label><select id="filter-cobrados" aria-label="Filtrar sesiones por cobro" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700 outline-none focus:border-blue-400">
                     <option value="all">Estado: Todos</option>
                     <option value="cobrado">Solo Cobrados</option>
                     <option value="pendiente" selected>Solo Pendientes</option>
-                </select>
-                <select id="filter-realizados" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700 outline-none focus:border-blue-400">
+                </select></div><div><label for="filter-realizados">Realización</label><select id="filter-realizados" aria-label="Filtrar sesiones por realización" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700 outline-none focus:border-blue-400">
                     <option value="all">Realización: Todas</option>
                     <option value="realizado">Marcados como realizados</option>
                     <option value="futuro">Sin marcar como realizados</option>
-                </select>
-                <select id="filter-grupo" aria-label="Filtrar sesiones por grupo" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700">
-                    <option value="">Todos los grupos</option>
-                </select>
+                </select></div></div></details>
             </div>
 
             <div id="lista-eventos" class="grid gap-4"></div>
@@ -452,9 +449,9 @@
         </div>
 
         <div id="tab-maestros" class="hidden space-y-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end px-1 gap-4">
+            <div class="app-section-heading flex flex-col sm:flex-row justify-between items-start sm:items-end px-1 gap-4">
                 <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900">Grupos (Coles)</h2>
+                    <h2 class="text-2xl font-extrabold text-slate-900">Grupos</h2>
                     <p class="text-sm text-slate-500">Gestión de entidades y ubicaciones</p>
                 </div>
                 <button onclick="openNewGrupoModal()" class="bg-slate-900 text-white px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2">
@@ -464,7 +461,7 @@
             
             <div class="relative">
                 <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                <input type="text" id="search-grupos" oninput="renderGrupos()" placeholder="Buscar por nombre o ubicación..." class="w-full pl-12 pr-4 py-4 rounded-2xl input-modern text-sm font-medium shadow-sm">
+                <input type="text" id="search-grupos" aria-label="Buscar grupo por nombre o ubicación" oninput="renderGrupos()" placeholder="Buscar por nombre o ubicación..." class="w-full pl-12 pr-4 py-4 rounded-2xl input-modern text-sm font-medium shadow-sm">
             </div>
 
             <div id="lista-maestros" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
@@ -476,17 +473,17 @@
         <div id="session-archive-actions"></div>
     </footer>
 
-    <div id="modal-evento" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+    <div id="modal-evento" role="dialog" aria-modal="true" aria-label="Datos de la sesión" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-[2rem] w-full max-w-lg p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center mb-6">
                 <h3 id="modal-evento-title" class="text-2xl font-extrabold text-slate-900">Registrar Sesión</h3>
-                <button type="button" onclick="closeModal('modal-evento')" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+                <button type="button" onclick="closeModal('modal-evento')" aria-label="Cerrar formulario" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
             </div>
             <form id="form-evento" class="space-y-4">
                 <input type="hidden" id="ev-rowIdx">
                 
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Grupo / Colegio</label>
+                    <label for="ev-grupo-search" class="block text-xs font-bold text-slate-400 uppercase mb-2">Grupo / Colegio</label>
                     <div class="relative">
                         <input 
                             type="text" 
@@ -509,17 +506,17 @@
                 </div>
                 
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Fecha</label>
+                    <label for="ev-fecha" class="block text-xs font-bold text-slate-400 uppercase mb-2">Fecha</label>
                     <input type="date" id="ev-fecha" onchange="refreshGroupLabels()" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Hora Inicio</label>
+                        <label for="ev-hora-inicio" class="block text-xs font-bold text-slate-400 uppercase mb-2">Hora Inicio</label>
                         <input type="time" id="ev-hora-inicio" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Hora Fin</label>
+                        <label for="ev-hora-fin" class="block text-xs font-bold text-slate-400 uppercase mb-2">Hora Fin</label>
                         <input type="time" id="ev-hora-fin" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                     </div>
                 </div>
@@ -592,23 +589,23 @@
                     </div>
                 </div>
 
-                <div class="flex gap-4 pt-4">
+                <div class="app-form-actions flex gap-4 pt-4">
                     <button type="submit" class="flex-1 btn-blue py-4 rounded-2xl font-bold text-lg shadow-lg">Guardar Cambios</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="modal-grupo" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+    <div id="modal-grupo" role="dialog" aria-modal="true" aria-label="Datos del grupo" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-[2rem] w-full max-w-lg p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 id="modal-grupo-title" class="text-2xl font-extrabold text-slate-900">Editar Grupo</h3>
-                <button type="button" onclick="closeModal('modal-grupo')" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+                <button type="button" onclick="closeModal('modal-grupo')" aria-label="Cerrar formulario" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
             </div>
             <form id="form-grupo" class="space-y-4">
                 <input type="hidden" id="gr-rowIdx">
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Nombre del Grupo</label>
+                    <label for="gr-nombre" class="block text-xs font-bold text-slate-400 uppercase mb-2">Nombre del Grupo</label>
                     <input type="text" id="gr-nombre" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                     <p id="gr-name-info" class="text-xs text-slate-500 mt-2"></p>
                 </div>
@@ -633,7 +630,7 @@
 </button>
                     </div>
                 </div>
-                <div class="flex gap-4 pt-4">
+                <div class="app-form-actions flex gap-4 pt-4">
                     <button type="submit" class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-lg">Guardar Grupo</button>
                 </div>
             </form>
@@ -719,15 +716,15 @@
     </div>
 
     <!-- Modal para Añadir Eventos Futuros -->
-    <div id="modal-future-events" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
+    <div id="modal-future-events" role="dialog" aria-modal="true" aria-label="Añadir eventos futuros" class="fixed inset-0 glass-modal hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-[2rem] w-full max-w-md p-8 shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-extrabold text-slate-900">Añadir Eventos Futuros</h3>
-                <button type="button" onclick="closeModal('modal-future-events')" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+                <button type="button" onclick="closeModal('modal-future-events')" aria-label="Cerrar formulario" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
             </div>
             <form id="form-future-events" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Seleccionar Mes</label>
+                    <label for="future-month" class="block text-xs font-bold text-slate-400 uppercase mb-2">Seleccionar Mes</label>
                     <select id="future-month" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                         <option value="">Selecciona un mes...</option>
                         <option value="1">Enero</option>
@@ -745,12 +742,12 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Año</label>
+                    <label for="future-year" class="block text-xs font-bold text-slate-400 uppercase mb-2">Año</label>
                     <select id="future-year" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                         <option value="">Selecciona un año...</option>
                     </select>
                 </div>
-                <div class="flex gap-3 pt-4">
+                <div class="app-form-actions flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
                         <i data-lucide="download" class="w-4 h-4"></i>
                         Importar Eventos
@@ -1591,7 +1588,7 @@
                 const iconColor = ev.realizado ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600';
                 return `
                 <div class="card-modern p-5 flex flex-wrap md:flex-nowrap justify-between items-center gap-4 ${ev.realizado ? 'bg-emerald-50/30' : ''} ${typeClass}">
-                    <div class="session-card-main flex items-center gap-4 cursor-pointer flex-1" onclick="openEditSesionModal(${ev.rowIdx})">
+                    <div role="button" tabindex="0" aria-label="Editar sesión" class="session-card-main flex items-center gap-4 cursor-pointer flex-1" onclick="openEditSesionModal(${ev.rowIdx})">
                         <div class="session-card-icon w-12 h-12 rounded-2xl flex items-center justify-center ${iconColor}" aria-hidden="true">
                             <i data-lucide="${icon}"></i>
                         </div>
@@ -1606,7 +1603,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-6">
+                    <div class="session-card-actions flex items-center gap-6">
                         <div class="text-right">
                             <p class="text-[10px] font-bold text-slate-400 uppercase">Total</p>
                             <p class="text-lg font-black text-slate-800">${ev.amountWarning ? 'Revisar importe' : LocaleData.currency(ev.total)}</p>
@@ -1615,7 +1612,7 @@
                             <button aria-label="Cambiar estado de pago, fila ${ev.rowIdx}" ${ev.paymentSaving||!ev.fechaObj||!ev.grupo?.trim()?'disabled':''} onclick="togglePago(${ev.rowIdx}, ${!ev.pagado})" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800' : 'bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600'} hover:scale-110 transition-all">
                                 <i data-lucide="euro" class="w-5 h-5"></i>
                             </button>
-                            <button onclick="confirmarBorrar(${ev.rowIdx})" class="p-2.5 rounded-xl bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
+                            <button aria-label="Archivar sesión, fila ${ev.rowIdx}" onclick="confirmarBorrar(${ev.rowIdx})" class="p-2.5 rounded-xl bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
                                 <i data-lucide="trash-2" class="w-5 h-5"></i>
                             </button>
                         </div>
@@ -1641,7 +1638,7 @@
 
             container.innerHTML = filtered.map(g => `
                 <div class="card-modern p-5 flex justify-between items-center gap-4">
-                    <div class="flex items-center gap-4 cursor-pointer flex-1" onclick="openEditGrupoModal(${g.rowIdx})">
+                    <div role="button" tabindex="0" aria-label="Editar grupo" class="group-card-main flex items-center gap-4 cursor-pointer flex-1" onclick="openEditGrupoModal(${g.rowIdx})">
                         <div class="bg-slate-900 text-white p-3 rounded-xl"><i data-lucide="users"></i></div>
                         <div>
                             <h4 class="font-bold text-slate-900">${GroupIdentity.catalogLabel(g.nombre)||'Grupo incompleto · fila '+g.rowIdx}</h4>
@@ -2503,13 +2500,13 @@
             
             // Actualizar el span con la información financiera
             statsInfo.innerHTML = `
-                <div class="space-y-1">
-                    <div class="text-xs text-slate-600 flex flex-col sm:flex-row sm:gap-x-4">
-                        <span><span class="font-medium">Pendiente de cobro (bruto):</span> ${formatCurrency(totalCobrar)}</span>
-                        <span><span class="font-medium">IRPF estimado (35 %):</span> ${formatCurrency(retencionIRPF)}</span>
-                        <span><span class="font-medium">Estimado tras IRPF:</span> ${formatCurrency(totalNeto)}</span>
+                <div class="financial-overview">
+                    <div class="financial-cards">
+                        <div class="financial-card financial-card-main"><span>Pendiente de cobro (bruto)</span><strong>${formatCurrency(totalCobrar)}</strong></div>
+                        <div class="financial-card"><span>IRPF estimado (35 %)</span><strong>${formatCurrency(retencionIRPF)}</strong></div>
+                        <div class="financial-card"><span>Estimado tras IRPF</span><strong>${formatCurrency(totalNeto)}</strong></div>
                     </div>
-                    <p class="text-xs text-slate-500">Todo el histórico pendiente de cobro, sin depender de los filtros de la lista. Los importes sin interpretar se excluyen. IRPF estimado con el 35 % configurado; no es una liquidación fiscal.</p>
+                    <details class="financial-explanation"><summary>Cómo se calcula</summary><p>Todo el histórico pendiente de cobro, sin depender de los filtros de la lista. Los importes sin interpretar se excluyen. IRPF estimado con el 35 % configurado; no es una liquidación fiscal.</p></details>
                 </div>
             `;
         }

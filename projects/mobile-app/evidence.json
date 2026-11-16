@@ -1,0 +1,62 @@
+{
+  "completedOn": "2026-11-16",
+  "baseCommit": "3b9d794a6b211d2737c6e88c025bd95c1b8d7f81",
+  "mobileUsagePercent": 90,
+  "tests": {
+    "passed": 249,
+    "failed": 0
+  },
+  "inlineScriptsParsed": 3,
+  "changedExistingFunctions": [
+    "renderEventos (HTML only)",
+    "renderGrupos (HTML only)",
+    "updateFinancialStats (HTML only)"
+  ],
+  "financialCalculationsUnchanged": true,
+  "unchangedModules": [
+    "API",
+    "protected-config",
+    "production config",
+    "Calendar and daily operations",
+    "auth",
+    "group and session review services",
+    "repertoire model/client"
+  ],
+  "browserEnvironment": "localhost:3011 in-memory fixture, no Google calls",
+  "responsiveWidths": [
+    320,
+    390,
+    768,
+    1280
+  ],
+  "responsiveViews": [
+    "Lista",
+    "Grupos",
+    "Calendario"
+  ],
+  "horizontalOverflow": false,
+  "mobileNavTargetHeight": 56,
+  "desktopNavTargetHeight": 48,
+  "shortViewportFormBounds": {
+    "top": 12,
+    "bottom": 568
+  },
+  "flows": [
+    "filters and summary",
+    "navigation",
+    "open by keyboard",
+    "focus cycle",
+    "Escape without saving",
+    "synthetic group preview and cancel without commit",
+    "future-import form open and cancel",
+    "information/privacy/terms pages at 320px"
+  ],
+  "realSheetsWrites": 0,
+  "realCalendarCalls": 0,
+  "limits": [
+    "Browser size emulation; no physical iOS/Android keyboard test"
+  ],
+  "screenshots": [
+    "app-movil-lista-20261116.png"
+  ]
+}
