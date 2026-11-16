@@ -13,7 +13,7 @@ Se muestran cuatro contadores para el repertorio activo completo:
 - Aún no lo saben: temas con Realizado desmarcado.
 - Repasando: temas con Repasando marcado, tanto aprendidos como pendientes.
 
-Cada tema tiene dos casillas: «Ya lo saben» y «Repasando». Son independientes y se guardan automáticamente después de verificar el resultado. Un tema ya aprendido puede volver a repasarse por nuevas incorporaciones sin desmarcar lo que el grupo sabe. No se seleccionan ni muestran fechas, último repaso o registro de repasos. Tampoco se solicitan objetivos o motivos.
+Cada tema tiene dos casillas: «Ya lo saben» y «Repasando». Son independientes. Los marcados consecutivos se agrupan durante una breve espera y se muestran como pendientes hasta confirmar el guardado. Guardar ahora adelanta el envío. Se comprueba el resultado antes de mostrarlos como guardados. Un tema ya aprendido puede volver a repasarse por nuevas incorporaciones sin desmarcar lo que el grupo sabe. No se seleccionan ni muestran fechas, último repaso o registro de repasos. Tampoco se solicitan objetivos o motivos.
 
 Los cuatro contadores funcionan como filtros. Sus etiquetas cortas son Temas, Ya saben, Por aprender y En repaso. El botón «Filtros» despliega tipo y archivados; permite restablecerlos. Se pueden combinar con búsqueda y tipo. Los contadores mantienen los totales del grupo aunque se filtre la lista. Un filtro vacío propone cambiar de filtro.
 
@@ -40,3 +40,7 @@ La copia de desarrollo permanece como archivo en consulta en http://localhost:30
 249 pruebas automáticas aprobadas. Recorrido en navegador sobre `node sandbox/repertoire-preview.cjs`, http://localhost:3004: contadores, cambio de «Ya lo saben», coexistencia con «Repasando», filtro con y sin resultados, independencia entre grupos, marcado directo de un lote y formulario de notas con cero campos de fecha. Los datos de esta prueba son ficticios en memoria; no se escribieron estados de aprendizaje de prueba en Google Sheets.
 
 La fase 6 añade la revisión responsive de 320 × 568 hasta 1280 × 900; ver PHASE6.md y evidence/phase6.json.
+
+## Guardado agrupado y cuota
+
+El guardado automático acumula marcados durante 1,2 segundos, con espera máxima de 4 segundos y lotes de 50 relaciones. Si hay un conflicto o límite de cuota, conserva los marcados y ofrece Actualizar y revisar marcados antes de Guardar marcados. No hay reenvío automático de escrituras inciertas. Espera a Marcados guardados y verificados antes de cerrar. Ver QUOTA.md y evidence/quota.json.

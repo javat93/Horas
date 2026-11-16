@@ -10,6 +10,7 @@ const FIELDS = Object.freeze({
   catalog: ['includeArchived'], validate: [], groupRepertoire: ['grupo', 'includeArchived'],
   saveTheme: ['theme', 'expectedVersion'], assignThemes: ['grupo', 'assignments', 'expectedVersion'],
   updateProgress: ['vinculoId', 'changes', 'expectedVersion'], recordRehearsal: ['ids', 'date', 'expectedVersion'],
+  updateProgressBatch: ['updates', 'expectedVersion'],
   markForReview: ['ids', 'motivoRepaso', 'proximoObjetivo', 'expectedVersion'],
   archiveTheme: ['temaId', 'activo', 'expectedVersion'], archiveAssignment: ['vinculoId', 'activo', 'expectedVersion']
 });
@@ -31,6 +32,18 @@ function validatePayload(p) {
     for (const a of p.assignments) { M.object(a, ['id', 'temaId']); M.uuid(a.id); M.uuid(a.temaId); if (ids.has(a.id) || themes.has(a.temaId)) M.fail('Asignación repetida en el lote.'); ids.add(a.id); themes.add(a.temaId); }
   }
   if (['updateProgress', 'archiveAssignment'].includes(p.action)) M.uuid(p.vinculoId);
+  if (p.action === 'updateProgressBatch') {
+    if (!Array.isArray(p.updates) || !p.updates.length || p.updates.length > 50) M.fail('Selecciona entre 1 y 50 relaciones.');
+    const ids = new Set();
+    for (const update of p.updates) {
+      M.object(update, ['vinculoId', 'changes']); M.uuid(update.vinculoId);
+      if (ids.has(update.vinculoId)) M.fail('Relación repetida en el lote.');
+      ids.add(update.vinculoId);
+      M.object(update.changes, ['realizado', 'repasando']);
+      if (!Object.keys(update.changes).length) M.fail('No hay marcados que guardar.');
+      Object.values(update.changes).forEach(M.bool);
+    }
+  }
   if (p.action === 'archiveTheme') M.uuid(p.temaId);
   if (['archiveTheme', 'archiveAssignment'].includes(p.action)) M.bool(p.activo);
   if (p.action === 'updateProgress') {
@@ -68,9 +81,7 @@ function assignmentCells(a, rowIdx) {
   for (const i of [6, 7]) row[i].userEnteredFormat = { numberFormat: { type: 'DATE', pattern: 'dd/mm/yyyy' } };
   return row;
 }
-async function snapshot(token, request) {
-  const q = new URLSearchParams({ fields: 'spreadsheetId,properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties))' });
-  const meta = await request(P.BASE + '?' + q, token);
+function layout(meta) {
   if (meta.spreadsheetId !== P.TARGET_ID || meta.properties?.locale !== 'es_ES' || meta.properties?.timeZone !== 'Europe/Madrid') M.fail('Libro de repertorio o configuración no reconocidos.', 'SCHEMA_MISMATCH', 409);
   const sheets = {};
   for (const name of ['Temas', 'GrupoTemas', 'Coles']) {
@@ -79,10 +90,19 @@ async function snapshot(token, request) {
     if (matches.length !== 1 || !p || !Number.isInteger(p.gridProperties?.rowCount) || p.gridProperties.rowCount < 2 || p.gridProperties.rowCount > P.LIMIT || (name !== 'Coles' && p.sheetId !== P.SHEET_IDS[name]) || p.gridProperties.columnCount < (M.HEADERS[name]?.length || 1)) M.fail('Estructura no reconocida: ' + name, 'SCHEMA_MISMATCH', 409);
     sheets[name] = p;
   }
-  const gridQuery = new URLSearchParams({ includeGridData: 'true', fields: 'spreadsheetId,sheets(properties(sheetId,title),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue))))' });
+  return sheets;
+}
+async function snapshot(token, request, knownLayout = null) {
+  // Reuse bounds only within this operation. Every grid read returns fresh schema metadata too.
+  const sheets = knownLayout || layout(await request(P.BASE + '?' + new URLSearchParams({ fields: 'spreadsheetId,properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties))' }), token));
+  const gridQuery = new URLSearchParams({ includeGridData: 'true', fields: 'spreadsheetId,properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue))))' });
   for (const name of ['Temas', 'GrupoTemas', 'Coles']) gridQuery.append('ranges', `${name}!A1:${name === 'Temas' ? 'H' : name === 'GrupoTemas' ? 'M' : 'A'}${sheets[name].gridProperties.rowCount}`);
   const result = await request(P.BASE + '?' + gridQuery, token);
   if (result.spreadsheetId !== P.TARGET_ID) M.fail('Respuesta de otro libro.', 'FORBIDDEN_TARGET', 403);
+  const currentLayout = layout(result);
+  if (Object.keys(sheets).some(name => currentLayout[name].sheetId !== sheets[name].sheetId || currentLayout[name].gridProperties.rowCount !== sheets[name].gridProperties.rowCount)) {
+    M.fail('La estructura cambió durante la operación. Actualiza antes de guardar.', 'REVIEW_EXPIRED', 409);
+  }
   const rows = {};
   for (const name of ['Temas', 'GrupoTemas', 'Coles']) {
     const found = result.sheets?.filter(s => s.properties?.title === name && s.properties?.sheetId === sheets[name].sheetId) || [];
@@ -151,14 +171,15 @@ function plan(p, snap, now) {
       }
     }
   } else {
-    const ids = p.ids || [p.vinculoId];
+    const ids = p.action === 'updateProgressBatch' ? p.updates.map(u => u.vinculoId) : p.ids || [p.vinculoId];
     for (const id of ids) {
       const before = findAssignment(id), after = { ...before };
       if (p.action !== 'archiveAssignment' && !before.activo) M.fail('Recupera la relación archivada antes de editarla.', 'ARCHIVED', 409);
       if (p.action === 'archiveAssignment') after.activo = p.activo;
-      else if (p.action === 'updateProgress') {
-        Object.assign(after, p.changes);
-        if (p.changes.realizado === true && !before.realizado && !before.fechaRealizado && p.changes.fechaRealizado === undefined) after.fechaRealizado = today;
+      else if (['updateProgress', 'updateProgressBatch'].includes(p.action)) {
+        const changes = p.action === 'updateProgressBatch' ? p.updates.find(u => u.vinculoId === id).changes : p.changes;
+        Object.assign(after, changes);
+        if (changes.realizado === true && !before.realizado && !before.fechaRealizado && changes.fechaRealizado === undefined) after.fechaRealizado = today;
       } else if (p.action === 'recordRehearsal') after.ultimoRepaso = p.date || today;
       else if (p.action === 'markForReview') {
         after.repasando = true;
@@ -189,7 +210,7 @@ async function execute(payload, token, transport, now) {
   const writes = plan(payload, snap, now);
   if (!writes.length) return { ...response(snap), unchanged: true, rowsChanged: 0 };
   if (payload.expectedVersion !== snap.version) M.fail('Los datos cambiaron. Recarga antes de guardar.', 'REVIEW_EXPIRED', 409);
-  const fresh = await snapshot(token, request);
+  const fresh = await snapshot(token, request, snap.sheets);
   if (fresh.version !== snap.version) M.fail('Los datos cambiaron durante la revisión.', 'REVIEW_EXPIRED', 409);
   const requests = writes.map(w => {
     const values = w.name === 'Temas' ? themeCells(w.after) : assignmentCells(w.after, w.rowIdx);
@@ -197,7 +218,7 @@ async function execute(payload, token, transport, now) {
   });
   try {
     await request(P.BASE + ':batchUpdate', token, 'POST', { requests });
-    const after = await snapshot(token, request);
+    const after = await snapshot(token, request, fresh.sheets);
     if (after.issues.length) throw Error('El estado guardado tiene incidencias.');
     for (const w of writes) {
       const found = (w.name === 'Temas' ? after.themes : after.assignments).find(a => a.id === w.after.id);

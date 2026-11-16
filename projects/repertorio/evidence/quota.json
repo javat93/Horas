@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-16",
+  "tests": 270,
+  "scope": "repertoire only",
+  "debounceMs": 1200,
+  "maxWaitMs": 4000,
+  "maxAssignmentsPerBatch": 50,
+  "readRequests": {
+    "open": 2,
+    "oldEffectiveSave": 6,
+    "newEffectiveBatch": 4
+  },
+  "writeRequestsPerBatch": 1,
+  "benchmarks": [
+    {
+      "case": "10 effective flags in one batch",
+      "oldReads": 60,
+      "newReads": 4,
+      "oldWrites": 10,
+      "newWrites": 1
+    },
+    {
+      "case": "20 flags across 10 pieces in one batch",
+      "oldReads": 120,
+      "newReads": 4,
+      "oldWrites": 20,
+      "newWrites": 1
+    },
+    {
+      "case": "toggle and undo before send",
+      "newReads": 0,
+      "newWrites": 0
+    }
+  ],
+  "preservedChecks": [
+    "strict batch validation",
+    "fresh metadata on each grid read",
+    "pre-write version comparison",
+    "post-write row and formula verification",
+    "original target and writable sheet allowlist"
+  ],
+  "failureBehavior": [
+    "retain queued flags",
+    "no automatic write retries",
+    "explicit read and review after conflict",
+    "reconcile uncertain write by verified read",
+    "60s quota cooldown without network retries"
+  ],
+  "realGoogleWrites": 0,
+  "realCalendarCalls": 0,
+  "existingSessionModulesUnchanged": true,
+  "existingCalendarModulesUnchanged": true
+}

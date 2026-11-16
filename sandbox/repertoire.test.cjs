@@ -94,7 +94,7 @@ test('edición externa y reordenación de filas conservan vínculos y detectan v
 });
 test('una edición entre la lectura y la última comprobación aborta antes de escribir', async () => {
   const f = fixture(); await f.seed(); const before = await f.read(); let reads = 0;
-  f.onRead = () => { if (++reads === 4) f.book.sheets[0].data[0].rowData[1].values[7] = { userEnteredValue: { stringValue: 'Externo' } }; };
+  f.onRead = () => { if (new URL(f.calls.at(-1).url).searchParams.get('includeGridData') === 'true' && ++reads === 2) f.book.sheets[0].data[0].rowData[1].values[7] = { userEnteredValue: { stringValue: 'Externo' } }; };
   const count = f.calls.filter(c => c.method === 'POST').length;
   await assert.rejects(f.run({ action: 'updateProgress', vinculoId: id(101), changes: { realizado: true }, expectedVersion: before.version }), { code: 'REVIEW_EXPIRED' });
   assert.equal(f.calls.filter(c => c.method === 'POST').length, count);

@@ -114,3 +114,9 @@ Se opera dentro de las filas existentes; no se añaden dimensiones ni se modific
 ## Interfaz integrada en producción (16/11/2026)
 
 La sección productiva se monta en index.html y reutiliza la sesión principal existente, comprobando modo, libro, permiso de Sheets y caducidad. No crea otro cliente OAuth ni almacenamiento de token. Esto no modifica el contrato ni las barreras de la API: sigue limitada a Temas y GrupoTemas, sin acceso a Calendar. El acceso de desarrollo descrito arriba conserva su sesión separada. Ver INTEGRATION.md.
+
+## Lotes de marcados y lectura optimizada (16/11/2026)
+
+updateProgressBatch recibe updates (entre 1 y 50 relaciones únicas con vinculoId y changes) y expectedVersion. changes solo admite realizado y repasando, booleanos. No acepta notas ni fechas por esta acción. Aplica un batchUpdate tras verificar el lote y la versión, y vuelve a leer para comprobar filas y fórmulas. El entorno anuncia progressBatch: true.
+
+Las tres instantáneas normales del guardado consumen cuatro lecturas: dos iniciales y una por cada verificación posterior. Cada cuadrícula incluye metadatos frescos y la lista de campos permitidos se actualiza de forma cerrada. Los rangos conocidos solo se reutilizan dentro de la misma operación y los cambios de estructura se rechazan. Ver QUOTA.md.

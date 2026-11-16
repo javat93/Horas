@@ -21,7 +21,7 @@ function guardRequest(request) {
       // Metadata must never be able to return all grid data implicitly.
       if (u.searchParams.get('includeGridData') === 'true' && !u.searchParams.getAll('ranges').length) M.fail('Faltan rangos acotados.', 'FORBIDDEN_RANGE', 403);
       const metadataFields = 'spreadsheetId,properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties))';
-      const gridFields = 'spreadsheetId,sheets(properties(sheetId,title),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue))))';
+      const gridFields = 'spreadsheetId,properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue))))';
       if (u.searchParams.get('fields') !== (u.searchParams.get('includeGridData') === 'true' ? gridFields : metadataFields)) M.fail('Campos de lectura bloqueados.', 'FORBIDDEN_RANGE', 403);
     } else if (method === 'POST' && u.href === BASE + ':batchUpdate') {
       if (!body || Object.keys(body).some(k => k !== 'requests') || !Array.isArray(body.requests) || !body.requests.length || body.requests.length > 100) M.fail('Lote no permitido.', 'FORBIDDEN_WRITE', 403);

@@ -6,7 +6,7 @@
   const C = RepertoireClient.forProfile(page.profile), M = RepertoireModel, G = GroupIdentity;
   const endpoint = page.endpoint, production = page.profile === 'production';
   const $ = id => root.getElementById(id), dialog = $('editor'), form = $('editor-form');
-  let client, env, token = '', expires = 0, view = 'repertoire', groupId = '', search = '', type = '', filter = 'all', archived = false;
+  let client, progress, hadPending = false, env, token = '', expires = 0, view = 'repertoire', groupId = '', search = '', type = '', filter = 'all', archived = false;
   let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false, oauthClient = null, filtersOpen = false, selecting = false;
   groupId = host?.groupId || new URLSearchParams(window.location.hash.slice(1)).get('grupo') || '';
   const types = [['temaGaleta', 'Galeta'], ['temaSlap', 'Slap'], ['temaPropio', 'Propio']];
@@ -17,7 +17,7 @@
     for (const c of children) if (c !== null && c !== undefined) n.append(typeof c === 'string' ? document.createTextNode(c) : c);
     return n;
   }
-  function button(text, action, cls = '', disabled = false) { return el('button', { type: 'button', class: 'button ' + cls, textContent: text, disabled, onclick: action }); }
+  function button(text, action, cls = '', disabled = false, allowPending = false) { return el('button', { type: 'button', class: 'button ' + cls, textContent: text, disabled: disabled || (!allowPending && !!progress?.state().pending), onclick: action }); }
   function icon(name) {
     const paths = { plus: 'M12 5v14M5 12h14', more: 'M5 12h.01M12 12h.01M19 12h.01', filters: 'M4 7h16M7 12h10M10 17h4' };
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -36,17 +36,28 @@
     return menu;
   }
   function chooseGroup(id) { groupId = id; selected.clear(); selecting = false; if (host) host.selectGroup(id); else window.history.replaceState(null, '', '#grupo=' + encodeURIComponent(id)); render(); window.scrollTo(0, 0); }
-  const canWrite = () => !!client?.state().canWrite && authenticated();
+  const canWrite = () => !!client?.state().canWrite && !progress?.state().saving && authenticated();
   function authenticated() { const session = host ? host.session() : { token, expires }; return !!session?.token && Date.now() < session.expires; }
-  const data = () => client?.state().data;
+  const data = () => { const d = client?.state().data; return d && progress ? { ...d, assignments: d.assignments.map(a => ({ ...a, ...progress.changes(a.id) })) } : d; };
   const currentGroup = () => data()?.groups.find(g => g.id === groupId);
   const themeById = id => data()?.themes.find(t => t.id === id);
   const sortThemes = (a, b) => a.numeroOrden - b.numeroOrden || a.nombre.localeCompare(b.nombre, 'es') || a.id.localeCompare(b.id);
   function matching(t) { return (!type || t[type]) && (!search || G.normalize(t.nombre).includes(G.normalize(search))); }
   function say(message, error = false) {
     $('status').replaceChildren(document.createTextNode(message)); $('status').className = 'status' + (error ? ' error' : ''); $('status').hidden = !message;
-    if (client?.state().needsReload) $('status').append(button('Actualizar datos', () => reload(true), '', client.state().busy));
+    if (client?.state().needsReload && !progress?.state().pending) $('status').append(button('Actualizar datos', () => reload(true), '', client.state().busy));
   }
+  function progressNotice() {
+    const s = progress?.state(); if (!s) return;
+    if (!s.pending) { if (s.saved) { progress.acknowledge(); say('Marcados guardados y verificados.'); } else if (hadPending) say('No quedan marcados pendientes.'); hadPending = false; return; }
+    hadPending = true;
+    const busy = s.saving || client.state().busy;
+    say(s.retryInMs ? 'Google ha limitado las lecturas. Tus marcados se conservan; espera aproximadamente un minuto antes de actualizar.' : s.error ? message(s.error) + ' Tus marcados se conservan sin reenviarse automáticamente.' : busy ? 'Guardando el lote y verificando los marcados…' : s.paused ? 'Revisa los marcados conservados y pulsa Guardar marcados.' : s.pending === 1 ? 'Un tema con marcados pendientes. Se guardará en breve.' : s.pending + ' temas con marcados pendientes. Se guardarán juntos en breve.', !!s.error);
+    if (client.state().needsReload) $('status').append(button('Actualizar y revisar marcados', async () => { await reload(true); if (!client.state().needsReload) progress.reviewed(); }, '', busy || !!s.retryInMs, true));
+    $('status').append(button(s.paused ? 'Guardar marcados' : 'Guardar ahora', () => progress.flush().catch(() => {}), '', busy || !authenticated() || client.state().needsReload || !!s.retryInMs, true));
+    $('status').append(button('Descartar marcados', () => { if (window.confirm('¿Descartar los marcados que todavía no se han confirmado?')) { progress.discard(); say('Marcados locales descartados.'); } }, 'subtle', busy, true));
+  }
+  function mark(id, changes) { try { progress.set(id, changes); } catch (error) { say(error.message, true); } }
   function message(error) {
     if (error.status === 401) return 'Vuelve a conectar Google. El formulario y sus cambios se conservan.';
     if (error.code === 'REVIEW_EXPIRED') return 'Los datos han cambiado en la hoja. Tu formulario se conserva. Actualiza los datos y revisa los cambios antes de guardar.';
@@ -80,13 +91,14 @@
     } catch (error) { say(message(error), true); } finally { controls(); }
   }
   async function mutate(payload, success) {
+    if (progress?.state().pending) { progressNotice(); return false; }
     say('Guardando cambios…');
     try { await client.save(payload); selected.clear(); render(); say(success); return true; }
     catch (error) { say(message(error), true); return false; }
   }
   function controls() {
-    const busy = !!client?.state().busy;
-    host?.onState({ busy, connected: authenticated() });
+    const busy = !!client?.state().busy || !!progress?.state().saving;
+    host?.onState({ busy: busy || !!progress?.state().pending, connected: authenticated() });
     $('workspace').setAttribute('aria-busy', String(busy));
     $('connect').disabled = !env || busy || connecting;
     $('connect').hidden = authenticated(); $('disconnect').hidden = !authenticated(); $('disconnect').disabled = busy;
@@ -95,9 +107,10 @@
     if (busy) $('workspace').querySelectorAll('input,select,textarea,button').forEach(n => { n.disabled = true; });
     if (dialog.open) {
       form.querySelectorAll('input,select,textarea,button').forEach(n => { n.disabled = busy; });
-      $('save-dialog').disabled = !canWrite();
+      $('save-dialog').disabled = !canWrite() || !!progress?.state().pending;
       $('dirty-label').textContent = busy ? 'Comprobando el guardado…' : dirty ? 'Cambios sin guardar' : '';
     }
+    progressNotice();
   }
   function render() {
     const focused = root.activeElement || document.activeElement, focusId = focused?.id;
@@ -185,8 +198,8 @@
     for (const a of rows) {
       const t = themeById(a.temaId), enabled = canWrite() && a.activo && t.activo;
       const pick = selecting ? el('input', { type: 'checkbox', checked: selected.has(a.id), disabled: !enabled, 'aria-label': 'Seleccionar ' + t.nombre, onchange: e => { if (e.target.checked) selected.add(a.id); else selected.delete(a.id); render(); } }) : null;
-      const checks = el('div', { class: 'song-checks' }, [checkbox('Ya lo saben', a.realizado, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { realizado: v } }, 'Estado de aprendizaje guardado.'), !enabled, 'realizado-' + a.id), checkbox('Repasando', a.repasando, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { repasando: v } }, 'Estado de repaso guardado.'), !enabled, 'repasando-' + a.id)]);
-      const state = (a.realizado ? 'Ya lo saben' : 'Aún no lo saben') + (a.repasando ? ' · Repasando' : '');
+      const checks = el('div', { class: 'song-checks' }, [checkbox('Ya lo saben', a.realizado, v => mark(a.id, { realizado: v }), !enabled, 'realizado-' + a.id), checkbox('Repasando', a.repasando, v => mark(a.id, { repasando: v }), !enabled, 'repasando-' + a.id)]);
+      const state = (a.realizado ? 'Ya lo saben' : 'Aún no lo saben') + (a.repasando ? ' · Repasando' : '') + (Object.keys(progress?.changes(a.id) || {}).length ? ' · Pendiente de guardar' : '');
       const name = el('div', { class: 'song-main' }, [el('div', { class: 'song-title' }, [el('span', { class: 'order', textContent: String(t.numeroOrden).padStart(2, '0') }), el('span', { textContent: t.nombre })]), tags(t), el('p', { class: 'status-copy', textContent: !a.activo ? 'Relación archivada' : !t.activo ? 'Tema archivado en el catálogo' : state })]);
       list.append(el('article', { class: 'song' + (selecting ? ' is-selecting' : '') + (a.repasando ? ' is-reviewing' : a.realizado ? ' is-learned' : ''), 'aria-label': t.nombre }, [pick, name, checks, el('div', { class: 'song-action' }, [actionMenu('Opciones de ' + t.nombre, [['Notas', () => editProgress(a), !enabled], [a.activo ? 'Archivar' : 'Recuperar', () => confirmAction(a.activo ? 'Retirar del repertorio' : 'Recuperar relación', t.nombre, 'Se conservarán sus estados y notas.', { action: 'archiveAssignment', vinculoId: a.id, activo: !a.activo }), !canWrite() || (!a.activo && !t.activo)]])])]));
     }
@@ -206,7 +219,7 @@
   }
   function closeDialog() {
     if (client?.state().busy) return;
-    if (dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres descartarlos?')) return;
+    if ((dirty || progress?.state().pending) && !window.confirm('Hay cambios sin guardar. ¿Quieres descartarlos?')) return;
     dialog.close(); draft = null; dirty = false;
   }
   function editTheme(t) {
@@ -262,7 +275,7 @@
   form.oninput = () => { dirty = readForm() !== initialForm; $('dirty-label').textContent = dirty ? 'Cambios sin guardar' : ''; };
   form.onchange = form.oninput;
   form.onsubmit = async e => {
-    e.preventDefault(); if (!draft || client.state().busy) return;
+    e.preventDefault(); if (!draft || client.state().busy || progress?.state().pending) return;
     try {
       const payload = draft.submit(new FormData(form));
       await client.save(payload); dialog.close(); draft = null; dirty = false; selected.clear(); render(); say('Cambios guardados y verificados.');
@@ -278,8 +291,8 @@
   root.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { if (client?.state().busy) return; view = b.dataset.tab; search = ''; type = ''; filter = 'all'; archived = false; selected.clear(); selecting = false; render(); window.scrollTo(0, 0); }; });
   root.addEventListener('click', e => { root.querySelectorAll('.action-menu[open]').forEach(menu => { if (!menu.contains(e.target)) menu.open = false; }); });
   root.addEventListener('keydown', e => { if (e.key === 'Escape') root.querySelectorAll('.action-menu[open]').forEach(menu => { menu.open = false; }); });
-  window.addEventListener('beforeunload', e => { if (dirty || client?.state().busy) { e.preventDefault(); e.returnValue = ''; } });
-  $('disconnect').onclick = () => { if (client?.state().busy || (dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres desconectar y descartarlos?'))) return; if (dialog.open) dialog.close(); token = ''; expires = 0; draft = null; dirty = false; selected.clear(); client.clear(); say('Sesión de desarrollo cerrada.'); };
+  window.addEventListener('beforeunload', e => { if (dirty || client?.state().busy || progress?.state().pending) { e.preventDefault(); e.returnValue = ''; } });
+  $('disconnect').onclick = () => { if (client?.state().busy || ((dirty || progress?.state().pending) && !window.confirm('Hay cambios sin guardar. ¿Quieres desconectar y descartarlos?'))) return; if (dialog.open) dialog.close(); token = ''; expires = 0; draft = null; dirty = false; progress?.discard(); selected.clear(); client.clear(); say('Sesión cerrada.'); };
   async function prepareOAuth() {
     const config = await json(endpoint + '?api=oauth');
     if (config.sessionKey !== 'horas-repertoire-' + page.profile + '-token' || config.scopes !== 'https://www.googleapis.com/auth/spreadsheets') throw Error('Sesión de repertorio no reconocida.');
@@ -303,16 +316,19 @@
   };
   async function refreshSession() {
     if (!host || !client || client.state().busy) return;
+    if (progress?.state().pending) { controls(); return; }
     const shared = host.session();
     if (!shared) { token = ''; expires = 0; controls(); return; }
     const changed = token !== shared.token; token = shared.token; expires = shared.expires;
     if (changed || !data()) await reload(true); else controls();
   }
   const ready = json(endpoint + '?api=environment').then(async e => {
-    env = C.verifyEnvironment(e); client = C.create({ transport, writeEnabled: env.writeEnabled, onChange: render });
+    env = C.verifyEnvironment(e); client = C.create({ transport, writeEnabled: env.writeEnabled && env.progressBatch === true, onChange: render });
+    progress = C.createProgressQueue({ client, onChange: render });
     if (env.preview) { $('mode-badge').textContent = 'SIMULACIÓN'; $('copy-link').hidden = true; $('connect').textContent = 'Abrir simulación'; say('Datos ficticios en memoria. Esta vista no escribe en Google Sheets.'); }
     else if (!host) prepareOAuth().catch(error => say(error.message, true));
     if (host) { render(); await refreshSession(); }
+    if (env.writeEnabled && !env.progressBatch) say('El guardado agrupado se está actualizando. Recarga en unos instantes para habilitar los cambios.');
     controls();
   }).catch(error => say(error.message, true));
   return { ready, refreshSession, refreshData: () => reload(true), groupId: () => groupId };
