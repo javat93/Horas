@@ -363,8 +363,11 @@
     <script src="app-ui.js?v=unified-20261116" defer></script>
     <script src="repertoire-model.js" defer></script>
     <script src="repertoire-client.js?v=quota-20261116" defer></script>
-    <script src="sandbox/repertoire-ui.js?v=groups-alpha-20261116" defer></script>
-    <script src="repertoire-integration.js?v=unified-20261116" defer></script>
+    <script src="group-courses.js?v=courses-20261116" defer></script>
+    <link rel="stylesheet" href="group-courses.css?v=courses-20261116">
+    <script src="sandbox/repertoire-ui.js?v=courses-20261116" defer></script>
+    <script src="repertoire-integration.js?v=courses-20261116" defer></script>
+    <script src="group-courses-ui.js?v=courses-20261116" defer></script>
 </head>
 <body class="pb-20">
 
@@ -469,6 +472,7 @@
                 <input type="text" id="search-grupos" aria-label="Buscar grupo por nombre o ubicación" oninput="renderGrupos()" placeholder="Buscar por nombre o ubicación..." class="w-full pl-12 pr-4 py-4 rounded-2xl input-modern text-sm font-medium shadow-sm">
             </div>
 
+            <div id="group-course-controls"></div>
             <div id="lista-maestros" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
         <section id="tab-repertorio" class="hidden" aria-label="Repertorio"></section>
@@ -1637,13 +1641,13 @@
             const container = document.getElementById('lista-maestros');
             const term = document.getElementById('search-grupos').value.toLowerCase();
             
-            const filtered = grupos.filter(g => 
+            const filtered = (window.horasGroupCourses ? window.horasGroupCourses.visible(grupos) : grupos).filter(g =>
                 GroupIdentity.matches(g.nombre,term) ||
                 (g.sitio && g.sitio.toLowerCase().includes(term))
             );
 
             if (filtered.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 font-medium">No se han encontrado grupos.</div>';
+                container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 font-medium">' + (window.horasGroupCourses ? 'No hay grupos con estos filtros. Revisa los filtros o pulsa Organizar este curso.' : 'No se han encontrado grupos.') + '</div>';
                 return;
             }
 
@@ -1662,6 +1666,7 @@
                         <p class="font-bold text-slate-700">${g.precio === null ? 'Sin tarifa' : LocaleData.currency(g.precio)}</p>
                     </div>
                 </div>`).join('');
+            if (window.horasGroupCourses) container.querySelectorAll('.group-card-main').forEach((node, index) => { const badge = document.createElement('span'); badge.className = 'gc-badge'; badge.textContent = window.horasGroupCourses.label(filtered[index]); node.querySelector('h4').parentElement.append(badge); });
             lucide.createIcons();
         }
 

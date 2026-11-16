@@ -39,7 +39,8 @@
         mounted = window.mountRepertoire(shadow, {
           ...shared,
           invalidateSession() { expireGoogleConnection(); },
-          onState({ busy, connected }) { document.getElementById('repertoire-refresh').disabled = busy || !connected; },
+          onState({ busy, connected }) { document.getElementById('repertoire-refresh').disabled = busy || !connected; window.horasGroupCourses?.setBlocked(busy); },
+          groupCourses: () => window.horasGroupCourses,
           page: { profile: 'production', endpoint: new URL('/api/repertorio', CONFIG.DAILY_API_URL).href },
           groupId: groupFromHash(location.hash),
           selectGroup(id) { history.replaceState(null, '', repertoireHash(id)); },

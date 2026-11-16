@@ -40,7 +40,7 @@
   function authenticated() { const session = host ? host.session() : { token, expires }; return !!session?.token && Date.now() < session.expires; }
   const data = () => { const d = client?.state().data; return d && progress ? { ...d, assignments: d.assignments.map(a => ({ ...a, ...progress.changes(a.id) })) } : d; };
   const currentGroup = () => data()?.groups.find(g => g.id === groupId);
-  const sortedGroups = () => [...(data()?.groups || [])].sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base', numeric: true }) || a.id.localeCompare(b.id));
+  const sortedGroups = () => [...(host?.groupCourses?.()?.visible(data()?.groups || []) || (host?.groupCourses ? [] : data()?.groups || []))].sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base', numeric: true }) || a.id.localeCompare(b.id));
   const themeById = id => data()?.themes.find(t => t.id === id);
   const sortThemes = (a, b) => a.numeroOrden - b.numeroOrden || a.nombre.localeCompare(b.nombre, 'es') || a.id.localeCompare(b.id);
   function matching(t) { return (!type || t[type]) && (!search || G.normalize(t.nombre).includes(G.normalize(search))); }
@@ -126,6 +126,11 @@
       p.append(el('ul', {}, data().issues.map(i => el('li', { textContent: [i.sheet, i.rowIdx ? 'fila ' + i.rowIdx : '', i.message || i.code].filter(Boolean).join(' · ') }))));
     }
     if (!env.writeEnabled) workspace.append(el('p', { class: 'readonly-note', textContent: 'Este acceso está en modo de consulta.' }));
+    if (view !== 'catalog' && host?.groupCourses) {
+      const courses = host.groupCourses();
+      if (courses) workspace.append(courses.panel());
+      if (!sortedGroups().some(g => g.id === groupId)) groupId = sortedGroups()[0]?.id || '';
+    }
     if (view === 'catalog') renderCatalog(workspace);
     else if (view === 'groups') renderGroups(workspace);
     else renderRepertoire(workspace);
@@ -173,16 +178,17 @@
   function renderGroups(root) {
     root.append(el('div', { class: 'toolbar' }, [el('h2', { textContent: 'Tus grupos' }), refreshButton()])); filters(root, false);
     const groups = sortedGroups().filter(g => !search || G.matches(g.nombre, search));
-    if (!groups.length) { root.append(empty('No se han encontrado grupos', 'Los grupos se consultan desde el catálogo de la copia.')); return; }
+    if (!groups.length) { root.append(empty('No se han encontrado grupos', host?.groupCourses ? 'Revisa los filtros o pulsa Organizar este curso para clasificar tus grupos.' : 'Los grupos se consultan desde el catálogo de la copia.')); return; }
     root.append(el('div', { class: 'group-grid' }, groups.map(g => { const s = M.summary(activeForGroup(g.id)); return el('article', { class: 'group-card' }, [el('h3', { textContent: g.label }), el('p', { textContent: `${s.asignados} temas · ${s.realizados} ya los saben · ${s.asignados - s.realizados} por aprender · ${s.repasando} repasando` }), button('Ver repertorio', () => { view = 'repertoire'; search = ''; chooseGroup(g.id); }, '')]); })));
   }
   function renderRepertoire(root) {
     const g = currentGroup();
-    if (!g) { root.append(empty('Todavía no hay grupos', 'Primero necesitas un grupo en el catálogo de la copia.')); return; }
+    if (!g) { root.append(empty(host?.groupCourses ? 'No hay grupos con estos filtros' : 'Todavía no hay grupos', host?.groupCourses ? 'Revisa los filtros o pulsa Organizar este curso. Los grupos sin clasificar conservan todo su repertorio.' : 'Primero necesitas un grupo en el catálogo de la copia.')); return; }
     const groupPicker = selectControl(sortedGroups().map(g => [g.id, g.label]), g.id, 'Seleccionar grupo', chooseGroup, 'group-picker');
     groupPicker.id = 'group-picker';
     const add = button('', assignThemes, 'primary add-themes', !canWrite()); add.setAttribute('aria-label', 'Añadir temas'); add.append(icon('plus'), el('span', { class: 'button-label', textContent: 'Añadir temas' }));
     root.append(el('div', { class: 'toolbar repertoire-toolbar' }, [el('div', { class: 'toolbar-title' }, [el('span', { class: 'picker-label', textContent: client.state().busy ? 'ACTUALIZANDO…' : 'GRUPO' }), groupPicker]), el('div', { class: 'toolbar-actions' }, [add, actionMenu('Opciones del repertorio', [['Actualizar datos', () => reload(), client.state().busy], [selecting ? 'Terminar selección' : 'Seleccionar varios temas', () => { selecting = !selecting; selected.clear(); render(); }, !canWrite()]])])]));
+    if (host?.groupCourses?.()) root.append(el('span', { class: 'gc-badge', textContent: host.groupCourses().label(g) }));
     const summary = M.summary(activeForGroup(g.id)); summary.pendientes = summary.asignados - summary.realizados;
     root.append(el('div', { class: 'stats', 'aria-label': 'Filtrar repertorio por estado' }, [['asignados', 'Temas', 'Temas del grupo', 'all'], ['realizados', 'Ya saben', 'Ya lo saben', 'done'], ['pendientes', 'Por aprender', 'Aún no lo saben', 'pending'], ['repasando', 'En repaso', 'Repasando', 'review']].map(([key, short, label, value]) => el('button', { type: 'button', id: 'repertoire-filter-' + value, class: 'stat stat-' + value, 'aria-label': label + ': ' + summary[key], 'aria-pressed': String(filter === value), onclick: () => { filter = value; selected.clear(); render(); } }, [el('strong', { textContent: String(summary[key]) }), el('span', { textContent: short })]))));
     root.append(el('p', { class: 'stat-note', textContent: 'Toca un estado para filtrar. También puedes repasar un tema que ya saben.' }));
@@ -332,6 +338,9 @@
     if (env.writeEnabled && !env.progressBatch) say('El guardado agrupado se está actualizando. Recarga en unos instantes para habilitar los cambios.');
     controls();
   }).catch(error => say(error.message, true));
+  let courseSubscribed = false;
+  const subscribeCourses = () => { const courses = host?.groupCourses?.(); if (courses && !courseSubscribed) { courseSubscribed = true; const style = el('link', { rel: 'stylesheet', href: 'group-courses.css?v=courses-20261116' }); root.append(style); courses.subscribe(render); render(); } };
+  if (host?.groupCourses) { subscribeCourses(); window.addEventListener('group-courses-ready', subscribeCourses); }
   return { ready, refreshSession, refreshData: () => reload(true), groupId: () => groupId };
   };
   if (document.getElementById('editor') && !document.getElementById('repertoire-template')) window.mountRepertoire();
