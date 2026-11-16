@@ -10,6 +10,7 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 - Fase 3 implementada el 15/11/2026: catálogo, repertorio por grupo y lista de grupos, con pruebas funcionales de escritorio y móvil en un entorno simulado separado. La interfaz usa la API fijada a la copia de desarrollo.
 - Fase 4 cerrada para migración por la petición expresa del usuario del 15/11/2026. Conserva los estados iniciales sin afirmar que los temas estén aprendidos.
 - Fase 5 completada el 15/11/2026: respaldo reciente verificado, 21 temas y 15 relaciones migrados al original, acceso publicado primero en consulta y después en escritura y prueba reversible de nota verificada.
+- Fase 6 completada el 16/11/2026: adaptación visual prioritaria para móvil, navegación inferior, estados táctiles y formularios inferiores; sin cambios de datos. Ver [PHASE6.md](PHASE6.md).
 - El original es el único maestro del repertorio. Desarrollo se conserva como archivo de validación, con el servidor local en consulta y sin sincronización de vuelta.
 
 ## Ubicaciones

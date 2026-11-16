@@ -1,6 +1,6 @@
 {
   "project": "PercuManager · Repertorio por grupo",
-  "projectVersion": 2,
+  "projectVersion": 3,
   "preparedOn": "2026-11-14",
   "timezone": "Europe/Madrid",
   "branch": "feature/repertorio-grupos",
@@ -121,7 +121,23 @@
         "evidence/phase5-migration.json",
         "evidence/phase5-migration-plan.json"
       ]
+    },
+    {
+      "id": 6,
+      "name": "Adaptación móvil y visual",
+      "status": "complete",
+      "completedOn": "2026-11-16",
+      "evidence": [
+        "evidence/phase6.json"
+      ],
+      "validationScope": "Responsive browser and isolated in-memory simulation; no physical iOS/Android keyboard test"
     }
   ],
-  "nextPhase": null
+  "nextPhase": null,
+  "designPreference": {
+    "mobileUsagePercent": 90,
+    "priority": "mobile-first",
+    "retainDesktopAdaptation": true,
+    "reviewDatesRequired": false
+  }
 }

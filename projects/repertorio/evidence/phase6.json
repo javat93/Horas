@@ -1,0 +1,72 @@
+{
+  "phase": 6,
+  "completedOn": "2026-11-16",
+  "mobileUsagePercent": 90,
+  "automatedTests": {
+    "command": "node --test --test-reporter=dot",
+    "passed": 249,
+    "failed": 0
+  },
+  "responsiveChecks": [
+    {
+      "width": 320,
+      "height": 568,
+      "clientWidth": 305,
+      "scrollWidth": 305,
+      "dialog": {
+        "top": 12,
+        "bottom": 568,
+        "buttonHeight": 48
+      },
+      "dateInputs": 0
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "stateControlHeight": 48
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "clientWidth": 415,
+      "scrollWidth": 415,
+      "stateControlHeight": 48
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "clientWidth": 753,
+      "scrollWidth": 753,
+      "stateControlHeight": 48
+    },
+    {
+      "width": 1280,
+      "height": 900,
+      "clientWidth": 1265,
+      "scrollWidth": 1265,
+      "stateControlHeight": 48
+    }
+  ],
+  "browserFlows": [
+    "Bottom navigation and desktop navigation",
+    "Type filter, archived toggle and reset",
+    "Selected group survives reload and reconnect via URL fragment",
+    "Create-theme dialog fits short mobile viewport",
+    "Assignment, learning/review coexistence, independent groups, batch review and notes checked during implementation in isolated fixture"
+  ],
+  "testEnvironment": "Local in-memory Sheets fixture with production HTML layout; no Google credentials or calls",
+  "googleSheetsWrites": 0,
+  "calendarCalls": 0,
+  "protectedAreasUnchanged": [
+    "Detalle",
+    "sessions",
+    "Calendar",
+    "model and production API"
+  ],
+  "limitations": [
+    "Emulated browser sizes, no physical iOS/Android keyboard test"
+  ],
+  "productionUrl": "https://javat93.github.io/Horas/repertorio.html"
+}

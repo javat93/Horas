@@ -6,7 +6,8 @@
   const endpoint = page.endpoint, production = page.profile === 'production';
   const $ = id => document.getElementById(id), dialog = $('editor'), form = $('editor-form');
   let client, env, token = '', expires = 0, view = 'repertoire', groupId = '', search = '', type = '', filter = 'all', archived = false;
-  let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false, oauthClient = null;
+  let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false, oauthClient = null, filtersOpen = false, selecting = false;
+  groupId = new URLSearchParams(window.location.hash.slice(1)).get('grupo') || '';
   const types = [['temaGaleta', 'Galeta'], ['temaSlap', 'Slap'], ['temaPropio', 'Propio']];
   const uid = () => crypto.randomUUID();
   function el(tag, props = {}, children = []) {
@@ -16,6 +17,24 @@
     return n;
   }
   function button(text, action, cls = '', disabled = false) { return el('button', { type: 'button', class: 'button ' + cls, textContent: text, disabled, onclick: action }); }
+  function icon(name) {
+    const paths = { plus: 'M12 5v14M5 12h14', more: 'M5 12h.01M12 12h.01M19 12h.01', filters: 'M4 7h16M7 12h10M10 17h4' };
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    for (const [key, value] of Object.entries({ viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'aria-hidden': 'true' })) svg.setAttribute(key, value);
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', paths[name]); svg.append(path); return svg;
+  }
+  function actionMenu(label, actions) {
+    const menu = el('details', { class: 'action-menu' });
+    menu.append(el('summary', { role: 'button', 'aria-label': label, title: label }, [icon('more')]), el('div', { class: 'menu-items' }, actions.map(([label, action, disabled = false]) => button(label, () => { menu.open = false; action(); }, 'subtle', disabled))));
+    menu.addEventListener('toggle', () => {
+      if (!menu.open) return;
+      const summary = menu.querySelector('summary').getBoundingClientRect(), panel = menu.querySelector('.menu-items');
+      const nav = document.querySelector('.tabs'), reserved = getComputedStyle(nav).position === 'fixed' ? nav.getBoundingClientRect().height : 0;
+      menu.classList.toggle('opens-up', window.innerHeight - reserved - summary.bottom < panel.offsetHeight + 12 && summary.top > panel.offsetHeight + 12);
+    });
+    return menu;
+  }
+  function chooseGroup(id) { groupId = id; selected.clear(); selecting = false; window.history.replaceState(null, '', '#grupo=' + encodeURIComponent(id)); render(); window.scrollTo(0, 0); }
   const canWrite = () => !!client?.state().canWrite && authenticated();
   function authenticated() { return !!token && Date.now() < expires; }
   const data = () => client?.state().data;
@@ -60,6 +79,7 @@
     } catch (error) { say(message(error), true); } finally { controls(); }
   }
   async function mutate(payload, success) {
+    say('Guardando cambios…');
     try { await client.save(payload); selected.clear(); render(); say(success); return true; }
     catch (error) { say(message(error), true); return false; }
   }
@@ -103,12 +123,21 @@
     s.value = value; return s;
   }
   function checkbox(text, checked, action, disabled = false, id = '') {
-    return el('label', { class: 'check-label' }, [el('input', { type: 'checkbox', checked, disabled, ...(id ? { id } : {}), onchange: e => action(e.target.checked) }), el('span', { textContent: text })]);
+    return el('label', { class: 'check-label' + (checked ? ' is-checked' : '') + (disabled ? ' is-disabled' : '') }, [el('input', { type: 'checkbox', checked, disabled, ...(id ? { id } : {}), onchange: e => action(e.target.checked) }), el('span', { textContent: text })]);
   }
   function filters(root, withArchived = true) {
-    const bar = el('div', { class: 'filters' }, [el('input', { id: 'theme-search', class: 'control search', type: 'search', placeholder: view === 'groups' ? 'Buscar grupo…' : 'Buscar tema…', 'aria-label': view === 'groups' ? 'Buscar grupo' : 'Buscar tema', value: search, oninput: e => { search = e.target.value; selected.clear(); render(); } })]);
-    if (view !== 'groups') bar.append(selectControl([['', 'Todos los tipos'], ...types], type, 'Filtrar por tipo', v => { type = v; selected.clear(); render(); }));
-    if (withArchived) bar.append(checkbox('Mostrar archivados', archived, v => { archived = v; selected.clear(); render(); }));
+    const primary = el('div', { class: 'filter-search' }, [el('input', { id: 'theme-search', class: 'control search', type: 'search', placeholder: view === 'groups' ? 'Buscar grupo…' : 'Buscar tema…', 'aria-label': view === 'groups' ? 'Buscar grupo' : 'Buscar tema', value: search, oninput: e => { search = e.target.value; selected.clear(); render(); } })]);
+    const bar = el('div', { class: 'filters' }, [primary]);
+    if (view !== 'groups') {
+      const count = Number(!!type) + Number(archived);
+      const toggle = button('', () => { filtersOpen = !filtersOpen; render(); }, 'filter-toggle');
+      toggle.id = 'filter-toggle'; toggle.setAttribute('aria-expanded', String(filtersOpen)); toggle.setAttribute('aria-controls', 'advanced-filters'); toggle.setAttribute('aria-label', 'Filtros' + (count ? ': ' + count + ' activos' : ''));
+      toggle.append(icon('filters'), el('span', { textContent: 'Filtros' + (count ? ' · ' + count : '') })); primary.append(toggle);
+      const advanced = el('div', { id: 'advanced-filters', class: 'advanced-filters', hidden: !filtersOpen }, [selectControl([['', 'Todos los tipos'], ...types], type, 'Filtrar por tipo', v => { type = v; selected.clear(); render(); })]);
+      if (withArchived) advanced.append(checkbox('Mostrar archivados', archived, v => { archived = v; selected.clear(); render(); }));
+      if (count) advanced.append(button('Restablecer filtros', () => { type = ''; archived = false; selected.clear(); render(); }, 'subtle'));
+      bar.append(advanced);
+    }
     root.append(bar);
   }
   function refreshButton() { return button('Actualizar', () => reload(), '', client.state().busy); }
@@ -129,34 +158,35 @@
     root.append(el('div', { class: 'toolbar' }, [el('h2', { textContent: 'Tus grupos' }), refreshButton()])); filters(root, false);
     const groups = data().groups.filter(g => !search || G.matches(g.nombre, search));
     if (!groups.length) { root.append(empty('No se han encontrado grupos', 'Los grupos se consultan desde el catálogo de la copia.')); return; }
-    root.append(el('div', { class: 'group-grid' }, groups.map(g => { const s = M.summary(activeForGroup(g.id)); return el('article', { class: 'group-card' }, [el('h3', { textContent: g.label }), el('p', { textContent: `${s.asignados} temas · ${s.realizados} ya los saben · ${s.asignados - s.realizados} por aprender · ${s.repasando} repasando` }), button('Ver repertorio', () => { groupId = g.id; view = 'repertoire'; search = ''; selected.clear(); render(); }, '')]); })));
+    root.append(el('div', { class: 'group-grid' }, groups.map(g => { const s = M.summary(activeForGroup(g.id)); return el('article', { class: 'group-card' }, [el('h3', { textContent: g.label }), el('p', { textContent: `${s.asignados} temas · ${s.realizados} ya los saben · ${s.asignados - s.realizados} por aprender · ${s.repasando} repasando` }), button('Ver repertorio', () => { view = 'repertoire'; search = ''; chooseGroup(g.id); }, '')]); })));
   }
   function renderRepertoire(root) {
     const g = currentGroup();
     if (!g) { root.append(empty('Todavía no hay grupos', 'Primero necesitas un grupo en el catálogo de la copia.')); return; }
-    const groupPicker = selectControl(data().groups.map(g => [g.id, g.label]), g.id, 'Seleccionar grupo', v => { groupId = v; selected.clear(); render(); }, 'group-picker');
-    root.append(el('div', { class: 'toolbar' }, [el('div', { class: 'toolbar-title' }, [groupPicker]), el('div', { class: 'toolbar-actions' }, [refreshButton(), button('Añadir temas', assignThemes, 'primary', !canWrite())])]));
+    const groupPicker = selectControl(data().groups.map(g => [g.id, g.label]), g.id, 'Seleccionar grupo', chooseGroup, 'group-picker');
+    groupPicker.id = 'group-picker';
+    const add = button('', assignThemes, 'primary add-themes', !canWrite()); add.setAttribute('aria-label', 'Añadir temas'); add.append(icon('plus'), el('span', { class: 'button-label', textContent: 'Añadir temas' }));
+    root.append(el('div', { class: 'toolbar repertoire-toolbar' }, [el('div', { class: 'toolbar-title' }, [el('span', { class: 'picker-label', textContent: client.state().busy ? 'ACTUALIZANDO…' : 'GRUPO' }), groupPicker]), el('div', { class: 'toolbar-actions' }, [add, actionMenu('Opciones del repertorio', [['Actualizar datos', () => reload(), client.state().busy], [selecting ? 'Terminar selección' : 'Seleccionar varios temas', () => { selecting = !selecting; selected.clear(); render(); }, !canWrite()]])])]));
     const summary = M.summary(activeForGroup(g.id)); summary.pendientes = summary.asignados - summary.realizados;
-    root.append(el('div', { class: 'stats' }, [['asignados', 'Temas del grupo'], ['realizados', 'Ya lo saben'], ['pendientes', 'Aún no lo saben'], ['repasando', 'Repasando']].map(([key, label]) => el('div', { class: 'stat' }, [el('strong', { textContent: String(summary[key]) }), el('span', { textContent: label })]))));
-    root.append(el('p', { class: 'stat-note', textContent: 'Puedes marcar «Repasando» aunque ya lo sepan. Los cambios se guardan automáticamente.' }));
+    root.append(el('div', { class: 'stats', 'aria-label': 'Filtrar repertorio por estado' }, [['asignados', 'Temas', 'Temas del grupo', 'all'], ['realizados', 'Ya saben', 'Ya lo saben', 'done'], ['pendientes', 'Por aprender', 'Aún no lo saben', 'pending'], ['repasando', 'En repaso', 'Repasando', 'review']].map(([key, short, label, value]) => el('button', { type: 'button', id: 'repertoire-filter-' + value, class: 'stat stat-' + value, 'aria-label': label + ': ' + summary[key], 'aria-pressed': String(filter === value), onclick: () => { filter = value; selected.clear(); render(); } }, [el('strong', { textContent: String(summary[key]) }), el('span', { textContent: short })]))));
+    root.append(el('p', { class: 'stat-note', textContent: 'Toca un estado para filtrar. También puedes repasar un tema que ya saben.' }));
     filters(root);
-    root.append(el('div', { class: 'state-tabs', 'aria-label': 'Filtrar por seguimiento' }, [['all', 'Todos'], ['done', 'Ya lo saben'], ['pending', 'Aún no lo saben'], ['review', 'Repasando']].map(([v, label]) => el('button', { textContent: label, 'aria-pressed': String(filter === v), onclick: () => { filter = v; selected.clear(); render(); } }))));
     const rows = data().assignments.filter(a => {
       const t = themeById(a.temaId);
       return G.id(a.grupo) === g.id && t && (archived || (a.activo && t.activo)) && matching(t) && (filter === 'all' || (filter === 'pending' && !a.realizado) || (filter === 'done' && a.realizado) || (filter === 'review' && a.repasando));
     }).sort((a, b) => sortThemes(themeById(a.temaId), themeById(b.temaId)));
     if (!rows.length) { const hasThemes = activeForGroup(g.id).length > 0; root.append(empty(hasThemes ? 'No hay temas con estos filtros' : 'Este grupo aún no tiene repertorio', hasThemes ? 'Elige otro filtro para ver los demás temas del grupo.' : 'Añade los temas que trabaja este grupo y marca los que ya sabe.', hasThemes ? null : button('Añadir temas', assignThemes, 'primary', !canWrite()))); return; }
     const eligible = rows.filter(a => a.activo && themeById(a.temaId).activo);
-    root.append(checkbox('Seleccionar visibles', !!eligible.length && eligible.every(a => selected.has(a.id)), checked => { for (const a of eligible) { if (checked) selected.add(a.id); else selected.delete(a.id); } render(); }, !canWrite() || !eligible.length));
+    if (selecting) root.append(el('div', { class: 'selection-heading' }, [checkbox('Seleccionar visibles', !!eligible.length && eligible.every(a => selected.has(a.id)), checked => { for (const a of eligible) { if (checked) selected.add(a.id); else selected.delete(a.id); } render(); }, !canWrite() || !eligible.length), button('Terminar', () => { selecting = false; selected.clear(); render(); }, 'subtle', client.state().busy)]));
     if (selected.size) root.append(el('div', { class: 'selection-bar' }, [el('span', { textContent: selected.size + (selected.size === 1 ? ' tema seleccionado' : ' temas seleccionados') + (selected.size > 50 ? ' · Selecciona como máximo 50 por lote.' : '') }), button('Marcar como repasando', () => mutate({ action: 'markForReview', ids: [...selected] }, 'Temas marcados como repasando.'), '', !canWrite() || selected.size > 50), button('Limpiar selección', () => { selected.clear(); render(); }, 'subtle', client.state().busy)]));
     const list = el('div', { class: 'list' });
     for (const a of rows) {
       const t = themeById(a.temaId), enabled = canWrite() && a.activo && t.activo;
-      const pick = el('input', { type: 'checkbox', checked: selected.has(a.id), disabled: !enabled, 'aria-label': 'Seleccionar ' + t.nombre, onchange: e => { if (e.target.checked) selected.add(a.id); else selected.delete(a.id); render(); } });
+      const pick = selecting ? el('input', { type: 'checkbox', checked: selected.has(a.id), disabled: !enabled, 'aria-label': 'Seleccionar ' + t.nombre, onchange: e => { if (e.target.checked) selected.add(a.id); else selected.delete(a.id); render(); } }) : null;
       const checks = el('div', { class: 'song-checks' }, [checkbox('Ya lo saben', a.realizado, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { realizado: v } }, 'Estado de aprendizaje guardado.'), !enabled, 'realizado-' + a.id), checkbox('Repasando', a.repasando, v => mutate({ action: 'updateProgress', vinculoId: a.id, changes: { repasando: v } }, 'Estado de repaso guardado.'), !enabled, 'repasando-' + a.id)]);
       const state = (a.realizado ? 'Ya lo saben' : 'Aún no lo saben') + (a.repasando ? ' · Repasando' : '');
       const name = el('div', { class: 'song-main' }, [el('div', { class: 'song-title' }, [el('span', { class: 'order', textContent: String(t.numeroOrden).padStart(2, '0') }), el('span', { textContent: t.nombre })]), tags(t), el('p', { class: 'status-copy', textContent: !a.activo ? 'Relación archivada' : !t.activo ? 'Tema archivado en el catálogo' : state })]);
-      list.append(el('article', { class: 'song', 'aria-label': t.nombre }, [pick, name, checks, el('div', { class: 'song-action' }, [button('Notas', () => editProgress(a), 'subtle', !enabled), button(a.activo ? 'Archivar' : 'Recuperar', () => confirmAction(a.activo ? 'Retirar del repertorio' : 'Recuperar relación', t.nombre, 'Se conservarán sus estados y notas.', { action: 'archiveAssignment', vinculoId: a.id, activo: !a.activo }), 'subtle', !canWrite() || (!a.activo && !t.activo))])]));
+      list.append(el('article', { class: 'song' + (selecting ? ' is-selecting' : '') + (a.repasando ? ' is-reviewing' : a.realizado ? ' is-learned' : ''), 'aria-label': t.nombre }, [pick, name, checks, el('div', { class: 'song-action' }, [actionMenu('Opciones de ' + t.nombre, [['Notas', () => editProgress(a), !enabled], [a.activo ? 'Archivar' : 'Recuperar', () => confirmAction(a.activo ? 'Retirar del repertorio' : 'Recuperar relación', t.nombre, 'Se conservarán sus estados y notas.', { action: 'archiveAssignment', vinculoId: a.id, activo: !a.activo }), !canWrite() || (!a.activo && !t.activo)]])])]));
     }
     root.append(list);
   }
@@ -243,7 +273,9 @@
   };
   $('close-dialog').onclick = closeDialog; $('cancel-dialog').onclick = closeDialog;
   dialog.addEventListener('cancel', e => { e.preventDefault(); closeDialog(); });
-  document.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { if (client?.state().busy) return; view = b.dataset.tab; search = ''; type = ''; filter = 'all'; archived = false; selected.clear(); render(); }; });
+  document.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { if (client?.state().busy) return; view = b.dataset.tab; search = ''; type = ''; filter = 'all'; archived = false; selected.clear(); selecting = false; render(); window.scrollTo(0, 0); }; });
+  document.addEventListener('click', e => { document.querySelectorAll('.action-menu[open]').forEach(menu => { if (!menu.contains(e.target)) menu.open = false; }); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.action-menu[open]').forEach(menu => { menu.open = false; }); });
   window.addEventListener('beforeunload', e => { if (dirty || client?.state().busy) { e.preventDefault(); e.returnValue = ''; } });
   $('disconnect').onclick = () => { if (client?.state().busy || (dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres desconectar y descartarlos?'))) return; if (dialog.open) dialog.close(); token = ''; expires = 0; draft = null; dirty = false; selected.clear(); client.clear(); say('Sesión de desarrollo cerrada.'); };
   async function prepareOAuth() {

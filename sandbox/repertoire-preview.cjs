@@ -2,7 +2,7 @@
 // Explicit offline preview, separate from the real-copy server. No credentials and no Google calls.
 const { fixture, id, theme } = require('./fixtures/repertoire.cjs');
 const { createServer } = require('./repertoire-server.cjs');
-async function createPreview() {
+async function createPreview({ productionLayout = false } = {}) {
   const f = fixture({ groups: ['Grupo A · Simulación', 'Grupo B · Simulación'], rowCount: 100 });
   await f.apply({ action: 'saveTheme', theme: theme(1, { nombre: 'Samba de roda', numeroOrden: 1 }) });
   await f.apply({ action: 'saveTheme', theme: theme(2, { nombre: 'Entrada Slap', numeroOrden: 1, temaGaleta: false, temaSlap: true }) });
@@ -23,7 +23,14 @@ async function createPreview() {
     return f.request(...args);
   };
   const control = payload => { if (!['conflict', 'uncertain', 'none'].includes(payload.next)) throw Error('Simulación no admitida.'); next = payload.next; conflictReads = 0; return { next }; };
-  return { server: createServer({ request, writeEnabled: true, preview: { control } }), fixture: f };
+  let pageHtml;
+  if (productionLayout) {
+    pageHtml = require('node:fs').readFileSync(require('node:path').join(__dirname, '../repertorio.html'), 'utf8')
+      .replace(/window\.RepertoirePage=Object\.freeze\(\{[^}]+\}\);/, 'window.RepertoirePage=Object.freeze({profile:"development",endpoint:"/api/repertorio-test"});')
+      .replace(/(?:sandbox\/)?repertoire(?:-client|-model|-ui)?\.(?:css|js)(?:\?[^" ]*)?/g, asset => '/assets/' + asset.replace(/^sandbox\//, '').split('?')[0])
+      .replace('src="group-identity.js"', 'src="/assets/group-identity.js"').replace('src="locale-data.js"', 'src="/assets/locale-data.js"');
+  }
+  return { server: createServer({ request, writeEnabled: true, preview: { control, pageHtml } }), fixture: f };
 }
-if (require.main === module) createPreview().then(({ server }) => server.listen(3004, '127.0.0.1', () => console.log('SIMULACIÓN LOCAL · http://localhost:3004 · datos ficticios en memoria, sin acceso a Google')));
+if (require.main === module) createPreview({ productionLayout: process.argv.includes('--production-layout') }).then(({ server }) => server.listen(3004, '127.0.0.1', () => console.log('SIMULACIÓN LOCAL · http://localhost:3004 · datos ficticios en memoria, sin acceso a Google')));
 module.exports = { createPreview };

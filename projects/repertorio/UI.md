@@ -1,6 +1,6 @@
 # Interfaz de repertorio
 
-Actualizada el 15/11/2026 tras la petición de simplificar el seguimiento, sin seleccionar fechas.
+Actualizada el 16/11/2026: prioridad móvil (90% del uso), sin seleccionar fechas.
 
 ## Uso habitual
 
@@ -15,13 +15,15 @@ Se muestran cuatro contadores para el repertorio activo completo:
 
 Cada tema tiene dos casillas: «Ya lo saben» y «Repasando». Son independientes y se guardan automáticamente después de verificar el resultado. Un tema ya aprendido puede volver a repasarse por nuevas incorporaciones sin desmarcar lo que el grupo sabe. No se seleccionan ni muestran fechas, último repaso o registro de repasos. Tampoco se solicitan objetivos o motivos.
 
-Los filtros son Todos, Ya lo saben, Aún no lo saben y Repasando. Se pueden combinar con búsqueda y tipo. Los contadores mantienen los totales del grupo aunque se filtre la lista. Un filtro vacío propone cambiar de filtro.
+Los cuatro contadores funcionan como filtros. Sus etiquetas cortas son Temas, Ya saben, Por aprender y En repaso. El botón «Filtros» despliega tipo y archivados; permite restablecerlos. Se pueden combinar con búsqueda y tipo. Los contadores mantienen los totales del grupo aunque se filtre la lista. Un filtro vacío propone cambiar de filtro.
 
-«Añadir temas» permite elegir hasta 50 temas del catálogo. Después se marcan los que ya sabe el grupo. «Archivar» retira una relación conservando sus datos; «Mostrar archivados» permite recuperarla. Las notas son opcionales y tienen su propio botón; el formulario solo pide la nota.
+«Añadir temas» permite elegir hasta 50 temas del catálogo. Después se marcan los que ya sabe el grupo. «Archivar» retira una relación conservando sus datos; «Mostrar archivados» permite recuperarla. Las notas son opcionales y se abren desde el menú de opciones del tema; el formulario solo pide la nota. Archivar y recuperar también están en ese menú.
 
-Seleccionar varios temas permite «Marcar como repasando» con un clic, sin formulario ni fechas. No cambia la casilla «Ya lo saben». Los lotes se limitan a 50 relaciones.
+El menú «Opciones del repertorio» permite actualizar datos y seleccionar varios temas. La selección permite «Marcar como repasando» con un clic, sin formulario ni fechas. No cambia la casilla «Ya lo saben». Los lotes se limitan a 50 relaciones.
 
 «Grupos» muestra el resumen y permite abrir su repertorio. «Catálogo de temas» mantiene nombre, orden, tipos Galeta/Slap/Propio, notas generales y archivo recuperable. Cambiar el nombre u orden conserva el TemaID y el seguimiento.
+
+En móvil, la navegación inferior mantiene Por grupo, Catálogo y Grupos al alcance. El selector permanece visible al desplazar y el enlace guarda el grupo elegido para recuperarlo al reconectar. Las casillas principales tienen 48 px de alto; los formularios se presentan como paneles inferiores. En escritorio se conserva la navegación superior y una distribución más compacta.
 
 ## Datos y límites
 
@@ -36,3 +38,5 @@ La copia de desarrollo permanece como archivo en consulta en http://localhost:30
 ## Validación de esta simplificación
 
 249 pruebas automáticas aprobadas. Recorrido en navegador sobre `node sandbox/repertoire-preview.cjs`, http://localhost:3004: contadores, cambio de «Ya lo saben», coexistencia con «Repasando», filtro con y sin resultados, independencia entre grupos, marcado directo de un lote y formulario de notas con cero campos de fecha. Los datos de esta prueba son ficticios en memoria; no se escribieron estados de aprendizaje de prueba en Google Sheets.
+
+La fase 6 añade la revisión responsive de 320 × 568 hasta 1280 × 900; ver PHASE6.md y evidence/phase6.json.

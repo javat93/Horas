@@ -119,6 +119,10 @@ Si falla la verificación, se detiene la activación y se aplica el procedimient
 
 Resultado de la fase 5: respaldo nativo reciente de las seis pestañas originales, creación limitada a Temas/GrupoTemas, dry-run fresco y 36 filas migradas. Verificación por UUID, datos, fórmulas y repetición sin duplicados completadas. La aplicación publicada y el proyecto local original incorporan el acceso a Repertorio, primero consultado y después habilitado para guardar. Nota temporal escrita, releída y restaurada desde la app publicada; no quedaron datos de prueba. 249 pruebas de la rama de entrega aprobadas y despliegues comprobados. Las seis pestañas anteriores conservan sus metadatos; no hubo escrituras en ellas ni llamadas a Calendar. PHASE5.md y evidence/phase5*.json documentan el cierre y la recuperación.
 
+## Fase 6 — Adaptación móvil y visual · COMPLETADA EL 16/11/2026
+
+Ampliación solicitada tras la migración y la simplificación de estados. Prioridad móvil (90% del uso), navegación inferior, selector de grupo fijo al desplazar, contadores que filtran, controles táctiles amplios y formularios inferiores. Adaptación conservada para escritorio. Sin cambios en datos, API, Detalle, sesiones o Calendar. 249 pruebas aprobadas y revisión responsive desde 320 px. Ver PHASE6.md y evidence/phase6.json.
+
 ## Ampliaciones fuera de estas fases
 
 Matriz comparativa de temas × grupos e historial de todos los repasos. No se necesita ninguna de ellas para cerrar esta primera versión.

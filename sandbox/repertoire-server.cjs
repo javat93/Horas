@@ -15,7 +15,7 @@ function createServer({ request, writeEnabled = false, preview = null } = {}) {
       try { return send(200, preview.control(JSON.parse(raw))); } catch (error) { return send(400, { error: error.message }); }
     }
     if (req.method === 'GET' && url.pathname === '/preview-session.js') return send(200, '/* Development UI: preview credentials are supplied only by the isolated preview server. */', 'text/javascript; charset=utf-8');
-    if (req.method === 'GET' && url.pathname === '/') return send(200, fs.readFileSync(path.join(__dirname, 'repertoire-development.html'), 'utf8'), 'text/html; charset=utf-8');
+    if (req.method === 'GET' && url.pathname === '/') return send(200, preview?.pageHtml || fs.readFileSync(path.join(__dirname, 'repertoire-development.html'), 'utf8'), 'text/html; charset=utf-8');
     if (req.method === 'GET' && url.pathname === '/tecnico') return send(200, fs.readFileSync(path.join(__dirname, 'repertoire-technical.html'), 'utf8'), 'text/html; charset=utf-8');
     const assets = {
       '/assets/repertoire.css': ['repertoire.css', 'text/css'],
