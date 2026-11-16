@@ -40,6 +40,7 @@
   function authenticated() { const session = host ? host.session() : { token, expires }; return !!session?.token && Date.now() < session.expires; }
   const data = () => { const d = client?.state().data; return d && progress ? { ...d, assignments: d.assignments.map(a => ({ ...a, ...progress.changes(a.id) })) } : d; };
   const currentGroup = () => data()?.groups.find(g => g.id === groupId);
+  const sortedGroups = () => [...(data()?.groups || [])].sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base', numeric: true }) || a.id.localeCompare(b.id));
   const themeById = id => data()?.themes.find(t => t.id === id);
   const sortThemes = (a, b) => a.numeroOrden - b.numeroOrden || a.nombre.localeCompare(b.nombre, 'es') || a.id.localeCompare(b.id);
   function matching(t) { return (!type || t[type]) && (!search || G.normalize(t.nombre).includes(G.normalize(search))); }
@@ -80,7 +81,7 @@
     if (!client || client.state().busy) return;
     try {
       await client.load();
-      if (!groupId || !currentGroup()) groupId = data().groups[0]?.id || '';
+      if (!groupId || !currentGroup()) groupId = sortedGroups()[0]?.id || '';
       selected.clear(); render();
       say(env.preview ? 'Simulación local: todos los cambios se guardan solo en memoria.' : production ? 'Repertorio actualizado.' : 'Datos de la copia actualizados.');
       if (keepDraft && draft) {
@@ -119,7 +120,7 @@
     const workspace = $('workspace'); workspace.replaceChildren();
     $('issue-panel').hidden = true;
     if (!data()) { workspace.append(empty('Todo tu repertorio en un lugar', authenticated() ? 'Cargando el repertorio…' : production ? 'Usa la conexión de Google de la aplicación para consultar tus temas.' : 'Conecta Google para consultar los temas de la copia de desarrollo.', host && !authenticated() ? button('Conectar Google', () => host.connect(), 'primary') : null)); controls(); return; }
-    if (!groupId) groupId = data().groups[0]?.id || '';
+    if (!groupId) groupId = sortedGroups()[0]?.id || '';
     if (data().issues.length) {
       const p = $('issue-panel'); p.hidden = false; p.replaceChildren(el('strong', { textContent: 'Hay datos que necesitan revisión. Los guardados están pausados.' }));
       p.append(el('ul', {}, data().issues.map(i => el('li', { textContent: [i.sheet, i.rowIdx ? 'fila ' + i.rowIdx : '', i.message || i.code].filter(Boolean).join(' · ') }))));
@@ -171,14 +172,14 @@
   function activeForGroup(id) { return data().assignments.filter(a => G.id(a.grupo) === id && a.activo && themeById(a.temaId)?.activo); }
   function renderGroups(root) {
     root.append(el('div', { class: 'toolbar' }, [el('h2', { textContent: 'Tus grupos' }), refreshButton()])); filters(root, false);
-    const groups = data().groups.filter(g => !search || G.matches(g.nombre, search));
+    const groups = sortedGroups().filter(g => !search || G.matches(g.nombre, search));
     if (!groups.length) { root.append(empty('No se han encontrado grupos', 'Los grupos se consultan desde el catálogo de la copia.')); return; }
     root.append(el('div', { class: 'group-grid' }, groups.map(g => { const s = M.summary(activeForGroup(g.id)); return el('article', { class: 'group-card' }, [el('h3', { textContent: g.label }), el('p', { textContent: `${s.asignados} temas · ${s.realizados} ya los saben · ${s.asignados - s.realizados} por aprender · ${s.repasando} repasando` }), button('Ver repertorio', () => { view = 'repertoire'; search = ''; chooseGroup(g.id); }, '')]); })));
   }
   function renderRepertoire(root) {
     const g = currentGroup();
     if (!g) { root.append(empty('Todavía no hay grupos', 'Primero necesitas un grupo en el catálogo de la copia.')); return; }
-    const groupPicker = selectControl(data().groups.map(g => [g.id, g.label]), g.id, 'Seleccionar grupo', chooseGroup, 'group-picker');
+    const groupPicker = selectControl(sortedGroups().map(g => [g.id, g.label]), g.id, 'Seleccionar grupo', chooseGroup, 'group-picker');
     groupPicker.id = 'group-picker';
     const add = button('', assignThemes, 'primary add-themes', !canWrite()); add.setAttribute('aria-label', 'Añadir temas'); add.append(icon('plus'), el('span', { class: 'button-label', textContent: 'Añadir temas' }));
     root.append(el('div', { class: 'toolbar repertoire-toolbar' }, [el('div', { class: 'toolbar-title' }, [el('span', { class: 'picker-label', textContent: client.state().busy ? 'ACTUALIZANDO…' : 'GRUPO' }), groupPicker]), el('div', { class: 'toolbar-actions' }, [add, actionMenu('Opciones del repertorio', [['Actualizar datos', () => reload(), client.state().busy], [selecting ? 'Terminar selección' : 'Seleccionar varios temas', () => { selecting = !selecting; selected.clear(); render(); }, !canWrite()]])])]));
