@@ -15,6 +15,9 @@ body > main.max-w-4xl, body > footer.max-w-4xl, #auth-status, #production-notice
 .app-brand-copy p { color: var(--app-muted); font-size: 10px; }
 #production-actions button { min-height: 44px; border: 1px solid var(--app-line); border-radius: 12px; background: #f5f7fb; color: #304969; box-shadow: none; }
 #auth-btn { background: #edf2ff !important; color: #214fbd !important; }
+#production-actions .repertoire-header-action { display: none; }
+body:has(#repertoire-entry.tab-active) #production-actions :is(#sync-btn, #add-future-events-btn) { display: none; }
+body:has(#repertoire-entry.tab-active) #production-actions .repertoire-header-action { display: flex; }
 .app-nav { display: flex; gap: 6px; max-width: none; padding: 6px; margin-bottom: 24px; border: 1px solid var(--app-line); box-shadow: none; }
 .app-nav :is(button, a) { min-width: 0; min-height: 48px; border-radius: 12px; color: var(--app-muted); font-size: 13px; }
 .app-nav svg { flex-shrink: 0; width: 20px; height: 20px; }

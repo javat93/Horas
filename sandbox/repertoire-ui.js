@@ -1,13 +1,14 @@
 /* global RepertoireClient, RepertoireModel, GroupIdentity */
 (function () {
   'use strict';
-  const page = window.RepertoirePage || { profile: 'development', endpoint: '/api/repertorio-test' };
+  window.mountRepertoire = function (root = document, host = null) {
+  const page = host?.page || window.RepertoirePage || { profile: 'development', endpoint: '/api/repertorio-test' };
   const C = RepertoireClient.forProfile(page.profile), M = RepertoireModel, G = GroupIdentity;
   const endpoint = page.endpoint, production = page.profile === 'production';
-  const $ = id => document.getElementById(id), dialog = $('editor'), form = $('editor-form');
+  const $ = id => root.getElementById(id), dialog = $('editor'), form = $('editor-form');
   let client, env, token = '', expires = 0, view = 'repertoire', groupId = '', search = '', type = '', filter = 'all', archived = false;
   let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false, oauthClient = null, filtersOpen = false, selecting = false;
-  groupId = new URLSearchParams(window.location.hash.slice(1)).get('grupo') || '';
+  groupId = host?.groupId || new URLSearchParams(window.location.hash.slice(1)).get('grupo') || '';
   const types = [['temaGaleta', 'Galeta'], ['temaSlap', 'Slap'], ['temaPropio', 'Propio']];
   const uid = () => crypto.randomUUID();
   function el(tag, props = {}, children = []) {
@@ -29,14 +30,14 @@
     menu.addEventListener('toggle', () => {
       if (!menu.open) return;
       const summary = menu.querySelector('summary').getBoundingClientRect(), panel = menu.querySelector('.menu-items');
-      const nav = document.querySelector('.tabs'), reserved = getComputedStyle(nav).position === 'fixed' ? nav.getBoundingClientRect().height : 0;
+      const nav = root.querySelector('.tabs'), reserved = host ? host.bottomInset() : getComputedStyle(nav).position === 'fixed' ? nav.getBoundingClientRect().height : 0;
       menu.classList.toggle('opens-up', window.innerHeight - reserved - summary.bottom < panel.offsetHeight + 12 && summary.top > panel.offsetHeight + 12);
     });
     return menu;
   }
-  function chooseGroup(id) { groupId = id; selected.clear(); selecting = false; window.history.replaceState(null, '', '#grupo=' + encodeURIComponent(id)); render(); window.scrollTo(0, 0); }
+  function chooseGroup(id) { groupId = id; selected.clear(); selecting = false; if (host) host.selectGroup(id); else window.history.replaceState(null, '', '#grupo=' + encodeURIComponent(id)); render(); window.scrollTo(0, 0); }
   const canWrite = () => !!client?.state().canWrite && authenticated();
-  function authenticated() { return !!token && Date.now() < expires; }
+  function authenticated() { const session = host ? host.session() : { token, expires }; return !!session?.token && Date.now() < session.expires; }
   const data = () => client?.state().data;
   const currentGroup = () => data()?.groups.find(g => g.id === groupId);
   const themeById = id => data()?.themes.find(t => t.id === id);
@@ -61,8 +62,8 @@
   }
   async function transport(payload) {
     if (!authenticated()) throw Object.assign(Error('La sesión ha caducado. Vuelve a conectar Google; tus cambios sin guardar se conservan.'), { status: 401, code: 'AUTH_REQUIRED' });
-    try { return await json(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(payload) }); }
-    catch (error) { if (error.status === 401) { token = ''; expires = 0; } throw error; }
+    try { return await json(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (host ? host.session()?.token : token) }, body: JSON.stringify(payload) }); }
+    catch (error) { if (error.status === 401) { token = ''; expires = 0; host?.invalidateSession(); } throw error; }
   }
   async function reload(keepDraft = false) {
     if (!client || client.state().busy) return;
@@ -85,11 +86,12 @@
   }
   function controls() {
     const busy = !!client?.state().busy;
+    host?.onState({ busy, connected: authenticated() });
     $('workspace').setAttribute('aria-busy', String(busy));
     $('connect').disabled = !env || busy || connecting;
     $('connect').hidden = authenticated(); $('disconnect').hidden = !authenticated(); $('disconnect').disabled = busy;
     $('connection-label').textContent = busy ? 'Guardando o consultando…' : authenticated() ? (env?.preview ? 'Datos simulados' : 'Google conectado') : 'Sin conexión';
-    document.querySelectorAll('.tabs button').forEach(b => { b.disabled = busy; });
+    root.querySelectorAll('.tabs button').forEach(b => { b.disabled = busy; });
     if (busy) $('workspace').querySelectorAll('input,select,textarea,button').forEach(n => { n.disabled = true; });
     if (dialog.open) {
       form.querySelectorAll('input,select,textarea,button').forEach(n => { n.disabled = busy; });
@@ -98,12 +100,12 @@
     }
   }
   function render() {
-    const focused = document.activeElement, focusId = focused?.id;
+    const focused = root.activeElement || document.activeElement, focusId = focused?.id;
     const caret = focused instanceof HTMLInputElement && focused.type === 'search' ? focused.selectionStart : null;
-    document.querySelectorAll('.tabs button').forEach(b => { if (b.dataset.tab === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    root.querySelectorAll('.tabs button').forEach(b => { if (b.dataset.tab === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     const workspace = $('workspace'); workspace.replaceChildren();
     $('issue-panel').hidden = true;
-    if (!data()) { workspace.append(empty('Todo tu repertorio en un lugar', production ? 'Conecta Google para consultar el repertorio de tus grupos.' : 'Conecta Google para consultar los temas de la copia de desarrollo.')); controls(); return; }
+    if (!data()) { workspace.append(empty('Todo tu repertorio en un lugar', authenticated() ? 'Cargando el repertorio…' : production ? 'Usa la conexión de Google de la aplicación para consultar tus temas.' : 'Conecta Google para consultar los temas de la copia de desarrollo.', host && !authenticated() ? button('Conectar Google', () => host.connect(), 'primary') : null)); controls(); return; }
     if (!groupId) groupId = data().groups[0]?.id || '';
     if (data().issues.length) {
       const p = $('issue-panel'); p.hidden = false; p.replaceChildren(el('strong', { textContent: 'Hay datos que necesitan revisión. Los guardados están pausados.' }));
@@ -114,7 +116,7 @@
     else if (view === 'groups') renderGroups(workspace);
     else renderRepertoire(workspace);
     controls();
-    if (focusId && document.getElementById(focusId) && document.getElementById(focusId) !== focused && !dialog.open) { const n = document.getElementById(focusId); n.focus(); if (caret !== null) n.setSelectionRange(caret, caret); }
+    if (focusId && root.getElementById(focusId) && root.getElementById(focusId) !== focused && !dialog.open) { const n = root.getElementById(focusId); n.focus(); if (caret !== null) n.setSelectionRange(caret, caret); }
   }
   function empty(title, text, action) { return el('div', { class: 'empty' }, [el('span', { class: 'empty-symbol', 'aria-hidden': 'true', textContent: '♫' }), el('h2', { textContent: title }), el('p', { textContent: text }), action]); }
   function tags(t) { return el('div', { class: 'types' }, types.filter(([k]) => t[k]).map(([, label]) => el('span', { class: 'tag', textContent: label }))); }
@@ -273,9 +275,9 @@
   };
   $('close-dialog').onclick = closeDialog; $('cancel-dialog').onclick = closeDialog;
   dialog.addEventListener('cancel', e => { e.preventDefault(); closeDialog(); });
-  document.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { if (client?.state().busy) return; view = b.dataset.tab; search = ''; type = ''; filter = 'all'; archived = false; selected.clear(); selecting = false; render(); window.scrollTo(0, 0); }; });
-  document.addEventListener('click', e => { document.querySelectorAll('.action-menu[open]').forEach(menu => { if (!menu.contains(e.target)) menu.open = false; }); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.action-menu[open]').forEach(menu => { menu.open = false; }); });
+  root.querySelectorAll('.tabs button').forEach(b => { b.onclick = () => { if (client?.state().busy) return; view = b.dataset.tab; search = ''; type = ''; filter = 'all'; archived = false; selected.clear(); selecting = false; render(); window.scrollTo(0, 0); }; });
+  root.addEventListener('click', e => { root.querySelectorAll('.action-menu[open]').forEach(menu => { if (!menu.contains(e.target)) menu.open = false; }); });
+  root.addEventListener('keydown', e => { if (e.key === 'Escape') root.querySelectorAll('.action-menu[open]').forEach(menu => { menu.open = false; }); });
   window.addEventListener('beforeunload', e => { if (dirty || client?.state().busy) { e.preventDefault(); e.returnValue = ''; } });
   $('disconnect').onclick = () => { if (client?.state().busy || (dirty && !window.confirm('Hay cambios sin guardar. ¿Quieres desconectar y descartarlos?'))) return; if (dialog.open) dialog.close(); token = ''; expires = 0; draft = null; dirty = false; selected.clear(); client.clear(); say('Sesión de desarrollo cerrada.'); };
   async function prepareOAuth() {
@@ -288,6 +290,7 @@
     });
   }
   $('connect').onclick = async () => {
+    if (host) return host.connect();
     if (connecting) return; connecting = true; controls();
     let awaitingGoogle = false;
     try {
@@ -298,10 +301,21 @@
       awaitingGoogle = true;
     } catch (error) { say(error.message, true); } finally { if (!awaitingGoogle) connecting = false; controls(); }
   };
-  json(endpoint + '?api=environment').then(e => {
+  async function refreshSession() {
+    if (!host || !client || client.state().busy) return;
+    const shared = host.session();
+    if (!shared) { token = ''; expires = 0; controls(); return; }
+    const changed = token !== shared.token; token = shared.token; expires = shared.expires;
+    if (changed || !data()) await reload(true); else controls();
+  }
+  const ready = json(endpoint + '?api=environment').then(async e => {
     env = C.verifyEnvironment(e); client = C.create({ transport, writeEnabled: env.writeEnabled, onChange: render });
     if (env.preview) { $('mode-badge').textContent = 'SIMULACIÓN'; $('copy-link').hidden = true; $('connect').textContent = 'Abrir simulación'; say('Datos ficticios en memoria. Esta vista no escribe en Google Sheets.'); }
-    else prepareOAuth().catch(error => say(error.message, true));
+    else if (!host) prepareOAuth().catch(error => say(error.message, true));
+    if (host) { render(); await refreshSession(); }
     controls();
   }).catch(error => say(error.message, true));
+  return { ready, refreshSession, refreshData: () => reload(true), groupId: () => groupId };
+  };
+  if (document.getElementById('editor') && !document.getElementById('repertoire-template')) window.mountRepertoire();
 })();

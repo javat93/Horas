@@ -359,8 +359,12 @@
         }
     </style>
     <link rel="stylesheet" href="review-ui.css?v=20261111-mobile-map">
-    <link rel="stylesheet" href="app-ui.css?v=mobile-20261116">
-    <script src="app-ui.js?v=mobile-20261116" defer></script>
+    <link rel="stylesheet" href="app-ui.css?v=unified-20261116">
+    <script src="app-ui.js?v=unified-20261116" defer></script>
+    <script src="repertoire-model.js" defer></script>
+    <script src="repertoire-client.js" defer></script>
+    <script src="sandbox/repertoire-ui.js?v=unified-20261116" defer></script>
+    <script src="repertoire-integration.js?v=unified-20261116" defer></script>
 </head>
 <body class="pb-20">
 
@@ -376,6 +380,7 @@
                 </div>
             </div>
             <div id="production-actions" class="flex gap-2 flex-wrap justify-end">
+                <button id="repertoire-refresh" type="button" aria-label="Actualizar repertorio" disabled class="repertoire-header-action font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span class="hidden sm:inline">Actualizar repertorio</span></button>
                 <button id="sync-btn" aria-label="Sincronizar" onclick="syncData(true)" class="hidden bg-emerald-50 text-emerald-600 font-bold px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-all flex items-center gap-2 text-sm">
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">Sincronizar</span>
@@ -409,7 +414,7 @@
             <button onclick="switchTab('maestros')" id="btn-maestros" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2">
                 <i data-lucide="users" class="w-4 h-4"></i> Grupos
             </button>
-            <a id="repertoire-entry" href="https://javat93.github.io/Horas/repertorio.html" class="hidden flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2"><i data-lucide="music" class="w-4 h-4"></i> Repertorio</a>
+            <a id="repertoire-entry" href="repertorio.html" class="hidden flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2"><i data-lucide="music" class="w-4 h-4"></i> Repertorio</a>
             <script>window.horasConfigReady.then(() => { if (typeof CONFIG !== 'undefined' && CONFIG.DATA_MODE === 'production') document.getElementById('repertoire-entry').classList.remove('hidden'); }).catch(() => {});</script>
         </nav>
 
@@ -466,7 +471,13 @@
 
             <div id="lista-maestros" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
+        <section id="tab-repertorio" class="hidden" aria-label="Repertorio"></section>
     </main>
+    <template id="repertoire-template"><link rel="stylesheet" href="sandbox/repertoire.css?v=unified-20261116"><link rel="stylesheet" href="repertoire-integrated.css?v=unified-20261116"><div class="repertoire-integrated"><div hidden><span id="mode-badge"></span><span id="connection-label"></span><button id="connect">Conectar Google</button><button id="disconnect">Desconectar</button></div><main class="shell"><div class="page-heading"><div><p class="eyebrow">TEMAS Y GRUPOS</p><h2>Repertorio por grupo</h2><p class="intro">Lo que ya habéis aprendido y lo que toca repasar.</p></div><a id="copy-link" class="text-link" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60/edit">Abrir hoja de cálculo ↗</a></div>
+<nav class="tabs" aria-label="Secciones de repertorio"><button data-tab="repertoire" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13M9 9l12-2"/><ellipse cx="6" cy="18" rx="3" ry="3"/><ellipse cx="18" cy="16" rx="3" ry="3"/></svg><span>Por grupo</span></button><button data-tab="catalog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span>Catálogo</span></button><button data-tab="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-4-5"/></svg><span>Resumen</span></button></nav>
+<div id="status" class="status" role="status" aria-live="polite" hidden></div><div id="issue-panel" class="issues" hidden></div><section id="workspace" aria-busy="false"><div class="empty"><span class="empty-symbol" aria-hidden="true">♫</span><h2>Todo tu repertorio en un lugar</h2><p>Conecta Google para consultar el repertorio de tus grupos.</p></div></section></main>
+<dialog id="editor" aria-labelledby="dialog-title"><form id="editor-form"><div class="dialog-heading"><div><p id="dialog-kicker" class="eyebrow"></p><h2 id="dialog-title"></h2></div><button id="close-dialog" type="button" class="icon-button" aria-label="Cerrar formulario">×</button></div><div id="dialog-body"></div><p id="dialog-error" class="form-error" role="alert" hidden></p><div class="dialog-footer"><span id="dirty-label" class="muted"></span><button id="cancel-dialog" type="button" class="button">Cancelar</button><button id="save-dialog" type="submit" class="button primary">Guardar</button></div></form></dialog>
+</div></template>
     <footer class="max-w-4xl mx-auto px-4 py-6 text-sm text-slate-600">
         <a href="inicio.html">Sobre Horas · PercuManager</a> · <a href="privacidad.html">Política de privacidad</a> · <a href="condiciones.html">Condiciones de uso</a>
         <a href="mailto:javat93@gmail.com">Contacto</a>
@@ -2427,12 +2438,13 @@
         }
 
         function switchTab(tabId) {
-            ['eventos', 'calendario', 'maestros'].forEach(t => {
+            ['eventos', 'calendario', 'maestros', 'repertorio'].forEach(t => {
+                if (t === 'repertorio' && typeof CONFIG !== 'undefined' && CONFIG.DATA_MODE !== 'production') return;
                 document.getElementById('tab-' + t).classList.add('hidden');
-                document.getElementById('btn-' + t).className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2";
+                document.getElementById(t === 'repertorio' ? 'repertoire-entry' : 'btn-' + t).className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all text-slate-400 flex items-center justify-center gap-2";
             });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
-            document.getElementById('btn-' + tabId).className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 tab-active";
+            document.getElementById(tabId === 'repertorio' ? 'repertoire-entry' : 'btn-' + tabId).className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 tab-active";
             if(tabId === 'calendario') {
                 setTimeout(() => {
                     if (calendar && calendar.render) {

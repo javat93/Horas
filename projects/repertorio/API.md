@@ -110,3 +110,7 @@ Se opera dentro de las filas existentes; no se añaden dimensiones ni se modific
 - Ciclo autenticado en la copia, mediado por el conector de Sheets: ejecutar el mismo handler y servicio, crear DEMO, asignar, marcar estados, registrar fecha, reintentar, archivar y recuperar; después retirar los registros temporales y releer.
 - Esta prueba verifica las operaciones y el cálculo real de Sheets. No se presenta como una prueba de OAuth del navegador ni como un despliegue remoto.
 - Evidencias en evidence/phase2-live.json y evidence/phase2.json.
+
+## Interfaz integrada en producción (16/11/2026)
+
+La sección productiva se monta en index.html y reutiliza la sesión principal existente, comprobando modo, libro, permiso de Sheets y caducidad. No crea otro cliente OAuth ni almacenamiento de token. Esto no modifica el contrato ni las barreras de la API: sigue limitada a Temas y GrupoTemas, sin acceso a Calendar. El acceso de desarrollo descrito arriba conserva su sesión separada. Ver INTEGRATION.md.

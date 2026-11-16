@@ -4,7 +4,7 @@ Actualizada el 16/11/2026: prioridad móvil (90% del uso), sin seleccionar fecha
 
 ## Uso habitual
 
-Abrir [Repertorio](https://javat93.github.io/Horas/repertorio.html) desde la navegación de Horas, conectar Google y elegir el grupo en «Por grupo».
+Abrir Repertorio desde el menú principal de Horas y elegir el grupo en «Por grupo». Comparte el logo, la navegación y la conexión de Google de la aplicación; no abre otra pantalla ni solicita conectarse de nuevo si la sesión principal sigue vigente.
 
 Se muestran cuatro contadores para el repertorio activo completo:
 
@@ -23,13 +23,13 @@ El menú «Opciones del repertorio» permite actualizar datos y seleccionar vari
 
 «Grupos» muestra el resumen y permite abrir su repertorio. «Catálogo de temas» mantiene nombre, orden, tipos Galeta/Slap/Propio, notas generales y archivo recuperable. Cambiar el nombre u orden conserva el TemaID y el seguimiento.
 
-En móvil, la navegación inferior mantiene Por grupo, Catálogo y Grupos al alcance. El selector permanece visible al desplazar y el enlace guarda el grupo elegido para recuperarlo al reconectar. Las casillas principales tienen 48 px de alto; los formularios se presentan como paneles inferiores. En escritorio se conserva la navegación superior y una distribución más compacta.
+En móvil, el menú inferior principal conserva Lista, Calendario, Grupos y Repertorio. Dentro de Repertorio, Por grupo, Catálogo y Resumen se encuentran arriba. El selector permanece visible al desplazar y el enlace guarda el grupo elegido para recuperarlo al reconectar. Las casillas principales tienen 48 px de alto; los formularios se presentan como paneles inferiores. En escritorio se conserva la navegación superior y una distribución más compacta.
 
 ## Datos y límites
 
 La aplicación publicada utiliza el original como único maestro. La columna nativa Realizado representa «Ya lo saben». Se conserva el esquema compatible del libro y de la API, incluidos los campos anteriores que ya no se usan en esta interfaz; no se borran datos existentes ni se ejecuta una migración por esta simplificación. Detalle, sesiones, Calendar y los estados de aprendizaje actuales no se modifican al publicar el cambio.
 
-La sesión del módulo pide solo Sheets, conserva el token en memoria y comprueba el perfil/destino del servidor. No comparte operaciones con Calendar. Al recargar hay que reconectar Google.
+La interfaz productiva reutiliza la sesión principal y su caducidad, sin pedir otros permisos ni guardar otra sesión. El backend de repertorio comprueba su perfil/destino y continúa sin acceso a Calendar. Se renueva la conexión principal solo cuando caduca o se invalida. El entorno de desarrollo mantiene su acceso aislado. Ver INTEGRATION.md.
 
 Los controles se bloquean durante un guardado. Si hay una edición externa, se conserva el formulario y se pide actualizar antes de guardar. Las respuestas perdidas se verifican antes de reintentar; no hay reenvío automático. Los UUID evitan duplicar altas y asignaciones. Ver API.md para los límites de concurrencia.
 

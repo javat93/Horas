@@ -24,12 +24,8 @@ async function createPreview({ productionLayout = false } = {}) {
   };
   const control = payload => { if (!['conflict', 'uncertain', 'none'].includes(payload.next)) throw Error('Simulación no admitida.'); next = payload.next; conflictReads = 0; return { next }; };
   let pageHtml;
-  if (productionLayout) {
-    pageHtml = require('node:fs').readFileSync(require('node:path').join(__dirname, '../repertorio.html'), 'utf8')
-      .replace(/window\.RepertoirePage=Object\.freeze\(\{[^}]+\}\);/, 'window.RepertoirePage=Object.freeze({profile:"development",endpoint:"/api/repertorio-test"});')
-      .replace(/(?:sandbox\/)?repertoire(?:-client|-model|-ui)?\.(?:css|js)(?:\?[^" ]*)?/g, asset => '/assets/' + asset.replace(/^sandbox\//, '').split('?')[0])
-      .replace('src="group-identity.js"', 'src="/assets/group-identity.js"').replace('src="locale-data.js"', 'src="/assets/locale-data.js"');
-  }
+  // Legacy standalone development preview. The integrated production layout uses preview-production.cjs.
+  if (productionLayout) pageHtml = require('node:fs').readFileSync(require('node:path').join(__dirname, 'repertoire-development.html'), 'utf8');
   return { server: createServer({ request, writeEnabled: true, preview: { control, pageHtml } }), fixture: f };
 }
 if (require.main === module) createPreview({ productionLayout: process.argv.includes('--production-layout') }).then(({ server }) => server.listen(3004, '127.0.0.1', () => console.log('SIMULACIÓN LOCAL · http://localhost:3004 · datos ficticios en memoria, sin acceso a Google')));

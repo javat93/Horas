@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const nav = document.getElementById('app-navigation');
   if (nav) {
-    const buttons = nav.querySelectorAll('button');
+    const buttons = nav.querySelectorAll('button, a');
     const markCurrent = () => buttons.forEach(button => {
       if (button.classList.contains('tab-active')) button.setAttribute('aria-current', 'page');
       else button.removeAttribute('aria-current');

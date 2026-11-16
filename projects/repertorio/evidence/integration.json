@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-16",
+  "tests": 253,
+  "mainNavigation": [
+    "Lista",
+    "Calendario",
+    "Grupos",
+    "Repertorio"
+  ],
+  "repertoireControls": [
+    "Por grupo",
+    "Catálogo",
+    "Resumen"
+  ],
+  "singleLogo": true,
+  "secondaryBottomNavigation": false,
+  "sharedExistingAuth": true,
+  "newOAuthClientsInIntegratedMode": 0,
+  "newOAuthScopes": 0,
+  "additionalTokenStorageKeys": 0,
+  "connectionTests": [
+    "reuse",
+    "renewal token read",
+    "expiry",
+    "missing expiry",
+    "invalid token",
+    "wrong mode",
+    "wrong spreadsheet",
+    "missing Sheets scope"
+  ],
+  "browserChecks": [
+    "same document navigation",
+    "group persists across sections",
+    "header refresh limited to repertoire",
+    "independent learning and review states in fixture",
+    "notes dialog without dates",
+    "catalog",
+    "legacy group link redirect"
+  ],
+  "responsiveWidths": [
+    320,
+    390,
+    768,
+    1280
+  ],
+  "horizontalOverflow": false,
+  "stateTargetHeight": 48,
+  "testEnvironment": "in-memory simulation on localhost:3011",
+  "realGoogleWrites": 0,
+  "realCalendarCalls": 0,
+  "liveAuthNotExercised": true
+}

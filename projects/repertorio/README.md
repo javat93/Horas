@@ -54,7 +54,7 @@ Preparado el 14/11/2026. Trabajo por fases sobre una copia completa del libro en
 
 ## Uso actual
 
-Abrir [Repertorio en la aplicación](https://javat93.github.io/Horas/repertorio.html), también accesible desde la navegación de Horas. Conectar Google y elegir el grupo. Las casillas Realizado/Repasando se ajustan según la situación real; esta migración no las inventó. La sesión del módulo pide únicamente Sheets y no usa la sesión de Calendar. No editar desarrollo como segundo maestro. El servidor de archivo arranca con `node sandbox/repertoire-server.cjs`, sin --write, en http://localhost:3002. PHASE5.md contiene el respaldo, los recibos y el alcance exacto de las comprobaciones.
+Abrir [Repertorio en la aplicación](https://javat93.github.io/Horas/repertorio.html), también accesible desde la navegación de Horas. Conectar Google y elegir el grupo. Las casillas Realizado/Repasando se ajustan según la situación real; esta migración no las inventó. Repertorio está integrado en la navegación principal y reutiliza su conexión de Google, sin solicitar otros permisos. El backend sigue limitado a las pestañas del repertorio y no opera sobre Calendar. Ver [INTEGRATION.md](INTEGRATION.md). No editar desarrollo como segundo maestro. El servidor de archivo arranca con `node sandbox/repertoire-server.cjs`, sin --write, en http://localhost:3002. PHASE5.md contiene el respaldo, los recibos y el alcance exacto de las comprobaciones.
 
 La copia conserva los vínculos de Calendar del libro original. No se debe arrancar la app normal contra ella con altas, bajas, sincronización o realizado automático habilitados. El nuevo acceso de desarrollo debe limitarse a repertorio, sin exponer operaciones de sesiones o Calendar.
 
