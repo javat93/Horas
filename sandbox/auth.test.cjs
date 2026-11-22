@@ -15,7 +15,7 @@ test('no fuerza consentimiento ni confunde un error de red o cuota con sesión i
 const html=require('./application-source.cjs')();
 function harness({granted=true,error}={}){
   const s=storage(),elements={},requests=[],syncs=[],errors=[];let token=null;
-  for(const id of ['auth-btn','review-google-permissions','sync-btn','add-future-events-btn','auth-text','auth-status'])elements[id]={classList:{toggle(){},add(){},remove(){}}};
+  for(const id of ['auth-btn','review-google-permissions','sync-btn','add-future-events-btn','auth-text','auth-status'])elements[id]={dataset:{},classList:{toggle(){},add(){},remove(){}}};
   const client={requestAccessToken:options=>requests.push(options)},window={};
   const context=vm.createContext({window,AppData:require('../app-data.js'),AuthSession:A,localStorage:s,CONFIG:{TEST_MODE:true,SCOPES:'scope1 scope2'},document:{getElementById:id=>elements[id]},gapi:{client:{getToken:()=>token,setToken:v=>token=v}},google:{accounts:{oauth2:{hasGrantedAllScopes:()=>granted}}},showLoading(){},hideLoading(){},showErrorModal:(...args)=>errors.push(args),syncData:async(...args)=>{syncs.push(args);if(error)throw error;},fetch:async()=>{throw Error('No real network');},console});
   const state=html.slice(html.indexOf('        let tokenClient;'),html.indexOf('        let eventos = []'));
@@ -41,7 +41,7 @@ test('permiso incompleto no se presenta como conectado ni inicia consultas',asyn
   const h=harness({granted:false});await h.context.handleAuthClick();await h.client.callback({access_token:'partial',expires_in:3600});assert.equal(h.s.getItem('g_token_pruebas'),null);assert.equal(h.syncs.length,0);assert.equal(h.errors.length,1);
 });
 test('recargar reutiliza sesión una vez; fallo de red no borra autorización',async()=>{
-  const h=harness({error:new Error('Failed to fetch')});A.create(h.s,'g_token_pruebas').save({access_token:'cached',expires_in:3600});h.context.checkAuth();h.context.checkAuth();await new Promise(resolve=>setImmediate(resolve));assert.equal(h.syncs.length,1);assert.equal(h.s.getItem('g_token_pruebas'),'cached');assert.equal(h.requests.length,0);
+  const h=harness({error:new Error('Failed to fetch')});A.create(h.s,'g_token_pruebas').save({access_token:'cached',expires_in:3600});h.context.checkAuth();h.context.checkAuth();await new Promise(resolve=>setImmediate(resolve));assert.equal(h.syncs.length,1);assert.equal(h.s.getItem('g_token_pruebas'),'cached');assert.equal(h.requests.length,0);assert.equal(h.elements['auth-btn'].dataset.googleReady,'true');
 });
 test('token renovado en otra pestaña reemplaza el antiguo y uno caducado no se envía',()=>{
   const h=harness();A.create(h.s,'g_token_pruebas').save({access_token:'other-tab',expires_in:3600});assert.equal(h.window.horasAccessToken(),'other-tab');assert.equal(h.getToken().access_token,'other-tab');
