@@ -32,7 +32,7 @@
     async function refreshSession() {
       const token = session()?.token || '';
       if (!token) { currentToken = ''; if (!store.state().busy) store.clear(); return; }
-      if (document.getElementById('tab-maestros').classList.contains('hidden') && document.getElementById('tab-repertorio').classList.contains('hidden')) return;
+      if (document.getElementById('tab-maestros').classList.contains('hidden') && document.getElementById('tab-repertorio').classList.contains('hidden') && document.getElementById('modal-evento').classList.contains('hidden')) return;
       if (token !== currentToken) { currentToken = token; if (store.state().busy) return; store.clear(); await refresh(); }
       else if (!data() && !store.state().error) await refresh();
     }
@@ -112,7 +112,7 @@
       dialog.addEventListener('cancel', e => { e.preventDefault(); close(); }); document.body.append(dialogHost); draw(); dialog.showModal(); search.focus();
     }
     window.addEventListener('beforeunload', e => { if (saving || draft?.size) { e.preventDefault(); e.returnValue = ''; } });
-    return { panel, visible, label, refreshSession, refresh, subscribe(fn) { subscribers.add(fn); return () => subscribers.delete(fn); }, setBlocked(value) { if (blocked !== value) { blocked = value; emit(); } } };
+    return { panel, visible, label, sessionGroups: (groups, selected, all) => data() ? C.sessionGroups(groups, data().records, selected, all) : groups.slice(), refreshSession, refresh, subscribe(fn) { subscribers.add(fn); return () => subscribers.delete(fn); }, setBlocked(value) { if (blocked !== value) { blocked = value; emit(); } } };
   };
   document.addEventListener('DOMContentLoaded', async () => {
     await window.horasConfigReady; if (CONFIG.DATA_MODE !== 'production') return;
@@ -120,11 +120,13 @@
     const shared = RepertoireIntegration.createSession({ config: CONFIG, read: () => savedSession().read(), accessToken: () => window.horasAccessToken(), connect: () => handleAuthClick() });
     const ui = window.horasGroupCourses = window.createGroupCoursesUI({ ...shared, endpoint: new URL('/api/grupos-curso', CONFIG.DAILY_API_URL).href, invalidateSession: () => expireGoogleConnection() });
     const mount = document.getElementById('group-course-controls');
-    ui.subscribe(() => { mount.replaceChildren(ui.panel()); renderGrupos(); }); mount.replaceChildren(ui.panel());
+    ui.subscribe(() => { mount.replaceChildren(ui.panel()); renderGrupos(); if (!document.getElementById('modal-evento').classList.contains('hidden')) { populateSelects(); filterGrupos(document.getElementById('ev-grupo-search').value); } }); mount.replaceChildren(ui.panel());
     new MutationObserver(() => ui.refreshSession()).observe(document.getElementById('auth-btn'), { attributes: true, attributeFilter: ['class'] });
     document.getElementById('btn-maestros').addEventListener('click', () => ui.refreshSession());
     document.getElementById('repertoire-entry').addEventListener('click', () => ui.refreshSession());
     window.addEventListener('storage', () => ui.refreshSession());
+    new MutationObserver(() => { if (!document.getElementById('modal-evento').classList.contains('hidden')) ui.refreshSession(); }).observe(document.getElementById('modal-evento'), {attributes:true,attributeFilter:['class']});
+    document.getElementById('ev-all-groups').addEventListener('change', () => { populateSelects(); filterGrupos(document.getElementById('ev-grupo-search').value); });
     await ui.refreshSession(); window.dispatchEvent(new Event('group-courses-ready'));
   });
 })();

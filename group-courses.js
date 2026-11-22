@@ -18,6 +18,10 @@
     return groups.filter(g => { const r = classification(records, g, filters.curso); return (filters.estado === 'all' || (filters.estado === 'unclassified' ? !r : !!r && r.activo === (filters.estado === 'active'))) && (filters.tipo === 'all' || (!!r && r.tipo === filters.tipo)); })
       .slice().sort((a, b) => G.catalogLabel(a.nombre).localeCompare(G.catalogLabel(b.nombre), 'es', { sensitivity: 'base', numeric: true }));
   }
+  function sessionGroups(groups, records, selected = '', all = false, curso = currentCourse()) {
+    const selectedId = G.id(selected);
+    return groups.filter(g => { const r = classification(records, g, curso); return all || G.id(g.nombre) === selectedId || !!r && r.activo && r.tipo === 'habitual'; }).slice().sort((a,b)=>G.catalogLabel(a.nombre).localeCompare(G.catalogLabel(b.nombre),'es',{sensitivity:'base',numeric:true}));
+  }
   function copyPrevious(groups, records, curso) {
     return groups.flatMap(g => { const r = classification(records, g, previous(curso)); return r && !classification(records, g, curso) ? [{ grupo: g.nombre, activo: r.activo, tipo: r.tipo }] : []; });
   }
@@ -48,5 +52,5 @@
     }
     return { state, load, save, clear() { if (!busy) { data = null; needsReload = false; error = null; notify(); } } };
   }
-  return { TARGET, SHEET_ID, HEADERS, fail, course, currentCourse, previous, key, classification, filter, copyPrevious, validateUpdates, createStore };
+  return { TARGET, SHEET_ID, HEADERS, fail, course, currentCourse, previous, key, classification, filter, sessionGroups, copyPrevious, validateUpdates, createStore };
 });

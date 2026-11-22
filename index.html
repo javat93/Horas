@@ -498,6 +498,8 @@
                 <input type="hidden" id="ev-rowIdx">
                 
                 <div>
+                    <label class="session-all-groups"><input type="checkbox" id="ev-all-groups"> Ver todos los grupos, incluidos puntuales e históricos</label>
+                    <p class="text-xs text-slate-500">Primero se muestran los habituales activos del curso actual. El grupo de una sesión existente siempre se conserva.</p>
                     <label for="ev-grupo-search" class="block text-xs font-bold text-slate-400 uppercase mb-2">Grupo / Colegio</label>
                     <div class="relative">
                         <input 
@@ -2551,11 +2553,14 @@
             if(value)document.getElementById('ev-grupo-search').value = groupOptionName(value);
         }
 
+        function sessionGroupCatalog() {
+            return window.horasGroupCourses?.sessionGroups(grupos, document.getElementById('ev-grupo').value, !!document.getElementById('ev-all-groups')?.checked) || grupos.slice();
+        }
         function populateSelects() {
             const sel = document.getElementById('ev-grupo');
             const selected = sel.value;
             // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
-            const gruposOrdenados = grupos.filter(g=>g.nombre.trim()).sort((a, b) =>
+            const gruposOrdenados = sessionGroupCatalog().filter(g=>g.nombre.trim()).sort((a, b) =>
                 groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base', numeric: true })
             );
             sel.innerHTML = '<option value="">Selecciona grupo...</option>' + 
@@ -2570,7 +2575,7 @@
             if (!optionsContainer) return;
             
             // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
-            const gruposOrdenados = grupos.filter(g=>g.nombre.trim()).sort((a, b) =>
+            const gruposOrdenados = sessionGroupCatalog().filter(g=>g.nombre.trim()).sort((a, b) =>
                 groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base', numeric: true })
             );
             
@@ -2610,7 +2615,7 @@
             const optionsContainer = document.getElementById('grupo-options');
             if (!optionsContainer) return;
             
-            const filtered = grupos.filter(g =>
+            const filtered = sessionGroupCatalog().filter(g =>
                 g.nombre.trim() && GroupIdentity.matches(g.nombre,searchTerm)
             ).sort((a, b) => groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base', numeric: true }));
             

@@ -161,3 +161,5 @@ body > footer > a { display: inline-flex; align-items: center; min-height: 44px;
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
+
+.session-all-groups{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px;color:#475569}.session-all-groups input{width:20px;height:20px;accent-color:#4f46e5}
