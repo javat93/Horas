@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded',()=>{
+document.getElementById('ev-grupo-search')?.addEventListener('click',showGrupoDropdown);
 const handlers=[
 function(event){syncData(true)},
 function(event){openAddFutureEventsModal()},

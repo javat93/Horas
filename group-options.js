@@ -57,7 +57,9 @@
         }
 
         // Función para mostrar/ocultar el dropdown
+        let grupoHideTimer;
         function showGrupoDropdown() {
+            clearTimeout(grupoHideTimer);
             const dropdown = document.getElementById('grupo-dropdown');
             const searchInput = document.getElementById('ev-grupo-search');
             if (dropdown) {
@@ -72,7 +74,8 @@
         function hideGrupoDropdown() {
             const dropdown = document.getElementById('grupo-dropdown');
             if (dropdown) {
-                setTimeout(() => {
+                clearTimeout(grupoHideTimer);
+                grupoHideTimer = setTimeout(() => {
                     dropdown.classList.add('hidden');
                 }, 200); // Pequeño delay para permitir clic en opciones
             }
@@ -102,6 +105,7 @@
             // Mostrar dropdown si hay búsqueda
             const dropdown = document.getElementById('grupo-dropdown');
             if (dropdown && searchTerm.trim() !== '') {
+                clearTimeout(grupoHideTimer);
                 dropdown.classList.remove('hidden');
             }
         }
