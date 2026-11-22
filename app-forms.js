@@ -9,23 +9,23 @@
             document.getElementById('ev-rowIdx').value = "";
             document.getElementById('sync-calendar-wrapper').classList.remove('hidden');
             document.getElementById('recurrence-options').classList.add('hidden');
-            
+
             // Establecer duración por defecto de 1 hora
             const now = new Date();
             const horaActual = now.getHours().toString().padStart(2, '0');
             const minutosActuales = Math.floor(now.getMinutes() / 15) * 15; // Redondear a 15 minutos
             const minutosStr = minutosActuales.toString().padStart(2, '0');
-            
+
             const madridParts=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
             document.getElementById('ev-fecha').value=['year','month','day'].map(type=>madridParts.find(p=>p.type===type).value).join('-');
             refreshGroupLabels();
             document.getElementById('ev-hora-inicio').value = `${horaActual}:${minutosStr}`;
-            
+
             // Calcular hora fin (1 hora después)
             let horaFin = parseInt(horaActual) + 1;
             if (horaFin >= 24) horaFin = horaFin - 24;
             document.getElementById('ev-hora-fin').value = `${horaFin.toString().padStart(2, '0')}:${minutosStr}`;
-            
+
             autoFillGrupo("");
             openModal('modal-evento');
         }
@@ -44,7 +44,7 @@
 
             document.getElementById('ev-fecha').value = fechaLocal.toISOString().split('T')[0];
             refreshGroupLabels();
-            
+
             // Usar las horas reales guardadas en Sheets; si faltan, mantenemos el fallback anterior.
             const horaInicioGuardada = ev.horaInicio || '10:00';
             let horaFinGuardada = ev.horaFin || '';
@@ -55,23 +55,23 @@
             }
             document.getElementById('ev-hora-inicio').value = horaInicioGuardada;
             document.getElementById('ev-hora-fin').value = horaFinGuardada;
-            
+
             document.getElementById('ev-precio').value = ev.precioHora;
             document.getElementById('ev-sitio').value = ev.direccion || '';
             document.getElementById('ev-barrio').value = ev.sitio || '';
-            
+
             // Cargar estado del checkbox de Bolo
             const isBolo = ev.boloCole === 'X';
             document.getElementById('ev-bolo').checked = isBolo;
-            
+
             // Mostrar opciones de calendario al editar
-            document.getElementById('sync-calendar-wrapper').classList.remove('hidden'); 
+            document.getElementById('sync-calendar-wrapper').classList.remove('hidden');
             document.getElementById('ev-repite').checked = false;
             document.getElementById('recurrence-options').classList.add('hidden');
-            
+
             autoFillGrupo(ev.grupo, true);
             window.configureProtectedSession?.(ev);
-            
+
             openModal('modal-evento');
         }
 
@@ -104,7 +104,7 @@
         function autoFillGrupo(nombre, ignoreOverwrite = false) {
             const isMaracuya = nombre.toLowerCase().includes('maracuyá') || nombre.toLowerCase().includes('maracuya');
             const g = GroupIdentity.resolve(grupos,nombre);
-            
+
             if (isMaracuya) {
                 document.getElementById('maracuya-gps-hint').classList.remove('hidden');
             } else {
@@ -129,7 +129,7 @@
             const precioInput = document.getElementById('ev-precio');
             const grupo = document.getElementById('ev-grupo').value;
             const g = GroupIdentity.resolve(grupos,grupo);
-            
+
             if (isBolo && g) {
                 precioInput.value = g.precioBolo ?? '';
             } else if (g) {
@@ -186,7 +186,7 @@
 
             // Mostrar modal
             modal.classList.remove('hidden');
-            
+
             // Hacer focus en campo si se especifica
             if (focusField) {
                 setTimeout(() => {
@@ -208,7 +208,7 @@
             const messageEl = document.getElementById('loading-message');
             messageEl.textContent = message;
             overlay.classList.remove('hidden');
-            
+
             // Prevenir scroll del body mientras carga
             document.body.style.overflow = 'hidden';
         }
@@ -216,7 +216,7 @@
         function hideLoading() {
             const overlay = document.getElementById('loading-overlay');
             overlay.classList.add('hidden');
-            
+
             // Restaurar scroll del body
             document.body.style.overflow = '';
         }
@@ -284,11 +284,11 @@
                 return false;
             }
 
-            
+
             const fechaSeleccionada = new Date(fecha);
             const hoy = new Date();
             hoy.setHours(0, 0, 0, 0);
-            
+
             if (fechaSeleccionada < hoy && !document.getElementById('ev-rowIdx').value) {
                 if (!confirm('La fecha seleccionada es anterior a hoy. ¿Deseas continuar?')) {
                     document.getElementById('ev-fecha').focus();
@@ -308,27 +308,27 @@
             const grupo = document.getElementById('ev-grupo').value;
             const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
             const isBolo = document.getElementById('ev-bolo').checked;
-            
+
             const fecha = document.getElementById('ev-fecha').value;
             const horaInicio = document.getElementById('ev-hora-inicio').value;
             const horaFin = document.getElementById('ev-hora-fin').value;
             const precio = parseFloat(document.getElementById('ev-precio').value);
             const sitio = document.getElementById('ev-sitio').value;
-            
+
             // Columna Bolo: "X" si es Bolo, vacío si no
-            const boloCole = isBolo ? "X" : ""; 
+            const boloCole = isBolo ? "X" : "";
             const clase = isMaracuya ? "" : "X";
 
             // Calculamos las horas usando las horas de inicio y fin introducidas
             const [h1, m1] = horaInicio.split(':').map(Number);
             const [h2, m2] = horaFin.split(':').map(Number);
-            
+
             // Calcular horas reales
             const minutosInicio = h1 * 60 + m1;
             const minutosFin = h2 * 60 + m2;
             let horasCalc = (minutosFin - minutosInicio) / 60;
             if (horasCalc <= 0) horasCalc = 1; // Mínimo 1 hora
-            
+
             // Para la columna H siempre guardamos 1, y el total se calcula en base a Precio * 1
             const horasParaColumnaH = 1;
             const fParts = fecha.split("-");
@@ -339,7 +339,7 @@
             const g = GroupIdentity.resolve(grupos,grupo);
             const ubicacion = document.getElementById('ev-barrio').value.trim() || ev?.sitio || g?.ubicacion || '';
             const direccion = sitio; // El campo sitio del formulario es la dirección para Maps
-            
+
             // Validar que ev exista antes de acceder a calEventId
             const calEventId = (ev && ev.calEventId) ? ev.calEventId : "";
             const fila = ["", "", boloCole, clase, precio, fFormat, totalStr, horasParaColumnaH, grupo, ubicacion, calEventId, direccion, horaInicio, horaFin];
@@ -351,7 +351,7 @@
                     fila[0] = old.pagado ? 'X' : '';
                     fila[1] = old.realizado ? 'X' : '';
                     await proxyGoogleAPI('sheets', 'update', {
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
                         range: `Detalle!A${rowIdx}:N${rowIdx}`,
                         valueInputOption: 'USER_ENTERED'
                     }, {
@@ -364,10 +364,10 @@
                         const startDT = `${fecha}T${horaInicio}:00`;
                         const endDT = `${fecha}T${horaFin}:00`;
 
-                        let eventResource = { 
-                            summary: isBolo ? `Bolo ${grupo}` : grupo, 
-                            location: sitio, 
-                            start: { dateTime: startDT, timeZone: tz }, 
+                        let eventResource = {
+                            summary: isBolo ? `Bolo ${grupo}` : grupo,
+                            location: sitio,
+                            start: { dateTime: startDT, timeZone: tz },
                             end: { dateTime: endDT, timeZone: tz },
                             colorId: '5',
                             description: `Sesión de ${horasCalc.toFixed(2)}h${isBolo ? ' (Bolo)' : ''} generada desde PercuManager.`,
@@ -382,7 +382,7 @@
                             const freq = document.getElementById('ev-freq').value;
                             const interval = document.getElementById('ev-interval').value;
                             const untilDate = document.getElementById('ev-until').value;
-                            
+
                             let rrule = `RRULE:FREQ=${freq};INTERVAL=${interval}`;
                             if (untilDate) {
                                 const formattedUntil = untilDate.replace(/-/g, '') + 'T235959Z';
@@ -403,19 +403,19 @@
                 } else {
                     // El append devuelve el rango donde insertó, ej: "Detalle!A5:N5"
                     const appendResponse = await proxyGoogleAPI('sheets', 'append', {
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
                         range: 'Detalle!A:N',
-                        valueInputOption: 'USER_ENTERED', 
+                        valueInputOption: 'USER_ENTERED',
                         insertDataOption: 'INSERT_ROWS'
                     }, {
                         values: [fila]
                     });
-                    
+
                     // Extraemos el número de fila del rango actualizado, ej: "Detalle!A5:N5" -> 5
                     // Manejar diferentes estructuras de respuesta (proxy vs gapi directo)
                     let updatedRange;
                     let insertedRow;
-                    
+
                     if (appendResponse.result && appendResponse.result.updates) {
                         updatedRange = appendResponse.result.updates.updatedRange;
                     } else if (appendResponse.updates) {
@@ -432,7 +432,7 @@
                         });
                         insertedRow = (lastRowResponse.values || []).length + 2;
                     }
-                    
+
                     if (updatedRange) {
                         const match = updatedRange.match(/\d+/);
                         if (match) {
@@ -441,17 +441,17 @@
                             console.error('No se pudo extraer número de fila del rango:', updatedRange);
                         }
                     }
-                    
-                                        
+
+
                     // Lógica de Google Calendar
                     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
                     const startDT = `${fecha}T${horaInicio}:00`;
                     const endDT = `${fecha}T${horaFin}:00`;
 
-                    let eventResource = { 
-                        summary: isBolo ? `Bolo ${grupo}` : grupo, 
-                        location: sitio, 
-                        start: { dateTime: startDT, timeZone: tz }, 
+                    let eventResource = {
+                        summary: isBolo ? `Bolo ${grupo}` : grupo,
+                        location: sitio,
+                        start: { dateTime: startDT, timeZone: tz },
                         end: { dateTime: endDT, timeZone: tz },
                         colorId: '5',
                         description: `Sesión de ${horasCalc.toFixed(2)}h${isBolo ? ' (Bolo)' : ''} generada desde PercuManager.`,
@@ -466,7 +466,7 @@
                         const freq = document.getElementById('ev-freq').value;
                         const interval = document.getElementById('ev-interval').value;
                         const untilDate = document.getElementById('ev-until').value;
-                        
+
                         let rrule = `RRULE:FREQ=${freq};INTERVAL=${interval}`;
                         if (untilDate) {
                             const formattedUntil = untilDate.replace(/-/g, '') + 'T235959Z';
@@ -479,7 +479,7 @@
                         const calResponse = await proxyGoogleAPI('calendar', 'insert', {
                             calendarId: 'primary'
                         }, eventResource);
-                        
+
                         // Obtener eventId de forma segura
                         let calEventId;
                         if (calResponse && calResponse.result && calResponse.result.id) {
@@ -494,7 +494,7 @@
                         // Guardamos el eventId en la columna K usando batchUpdate
                         try {
                             if (insertedRow) {
-                                
+
                                 // Usar batchUpdate para actualizar la celda específica
                                 await proxyGoogleAPI('sheets', 'batchUpdate', {
                                     spreadsheetId: CONFIG.SPREADSHEET_ID
@@ -546,7 +546,7 @@
             try {
                 if (rowIdx) {
                     await proxyGoogleAPI('sheets', 'update', {
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
                         range: `Coles!A${rowIdx}:E${rowIdx}`,
                         valueInputOption: 'USER_ENTERED'
                     }, {
@@ -554,9 +554,9 @@
                     });
                 } else {
                     await proxyGoogleAPI('sheets', 'append', {
-                        spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                        spreadsheetId: CONFIG.SPREADSHEET_ID,
                         range: 'Coles!A:E',
-                        valueInputOption: 'USER_ENTERED', 
+                        valueInputOption: 'USER_ENTERED',
                         insertDataOption: 'INSERT_ROWS'
                     }, {
                         values: [fila]
@@ -570,15 +570,15 @@
         // Event listener para formulario de eventos futuros
         document.getElementById('form-future-events').onsubmit = async (e) => {
             e.preventDefault();
-            
+
             const month = parseInt(document.getElementById('future-month').value);
             const year = parseInt(document.getElementById('future-year').value);
-            
+
             if (!month || !year) {
                 showErrorModal('Error de Validación', 'Por favor selecciona mes y año.', 'error');
                 return;
             }
-            
+
             try {
                 await importFutureEvents(month, year);
                 closeModal('modal-future-events');
@@ -590,4 +590,3 @@
         };
 
         let confirmCallback = null;
-

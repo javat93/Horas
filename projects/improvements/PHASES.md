@@ -32,4 +32,6 @@ Google Identity CSP: https://developers.google.com/identity/oauth2/web/guides/ge
 Cabeceras en Pages: https://github.com/orgs/community/discussions/54257
 
 ## Validación de entrega
-La fase técnica sigue abierta hasta verificar regresión, recorridos móviles, CI y publicación.
+Validación previa a publicación: 296 pruebas Node de la entrega y 293 de la copia local conservando cambios previos, todas correctas. Seis recorridos móviles de CI correctos (320 y 390 px): organización/selector/borrador, plantilla e informes. Revisión visual móvil sin desbordamiento, recuperación tras cuota y CSV descargado en simulación. Test isolation correcto.
+
+La publicación y las verificaciones de activos/API se registran en el acta local de entrega. No se ha probado un consentimiento OAuth nuevo ni realizado escrituras reales de sesiones o Calendar.

@@ -4,7 +4,7 @@
         window.addEventListener('unhandledrejection', function(event) {
             console.error('ERROR ASÍNCRONO NO CAPTURADO:', event.reason);
             console.error('Stack trace:', event.reason?.stack || 'No stack available');
-            
+
             // Intentar identificar el origen del error
             if (event.reason?.message?.includes('listener') || event.reason?.message?.includes('channel')) {
                 console.warn('Posible causa: Listener asíncrono con canal cerrado');
@@ -14,7 +14,7 @@
 
         // Sistema de control de versiones (definido en app-version.js)
         const APP_VERSION = window.APP_VERSION || { version: '1.5.8', date: '', changes: [] };
-        
+
         // Mostrar versión en consola al cargar
         console.log('%c=== PERCU MANAGER ===', 'color: #2563eb; font-weight: bold; font-size: 14px');
         console.log(`%cVersión: ${APP_VERSION.version}`, 'color: #10b981; font-weight: bold');
@@ -91,10 +91,10 @@
             if (val === undefined || val === null || val === '') return 0;
             if (typeof val === 'number') return val;
             if ((CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE) && CONFIG.TEST_PHASE >= 4) return LocaleData.numeric(val) ?? 0;
-            
+
             // Eliminar espacios, símbolos de moneda y otros caracteres no numéricos excepto coma y punto
             let cleanVal = val.toString().replace(/[^\d,.-]/g, '').trim();
-            
+
             // Si hay puntos y comas, asumimos que el punto es separador de miles y la coma decimal (formato español)
             if (cleanVal.includes('.') && cleanVal.includes(',')) {
                 cleanVal = cleanVal.replace(/\./g, '').replace(',', '.');
@@ -102,11 +102,11 @@
                 // Si solo hay coma, es el separador decimal
                 cleanVal = cleanVal.replace(',', '.');
             }
-            
+
             const result = parseFloat(cleanVal);
             return isNaN(result) ? 0 : result;
         }
-		
+
         function gapiLoaded() {
             gapi.load('client', async () => {
                 await gapi.client.init({
@@ -149,7 +149,7 @@
                     },
                     client_id: CONFIG.CLIENT_ID,
                     scope: CONFIG.SCOPES,
-                    callback: '', 
+                    callback: '',
                 });
                 gisInited = true;
                 checkAuth();
@@ -195,7 +195,7 @@
                     document.getElementById('add-future-events-btn').classList.remove('hidden');
                     document.getElementById('auth-btn').classList.add('hidden');
                     document.getElementById('auth-text').innerText = "Conectado";
-                    
+
                     // Intentar sincronizar para validar el token
                     syncData(false,false).catch(err => {if(AuthSession.isAuthError(err))expireGoogleConnection();else document.getElementById('auth-status').textContent='No se pudieron cargar los datos. Puedes reintentar sin volver a iniciar sesión.';});
                 } else {
@@ -210,7 +210,7 @@
         function ensureAuthButtonVisible() {
             const authBtn = document.getElementById('auth-btn');
             const token = localStorage.getItem(tokenStorageKey());
-            
+
             if (!token) {
                 // Forzar visibilidad del botón si no hay token
                 authBtn.classList.remove('hidden');
@@ -240,32 +240,32 @@
                 if (!proxyUrl) {
                     throw new Error(`URL del proxy no configurada para ${apiType}`);
                 }
-                
+
                 // Obtener token de OAuth si está disponible
                 const token = window.horasAccessToken();
-                
+
                 const headers = {
                     'Content-Type': 'application/json',
                 };
-                
+
                 // Añadir token de OAuth si existe
                 if (token) {
                     headers['Authorization'] = `Bearer ${token}`;
                 }
-                
+
                 const requestData = {
                     method: method,
                     params: params,
                     body: body
                 };
-                
-                
+
+
                 const response = await window.horasFetch(proxyUrl, {
                     method: 'POST',
                     headers: headers,
                     body: JSON.stringify(requestData)
                 });
-                
+
                 return await AppData.readResponse(response);
             } else {
                 // En desarrollo, usar gapi directamente
@@ -355,7 +355,7 @@
                 if (nativeData) window.updateLocaleWarnings?.(nativeData);
                 // 1. Grupos
                 const resColes = nativeData ? {values:nativeData.groups} : await proxyGoogleAPI('sheets', 'get', {
-                    spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
                     range: 'Coles!A2:E'
                 });
                 const loadedGroups = (resColes.values || []).map((row, index) => AppData.hasContent(row)?({
@@ -364,18 +364,18 @@
                     sitio: row[1] || '',
                     precio: LocaleData.numeric(row[2]),
                     precioBolo: LocaleData.numeric(row[3]),
-                    ubicacion: row[4] || ''                    
+                    ubicacion: row[4] || ''
                 }):null).filter(Boolean);
 
                 // 2. Sesiones (leemos hasta columna N para incluir calEventId, dirección y horas guardadas)
                 const resDetalle = nativeData ? {values:nativeData.details} : await proxyGoogleAPI('sheets', 'get', {
-                    spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
                     range: 'Detalle!A2:N'
                 });
-                
+
                 const rawRows = resDetalle.values || [];
                 const hoy = new Date().setHours(0,0,0,0);
-                
+
                 // Mapeamos primero sin calEventId para tener los objetos base
                 let eventosBase = rawRows.map((row, index) => {
                     if(!AppData.hasContent(row))return null;
@@ -410,7 +410,7 @@
                 const sinId = resolverCal
                     ? eventosBase.filter(ev => !ev.calEventId && ev.fechaObj)
                     : [];
-                
+
                 // Sincronizamos Calendar eventIds si hay eventos sin ID
                 if (sinId.length > 0) {
                     const updates = [];
@@ -495,7 +495,7 @@
                     const now = new Date();
                     const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
                     const oneMonthAhead = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-                    
+
                     // Obtener eventos del Calendar
                     const calendarResponse = await listAllCalendarEvents({
                         calendarId: 'primary',
@@ -504,9 +504,9 @@
                         singleEvents: true,
                         orderBy: 'startTime'
                     });
-                    
+
                     const allEvents = calendarResponse.items || [];
-                    
+
                     // Filtrar solo eventos con colorId 5 (amarillo)
                     const events = allEvents.filter(ev => {
                         // Validación robusta del colorId
@@ -522,7 +522,7 @@
                         }
                         return isValid;
                     });
-                    
+
                     if (events.length > 0) {
                         // Crear set de calEventId existentes para búsqueda rápida
                         const existingEventIds = new Set();
@@ -532,13 +532,13 @@
                             const uniqueKey = CalendarLinking.eventKey(event);
                             if (uniqueKey) existingEventKeys.add(uniqueKey);
                         });
-                        
+
                         // Procesar cada evento y añadirlo si no existe
                         const rowsToAdd = [];
                         let processedCount = 0;
                         let skippedCount = 0;
                         let updateCount = 0;
-                        
+
                         for (const event of events) {
                             try {
                                 // Procesar evento para obtener datos actuales del Calendar
@@ -547,10 +547,10 @@
                                     console.warn(`No se pudo procesar evento ${event.id}`);
                                     continue;
                                 }
-                                
+
                                 // Guardar tempRow en el evento para usarlo en comparaciones
                                 event.tempRow = tempRow;
-                                
+
                                 // Verificar si el evento ya existe por calEventId
                                 if (existingEventIds.has(event.id)) {
                                     // El evento existe, verificar si hay cambios
@@ -573,7 +573,7 @@
                                             existingEvent.horaInicio,
                                             existingEvent.horaFin
                                         ];
-                                        
+
                                         // Verificar si hay cambios
                                         if (hasEventChanges(event, existingRow)) {
                                             // Hay cambios, actualizar el registro existente
@@ -593,13 +593,13 @@
                                     }
                                     continue;
                                 }
-                                
+
                                 // El evento no existe, verificar si es un nuevo evento
                                 const fecha = tempRow[5]; // Columna F: fecha
                                 const grupo = tempRow[8]; // Columna I: grupo
                                 const horaInicio = tempRow[12]; // Columna M: horaInicio
                                 const horaFin = tempRow[13]; // Columna N: horaFin
-                                
+
                                 // Verificar duplicado por fecha+grupo+horas
                                 if (fecha && grupo) {
                                     const uniqueKey = CalendarLinking.eventKey({fechaStr:fecha,grupo,horaInicio,horaFin});
@@ -608,7 +608,7 @@
                                         continue;
                                     }
                                 }
-                                
+
                                 if (eventosBase.some(ev => !ev.calEventId && CalendarLinking.compatible(ev, event))) {
                                     skippedCount++;
                                     continue; // Resolver la ambigüedad antes de añadir otra fila.
@@ -621,7 +621,7 @@
                                 console.warn(`Error procesando evento ${event.id}:`, err);
                             }
                         }
-                        
+
                         // Mostrar resumen de sincronización
                         let message = '';
                         if (processedCount > 0 || updateCount > 0) {
@@ -635,7 +635,7 @@
                         } else if (skippedCount > 0) {
                             showErrorModal('Sincronización', `${skippedCount} eventos ya estaban sincronizados.`, 'info');
                         }
-                        
+
                         // Añadir nuevos eventos al spreadsheet
                         if (rowsToAdd.length > 0) {
                             await proxyGoogleAPI('sheets', 'append', {
@@ -646,13 +646,13 @@
                             }, {
                                 values: rowsToAdd
                             });
-                            
+
                             // Recargar eventos base para incluir los nuevos
                             const resDetalleActualizado = await proxyGoogleAPI('sheets', 'get', {
-                                spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                                spreadsheetId: CONFIG.SPREADSHEET_ID,
                                 range: 'Detalle!A2:N'
                             });
-                            
+
                             const rawRowsActualizado = resDetalleActualizado.values || [];
                             eventosBase = rawRowsActualizado.map((row, index) => {
                                 const fParts = (row[5] || "").split("/");
@@ -688,19 +688,19 @@
                 renderAll();
                 updateFinancialStats();
                 window.refreshCalendarPending?.().catch(error=>console.warn("No se pudieron consultar los cambios pendientes",error.message));
-                
+
                 // 4. Actualizar automáticamente las clases realizadas (solo en la carga inicial)
                 if (actualizarRealizadosFlag) {
                     await actualizarRealizados();
                 }
-            } catch (err) { 
+            } catch (err) {
         console.error("Error sync:", err);
-        
+
         // Detectar error de autenticación y limpiar token inválido
         if (AuthSession.isAuthError(err)) {
             console.error('Token inválido detectado en syncData, limpiando localStorage');
             expireGoogleConnection();
-            
+
             // Lanzar error para que checkAuth() también sepa que falló
             throw err;
         }
@@ -717,36 +717,36 @@
             try {
                 const hoy = new Date().setHours(0,0,0,0);
                 const updates = [];
-                
+
                 // Volver a leer los datos originales del spreadsheet para comparar correctamente
                 const resDetalle = await proxyGoogleAPI('sheets', 'get', {
-                    spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
                     range: 'Detalle!A2:I'  // Incluir hasta columna I para obtener fecha y grupo
                 });
-                
+
                 const rawRows = resDetalle.values || [];
-                
+
                 // Buscar clases que deberían estar realizadas pero no lo están en el spreadsheet
                 for (let i = 0; i < rawRows.length; i++) {
                     const row = rawRows[i];
                     const rowIdx = i + 2; // +2 porque empieza en A2
-                    
+
                     // Extraer fecha directamente del spreadsheet (columna F = index 5)
                     const fechaStr = row[5] || '';
                     if (!fechaStr) continue;
-                    
+
                     // Parsear fecha del spreadsheet
                     const fParts = fechaStr.split("/");
                     const fechaObj = fParts.length === 3 ? new Date(fParts[2], fParts[1]-1, fParts[0]) : null;
-                    
+
                     if (!fechaObj) continue;
-                    
+
                     const fueRealizadoOriginalmente = row[1] === 'X'; // Valor original del spreadsheet
                     const deberiaEstarRealizado = fechaObj < hoy;
-                    
+
                     // Obtener nombre del grupo si está disponible
                     const grupo = row[8] || 'Sin nombre';
-                    
+
                     // Si debería estar realizado pero no estaba marcado como X en la columna B
                     if (deberiaEstarRealizado && !fueRealizadoOriginalmente) {
                         updates.push({
@@ -756,7 +756,7 @@
                         });
                     }
                 }
-                
+
                 // Actualizar celdas individualmente para preservar formato de checkbox
                 if (updates.length > 0) {
                     for (const update of updates) {
@@ -829,10 +829,10 @@
                 showErrorModal('Vínculo compartido', 'Revisa el CalendarId antes de borrar. Podría pertenecer a otra clase.', 'warning');
                 return;
             }
-            const mensaje = ev ? 
+            const mensaje = ev ?
                 `¿Seguro que quieres borrar la clase "${ev.grupo}" del ${ev.fechaStr}? Esta acción no se puede deshacer.` :
                 "¿Seguro que quieres borrar esta fila? Esta acción no se puede deshacer.";
-            
+
             showConfirmModal(mensaje, async (confirmed) => {
                 if (confirmed) {
                     // 1. Borrar evento de Google Calendar si existe
@@ -885,7 +885,7 @@
             const yearSelect = document.getElementById('future-year');
             const currentYear = new Date().getFullYear();
             yearSelect.innerHTML = '<option value="">Selecciona un año...</option>';
-            
+
             for (let i = 0; i <= 2; i++) {
                 const year = currentYear + i;
                 const option = document.createElement('option');
@@ -893,12 +893,12 @@
                 option.textContent = year;
                 yearSelect.appendChild(option);
             }
-            
+
             // Seleccionar mes y año actuales por defecto
             const currentMonth = new Date().getMonth() + 1;
             document.getElementById('future-month').value = currentMonth;
             document.getElementById('future-year').value = currentYear;
-            
+
             openModal('modal-future-events');
         }
 
@@ -909,29 +909,29 @@
         function updateFinancialStats() {
             const statsInfo = document.getElementById('stats-info');
             if (!statsInfo) return;
-            
+
             const reportScope=window.horasReportScope?.()||{curso:'all',grupo:''};
             const reportEvents=window.ReportTools?ReportTools.filterSessions(eventos,reportScope,LocaleData.parseSpanish,GroupIdentity.id):eventos;
             // Calcular totales
             let totalCobrar = 0;
             let totalPendiente = 0;
-            
+
             reportEvents.forEach(ev => {
                 if (!ev.pagado && !ev.amountWarning) {
                     totalCobrar += ev.total;
                     totalPendiente += ev.total;
                 }
             });
-            
+
             // Estimación de IRPF configurada por el usuario.
             const retencionIRPF = totalCobrar * 0.35;
             const totalNeto = totalCobrar - retencionIRPF;
-            
+
             // Formatear números
             const formatCurrency = (amount) => {
                 return LocaleData.currency(amount);
             };
-            
+
             // Actualizar el span con la información financiera
             statsInfo.innerHTML = `
                 <div class="financial-overview">
@@ -947,11 +947,11 @@
 
         async function importFutureEvents(month, year) {
             showLoading('Importando eventos...');
-            
+
             try {
                 // 1. Cargar grupos desde el spreadsheet (igual que syncData)
                 const resColes = await proxyGoogleAPI('sheets', 'get', {
-                    spreadsheetId: CONFIG.SPREADSHEET_ID, 
+                    spreadsheetId: CONFIG.SPREADSHEET_ID,
                     range: 'Coles!A2:E'
                 });
                 grupos = (resColes.values || []).map((row, index) => ({
@@ -960,16 +960,16 @@
                     sitio: row[1] || '',
                     precio: LocaleData.numeric(row[2]),
                     precioBolo: LocaleData.numeric(row[3]),
-                    ubicacion: row[4] || ''                    
+                    ubicacion: row[4] || ''
                 }));
-                
+
                 // Calcular rango de fechas para el mes seleccionado de forma robusta
                 const startDate = new Date(year, month - 1, 1, 0, 0, 0, 0);
                 const endDate = new Date(year, month, 1, 0, 0, 0, 0);
-                
+
                 const timeMin = startDate.toISOString();
                 const timeMax = endDate.toISOString();
-                
+
                 // 2. Obtener eventos de Google Calendar
                 const calendarResponse = await listAllCalendarEvents({
                     calendarId: 'primary',
@@ -978,28 +978,28 @@
                     singleEvents: true,
                     orderBy: 'startTime'
                 });
-                
+
                 const allEvents = calendarResponse.items || [];
-                
+
                 // Filtrar solo eventos con colorId 5 (amarillo)
                 const events = allEvents.filter(ev => {
                     if (!ev.colorId) return false;
                     return String(ev.colorId) === '5';
                 });
-                
+
                 // Procesar eventos de Calendar para obtener su representación en Excel (tempRow)
                 for (const event of events) {
                     event.tempRow = await processCalendarEvent(event);
                 }
-                
+
                 // 3. Obtener eventos existentes del spreadsheet en rango completo Detalle!A2:N
                 const existingEvents = await proxyGoogleAPI('sheets', 'get', {
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
                     range: 'Detalle!A2:N'
                 });
-                
+
                 const allSheetRows = existingEvents.values || [];
-                
+
                 // Mapear filas completas a objetos
                 const sheetEvents = allSheetRows.map((row, index) => {
                     const fParts = (row[5] || "").split("/");
@@ -1023,20 +1023,20 @@
                         horaFin: row[13] || ''
                     };
                 });
-                
+
                 CalendarLinking.assertUniqueLinks(sheetEvents);
                 // Filtrar eventos del spreadsheet para el mes y año seleccionados
-                const sheetEventsInMonth = sheetEvents.filter(ev => 
-                    ev.fechaObj && 
-                    (ev.fechaObj.getMonth() + 1) === month && 
+                const sheetEventsInMonth = sheetEvents.filter(ev =>
+                    ev.fechaObj &&
+                    (ev.fechaObj.getMonth() + 1) === month &&
                     ev.fechaObj.getFullYear() === year
                 );
-                
+
                 if (events.length === 0 && sheetEventsInMonth.length === 0) {
                     showErrorModal('Sin Eventos Válidos', 'No se encontraron eventos en el mes seleccionado ni en Google Calendar ni en el Spreadsheet.', 'info');
                     return;
                 }
-                
+
                 // Registro de estados y matched IDs/Keys
                 const matchedCalendarEventIds = new Set(sheetEvents.map(ev => ev.calEventId).filter(Boolean));
                 const rowsToAdd = [];
@@ -1044,16 +1044,16 @@
                 let updatedInSheets = 0;
                 let insertedInCalendar = 0;
                 let skippedCount = 0;
-                
+
                 // Paso 1: Cruzar datos de Sheets a Calendar
                 for (const sheetEv of sheetEventsInMonth) {
                     let calEv = null;
-                    
+
                     // Buscar coincidencia en Calendar
                     if (sheetEv.calEventId) {
                         calEv = events.find(e => e.id === sheetEv.calEventId);
                     }
-                    
+
                     if (!calEv && !sheetEv.calEventId) {
                         const decision = CalendarLinking.choose(sheetEv, events, sheetEvents);
                         if (decision.status === 'matched') calEv = events.find(e => e.id === decision.id);
@@ -1062,7 +1062,7 @@
                     if (calEv) {
                         // El evento existe en ambos lados
                         matchedCalendarEventIds.add(calEv.id);
-                        
+
                         // Convertir evento de la hoja a fila para comparación
                         const existingRow = [
                             sheetEv.pagado ? 'X' : '',
@@ -1080,14 +1080,14 @@
                             sheetEv.horaInicio,
                             sheetEv.horaFin
                         ];
-                        
+
                         const needsIdUpdate = sheetEv.calEventId !== calEv.id;
                         const hasChanges = hasEventChanges(calEv, existingRow);
-                        
+
                         if (hasChanges || needsIdUpdate) {
                             // Actualizar calEventId en tempRow antes de guardarlo en Excel
                             calEv.tempRow[10] = calEv.id;
-                            
+
                             const updated = await updateExistingEvent(sheetEv.rowIdx, calEv, sheetEv);
                             if (updated) {
                                 sheetEv.calEventId = calEv.id;
@@ -1115,7 +1115,7 @@
                         insertedInSheets++;
                     }
                 }
-                
+
                 // Insertar los registros nuevos en Sheets en lote
                 if (rowsToAdd.length > 0) {
                     await proxyGoogleAPI('sheets', 'append', {
@@ -1127,7 +1127,7 @@
                         values: rowsToAdd
                     });
                 }
-                
+
                 // 4. Mostrar resumen completo
                 let message = '';
                 const parts = [];
@@ -1135,15 +1135,15 @@
                 if (updatedInSheets > 0) parts.push(`${updatedInSheets} actualizados en Sheets`);
                 if (insertedInCalendar > 0) parts.push(`${insertedInCalendar} agregados a Calendar`);
                 if (skippedCount > 0) parts.push(`${skippedCount} omitidos (sin cambios)`);
-                
+
                 if (parts.length > 0) {
                     message = `Operación completada: ` + parts.join(', ') + '.';
                 } else {
                     message = `No se realizaron cambios.`;
                 }
-                
+
                 showErrorModal('Importación y Sincronización', message, 'success');
-                
+
             } catch (error) {
                 console.error('Error en importFutureEvents:', error);
                 throw error;
@@ -1161,7 +1161,7 @@
                 grupo: calendarEvent.tempRow ? calendarEvent.tempRow[8] : '',
                 sitio: calendarEvent.tempRow ? calendarEvent.tempRow[9] : ''
             };
-            
+
             const excelData = {
                 fecha: existingRow[5] || '',
                 horaInicio: existingRow[12] || '',
@@ -1169,7 +1169,7 @@
                 grupo: existingRow[8] || '',
                 sitio: existingRow[9] || ''
             };
-            
+
             // Comparar campos clave
             return calendarData.fecha !== excelData.fecha ||
                    calendarData.horaInicio !== excelData.horaInicio ||
@@ -1181,13 +1181,13 @@
         // Función para actualizar un registro existente en Excel
         async function updateExistingEvent(rowIdx, calendarEvent, existingEvent = null) {
             if (!calendarEvent.tempRow) return false;
-            
+
             try {
                 // Preparar datos para actualización (mantener columnas A y B si existen)
                 const updateRow = [...calendarEvent.tempRow];
                 updateRow[0] = existingEvent && existingEvent.pagado ? 'X' : '';
                 updateRow[1] = existingEvent && existingEvent.realizado ? 'X' : '';
-                
+
                 await proxyGoogleAPI('sheets', 'update', {
                     spreadsheetId: CONFIG.SPREADSHEET_ID,
                     range: `Detalle!A${rowIdx}:N${rowIdx}`,
@@ -1195,7 +1195,7 @@
                 }, {
                     values: [updateRow]
                 });
-                
+
                 return true;
             } catch (err) {
                 console.error('Error actualizando evento existente:', err);
@@ -1209,15 +1209,15 @@
             const title = event.summary || 'Sin título';
             const start = event.start;
             const end = event.end;
-            
+
             // Parsear fechas y horas usando las mismas funciones que syncData
             let startDate, endDate, horaInicio, horaFin;
-            
+
             if (start.dateTime) {
                 // Evento con hora específica
                 startDate = new Date(start.dateTime);
                 endDate = new Date(end.dateTime);
-                
+
                 // Usar la misma función que syncData para formatear horas
                 const horasInfo = extractHorasFromCalendarEvent(event);
                 horaInicio = horasInfo.horaInicio;
@@ -1231,18 +1231,18 @@
             } else {
                 return null; // Evento sin fecha válida
             }
-            
+
             // Formatear fecha para spreadsheet (mismo formato que syncData)
             const fFormat = `${startDate.getDate().toString().padStart(2, '0')}/${(startDate.getMonth() + 1).toString().padStart(2, '0')}/${startDate.getFullYear()}`;
-            
+
             // Extraer información del título como lo hace el formulario
             let grupo = 'Sin grupo';
             let sitio = '';
-            
+
             // Determinar si es un evento de Bolo
             const tieneBolo = title.toLowerCase().includes('bolo');
 
-            
+
             if (title.includes(' - ')) {
                 const parts = title.split(' - ');
                 grupo = parts[0].trim();
@@ -1254,27 +1254,27 @@
             }
 
             grupo = grupo.replace(/^Bolo\s+/, "");
-            
+
             // Determinar si es Maracuya para la columna clase (como en el formulario)
             const isMaracuya = grupo.toLowerCase().includes('maracuyá') || grupo.toLowerCase().includes('maracuya');
-            
+
             // Marcar campo BoloCole si contiene la palabra "Bolo"
-            const boloCole = tieneBolo ? "X" : ""; 
+            const boloCole = tieneBolo ? "X" : "";
             const clase = isMaracuya ? "" : "X"; // Columna D: "" para Maracuya, "X" para otros
-            
+
             // Buscar información del grupo como hace el formulario
             const g = GroupIdentity.resolve(grupos,grupo);
             if(g)grupo = g.nombre;
-            
+
             // Usar precio bolo si es evento de Bolo, sino precio normal
             const precio = g ? (tieneBolo ? g.precioBolo : g.precio) : null;
             if(precio === null || !Number.isFinite(precio))throw new Error(`El grupo «${grupo}» no tiene una tarifa válida para este tipo de sesión. Revisa Coles antes de importar.`);
             const ubicacion = g ? g.ubicacion : ''; // Ubicación del grupo
             const direccion = typeof event.location === 'string' && event.location.trim() ? event.location.trim() : (g ? g.sitio : '');
-            
+
             // Calcular horas y total (misma lógica que el formulario)
             let horasCalc = 1;
-            
+
             if (horaInicio && horaFin) {
                 // Calcular horas reales si tenemos horas específicas
                 const [h1, m1] = horaInicio.split(':').map(Number);
@@ -1282,14 +1282,14 @@
                 const minutosInicio = h1 * 60 + m1;
                 const minutosFin = h2 * 60 + m2;
                 horasCalc = (minutosFin - minutosInicio) / 60;
-                
+
                 if (horasCalc <= 0) horasCalc = 1; // Mínimo 1 hora
             }
-            
+
             // Para la columna H siempre guardamos 1, y el total se calcula en base a Precio * 1
             const horasParaColumnaH = 1;
             const totalStr = precio.toFixed(2).replace(".",",") + " €";
-            
+
             // Crear fila para spreadsheet con el mismo orden que el formulario
             const fila = [
                 '', // Columna A: pagado
@@ -1307,11 +1307,11 @@
                 horaInicio, // Columna M: horaInicio
                 horaFin // Columna N: horaFin
             ];
-            
+
             return fila;
         }
 
-        
+
         // Función auxiliar para formatear tiempo
         function formatTime(date) {
             const hours = date.getHours().toString().padStart(2, '0');
@@ -1326,4 +1326,3 @@
             ensureAuthButtonVisible();
             lucide.createIcons();
         };
-    

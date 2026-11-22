@@ -14,16 +14,16 @@
             const fCobrados = document.getElementById('filter-cobrados').value;
             const fRealizados = document.getElementById('filter-realizados').value;
             const fGrupo = document.getElementById('filter-grupo').value;
-            
+
             const filtered = eventos.filter(ev => {
                 let pasaCobro = true;
                 if (fCobrados === 'cobrado') pasaCobro = ev.pagado;
                 if (fCobrados === 'pendiente') pasaCobro = !ev.pagado;
-                
+
                 let pasaRealizado = true;
                 if (fRealizados === 'realizado') pasaRealizado = ev.realizado;
                 if (fRealizados === 'futuro') pasaRealizado = !ev.realizado;
-                
+
                 return pasaCobro && pasaRealizado && (!fGrupo || GroupIdentity.id(ev.grupo) === fGrupo);
             });
 
@@ -48,7 +48,7 @@
                             <div class="session-card-meta flex gap-3 mt-1">
                                 <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${SafeHTML.escape(ev.fechaStr||'Fecha pendiente')}${ev.dateWarning ? ' · Revisar fecha' : ''}${ev.paymentSaving?' · Guardando pago…':ev.paymentError?' · Pago no guardado; vuelve a intentarlo':''}</span>
                                 <span class="text-xs font-bold ${ev.realizado ? 'text-blue-500' : 'text-slate-400'} flex items-center gap-1">
-                                    <i data-lucide="${ev.realizado ? 'flag' : 'hourglass'}" class="w-3 h-3"></i> 
+                                    <i data-lucide="${ev.realizado ? 'flag' : 'hourglass'}" class="w-3 h-3"></i>
                                     ${ev.realizado ? 'Realizado' : 'Pendiente'}
                                 </span>
                             </div>
@@ -76,7 +76,7 @@
         function renderGrupos() {
             const container = document.getElementById('lista-maestros');
             const term = document.getElementById('search-grupos').value.toLowerCase();
-            
+
             const filtered = (window.horasGroupCourses ? window.horasGroupCourses.visible(grupos) : grupos).filter(g =>
                 GroupIdentity.matches(g.nombre,term) ||
                 (g.sitio && g.sitio.toLowerCase().includes(term))
@@ -112,18 +112,18 @@
                 // Crear objeto de evento con horas si están disponibles
                 let startDateTime = e.fechaObj;
                 let endDateTime = e.fechaObj;
-                
+
                 // Si tenemos horas de inicio y fin, aplicarlas
                 if (e.horaInicio && e.horaFin && e.horaInicio.trim() !== '' && e.horaFin.trim() !== '') {
                     const [startHour, startMin] = e.horaInicio.split(':').map(Number);
                     const [endHour, endMin] = e.horaFin.split(':').map(Number);
-                    
+
                     // Crear fecha local sin conversión UTC
                     const fechaLocal = new Date(e.fechaObj);
                     const year = fechaLocal.getFullYear();
                     const month = fechaLocal.getMonth();
                     const day = fechaLocal.getDate();
-                    
+
                     startDateTime = new Date(year, month, day, startHour, startMin, 0, 0);
                     endDateTime = new Date(year, month, day, endHour, endMin, 0, 0);
                 } else {
@@ -132,11 +132,11 @@
                     const year = fechaLocal.getFullYear();
                     const month = fechaLocal.getMonth();
                     const day = fechaLocal.getDate();
-                    
+
                     startDateTime = new Date(year, month, day, 0, 0, 0, 0);
                     endDateTime = new Date(year, month, day, 23, 59, 59, 999);
                 }
-                
+
                 // Personalizar título según dispositivo
                 let eventTitle;
                 const isMobile = window.innerWidth <= 768;
@@ -151,13 +151,13 @@
                         eventTitle = sessionGroupName(e) || e.sitio || 'Sesión';
                     }
                 }
-                
-                return { 
+
+                return {
                     title: eventTitle,
-                    start: startDateTime, 
+                    start: startDateTime,
                     end: endDateTime,
-                    color: e.pagado ? '#10b981' : '#2563eb', 
-                    extendedProps: { rowIdx: e.rowIdx } 
+                    color: e.pagado ? '#10b981' : '#2563eb',
+                    extendedProps: { rowIdx: e.rowIdx }
                 };
             });
             const isMobile = window.innerWidth <= 768;

@@ -31,7 +31,7 @@
             const gruposOrdenados = sessionGroupCatalog().filter(g=>g.nombre.trim()).sort((a, b) =>
                 groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base', numeric: true })
             );
-            sel.innerHTML = '<option value="">Selecciona grupo...</option>' + 
+            sel.innerHTML = '<option value="">Selecciona grupo...</option>' +
                 gruposOrdenados.map(g => `<option value="${SafeHTML.escape(g.nombre)}">${SafeHTML.escape(groupOptionName(g.nombre))}</option>`).join('');
             sel.value = selected;
             populateGrupoOptions();
@@ -41,14 +41,14 @@
         function populateGrupoOptions() {
             const optionsContainer = document.getElementById('grupo-options');
             if (!optionsContainer) return;
-            
+
             // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
             const gruposOrdenados = sessionGroupCatalog().filter(g=>g.nombre.trim()).sort((a, b) =>
                 groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base', numeric: true })
             );
-            
-            optionsContainer.innerHTML = gruposOrdenados.map(g => 
-                `<div class="grupo-option px-3 py-2 hover:bg-slate-100 cursor-pointer rounded-lg transition-colors" 
+
+            optionsContainer.innerHTML = gruposOrdenados.map(g =>
+                `<div class="grupo-option px-3 py-2 hover:bg-slate-100 cursor-pointer rounded-lg transition-colors"
 
                        data-grupo="${SafeHTML.escape(g.nombre)}">
                     <div class="font-medium text-sm">${SafeHTML.escape(groupOptionName(g.nombre))}</div>
@@ -85,23 +85,23 @@
         function filterGrupos(searchTerm) {
             const optionsContainer = document.getElementById('grupo-options');
             if (!optionsContainer) return;
-            
+
             const filtered = sessionGroupCatalog().filter(g =>
                 g.nombre.trim() && GroupIdentity.matches(g.nombre,searchTerm)
             ).sort((a, b) => groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base', numeric: true }));
-            
+
             if (filtered.length === 0) {
                 optionsContainer.innerHTML = '<div class="text-slate-400 text-sm px-3 py-2">No se encontraron grupos</div>';
             } else {
-                optionsContainer.innerHTML = filtered.map(g => 
-                    `<div class="grupo-option px-3 py-2 hover:bg-slate-100 cursor-pointer rounded-lg transition-colors" 
+                optionsContainer.innerHTML = filtered.map(g =>
+                    `<div class="grupo-option px-3 py-2 hover:bg-slate-100 cursor-pointer rounded-lg transition-colors"
 
                            data-grupo="${SafeHTML.escape(g.nombre)}">
                         <div class="font-medium text-sm">${SafeHTML.escape(groupOptionName(g.nombre))}</div>
                     </div>`
                 ).join('');
             }
-            
+
             // Mostrar dropdown si hay búsqueda
             const dropdown = document.getElementById('grupo-dropdown');
             if (dropdown && searchTerm.trim() !== '') {
@@ -114,18 +114,18 @@
         function selectGrupo(grupoNombre) {
             const searchInput = document.getElementById('ev-grupo-search');
             const hiddenSelect = document.getElementById('ev-grupo');
-            
+
             if (searchInput) {
                 searchInput.value = groupOptionName(grupoNombre);
             }
-            
+
             if (hiddenSelect) {
                 hiddenSelect.value = grupoNombre;
                 // Disparar el evento onchange para mantener compatibilidad
                 const event = new Event('change', { bubbles: true });
                 hiddenSelect.dispatchEvent(event);
             }
-            
+
             hideGrupoDropdown();
         }
 
@@ -134,7 +134,7 @@
             const dropdown = document.getElementById('grupo-dropdown');
             const searchInput = document.getElementById('ev-grupo-search');
             const dropdownContainer = searchInput ? searchInput.parentElement : null;
-            
+
             if (dropdown && dropdownContainer && !dropdownContainer.contains(event.target)) {
                 hideGrupoDropdown();
             }
