@@ -260,10 +260,27 @@
       return { action: 'updateProgress', vinculoId: a.id, changes };
     });
   }
+  let templateData = null;
+  async function templateRequest(payload) {
+    if(!authenticated())throw Error('Conecta Google para consultar las plantillas.');
+    const target=new URL('/api/plantillas',new URL(endpoint,window.location.href));
+    const result=await json(target.href,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+(host?host.session()?.token:token)},body:JSON.stringify(payload)});
+    if(result.mode!=='templates-production'||result.spreadsheetId!==C.TARGET||result.legacyModified!==false||result.calendarModified!==false||!Array.isArray(result.templates)||!/^[a-f0-9]{64}$/.test(result.version))throw Error('No se pudo verificar la plantilla. Actualiza antes de repetir.');
+    templateData=result;return result;
+  }
   function assignThemes() {
     const g = currentGroup(); if (!g) return; draftMeta = {type:'assign', groupId:g.id};
     const choices = new Set(), ids = new Map(), candidates = data().themes.filter(t => t.activo && !data().assignments.some(a => G.id(a.grupo) === g.id && a.temaId === t.id && a.activo)).sort(sortThemes);
     const list = el('div', { class: 'assign-list' });
+    const presets = el('details', {class:'template-options'},[el('summary',{textContent:'Usar una plantilla o el repertorio de otro grupo'})]);
+    const templateStatus=el('p',{class:'explanation',role:'status'}),savedTemplates=el('div',{class:'template-list'});
+    function chooseTemplate(ids){const available=RepertoireTemplates.candidates(ids,data().themes,data().assignments,g.nombre,G.same);choices.clear();for(const id of available)choices.add(id);dirty=!!choices.size;fill();templateStatus.textContent=available.length+' temas preparados para revisar. Solo se copian temas; los estados aprendidos no se copian.';}
+    for(const preset of RepertoireTemplates.builtins(data().themes))presets.append(button(preset.nombre,()=>chooseTemplate(preset.temaIds),'subtle'));
+    presets.append(selectControl([['','Copiar temas de otro grupo…'],...data().groups.filter(other=>other.id!==g.id).sort((a,b)=>a.label.localeCompare(b.label,'es')).map(other=>[other.id,other.label])],'','Grupo del que copiar temas',id=>{if(id)chooseTemplate(data().assignments.filter(a=>G.id(a.grupo)===id&&a.activo).map(a=>a.temaId));}));
+    const name=el('input',{class:'control',placeholder:'Nombre de la plantilla personalizada',maxLength:100,'aria-label':'Nombre de plantilla'});
+    function showSaved(){savedTemplates.replaceChildren();for(const t of templateData?.templates.filter(t=>t.activo)||[])savedTemplates.append(el('div',{},[button(t.nombre,()=>chooseTemplate(t.temaIds)),button('Archivar '+t.nombre,async()=>{try{await templateRequest({action:'save',template:{id:t.id,nombre:t.nombre,temaIds:t.temaIds,activo:false},expectedVersion:templateData.version});showSaved();templateStatus.textContent='Plantilla archivada y verificada.';}catch(e){templateData=null;templateStatus.textContent=e.message;}},'subtle')]));}
+    presets.append(button('Cargar o actualizar plantillas guardadas',async()=>{try{await templateRequest({action:'load'});showSaved();templateStatus.textContent='Plantillas actualizadas.';}catch(e){templateData=null;templateStatus.textContent=e.message;}}),savedTemplates,name,button('Guardar selección como plantilla',async()=>{if(!choices.size||choices.size>50||!name.value.trim()){templateStatus.textContent='Escribe un nombre y selecciona entre 1 y 50 temas.';return;}try{if(!templateData)await templateRequest({action:'load'});await templateRequest({action:'save',template:{id:uid(),nombre:name.value.trim(),temaIds:[...choices],activo:true},expectedVersion:templateData.version});showSaved();templateStatus.textContent='Plantilla guardada y verificada. No se ha cambiado el repertorio del grupo.';}catch(e){templateData=null;templateStatus.textContent=e.message;}}),templateStatus);
+    if(templateData)showSaved();
     const filterText = el('input', { class: 'control', type: 'search', placeholder: 'Buscar temas para añadir…', 'aria-label': 'Buscar temas para añadir' });
     const typeFilter = selectControl([['', 'Todos los tipos'], ...types], '', 'Tipo para asignar', () => fill());
     function fill() {
@@ -277,7 +294,7 @@
     }
     filterText.oninput = fill;
     fill();
-    openDialog('Añadir temas', g.label, [el('p', { class: 'explanation', textContent: 'Después de añadirlos, marca los que ya sabe el grupo. Los temas recuperados conservan sus estados anteriores.' }), filterText, typeFilter, list], () => {
+    openDialog('Añadir temas', g.label, [el('p', { class: 'explanation', textContent: 'Después de añadirlos, marca los que ya sabe el grupo. Los temas recuperados conservan sus estados anteriores.' }), presets, filterText, typeFilter, list], () => {
       if (!choices.size || choices.size > 50) throw Object.assign(Error('Selecciona entre 1 y 50 temas.'), { status: 400 });
       for (const id of choices) if (!ids.has(id)) ids.set(id, uid());
       return { action: 'assignThemes', grupo: g.nombre, assignments: [...choices].map(temaId => ({ id: ids.get(temaId), temaId })) };
