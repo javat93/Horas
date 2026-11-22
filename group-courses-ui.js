@@ -53,6 +53,8 @@
       else if (data()) {
         const unclassified = data().groups.filter(g => !C.classification(data().records, g, filters.curso)).length;
         const count = visible(data().groups).length;
+        if(unclassified===data().groups.length && unclassified>0) root.append(el('div',{className:'gc-onboarding'},[el('strong',{textContent:'Organiza tus grupos de '+filters.curso}),el('p',{textContent:'Tus grupos siguen guardados. Selecciona cuáles llevas este curso y distingue los habituales de los puntuales.'}),button('Organizar este curso',()=>openEditor(),!eligible(),true)]));
+        else if(count===0) root.append(el('p',{className:'gc-message',textContent:'No hay coincidencias con estos filtros. Puedes consultar todos sin cambiar la clasificación.'}),button('Ver todos los grupos',()=>{filters={...filters,estado:'all',tipo:'all'};emit();}));
         root.append(el('p', { className: 'gc-message', textContent: `${count} ${count === 1 ? 'grupo' : 'grupos'} con estos filtros` + (unclassified ? ` · ${unclassified} sin clasificar` : '') }));
         if (unclassified) root.append(button('Ver sin clasificar', () => { filters = { ...filters, estado: 'unclassified', tipo: 'all' }; emit(); }));
         if (data().issues.length) root.append(el('p', { role: 'alert', className: 'gc-message', textContent: data().issues.join(' · ') }));
@@ -89,7 +91,9 @@
       }
       const search = el('input', { type: 'search', placeholder: 'Buscar grupo…', 'aria-label': 'Buscar grupos para organizar', oninput: e => { query = e.target.value; draw(); } });
       const pickVisible = button('Seleccionar visibles', () => { for (const g of editData().groups.filter(g => !query || G.matches(g.nombre, query))) { if (draft.size >= 100) break; if (!draft.has(g.id)) { const r = C.classification(editData().records, g, draftCourse); draft.set(g.id, { grupo: g.nombre, activo: r?.activo ?? true, tipo: r?.tipo || 'habitual' }); } } draw(); });
-      const clear = button('Quitar selección', () => { draft.clear(); draw(); });
+      const clear = button('Quitar selección', () => { draft.clear(); touched=true; draw(); });
+      function applySelected(activo,tipo){if(!draft.size){error.textContent='Selecciona primero uno o varios grupos.';return;}for(const r of draft.values()){r.activo=activo;if(tipo)r.tipo=tipo;}draw();}
+      const presets=el('div',{className:'gc-bulk-actions'},[button('Habituales activos',()=>applySelected(true,'habitual')),button('Puntuales activos',()=>applySelected(true,'puntual')),button('Marcar inactivos',()=>applySelected(false))]);
       const copy = button('Copiar del ' + C.previous(draftCourse), () => {
         const copies = C.copyPrevious(editData().groups, editData().records, draftCourse);
         if (!copies.length) { error.textContent = 'No hay grupos del curso anterior pendientes de clasificar aquí.'; return; }
@@ -110,7 +114,7 @@
         }
       }, false, true);
       save.setAttribute('data-gc-save', '');
-      dialog.append(heading, el('p', { className: 'gc-message', textContent: 'Selecciona grupos y ajusta su estado y tipo. Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), copy, list, error, reload, el('div', { className: 'gc-dialog-footer' }, [counter, save]));
+      dialog.append(heading, el('p', { className: 'gc-message', textContent: 'Selecciona grupos y ajusta su estado y tipo. Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), el('p',{className:'gc-message',textContent:'1. Selecciona grupos. 2. Aplica una clasificación a la selección o ajusta cada grupo. 3. Guarda y verifica.'}), presets, copy, list, error, reload, el('div', { className: 'gc-dialog-footer' }, [counter, save]));
       dialog.addEventListener('cancel', e => { e.preventDefault(); close(); }); document.body.append(dialogHost); draw(); dialog.showModal(); search.focus();
     }
     window.addEventListener('beforeunload', e => { if (saving || draft?.size) { e.preventDefault(); e.returnValue = ''; } });
