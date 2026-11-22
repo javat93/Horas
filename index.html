@@ -1644,7 +1644,7 @@
             const filtered = (window.horasGroupCourses ? window.horasGroupCourses.visible(grupos) : grupos).filter(g =>
                 GroupIdentity.matches(g.nombre,term) ||
                 (g.sitio && g.sitio.toLowerCase().includes(term))
-            );
+            ).sort((a, b) => GroupIdentity.catalogLabel(a.nombre).localeCompare(GroupIdentity.catalogLabel(b.nombre), 'es', { sensitivity: 'base', numeric: true }));
 
             if (filtered.length === 0) {
                 container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 font-medium">' + (window.horasGroupCourses ? 'No hay grupos con estos filtros. Revisa los filtros o pulsa Organizar este curso.' : 'No se han encontrado grupos.') + '</div>';
@@ -2541,7 +2541,7 @@
             const names = new Map();
             for(const name of [...grupos.map(g=>g.nombre),...eventos.map(ev=>ev.grupo)])if(GroupIdentity.id(name))names.set(GroupIdentity.id(name),GroupIdentity.catalogLabel(name));
             select.replaceChildren(new Option('Todos los grupos',''));
-            for(const [id,name]of [...names].sort((a,b)=>a[1].localeCompare(b[1],'es')))select.append(new Option(name,id));
+            for(const [id,name]of [...names].sort((a,b)=>a[1].localeCompare(b[1],'es',{sensitivity:'base',numeric:true})))select.append(new Option(name,id));
             select.value = names.has(selected) ? selected : '';
         }
 
@@ -2556,7 +2556,7 @@
             const selected = sel.value;
             // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
             const gruposOrdenados = grupos.filter(g=>g.nombre.trim()).sort((a, b) =>
-                groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base' })
+                groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base', numeric: true })
             );
             sel.innerHTML = '<option value="">Selecciona grupo...</option>' + 
                 gruposOrdenados.map(g => `<option value="${g.nombre}">${groupOptionName(g.nombre)}</option>`).join('');
@@ -2571,7 +2571,7 @@
             
             // Ordenar grupos alfabéticamente (ignorando mayúsculas/minúsculas)
             const gruposOrdenados = grupos.filter(g=>g.nombre.trim()).sort((a, b) =>
-                groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base' })
+                groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base', numeric: true })
             );
             
             optionsContainer.innerHTML = gruposOrdenados.map(g => 
@@ -2610,9 +2610,9 @@
             const optionsContainer = document.getElementById('grupo-options');
             if (!optionsContainer) return;
             
-            const filtered = grupos.filter(g => 
-                GroupIdentity.matches(g.nombre,searchTerm)
-            );
+            const filtered = grupos.filter(g =>
+                g.nombre.trim() && GroupIdentity.matches(g.nombre,searchTerm)
+            ).sort((a, b) => groupOptionName(a.nombre).localeCompare(groupOptionName(b.nombre), 'es', { sensitivity: 'base', numeric: true }));
             
             if (filtered.length === 0) {
                 optionsContainer.innerHTML = '<div class="text-slate-400 text-sm px-3 py-2">No se encontraron grupos</div>';
