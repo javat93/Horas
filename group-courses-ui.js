@@ -41,7 +41,8 @@
       const s = store.state(), root = el('section', { className: 'gc-panel', 'aria-label': 'Organización de grupos por curso' });
       const years = new Set([C.currentCourse(), C.previous(C.currentCourse()), filters.curso, ...(data()?.records || []).map(r => r.curso)]);
       const next = +C.currentCourse().slice(0, 4) + 1; years.add(`${next}–${next + 1}`);
-      root.append(el('div', { className: 'gc-top' }, [select('Curso', [...years].sort().reverse().map(y => [y, y]), filters.curso, v => change('curso', v), s.busy), button('Organizar este curso', openEditor, !eligible(), true)]));
+      const management = el('details', { className: 'gc-management' }, [el('summary', { textContent: 'Organizar', 'aria-label': 'Opciones de organización del curso' }), el('div', { className: 'gc-management-actions' }, [button('Organizar este curso', openEditor, !eligible(), true), button('Actualizar organización', () => refresh(true), s.busy || blocked || Date.now() < cooldown)])]);
+      root.append(el('div', { className: 'gc-top' }, [select('Curso', [...years].sort().reverse().map(y => [y, y]), filters.curso, v => change('curso', v), s.busy), management]));
       const details = el('details', { className: 'gc-filters', open: filtersOpen, ontoggle: () => { if (details.isConnected) filtersOpen = details.open; } });
       details.append(el('summary', { textContent: 'Filtros · ' + ({ active: 'Activos', inactive: 'Inactivos', all: 'Todos', unclassified: 'Sin clasificar' }[filters.estado]) + ' · ' + ({ habitual: 'Habituales', puntual: 'Puntuales', all: 'Todos los tipos' }[filters.tipo]) }), el('div', { className: 'gc-filter-fields' }, [select('Estado', [['active', 'Activos'], ['inactive', 'Inactivos'], ['unclassified', 'Sin clasificar'], ['all', 'Todos']], filters.estado, v => { filtersOpen = true; filters = { ...filters, estado: v, ...(v === 'unclassified' ? { tipo: 'all' } : {}) }; emit(); }, s.busy), select('Tipo', [['habitual', 'Habituales'], ['puntual', 'Puntuales'], ['all', 'Todos los tipos']], filters.tipo, v => change('tipo', v), s.busy || filters.estado === 'unclassified')]));
       root.append(details);
@@ -55,7 +56,7 @@
         if (unclassified) root.append(button('Ver sin clasificar', () => { filters = { ...filters, estado: 'unclassified', tipo: 'all' }; emit(); }));
         if (data().issues.length) root.append(el('p', { role: 'alert', className: 'gc-message', textContent: data().issues.join(' · ') }));
         if (notice) root.append(el('p', { role: 'status', className: 'gc-message', textContent: notice }));
-        root.append(button('Actualizar organización', () => refresh(true), blocked));
+
       }
       return root;
     }
