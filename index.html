@@ -371,6 +371,8 @@
     <script src="group-courses-ui.js?v=courses-20261116" defer></script>
     <script src="draft-vault.js?v=improvements-20261122" defer></script>
     <script src="form-drafts.js?v=improvements-20261122" defer></script>
+    <script src="report-tools.js?v=improvements-20261122" defer></script>
+    <script src="report-ui.js?v=improvements-20261122" defer></script>
 </head>
 <body class="pb-20">
 
@@ -434,6 +436,7 @@
                 </button>
             </div>
             
+            <details class="report-controls"><summary>Informe por grupo y curso</summary><div class="session-filter-fields"><label>Curso<select id="report-course" aria-label="Curso del informe"><option value="all">Todo el histórico</option></select></label><label>Grupo<select id="report-group" aria-label="Grupo del informe"><option value="">Todos los grupos</option></select></label><button id="report-export" type="button">Descargar sesiones CSV</button></div></details>
             <div id="stats-info" aria-live="polite">Cargando datos...</div>
             <div class="session-filters">
                 <div><label for="filter-grupo">Grupo</label><select id="filter-grupo" aria-label="Filtrar sesiones por grupo" onchange="renderEventos()" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700">
@@ -1575,6 +1578,7 @@
             renderCalendar();
             populateSelects();
             lucide.createIcons();
+            document.dispatchEvent(new Event('horas:data-rendered'));
         }
 
         function renderEventos() {
@@ -2500,11 +2504,13 @@
             const statsInfo = document.getElementById('stats-info');
             if (!statsInfo) return;
             
+            const reportScope=window.horasReportScope?.()||{curso:'all',grupo:''};
+            const reportEvents=window.ReportTools?ReportTools.filterSessions(eventos,reportScope,LocaleData.parseSpanish,GroupIdentity.id):eventos;
             // Calcular totales
             let totalCobrar = 0;
             let totalPendiente = 0;
             
-            eventos.forEach(ev => {
+            reportEvents.forEach(ev => {
                 if (!ev.pagado && !ev.amountWarning) {
                     totalCobrar += ev.total;
                     totalPendiente += ev.total;
@@ -2528,7 +2534,7 @@
                         <div class="financial-card"><span>IRPF estimado (35 %)</span><strong>${formatCurrency(retencionIRPF)}</strong></div>
                         <div class="financial-card"><span>Estimado tras IRPF</span><strong>${formatCurrency(totalNeto)}</strong></div>
                     </div>
-                    <details class="financial-explanation"><summary>Cómo se calcula</summary><p>Todo el histórico pendiente de cobro, sin depender de los filtros de la lista. Los importes sin interpretar se excluyen. IRPF estimado con el 35 % configurado; no es una liquidación fiscal.</p></details>
+                    <details class="financial-explanation"><summary>Cómo se calcula</summary><p>Periodo: ${reportScope.curso==='all'?'todo el histórico':reportScope.curso}. Grupo: ${reportScope.grupo?'grupo seleccionado':'todos'}. Estos filtros son independientes de la lista de sesiones. Los importes sin interpretar se excluyen. IRPF estimado con el 35 % configurado; no es una liquidación fiscal.</p></details>
                 </div>
             `;
         }
