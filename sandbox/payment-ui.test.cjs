@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const AppData=require('../app-data.js');
-const html=fs.readFileSync(require.resolve('../index.html'),'utf8');
+const html=require('./application-source.cjs')();
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function harness(fetch,extras={}){
   const events=[2,3].map(rowIdx=>({rowIdx,pagado:false,total:24,sourceVersion:'initial'})),errors=[];

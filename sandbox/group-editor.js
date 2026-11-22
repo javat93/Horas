@@ -31,7 +31,7 @@
       dialog.close();dialog.remove();closeModal('modal-grupo');
       const resultHost=document.getElementById('test-result');resultHost.textContent='Guardando los cambios del grupo…';
       try{
-        const r=await request;const saved=r.unchanged?'Se conserva todo. Ninguna celda modificada.':`${r.cellsChanged} celdas guardadas y verificadas. Calendar y sesiones sin cambios.`;resultHost.textContent=saved;
+        const r=await request;window.horasDrafts?.clearForm('group',rowIdx);const saved=r.unchanged?'Se conserva todo. Ninguna celda modificada.':`${r.cellsChanged} celdas guardadas y verificadas. Calendar y sesiones sin cambios.`;resultHost.textContent=saved;
         if(!r.unchanged){try{await syncData(false,false);}catch(error){resultHost.textContent=saved+' Falta recargar la vista: '+error.message;}}
       }catch(error){resultHost.textContent='No se pudieron guardar los cambios del grupo.';showErrorModal('No se pudo guardar el grupo',error.message,'warning');}
       finally{busy=false;}

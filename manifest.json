@@ -1,7 +1,7 @@
 {
-  "short_name": "Batucada",
-  "name": "Batucada: Gestión y Calendario",
-  "description": "Aplicación para la gestión de eventos y calendario de la Batucada.",
+  "short_name": "PercuManager",
+  "name": "PercuManager · Grupos, repertorio y sesiones",
+  "description": "Gestión de grupos por curso, repertorios y sesiones.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -28,7 +28,10 @@
   "theme_color": "#1E90FF",
   "scope": "./",
   "lang": "es",
-  "categories": ["productivity", "business"],
+  "categories": [
+    "productivity",
+    "business"
+  ],
   "prefer_related_applications": false,
   "splash_screen": {
     "background_color": "#ffffff",

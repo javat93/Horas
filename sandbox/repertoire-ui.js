@@ -68,7 +68,7 @@
     return error.message;
   }
   async function json(url, options) {
-    const r = await fetch(url, options); let d;
+    const r = await (window.horasGoogleRequests?.fetch(url, options) || fetch(url, options)); let d;
     try { d = await r.json(); } catch { throw Object.assign(Error('El servidor no ha devuelto una respuesta válida.'), { status: r.status, code: 'UNVERIFIED_RESPONSE' }); }
     if (!r.ok) throw Object.assign(Error(d.error || 'No se ha podido completar la operación.'), { status: r.status, code: d.code });
     return d;
@@ -128,7 +128,7 @@
     }
     if (!env.writeEnabled) workspace.append(el('p', { class: 'readonly-note', textContent: 'Este acceso está en modo de consulta.' }));
     const vault = window.horasDraftVault, savedMarks = vault?.read('repertoire-marks'), savedForm = vault?.read('repertoire-form');
-    if (savedMarks?.length && !progress?.state().pending) workspace.append(el('div', { class:'status' }, [el('p',{textContent:'Hay marcados recuperables en este dispositivo. Revisa los datos antes de guardarlos.'}), button('Recuperar marcados',async()=>{await reload(true);if(client.state().canWrite){progress.restore(savedMarks);if(!progress.state().pending){vault.remove('repertoire-marks');say('Los marcados ya están confirmados o las relaciones ya no están activas.');}}},'',!canWrite()),button('Descartar borrador',()=>{vault.remove('repertoire-marks');render();},'subtle')]));
+    if (savedMarks?.length && !progress?.state().pending) workspace.append(el('div', { class:'status' }, [el('p',{textContent:'Hay marcados recuperables en este dispositivo. Revisa los datos antes de guardarlos.'}), button('Recuperar marcados',async()=>{await reload(true);if(client.state().canWrite){const first=savedMarks.map(u=>data().assignments.find(a=>a.id===u.vinculoId&&a.activo)).find(Boolean);if(first){view='repertoire';groupId=G.id(first.grupo);host?.groupCourses?.()?.revealGroup(groupId);host?.selectGroup(groupId);}progress.restore(savedMarks);if(!progress.state().pending){vault.remove('repertoire-marks');say('Los marcados ya están confirmados o las relaciones ya no están activas.');}}},'',!canWrite()),button('Descartar borrador',()=>{vault.remove('repertoire-marks');render();},'subtle')]));
     if (savedForm && !dialog.open) workspace.append(el('div', { class:'status' }, [button('Recuperar formulario de repertorio',()=>recoverForm(savedForm),'',!canWrite()),button('Descartar formulario',()=>{vault.remove('repertoire-form');render();},'subtle')]));
     if (view !== 'catalog' && host?.groupCourses) {
       const courses = host.groupCourses();
@@ -274,7 +274,7 @@
     const list = el('div', { class: 'assign-list' });
     const presets = el('details', {class:'template-options'},[el('summary',{textContent:'Usar una plantilla o el repertorio de otro grupo'})]);
     const templateStatus=el('p',{class:'explanation',role:'status'}),savedTemplates=el('div',{class:'template-list'});
-    function chooseTemplate(ids){const available=RepertoireTemplates.candidates(ids,data().themes,data().assignments,g.nombre,G.same);choices.clear();for(const id of available)choices.add(id);dirty=!!choices.size;fill();templateStatus.textContent=available.length+' temas preparados para revisar. Solo se copian temas; los estados aprendidos no se copian.';}
+    function chooseTemplate(ids){const available=RepertoireTemplates.candidates(ids,data().themes,data().assignments,g.nombre,G.same);choices.clear();for(const id of available)choices.add(id);dirty=!!choices.size;fill();if(dirty)persistForm();else window.horasDraftVault?.remove('repertoire-form');templateStatus.textContent=available.length+' temas preparados para revisar. Solo se copian temas; los estados aprendidos no se copian.';}
     for(const preset of RepertoireTemplates.builtins(data().themes))presets.append(button(preset.nombre,()=>chooseTemplate(preset.temaIds),'subtle'));
     presets.append(selectControl([['','Copiar temas de otro grupo…'],...data().groups.filter(other=>other.id!==g.id).sort((a,b)=>a.label.localeCompare(b.label,'es')).map(other=>[other.id,other.label])],'','Grupo del que copiar temas',id=>{if(id)chooseTemplate(data().assignments.filter(a=>G.id(a.grupo)===id&&a.activo).map(a=>a.temaId));}));
     const name=el('input',{class:'control',placeholder:'Nombre de la plantilla personalizada',maxLength:100,'aria-label':'Nombre de plantilla'});
@@ -307,8 +307,8 @@
     recoveringForm = true;
     try {
       if(record.type==='theme'){const theme=themeById(record.id);if(record.existing&&!theme)throw Error('El tema ya no está disponible.');editTheme(theme,record.id);}
-      else if(record.type==='progress'){const a=data().assignments.find(a=>a.id===record.id);if(!a)throw Error('La relación ya no está disponible.');groupId=G.id(a.grupo);editProgress(a);}
-      else if(record.type==='assign'){groupId=record.groupId;if(!currentGroup())throw Error('El grupo ya no está disponible.');assignThemes();}else throw Error('Borrador no válido.');
+      else if(record.type==='progress'){const a=data().assignments.find(a=>a.id===record.id);if(!a)throw Error('La relación ya no está disponible.');groupId=G.id(a.grupo);host?.groupCourses?.()?.revealGroup(groupId);editProgress(a);}
+      else if(record.type==='assign'){groupId=record.groupId;host?.groupCourses?.()?.revealGroup(groupId);if(!currentGroup())throw Error('El grupo ya no está disponible.');assignThemes();}else throw Error('Borrador no válido.');
       const values=Array.isArray(record.values)?record.values:[];
       for(const n of form.querySelectorAll('input[name],select[name],textarea[name]')){const matches=values.filter(([k])=>k===n.name);if(n.type==='checkbox'){n.checked=n.name==='assign-choice'?matches.some(([,v])=>v===n.value):!!matches.length;n.dispatchEvent(new Event('change',{bubbles:true}));}else if(matches.length)n.value=String(matches[0][1]);}
       dirty=true;$('dirty-label').textContent='Borrador recuperado. Revisa antes de guardar.';
@@ -374,7 +374,7 @@
     controls();
   }).catch(error => say(error.message, true));
   let courseSubscribed = false;
-  const subscribeCourses = () => { const courses = host?.groupCourses?.(); if (courses && !courseSubscribed) { courseSubscribed = true; const style = el('link', { rel: 'stylesheet', href: 'group-courses.css?v=courses-20261116' }); root.append(style); courses.subscribe(render); render(); } };
+  const subscribeCourses = () => { const courses = host?.groupCourses?.(); if (courses && !courseSubscribed) { courseSubscribed = true; const style = el('link', { rel: 'stylesheet', href: 'group-courses.css?v=improvements-20261122' }); root.append(style); courses.subscribe(render); render(); } };
   if (host?.groupCourses) { subscribeCourses(); window.addEventListener('group-courses-ready', subscribeCourses); }
   return { ready, refreshSession, refreshData: () => reload(true), groupId: () => groupId };
   };

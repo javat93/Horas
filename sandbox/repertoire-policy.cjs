@@ -24,7 +24,7 @@ function guardRequest(request) {
       const gridFields = 'spreadsheetId,properties(locale,timeZone),sheets(properties(sheetId,title,gridProperties),data(startRow,startColumn,rowData(values(userEnteredValue,effectiveValue))))';
       if (u.searchParams.get('fields') !== (u.searchParams.get('includeGridData') === 'true' ? gridFields : metadataFields)) M.fail('Campos de lectura bloqueados.', 'FORBIDDEN_RANGE', 403);
     } else if (method === 'POST' && u.href === BASE + ':batchUpdate') {
-      if (!body || Object.keys(body).some(k => k !== 'requests') || !Array.isArray(body.requests) || !body.requests.length || body.requests.length > 100) M.fail('Lote no permitido.', 'FORBIDDEN_WRITE', 403);
+      if (!body || Object.keys(body).some(k => k !== 'requests') || !Array.isArray(body.requests) || !body.requests.length || body.requests.length > 500) M.fail('Lote no permitido.', 'FORBIDDEN_WRITE', 403);
       for (const item of body.requests) {
         if (Object.keys(item).length !== 1 || !item.updateCells) M.fail('Solo se permite actualizar celdas del repertorio.', 'FORBIDDEN_WRITE', 403);
         const c = item.updateCells, r = c.range;

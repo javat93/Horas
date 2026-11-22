@@ -46,7 +46,7 @@ test('original rechazado antes de leer, Calendar nunca se consulta ni se escribe
   const f=fixture();await runGroups({...payload,action:'preview'},'',f.request);
 });
 test('formulario real escribe A/B/C/D/E en orden con importes numéricos; texto inválido no se guarda',async()=>{
-  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+  const html=require('./application-source.cjs')();
   const handler=html.match(/document.getElementById\('form-grupo'\).onsubmit = async \(e\) => \{([\s\S]*?)\n        \};/)[0];
   const fields={'form-grupo':{},'gr-rowIdx':{value:'2'},'gr-nombre':{value:'Cole'},'gr-sitio':{value:'Calle'},'gr-precio':{value:'16,50'},'gr-precio-bolo':{value:'80'},'gr-ubicacion':{value:'Sant Andreu'}};
   const calls=[],errors=[];vm.runInNewContext(handler,{document:{getElementById:id=>fields[id]},LocaleData:D,CONFIG:{SPREADSHEET_ID:TEST_ID},proxyGoogleAPI:async(...args)=>calls.push(args),closeModal(){},syncData(){},showErrorModal:(...args)=>errors.push(args),console});

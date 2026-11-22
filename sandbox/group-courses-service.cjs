@@ -68,11 +68,11 @@ async function execute(p, token, request, now) {
     if (before && before.activo === u.activo && before.tipo === u.tipo) continue;
     const index = before ? before.rowIdx - 1 : s.rows.GruposCurso.findIndex((r, i) => i > 0 && placeholder(r) && !reserved.has(i));
     if (index < 0) C.fail('La pestaña de cursos está llena.', 'CAPACITY', 409); reserved.add(index);
-    writes.push({ index, record: { id: g.id, grupo: g.nombre, curso: p.curso, activo: u.activo, tipo: u.tipo, actualizadoEn: now.toISOString() } });
+    writes.push({ index, before, record: { id: g.id, grupo: g.nombre, curso: p.curso, activo: u.activo, tipo: u.tipo, actualizadoEn: now.toISOString() } });
   }
   if (!writes.length) return { ...response(s), rowsChanged: 0 };
   const fresh = await snapshot(token, request, s.sheets); if (fresh.version !== s.version) C.fail('Han cambiado los datos. Actualiza antes de guardar.', 'REVIEW_EXPIRED', 409);
-  const requests = writes.map(w => ({ updateCells: { range: { sheetId: C.SHEET_ID, startRowIndex: w.index, endRowIndex: w.index + 1, startColumnIndex: 0, endColumnIndex: 6 }, rows: [{ values: Object.values(clean(w.record)).map(cell) }], fields: 'userEnteredValue' } }));
+  const requests = writes.flatMap(w => { const values=Object.values(clean(w.record)).map(cell),before=s.rows.GruposCurso[w.index].map(cell);return (w.before?require('./sheet-patches.cjs').changedRuns(before,values):[{start:0,values}]).map(run=>({updateCells:{range:{sheetId:C.SHEET_ID,startRowIndex:w.index,endRowIndex:w.index+1,startColumnIndex:run.start,endColumnIndex:run.start+run.values.length},rows:[{values:run.values}],fields:'userEnteredValue'}})); });
   try {
     await request(BASE + ':batchUpdate', token, 'POST', { requests });
     const after = await snapshot(token, request, fresh.sheets);

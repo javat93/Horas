@@ -49,7 +49,7 @@ test('pago booleano se conserva; fórmulas, original y revisiones antiguas no se
 test('escritura o verificación fallida no se anuncia como éxito ni se vuelve a enviar',async()=>{
   for(const options of [{failWrite:true},{failVerify:true}]){const f=fixture(options);await assert.rejects(()=>runState(f.payload(),'',f.request),/confirmar|comprobar/);assert.equal(f.calls.filter(c=>c.method==='POST').length,1);}
 });
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const html=require('./application-source.cjs')();
 function loader(load){
   const sync=html.slice(html.indexOf('        function syncData('),html.indexOf('        // Función para actualizar automáticamente las clases'));
   const context=vm.createContext({setTimeout,CONFIG:{TEST_MODE:true,TEST_PHASE:8},AppData:A,LocaleData:D,AuthSession:Auth,syncInFlight:null,eventos:[{rowIdx:99,total:20}],grupos:[{rowIdx:88,nombre:'Anterior'}],window:{loadNativeData:load,updateLocaleWarnings(){}},showLoading(){},hideLoading(){},renderAll(){},updateFinancialStats(){},document:{getElementById:()=>({})},console:{error(){}},parseSpanishNumber:v=>D.numeric(v)??0,proxyGoogleAPI:async()=>{throw Error('Unexpected write');}});vm.runInContext(sync,context);return context;

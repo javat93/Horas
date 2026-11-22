@@ -1,0 +1,1 @@
+window.horasConfigReady.then(() => { if (typeof CONFIG !== 'undefined' && CONFIG.DATA_MODE === 'production') document.getElementById('repertoire-entry').classList.remove('hidden'); }).catch(() => {});

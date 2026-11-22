@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const html=require('./application-source.cjs')();
 test('nueva sesión y nuevo grupo reactivan los campos bloqueados por una edición anterior; fecha de Madrid',()=>{
   const elements={};const element=id=>elements[id]||=( {disabled:true,hidden:true,value:'anterior',textContent:'anterior',classList:{add(){},remove(){}},reset(){}} );
   class Clock extends Date{constructor(...args){super(...(args.length?args:['2026-11-01T23:30:00Z']));}}

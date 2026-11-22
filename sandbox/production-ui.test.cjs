@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const C=require('../protected-config.js');
-const panel=fs.readFileSync(require.resolve('./panel.js'),'utf8'),html=fs.readFileSync(require.resolve('../index.html'),'utf8');
+const panel=fs.readFileSync(require.resolve('./panel.js'),'utf8'),html=require('./application-source.cjs')();
 async function mount(mode,overrides={}){
   const elements={},handlers={},mounted={},calls=[];let ready;
   const node=()=>({style:{},value:'',children:[],append(...items){this.children.push(...items);},addEventListener(type,fn){this.handlers??={};this.handlers[type]=fn;}});

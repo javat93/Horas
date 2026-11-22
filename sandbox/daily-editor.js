@@ -6,7 +6,7 @@
     if(!await window.horasEnvironmentReady||!window.horasDailyReady)throw Error('El backend aún no ha confirmado las operaciones diarias. Recarga antes de continuar.');
     const token=window.horasAccessToken();if(!token)throw Error('Primero conecta Google.');
     const r=await (window.horasFetch||fetch)(CONFIG.DAILY_API_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({spreadsheetId:CONFIG.SPREADSHEET_ID,...body})});
-    const data=await r.json();if(!r.ok)throw Object.assign(Error(data.error||'No se pudo completar la operación.'),{code:data.code});return data;
+    const data=await r.json();if(!r.ok)throw Object.assign(Error(data.error||'No se pudo completar la operación.'),{code:data.code,status:r.status});return data;
   }
   async function review(kind,input){
     if(busy)return;busy=true;const operationId=crypto.randomUUID();let plan;try{plan=await api({action:'preview',kind,input,operationId});}finally{busy=false;}

@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const G=require('../group-identity.js'),L=require('../calendar-linking.js'),D=require('../locale-data.js');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const html=require('./application-source.cjs')();
 test('un cole estable con alias exactos, sin confundir otros grupos',()=>{
   for(const name of ['Molí de finestrelles','Moli de finestrelles','Tramuntana','  MOLÍ DE   FINESTRELLES '])assert.equal(G.id(name),G.school.id);
   for(const other of ['Tramuntana Jr','Moli','Slap Martes',''])assert.equal(G.same(other,'Tramuntana'),false);
@@ -46,6 +46,6 @@ test('filtro real reúne años y alias una sola vez, con los dos nombres según 
   const renderer=html.slice(html.indexOf('        function renderEventos('),html.indexOf('        function renderGrupos('));
   const fields={'lista-eventos':{},'filter-cobrados':{value:'all'},'filter-realizados':{value:'all'},'filter-grupo':{value:G.school.id}};
   const events=[{rowIdx:2,grupo:'Moli de finestrelles',fechaStr:'31/12/2025',total:24},{rowIdx:3,grupo:'Tramuntana',fechaStr:'01/01/2026',total:80},{rowIdx:4,grupo:'Slap Martes',fechaStr:'01/01/2026',total:22}];
-  const context=vm.createContext({window:{},SHOW_SESSION_TYPES:false,document:{getElementById:id=>fields[id]},eventos:events,GroupIdentity:G,LocaleData:D,lucide:{createIcons(){}}});vm.runInContext(helper+renderer,context);context.renderEventos();const result=fields['lista-eventos'].innerHTML;
-  assert.equal((result.match(/openEditSesionModal/g)||[]).length,2);assert.match(result,/Molí de finestrelles/);assert.match(result,/Tramuntana/);assert(!result.includes('Slap Martes'));assert.equal(events.length,3);assert.equal(events[0].grupo,'Moli de finestrelles');
+  const context=vm.createContext({window:{},SafeHTML:require('../safe-html.js'),SHOW_SESSION_TYPES:false,document:{getElementById:id=>fields[id]},eventos:events,GroupIdentity:G,LocaleData:D,lucide:{createIcons(){}}});vm.runInContext(helper+renderer,context);context.renderEventos();const result=fields['lista-eventos'].innerHTML;
+  assert.equal((result.match(/data-ui-action="edit-session"/g)||[]).length,2);assert.match(result,/Molí de finestrelles/);assert.match(result,/Tramuntana/);assert(!result.includes('Slap Martes'));assert.equal(events.length,3);assert.equal(events[0].grupo,'Moli de finestrelles');
 });

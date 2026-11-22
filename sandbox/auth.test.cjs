@@ -12,7 +12,7 @@ test('no fuerza consentimiento ni confunde un error de red o cuota con sesión i
   assert.deepEqual(A.requestOptions(),{prompt:''});for(const error of [{status:401},{message:'Google 401: Unauthorized'},{message:'invalid authentication credentials'}])assert.equal(A.isAuthError(error),true);
   for(const error of [{status:403,message:'quota exceeded'},{status:500},{message:'Failed to fetch'}])assert.equal(A.isAuthError(error),false);
 });
-const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const html=require('./application-source.cjs')();
 function harness({granted=true,error}={}){
   const s=storage(),elements={},requests=[],syncs=[],errors=[];let token=null;
   for(const id of ['auth-btn','review-google-permissions','sync-btn','add-future-events-btn','auth-text','auth-status'])elements[id]={classList:{toggle(){},add(){},remove(){}}};

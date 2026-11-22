@@ -10,7 +10,7 @@
     function emit() { subscribers.forEach(fn => fn()); const save = dialog?.querySelector('[data-gc-save]'); if (save && !saving) save.disabled = !draft?.size || !eligible(); }
     async function json(payload) {
       const shared = session(); if (!shared) throw Object.assign(Error('Conecta Google para organizar los grupos.'), { status: 401 });
-      const r = await fetch(endpoint + (payload ? '' : '?api=environment'), { ...(payload ? { method: 'POST', body: JSON.stringify(payload) } : {}), headers: { Authorization: 'Bearer ' + shared.token, 'Content-Type': 'application/json' } });
+      const r = await (window.horasGoogleRequests?.fetch.bind(window.horasGoogleRequests) || fetch)(endpoint + (payload ? '' : '?api=environment'), { ...(payload ? { method: 'POST', body: JSON.stringify(payload) } : {}), headers: { Authorization: 'Bearer ' + shared.token, 'Content-Type': 'application/json' } });
       let d; try { d = await r.json(); } catch { throw Object.assign(Error('Respuesta pendiente de verificar.'), { code: 'UNVERIFIED_RESPONSE', status: 502 }); }
       if (!r.ok) {
         if (r.status === 401) invalidateSession();
@@ -69,7 +69,7 @@
       if (recover === true) { const stored = window.horasDraftVault?.read('course:'+draftCourse); if (Array.isArray(stored)) { try { C.validateUpdates(stored); for(const r of stored) if(data().groups.some(g=>g.id===G.id(r.grupo))) draft.set(G.id(r.grupo),{...r}); } catch {} } }
       const editorData = data(), editData = () => data() || editorData;
       dialog = el('dialog', { className: 'gc-dialog', 'aria-labelledby': 'gc-dialog-title' });
-      dialogHost = el('div'); const shadow = dialogHost.attachShadow({ mode: 'open' }); shadow.append(el('link', { rel: 'stylesheet', href: 'group-courses.css?v=courses-20261116' }), dialog);
+      dialogHost = el('div'); const shadow = dialogHost.attachShadow({ mode: 'open' }); shadow.append(el('link', { rel: 'stylesheet', href: 'group-courses.css?v=improvements-20261122' }), dialog);
       const close = () => { if (saving) return; if (draft.size && !window.confirm('¿Descartar la selección sin guardar?')) return; window.horasDraftVault?.remove('course:'+draftCourse); dialog.close(); dialogHost.remove(); dialog = null; dialogHost = null; draft = null; };
       const heading = el('div', { className: 'gc-dialog-heading' }, [el('div', {}, [el('p', { className: 'gc-kicker', textContent: 'ORGANIZAR ' + draftCourse }), el('h2', { id: 'gc-dialog-title', textContent: 'Tus grupos de este curso' })]), button('Cerrar', close)]);
       const error = el('p', { className: 'gc-message', role: 'alert' }), counter = el('p', { className: 'gc-message', 'aria-live': 'polite' });
@@ -93,7 +93,7 @@
       const pickVisible = button('Seleccionar visibles', () => { for (const g of editData().groups.filter(g => !query || G.matches(g.nombre, query))) { if (draft.size >= 100) break; if (!draft.has(g.id)) { const r = C.classification(editData().records, g, draftCourse); draft.set(g.id, { grupo: g.nombre, activo: r?.activo ?? true, tipo: r?.tipo || 'habitual' }); } } draw(); });
       const clear = button('Quitar selección', () => { draft.clear(); touched=true; draw(); });
       function applySelected(activo,tipo){if(!draft.size){error.textContent='Selecciona primero uno o varios grupos.';return;}for(const r of draft.values()){r.activo=activo;if(tipo)r.tipo=tipo;}draw();}
-      const presets=el('div',{className:'gc-bulk-actions'},[button('Habituales activos',()=>applySelected(true,'habitual')),button('Puntuales activos',()=>applySelected(true,'puntual')),button('Marcar inactivos',()=>applySelected(false))]);
+      const presets=el('div',{className:'gc-bulk-actions gc-presets'},[button('Habituales activos',()=>applySelected(true,'habitual')),button('Puntuales activos',()=>applySelected(true,'puntual')),button('Marcar inactivos',()=>applySelected(false))]);
       const copy = button('Copiar del ' + C.previous(draftCourse), () => {
         const copies = C.copyPrevious(editData().groups, editData().records, draftCourse);
         if (!copies.length) { error.textContent = 'No hay grupos del curso anterior pendientes de clasificar aquí.'; return; }
@@ -114,11 +114,11 @@
         }
       }, false, true);
       save.setAttribute('data-gc-save', '');
-      dialog.append(heading, el('p', { className: 'gc-message', textContent: 'Selecciona grupos y ajusta su estado y tipo. Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), el('p',{className:'gc-message',textContent:'1. Selecciona grupos. 2. Aplica una clasificación a la selección o ajusta cada grupo. 3. Guarda y verifica.'}), presets, copy, list, error, reload, el('div', { className: 'gc-dialog-footer' }, [counter, save]));
+      dialog.append(heading, el('p', { className: 'gc-message', textContent: 'Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), el('p',{className:'gc-message',textContent:'Selecciona, clasifica y guarda. También puedes ajustar cada grupo.'}), presets, copy, list, error, reload, el('div', { className: 'gc-dialog-footer' }, [counter, save]));
       dialog.addEventListener('cancel', e => { e.preventDefault(); close(); }); document.body.append(dialogHost); draw(); dialog.showModal(); search.focus();
     }
     window.addEventListener('beforeunload', e => { if (saving || draft?.size) { e.preventDefault(); e.returnValue = ''; } });
-    return { panel, visible, label, sessionGroups: (groups, selected, all) => data() ? C.sessionGroups(groups, data().records, selected, all) : groups.slice(), refreshSession, refresh, subscribe(fn) { subscribers.add(fn); return () => subscribers.delete(fn); }, setBlocked(value) { if (blocked !== value) { blocked = value; emit(); } } };
+    return { panel, visible, label, revealGroup(id) { if(data() && !visible(data().groups).some(g=>g.id===id)){filters={...filters,estado:'all',tipo:'all'};emit();} }, sessionGroups: (groups, selected, all) => data() ? C.sessionGroups(groups, data().records, selected, all) : groups.slice(), refreshSession, refresh, subscribe(fn) { subscribers.add(fn); return () => subscribers.delete(fn); }, setBlocked(value) { if (blocked !== value) { blocked = value; emit(); } } };
   };
   document.addEventListener('DOMContentLoaded', async () => {
     await window.horasConfigReady; if (CONFIG.DATA_MODE !== 'production') return;

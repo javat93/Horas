@@ -14,7 +14,7 @@ async function seeded(n=10){
 test('diez temas y veinte casillas se verifican con 4 lecturas y un solo batchUpdate',async()=>{
   const {f,run,data}=await seeded();const result=await run({action:'updateProgressBatch',updates:data.assignments.filter(a=>a.grupo==='Grupo A').map(a=>({vinculoId:a.id,changes:{realizado:true,repasando:true}})),expectedVersion:data.version});
   assert.deepEqual(counts(f),{reads:4,writes:1});assert.equal(f.calls.filter(c=>c.method==='GET'&&!new URL(c.url).searchParams.has('includeGridData')).length,1);
-  assert.equal(f.calls.find(c=>c.method==='POST').body.requests.length,10);
+  assert.equal(new Set(f.calls.find(c=>c.method==='POST').body.requests.map(r=>r.updateCells.range.startRowIndex)).size,10);
   for(const a of result.assignments.filter(a=>a.grupo==='Grupo A')){assert(a.realizado&&a.repasando);assert.equal(a.fechaRealizado,'2026-11-16');}
   const first=result.assignments.find(a=>a.id===id(101));assert.equal(first.notas,'Conservar nota');assert.equal(first.ultimoRepaso,'2026-11-01');assert.equal(result.assignments.find(a=>a.id===id(500)).realizado,false);
   assert(f.calls.every(c=>c.url.includes('1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60')));assert(f.calls.filter(c=>c.method==='POST').every(c=>c.body.requests.every(r=>r.updateCells.range.sheetId===155111502)));

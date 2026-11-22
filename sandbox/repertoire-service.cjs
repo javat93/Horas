@@ -147,7 +147,7 @@ function plan(p, snap, now) {
     const rowIdx = before?.rowIdx || allocate(name);
     after.rowIdx = rowIdx;
     if (name === 'GrupoTemas') after.actualizadoEn = stamp;
-    writes.push({ name, rowIdx, after });
+    writes.push({ name, rowIdx, after, before: before ? { ...before } : null });
   }
   const findAssignment = id => { const a = assignments.find(a => a.id === id); if (!a) M.fail('Relación no encontrada.', 'NOT_FOUND', 404); return a; };
   if (p.action === 'saveTheme') {
@@ -212,9 +212,10 @@ async function execute(payload, token, transport, now) {
   if (payload.expectedVersion !== snap.version) M.fail('Los datos cambiaron. Recarga antes de guardar.', 'REVIEW_EXPIRED', 409);
   const fresh = await snapshot(token, request, snap.sheets);
   if (fresh.version !== snap.version) M.fail('Los datos cambiaron durante la revisión.', 'REVIEW_EXPIRED', 409);
-  const requests = writes.map(w => {
+  const requests = writes.flatMap(w => {
     const values = w.name === 'Temas' ? themeCells(w.after) : assignmentCells(w.after, w.rowIdx);
-    return { updateCells: { range: { sheetId: snap.sheets[w.name].sheetId, startRowIndex: w.rowIdx - 1, endRowIndex: w.rowIdx, startColumnIndex: 0, endColumnIndex: values.length }, rows: [{ values }], fields: 'userEnteredValue,userEnteredFormat.numberFormat,dataValidation' } };
+    const runs = w.before ? require('./sheet-patches.cjs').changedRuns(snap.rows[w.name][w.rowIdx-1], values) : [{start:0,values}];
+    return runs.map(run=>({ updateCells: { range: { sheetId: snap.sheets[w.name].sheetId, startRowIndex: w.rowIdx - 1, endRowIndex: w.rowIdx, startColumnIndex: run.start, endColumnIndex: run.start+run.values.length }, rows: [{ values:run.values }], fields: 'userEnteredValue,userEnteredFormat.numberFormat,dataValidation' } }));
   });
   try {
     await request(P.BASE + ':batchUpdate', token, 'POST', { requests });

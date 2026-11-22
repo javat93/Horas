@@ -14,7 +14,7 @@ function createHandler({ request = googleRequest } = {}) {
     if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
     if (req.method === 'OPTIONS') return res.status(204).end();
-    if (req.method === 'GET' && req.query?.api === 'environment') return res.json({ mode: 'group-courses-production', spreadsheetId: C.TARGET, sheetId: C.SHEET_ID, writeEnabled: true, writableSheets: ['GruposCurso'], calendarAccess: false });
+    if (req.method === 'GET' && req.query?.api === 'environment') return res.json({ appVersion:require('../release/app-release.json').version, mode: 'group-courses-production', spreadsheetId: C.TARGET, sheetId: C.SHEET_ID, writeEnabled: true, writableSheets: ['GruposCurso'], calendarAccess: false });
     if (req.method !== 'POST' || Object.keys(req.query || {}).length) return res.status(405).json({ error: 'Operación no permitida.' });
     try {
       S.validate(req.body);

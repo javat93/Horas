@@ -22,7 +22,7 @@ function createHandler({ request = googleRequest, writeEnabled = false, origins 
     res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
     if (req.method === 'OPTIONS') return res.status(204).end();
     const environment = { mode: policy.MODE, phase: profile === 'production' ? 5 : 3, spreadsheetId: policy.TARGET_ID, writeEnabled, writableSheets: ['Temas', 'GrupoTemas'], legacyOperationsEnabled: false, calendarAccess: false, sessionKey: 'horas-repertoire-' + profile + '-token' };
-    if (req.method === 'GET' && req.query?.api === 'environment') return res.json({ ...environment, progressBatch: true });
+    if (req.method === 'GET' && req.query?.api === 'environment') return res.json({ ...environment, progressBatch: true, appVersion:require('../release/app-release.json').version });
     if (req.method === 'GET' && req.query?.api === 'oauth') return res.json({ clientId: '367465910816-1epkiok8ntvrphrv08b4g6amh0u9knpv.apps.googleusercontent.com', scopes: 'https://www.googleapis.com/auth/spreadsheets', sessionKey: environment.sessionKey });
     if (req.method !== 'POST' || Object.keys(req.query || {}).length) return res.status(405).json({ error: 'Ruta o método no permitido.' });
     try {

@@ -64,11 +64,11 @@ function testConfig(origin) {
     DISCOVERY_DOCS:['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest','https://sheets.googleapis.com/$discovery/rest?version=v4'],
     PROXY_URL:origin,GOOGLE_SHEETS_API_URL:`${origin}/api/sheets`,GOOGLE_CALENDAR_API_URL:`${origin}/api/calendar`,
     USE_PROXY:true,ENVIRONMENT:'production',TEST_MODE:true,TEST_PHASE:8,DAILY_API_URL:`${origin}/api/test-daily`,STATE_API_URL:`${origin}/api/test-state`,GROUPS_API_URL:`${origin}/api/test-groups`,CALENDAR_LINKS_API_URL:`${origin}/api/test-links`,PROTECTED_REVIEW_API_URL:`${origin}/api/test-protected`,LOCALE_API_URL:`${origin}/api/test-locale`
-  })});`;
+  })});if(typeof window!=='undefined')window.horasConfigReady=Promise.resolve();`;
 }
 function testPage() {
   let html = fs.readFileSync(path.join(ROOT,'index.html'),'utf8');
-  const loader = /<script>\s*\/\/ Detectar si estamos en producción[\s\S]*?<\/script>/;
+  const loader = /<script src="config-bootstrap\.js[^"]*"><\/script>/;
   if (!loader.test(html)) throw new Error('Ha cambiado el cargador de configuración. No se inicia el entorno de pruebas.');
   html = html.replace(loader, '<script src="/sandbox/config.js"></script>');
   return html;

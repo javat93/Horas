@@ -1,0 +1,1 @@
+const fs=require('node:fs'),path=require('node:path');module.exports=()=>['index.html','config-bootstrap.js','repertoire-nav-init.js','app-main.js','app-views.js','app-forms.js','group-options.js'].map(name=>fs.readFileSync(path.join(__dirname,'..',name),'utf8')).join('\n');

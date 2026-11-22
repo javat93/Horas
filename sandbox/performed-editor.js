@@ -6,6 +6,8 @@
     if(!(CONFIG.PROTECTED_MODE || CONFIG.TEST_MODE)||CONFIG.TEST_PHASE<8||busy||blocked||document.hidden||Date.now()-lastRun<60000)return;
     if(!eventos.some(e=>!e.realizado&&!e.autoExcluded&&!e.dateWarning&&e.calEventId&&e.horaFin))return;
     if(window.horasOperationBusy?.())return;
+    if(window.horasGoogleRequests?.state().retryInMs)return;
+    if(window.GoogleRequests&&GoogleRequests.nextPerformed(eventos)>0)return;
     busy=true;lastRun=Date.now();
     try{
       if(!await window.horasEnvironmentReady||window.horasWritesEnabled===false)return;
@@ -26,5 +28,6 @@
     if(CONFIG.DATA_MODE==='rehearsal')status.textContent='Realizado automático pausado durante el ensayo para conservar el histórico.';
     window.horasEnvironmentReady.then(ready=>{if(ready){if(CONFIG.DATA_MODE==='production')status.textContent='';else if(window.horasWritesEnabled===false)status.textContent='Realizado automático pendiente de activación.';document.getElementById(CONFIG.DATA_MODE==='production'?'production-notices':'test-environment-banner')?.append(status);}});
     setInterval(()=>window.runAutoPerformed(),60000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)window.runAutoPerformed();});
   });
 })();
