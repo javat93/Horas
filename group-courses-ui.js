@@ -46,6 +46,7 @@
       const details = el('details', { className: 'gc-filters', open: filtersOpen, ontoggle: () => { if (details.isConnected) filtersOpen = details.open; } });
       details.append(el('summary', { textContent: 'Filtros · ' + ({ active: 'Activos', inactive: 'Inactivos', all: 'Todos', unclassified: 'Sin clasificar' }[filters.estado]) + ' · ' + ({ habitual: 'Habituales', puntual: 'Puntuales', all: 'Todos los tipos' }[filters.tipo]) }), el('div', { className: 'gc-filter-fields' }, [select('Estado', [['active', 'Activos'], ['inactive', 'Inactivos'], ['unclassified', 'Sin clasificar'], ['all', 'Todos']], filters.estado, v => { filtersOpen = true; filters = { ...filters, estado: v, ...(v === 'unclassified' ? { tipo: 'all' } : {}) }; emit(); }, s.busy), select('Tipo', [['habitual', 'Habituales'], ['puntual', 'Puntuales'], ['all', 'Todos los tipos']], filters.tipo, v => change('tipo', v), s.busy || filters.estado === 'unclassified')]));
       root.append(details);
+      if(window.horasDraftVault?.read('course:'+filters.curso)) root.append(button('Revisar selección guardada',()=>openEditor(true),!eligible()));
       if (!session()) root.append(el('p', { className: 'gc-message', textContent: 'Usa la conexión de Google de la aplicación.' }), button('Conectar Google', connect));
       else if (s.busy) root.append(el('p', { className: 'gc-message', role: 'status', textContent: saving ? 'Guardando el lote y verificando…' : 'Cargando organización por curso…' }));
       else if (s.error) root.append(el('p', { className: 'gc-message', role: 'alert', textContent: notice || s.error.message }), button(Date.now() < cooldown ? 'Espera un minuto para actualizar' : 'Actualizar organización', () => refresh(true), Date.now() < cooldown));
@@ -60,18 +61,19 @@
       }
       return root;
     }
-    function openEditor() {
+    function openEditor(recover = false) {
       if (!eligible()) return;
-      draftCourse = filters.curso; draft = new Map();
+      draftCourse = filters.curso; draft = new Map(); let touched = false;
+      if (recover === true) { const stored = window.horasDraftVault?.read('course:'+draftCourse); if (Array.isArray(stored)) { try { C.validateUpdates(stored); for(const r of stored) if(data().groups.some(g=>g.id===G.id(r.grupo))) draft.set(G.id(r.grupo),{...r}); } catch {} } }
       const editorData = data(), editData = () => data() || editorData;
       dialog = el('dialog', { className: 'gc-dialog', 'aria-labelledby': 'gc-dialog-title' });
       dialogHost = el('div'); const shadow = dialogHost.attachShadow({ mode: 'open' }); shadow.append(el('link', { rel: 'stylesheet', href: 'group-courses.css?v=courses-20261116' }), dialog);
-      const close = () => { if (saving) return; if (draft.size && !window.confirm('¿Descartar la selección sin guardar?')) return; dialog.close(); dialogHost.remove(); dialog = null; dialogHost = null; draft = null; };
+      const close = () => { if (saving) return; if (draft.size && !window.confirm('¿Descartar la selección sin guardar?')) return; window.horasDraftVault?.remove('course:'+draftCourse); dialog.close(); dialogHost.remove(); dialog = null; dialogHost = null; draft = null; };
       const heading = el('div', { className: 'gc-dialog-heading' }, [el('div', {}, [el('p', { className: 'gc-kicker', textContent: 'ORGANIZAR ' + draftCourse }), el('h2', { id: 'gc-dialog-title', textContent: 'Tus grupos de este curso' })]), button('Cerrar', close)]);
       const error = el('p', { className: 'gc-message', role: 'alert' }), counter = el('p', { className: 'gc-message', 'aria-live': 'polite' });
       let query = '';
       const list = el('div', { className: 'gc-editor-list' });
-      const selected = () => { counter.textContent = draft.size + ' grupos seleccionados · máximo 100'; save.disabled = !draft.size || !eligible(); };
+      const selected = () => { counter.textContent = draft.size + ' grupos seleccionados · máximo 100'; save.disabled = !draft.size || !eligible(); if(draft.size){touched=true;window.horasDraftVault?.save('course:'+draftCourse,[...draft.values()]);}else if(touched)window.horasDraftVault?.remove('course:'+draftCourse); };
       function draw() {
         list.replaceChildren();
         const groups = editData().groups.filter(g => !query || G.matches(g.nombre, query)).slice().sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base', numeric: true }));
@@ -79,7 +81,7 @@
           const existing = C.classification(editData().records, g, draftCourse), value = draft.get(g.id);
           const box = el('input', { type: 'checkbox', checked: !!value, 'aria-label': 'Seleccionar ' + g.label, onchange: e => { if (e.target.checked) { if (draft.size >= 100) { e.target.checked = false; error.textContent = 'Puedes guardar hasta 100 grupos por lote.'; return; } draft.set(g.id, { grupo: g.nombre, activo: existing?.activo ?? true, tipo: existing?.tipo || 'habitual' }); } else draft.delete(g.id); options(); selected(); } });
           const row = el('article', { className: 'gc-editor-row' }, [el('label', { className: 'gc-group-choice' }, [box, el('span', {}, [el('strong', { textContent: g.label }), el('small', { textContent: existing ? `${existing.tipo === 'habitual' ? 'Habitual' : 'Puntual'} · ${existing.activo ? 'Activo' : 'Inactivo'}` : 'Sin clasificar en este curso' })])])]);
-          function options() { row.querySelector('.gc-filter-fields')?.remove(); const current = draft.get(g.id); if (current) row.append(el('div', { className: 'gc-filter-fields' }, [select('Estado de ' + g.label, [['true', 'Activo'], ['false', 'Inactivo']], String(current.activo), v => { current.activo = v === 'true'; }), select('Tipo de ' + g.label, [['habitual', 'Habitual'], ['puntual', 'Puntual']], current.tipo, v => { current.tipo = v; })])); }
+          function options() { row.querySelector('.gc-filter-fields')?.remove(); const current = draft.get(g.id); if (current) row.append(el('div', { className: 'gc-filter-fields' }, [select('Estado de ' + g.label, [['true', 'Activo'], ['false', 'Inactivo']], String(current.activo), v => { current.activo = v === 'true'; selected(); }), select('Tipo de ' + g.label, [['habitual', 'Habitual'], ['puntual', 'Puntual']], current.tipo, v => { current.tipo = v; selected(); })])); }
           options();
           list.append(row);
         }
@@ -99,7 +101,7 @@
         if (!draft.size || !eligible()) return; saving = true; error.textContent = 'Guardando y verificando…';
         dialog.querySelectorAll('button,input,select').forEach(n => { n.disabled = true; });
         try {
-          await store.save(draftCourse, [...draft.values()]); notice = 'Organización guardada y verificada.'; dialog.close(); dialogHost.remove(); dialog = null; dialogHost = null; draft = null;
+          await store.save(draftCourse, [...draft.values()]); window.horasDraftVault?.remove('course:'+draftCourse); notice = 'Organización guardada y verificada.'; dialog.close(); dialogHost.remove(); dialog = null; dialogHost = null; draft = null;
         } catch (e) {
           error.textContent = e.message + ' La selección se conserva. Actualiza y revisa antes de reenviar.';
           reload.hidden = false; reload.disabled = Date.now() < cooldown;

@@ -7,6 +7,7 @@
   const endpoint = page.endpoint, production = page.profile === 'production';
   const $ = id => root.getElementById(id), dialog = $('editor'), form = $('editor-form');
   let client, progress, hadPending = false, env, token = '', expires = 0, view = 'repertoire', groupId = '', search = '', type = '', filter = 'all', archived = false;
+  let draftMeta = null, recoveringForm = false;
   let selected = new Set(), draft = null, initialForm = '', dirty = false, connecting = false, oauthClient = null, filtersOpen = false, selecting = false;
   groupId = host?.groupId || new URLSearchParams(window.location.hash.slice(1)).get('grupo') || '';
   const types = [['temaGaleta', 'Galeta'], ['temaSlap', 'Slap'], ['temaPropio', 'Propio']];
@@ -126,6 +127,9 @@
       p.append(el('ul', {}, data().issues.map(i => el('li', { textContent: [i.sheet, i.rowIdx ? 'fila ' + i.rowIdx : '', i.message || i.code].filter(Boolean).join(' · ') }))));
     }
     if (!env.writeEnabled) workspace.append(el('p', { class: 'readonly-note', textContent: 'Este acceso está en modo de consulta.' }));
+    const vault = window.horasDraftVault, savedMarks = vault?.read('repertoire-marks'), savedForm = vault?.read('repertoire-form');
+    if (savedMarks?.length && !progress?.state().pending) workspace.append(el('div', { class:'status' }, [el('p',{textContent:'Hay marcados recuperables en este dispositivo. Revisa los datos antes de guardarlos.'}), button('Recuperar marcados',async()=>{await reload(true);if(client.state().canWrite){progress.restore(savedMarks);if(!progress.state().pending){vault.remove('repertoire-marks');say('Los marcados ya están confirmados o las relaciones ya no están activas.');}}},'',!canWrite()),button('Descartar borrador',()=>{vault.remove('repertoire-marks');render();},'subtle')]));
+    if (savedForm && !dialog.open) workspace.append(el('div', { class:'status' }, [button('Recuperar formulario de repertorio',()=>recoverForm(savedForm),'',!canWrite()),button('Descartar formulario',()=>{vault.remove('repertoire-form');render();},'subtle')]));
     if (view !== 'catalog' && host?.groupCourses) {
       const courses = host.groupCourses();
       if (courses) workspace.append(courses.panel());
@@ -227,10 +231,10 @@
   function closeDialog() {
     if (client?.state().busy) return;
     if ((dirty || progress?.state().pending) && !window.confirm('Hay cambios sin guardar. ¿Quieres descartarlos?')) return;
-    dialog.close(); draft = null; dirty = false;
+    window.horasDraftVault?.remove('repertoire-form'); dialog.close(); draft = null; dirty = false;
   }
-  function editTheme(t) {
-    const id = t?.id || uid();
+  function editTheme(t, restoredId = null) {
+    const id = t?.id || restoredId || uid(); draftMeta = { type:'theme', id, existing:!!t };
     const grid = el('div', { class: 'form-grid' }, [field('Nombre del tema', 'nombre', t?.nombre || '', 'text', { required: true, maxLength: 200 }), field('Número de orden', 'numeroOrden', t?.numeroOrden || 1, 'number', { required: true, min: 1, step: 1 })]);
     const choices = el('fieldset', { class: 'fieldset field full' }, [el('legend', { textContent: 'Tipos de tema' }), el('div', { class: 'type-options' }, types.map(([k, label]) => { const check = checkbox(label, !!t?.[k], () => {}); check.querySelector('input').name = k; return check; })), el('p', { class: 'explanation', textContent: 'Puedes marcar varios. El número se aplica a todos los tipos elegidos y puede repetirse entre tipos distintos.' })]);
     grid.append(choices, field('Notas generales del tema', 'notas', t?.notas || '', 'textarea', { maxLength: 2000 }));
@@ -247,6 +251,7 @@
     });
   }
   function editProgress(a) {
+    draftMeta = { type:'progress', id:a.id };
     const t = themeById(a.temaId), original = { notas: a.notas };
     const grid = el('div', { class: 'form-grid' }, [field('Notas de este grupo', 'notas', a.notas, 'textarea', { maxLength: 2000 })]);
     openDialog(t.nombre, currentGroup().label, [grid], values => {
@@ -256,7 +261,7 @@
     });
   }
   function assignThemes() {
-    const g = currentGroup(); if (!g) return;
+    const g = currentGroup(); if (!g) return; draftMeta = {type:'assign', groupId:g.id};
     const choices = new Set(), ids = new Map(), candidates = data().themes.filter(t => t.activo && !data().assignments.some(a => G.id(a.grupo) === g.id && a.temaId === t.id && a.activo)).sort(sortThemes);
     const list = el('div', { class: 'assign-list' });
     const filterText = el('input', { class: 'control', type: 'search', placeholder: 'Buscar temas para añadir…', 'aria-label': 'Buscar temas para añadir' });
@@ -279,13 +284,26 @@
     }, 'Añadir seleccionados');
   }
   function confirmAction(title, name, explanation, payload) { openDialog(title, name, [el('p', { class: 'explanation', textContent: explanation })], () => payload, title.startsWith('Recuperar') ? 'Recuperar' : 'Archivar'); }
-  form.oninput = () => { dirty = readForm() !== initialForm; $('dirty-label').textContent = dirty ? 'Cambios sin guardar' : ''; };
+  function persistForm() { if (!recoveringForm && dirty && draftMeta) window.horasDraftVault?.save('repertoire-form', { ...draftMeta, values:[...new FormData(form).entries()] }); }
+  async function recoverForm(record) {
+    await reload(true); if (!client.state().canWrite) return;
+    recoveringForm = true;
+    try {
+      if(record.type==='theme'){const theme=themeById(record.id);if(record.existing&&!theme)throw Error('El tema ya no está disponible.');editTheme(theme,record.id);}
+      else if(record.type==='progress'){const a=data().assignments.find(a=>a.id===record.id);if(!a)throw Error('La relación ya no está disponible.');groupId=G.id(a.grupo);editProgress(a);}
+      else if(record.type==='assign'){groupId=record.groupId;if(!currentGroup())throw Error('El grupo ya no está disponible.');assignThemes();}else throw Error('Borrador no válido.');
+      const values=Array.isArray(record.values)?record.values:[];
+      for(const n of form.querySelectorAll('input[name],select[name],textarea[name]')){const matches=values.filter(([k])=>k===n.name);if(n.type==='checkbox'){n.checked=n.name==='assign-choice'?matches.some(([,v])=>v===n.value):!!matches.length;n.dispatchEvent(new Event('change',{bubbles:true}));}else if(matches.length)n.value=String(matches[0][1]);}
+      dirty=true;$('dirty-label').textContent='Borrador recuperado. Revisa antes de guardar.';
+    }catch(error){say(error.message,true);}finally{recoveringForm=false;persistForm();}
+  }
+  form.oninput = () => { dirty = readForm() !== initialForm; $('dirty-label').textContent = dirty ? 'Cambios sin guardar' : ''; persistForm(); };
   form.onchange = form.oninput;
   form.onsubmit = async e => {
     e.preventDefault(); if (!draft || client.state().busy || progress?.state().pending) return;
     try {
       const payload = draft.submit(new FormData(form));
-      await client.save(payload); dialog.close(); draft = null; dirty = false; selected.clear(); render(); say('Cambios guardados y verificados.');
+      await client.save(payload); window.horasDraftVault?.remove('repertoire-form'); dialog.close(); draft = null; dirty = false; selected.clear(); render(); say('Cambios guardados y verificados.');
     } catch (error) {
       const errorBox = $('dialog-error'); errorBox.hidden = false; errorBox.replaceChildren(document.createTextNode(message(error)));
       if (client.state().needsReload) errorBox.append(button('Actualizar y conservar formulario', () => reload(true)));
@@ -331,7 +349,7 @@
   }
   const ready = json(endpoint + '?api=environment').then(async e => {
     env = C.verifyEnvironment(e); client = C.create({ transport, writeEnabled: env.writeEnabled && env.progressBatch === true, onChange: render });
-    progress = C.createProgressQueue({ client, onChange: render });
+    progress = C.createProgressQueue({ client, onChange: () => { const vault = window.horasDraftVault; if (vault) { if (progress.state().pending) vault.save('repertoire-marks', progress.entries()); else vault.remove('repertoire-marks'); } render(); } });
     if (env.preview) { $('mode-badge').textContent = 'SIMULACIÓN'; $('copy-link').hidden = true; $('connect').textContent = 'Abrir simulación'; say('Datos ficticios en memoria. Esta vista no escribe en Google Sheets.'); }
     else if (!host) prepareOAuth().catch(error => say(error.message, true));
     if (host) { render(); await refreshSession(); }

@@ -56,7 +56,7 @@
       saving=busy=true;save.disabled=cancel.disabled=extra.disabled=true;status.textContent='Releyendo y comprobando antes de guardar…';
       const request=api({action:'apply',kind,input,expectedVersion:plan.version,operationId,allowSimilar:extra.checked});d.close();d.remove();if(kind==='session'||kind==='edit')closeModal('modal-evento');if(kind==='group')closeModal('modal-grupo');if(kind==='import')closeModal('modal-future-events');const resultHost=document.getElementById('test-result');resultHost.textContent='Guardando los cambios…';
       try{
-        const result=await request;
+        const result=await request; if(['group','session','edit'].includes(kind)) window.horasDrafts?.clearForm(kind==='group'?'group':'session', input.rowIdx);
         save.hidden=true;cancel.textContent='Cerrar';const message=result.alreadyApplied?'Esta operación ya se registró; no se ha repetido.':result.unchanged?'No hay cambios que guardar.':kind==='sync'?`Sincronización verificada. Altas: ${result.added}. Cambios de fecha u horario: ${result.moved}. Sesiones retiradas: ${result.removed}. Calendar sin cambios.`:`Operación guardada y verificada: ${result.saved} registro(s). ${result.calendarModified?'Calendar actualizado.':'Calendar sin cambios.'}`;
         status.textContent=message;document.getElementById('test-result').textContent=message;
         try{await syncData(false,false);}catch(e){resultHost.textContent=message+' Falta recargar la vista: '+e.message;}

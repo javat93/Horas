@@ -31,7 +31,7 @@
         throw e;
       }).finally(()=>{sending=null;if(!paused)arm();notify();});notify();return sending;
     }
-    return{state,set,flush,changes:id=>({...pending.get(id)}),acknowledge(){saved=false;},reviewed(){if(sending)throw Error('Espera al guardado.');error=null;paused=!!pending.size;notify();},discard(){if(sending)throw Error('Espera al guardado.');stop();pending.clear();firstAt=null;paused=false;error=null;saved=false;notify();}};
+    return{state,set,flush,entries:()=>[...pending].map(([vinculoId,changes])=>({vinculoId,changes:{...changes}})),restore(updates){if(sending||!client.state().canWrite)throw Error('Actualiza antes de recuperar.');if(!Array.isArray(updates)||updates.length>500)throw Error('Borrador no válido.');for(const u of updates){if(!client.state().data.assignments.some(a=>a.id===u.vinculoId&&a.activo)||!u.changes||Object.entries(u.changes).some(([k,v])=>!['realizado','repasando'].includes(k)||typeof v!=='boolean'))continue;pending.set(u.vinculoId,{...u.changes});}prune();paused=!!pending.size;stop();notify();},changes:id=>({...pending.get(id)}),acknowledge(){saved=false;},reviewed(){if(sending)throw Error('Espera al guardado.');error=null;paused=!!pending.size;notify();},discard(){if(sending)throw Error('Espera al guardado.');stop();pending.clear();firstAt=null;paused=false;error=null;saved=false;notify();}};
   }
   function forProfile(profile='development'){
   if(!['development','production'].includes(profile))throw Error('Perfil de repertorio no permitido.');
