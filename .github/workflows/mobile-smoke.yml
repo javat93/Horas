@@ -16,6 +16,7 @@ jobs:
       - run: npm install --no-save @playwright/test@1.65.1
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --config=playwright.config.cjs
+      - run: npx playwright test --config=playwright.google.config.cjs
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

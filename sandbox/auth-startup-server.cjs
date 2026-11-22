@@ -1,0 +1,5 @@
+// Static-only SDK startup check. No credentials, application API or write routes.
+const http=require('node:http'),fs=require('node:fs/promises'),path=require('node:path');
+const root=path.resolve(__dirname,'..'),port=Number(process.env.HORAS_AUTH_PORT||3012);
+const types={'.js':'text/javascript','.css':'text/css','.html':'text/html; charset=utf-8','.json':'application/json','.png':'image/png','.ico':'image/x-icon'};
+http.createServer(async(req,res)=>{try{if(req.method!=='GET'){res.writeHead(405);return res.end();}const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname),rel=pathname==='/'?'index.html':pathname.slice(1),file=path.resolve(root,rel==='config.secure.js'?'config.production.js':rel);if(!file.startsWith(root+path.sep)||pathname.startsWith('/api/')){res.writeHead(403);return res.end();}const content=await fs.readFile(file);res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');res.end(content);}catch{res.writeHead(404);res.end();}}).listen(port,'127.0.0.1',()=>console.log('Google SDK startup: http://localhost:'+port));

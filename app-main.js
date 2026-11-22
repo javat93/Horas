@@ -185,6 +185,7 @@
 
         function checkAuth() {
             if (gapiInited && gisInited && !authRestoreStarted) {
+                document.getElementById('auth-btn').dataset.googleReady = 'true';
                 authRestoreStarted=true;
                 const stored=savedSession().read();
                 if(stored.expired){expireGoogleConnection();return;}
