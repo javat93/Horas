@@ -85,7 +85,7 @@ async function prepare(p,snap,meta,token,request){
       after=copy(before);const desired=S.rowFor(s),changedSchedule=['group','date','start','end','district','address'].some(k=>old[k]!==s[k]);
       const formula=row[6]?.userEnteredValue?.formulaValue,safe=new RegExp('^=\\s*\\$?E\\$?'+rowIdx+'\\s*\\*\\s*\\$?H\\$?'+rowIdx+'\\s*$','i');
       if(changedSchedule&&s.price===old.price&&s.total===old.total&&(row[4]?.userEnteredValue?.formulaValue||(formula&&!safe.test(formula))))throw Error('El importe depende de una fórmula especial. Revisa el importe antes de cambiar los datos de esta sesión.');
-      const columns={2:old.gig!==s.gig,3:old.gig!==s.gig,4:old.price!==s.price,5:old.date!==s.date,6:old.total!==s.total,8:!G.same(old.group,s.group),9:old.district!==s.district,10:old.calendarId!==s.calendarId,11:old.address!==s.address,12:old.start!==s.start,13:old.end!==s.end};
+      const columns={2:old.gig!==s.gig,3:old.gig!==s.gig||(s.gig&&(['X',true].includes(D.value(before[3]))!==s.classMarked)),4:old.price!==s.price,5:old.date!==s.date,6:old.total!==s.total,8:!G.same(old.group,s.group),9:old.district!==s.district,10:old.calendarId!==s.calendarId,11:old.address!==s.address,12:old.start!==s.start,13:old.end!==s.end};
       for(const [column,change]of Object.entries(columns))if(change){const i=Number(column);after[i].userEnteredValue=desired[i].userEnteredValue;if([5,12,13].includes(i))after[i].userEnteredFormat={...after[i].userEnteredFormat,numberFormat:desired[i].userEnteredFormat.numberFormat};}
       summary.push(s);
     }

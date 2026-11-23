@@ -16,13 +16,14 @@ async function rawRow(rowIdx,token,request){
   const sheet=result.sheets?.find(s=>s.properties?.sheetId===0&&s.properties?.title==='Detalle');if(!sheet)throw Error('No se pudo comprobar la fila de Detalle.');
   return Array.from({length:15},(_,i)=>sheet.data?.[0]?.rowData?.[0]?.values?.[i]||{});
 }
+const classMarked=(group,gig)=>!(gig&&G.normalize(group).includes('maracuya'));
 function session(input,groups){
   if(!input||Object.keys(input).some(k=>!['group','date','start','end','price','total','district','address','gig','repeat'].includes(k)))throw Error('Campos de sesión no permitidos.');
   const group=G.resolve(groups,text(input.group,200));if(!group)throw Error('Selecciona un grupo del catálogo.');
   const date=D.validISO(input.date),start=L.time(input.start),end=L.time(input.end);
   if(!date||typeof input.gig!=='boolean'||(input.start&&!start)||(input.end&&!end)||!!start!==!!end||(start&&end<=start))throw Error('Fecha u horario no válido; inicio y fin deben pertenecer al mismo día.');
   const price=money(input.price),total=input.total===undefined?price:money(input.total);
-  return {group:group.nombre,date,start,end,price,total,district:text(input.district||'',500),address:text(input.address||''),gig:input.gig,calendarId:''};
+  return {group:group.nombre,date,start,end,price,total,district:text(input.district||'',500),address:text(input.address||''),gig:input.gig,classMarked:classMarked(group.nombre,input.gig),calendarId:''};
 }
 function dates(first,repeat){
   if(!repeat)return [first];
@@ -38,7 +39,7 @@ function dates(first,repeat){
 }
 function rowFor(s){
   const serialTime=t=>t?t.split(':').map(Number).reduce((h,m)=>h*60+m)/1440:'';
-  const row=['','',s.gig?'X':'',s.gig?'':'X',s.price,D.serial(s.date),s.total,1,s.group,s.district,s.calendarId,s.address,serialTime(s.start),serialTime(s.end),''].map(cell);
+  const row=['','',s.gig?'X':'',classMarked(s.group,s.gig)?'X':'',s.price,D.serial(s.date),s.total,1,s.group,s.district,s.calendarId,s.address,serialTime(s.start),serialTime(s.end),''].map(cell);
   for(const i of [0,1,2,3])row[i].dataValidation={condition:{type:'BOOLEAN',values:[{userEnteredValue:'X'}]}};
   row[8].dataValidation={condition:{type:'ONE_OF_RANGE',values:[{userEnteredValue:'=Coles!$A$2:$A'}]},showCustomUi:true};
   for(const i of [12,13])row[i].userEnteredFormat={numberFormat:{type:'TIME',pattern:'hh:mm'}};
@@ -102,7 +103,7 @@ async function build(p,snap,token,request,now,meta){
       if(price===null||price<0){skipped.push({title:e.summary||'',date,reason:'Tarifa vacía o no numérica'});continue;}
       const s={group:g.nombre,date,start:h.horaInicio,end:h.horaFin,price,total:price,gig,district:g.ubicacion,address:text(e.location||g.sitio||''),calendarId:e.id},row=rowFor(s),k=key(row);
       if(proposed.has(k)||existing.slice(1).some(r=>key(r)===k)){skipped.push({title:e.summary||'',date,reason:'Sesión con el mismo grupo, fecha y horario; se conserva la existente'});continue;}
-      proposed.add(k);rows.push(row);summary.push(s);
+      proposed.add(k);rows.push(row);summary.push({...s,classMarked:classMarked(s.group,s.gig)});
     }if(rows.length+removals.length+moves.length>100)throw Error('Más de 100 cambios. Divide la sincronización antes de continuar.');
   }else if(p.kind==='restore'){
     if(Object.keys(p.input||{}).some(k=>k!=='operationId')||typeof p.input?.operationId!=='string')throw Error('Archivo no válido.');

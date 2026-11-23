@@ -24,6 +24,7 @@
       const text=(label,before,after,format=value=>String(value??''),same=(a,b)=>String(a??'').trim()===String(b??'').trim())=>{if(!same(before,after))changes.push(`${label}: ${format(before)} → ${format(after)}`);};
       const number=(a,b)=>{const left=LocaleData.numeric(a),right=LocaleData.numeric(b);return left===right;};
       text('Tipo',current?.boloCole==='X','gig' in s?!!s.gig:!!input.gig,value=>value?'Bolo':'Clase');
+      if(typeof s.classMarked==='boolean')text('Casilla Clase',['X',true].includes(current?.clase),s.classMarked,value=>value?'Marcada':'Sin marcar');
       text('Grupo',current?.grupo,s.group,value=>GroupIdentity.label(value,s.date),(a,b)=>GroupIdentity.id(a)===GroupIdentity.id(b));
       text('Fecha',currentDate,s.date,value=>LocaleData.display(value));
       text('Horario',`${CalendarLinking.time(current?.horaInicio)}-${CalendarLinking.time(current?.horaFin)}`,`${s.start||''}-${s.end||''}`);
@@ -35,7 +36,7 @@
     }else for(const s of plan.summary){
       const card=node('div');card.className='review-record';d.append(card);
       const label=kind==='group'?`${GroupIdentity.catalogLabel(s.name)} · sesión: ${s.price===''?'sin tarifa':LocaleData.currency(s.price)} · bolo: ${s.gigPrice===''?'sin tarifa':LocaleData.currency(s.gigPrice)}`:`${GroupIdentity.label(s.group,s.date)} · ${LocaleData.display(s.date)} · ${s.start||''}–${s.end||''} · ${LocaleData.numeric(s.total)===null?'sin importe':LocaleData.currency(LocaleData.numeric(s.total))}`;
-      card.append(node('p',label));if(s.district||s.address)card.append(node('p',`Barrio: ${s.district||'(vacío)'} · Dirección: ${s.address||'(vacía)'}`));
+      card.append(node('p',label));if(s.gig&&typeof s.classMarked==='boolean')card.append(node('p',s.classMarked?'Casillas: Bolo y Clase marcadas.':'Casillas: Bolo marcada; Clase sin marcar (Maracuyá).'));if(s.district||s.address)card.append(node('p',`Barrio: ${s.district||'(vacío)'} · Dirección: ${s.address||'(vacía)'}`));
     }
     if(kind==='sync'){
       d.append(node('h3',`Cambios de fecha u horario (${plan.moves.length})`));
