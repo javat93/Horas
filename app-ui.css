@@ -135,10 +135,10 @@ body > footer > a { display: inline-flex; align-items: center; min-height: 44px;
   .glass-modal .grid { gap: 12px; }
   .glass-modal .grid input { padding-left: 10px; padding-right: 8px; }
   .app-form-actions { bottom: -1px; }
-  dialog:where(:not(#modal-mapa)), #protected-review-dialog > div { width: 100%; max-width: 100% !important; max-height: calc(100dvh - 12px) !important; margin: auto 0 0; padding: 22px 18px !important; border: 0; border-radius: 22px 22px 0 0 !important; }
+  dialog:where(:not(#modal-mapa,#reports-dialog)), #protected-review-dialog > div { width: 100%; max-width: 100% !important; max-height: calc(100dvh - 12px) !important; margin: auto 0 0; padding: 22px 18px !important; border: 0; border-radius: 22px 22px 0 0 !important; }
   #protected-review-dialog { padding: 0 !important; align-items: flex-end !important; }
-  dialog:where(:not(#modal-mapa)) :is(input:not([type=checkbox]), select, textarea) { font-size: 16px !important; }
-  dialog:where(:not(#modal-mapa)) button { min-height: 48px !important; }
+  dialog:where(:not(#modal-mapa,#reports-dialog)) :is(input:not([type=checkbox]), select, textarea) { font-size: 16px !important; }
+  dialog:where(:not(#modal-mapa,#reports-dialog)) button { min-height: 48px !important; }
   #calendar { padding: 12px !important; }
   .fc .fc-header-toolbar { flex-wrap: wrap; gap: 14px; }
   .fc .fc-toolbar-title { font-size: 20px !important; }

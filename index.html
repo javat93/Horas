@@ -6,7 +6,7 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Horas · PercuManager</title>
-    <script src="app-release.js?v=admin-exports-20261123"></script>
+    <script src="app-release.js?v=reports-design-20261123"></script>
     <!-- Tailwind CSS compilado para producción (17KB minificado, sin CDN) -->
 <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.17.0/dist/maplibre-gl.css">
@@ -348,8 +348,8 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="review-ui.css?v=20261111-mobile-map">
-    <link rel="stylesheet" href="app-ui.css?v=improvements-20261122">
+    <link rel="stylesheet" href="review-ui.css?v=reports-design-20261123">
+    <link rel="stylesheet" href="app-ui.css?v=reports-design-20261123">
     <script src="app-ui.js?v=improvements-20261122" defer></script>
     <script src="repertoire-model.js" defer></script>
     <script src="repertoire-templates.js?v=improvements-20261122" defer></script>
@@ -363,11 +363,12 @@
     <script src="form-drafts.js?v=improvements-20261122" defer></script>
     <script src="report-tools.js?v=improvements-20261122" defer></script>
     <script src="report-ui.js?v=improvements-20261122" defer></script>
-    <link rel="stylesheet" href="admin-report.css?v=admin-exports-20261123">
+    <script src="reports-dialog.js?v=reports-design-20261123" defer></script>
+    <link rel="stylesheet" href="admin-report.css?v=reports-design-20261123">
     <script src="admin-report-model.js?v=admin-exports-20261123" defer></script>
     <script src="admin-report-images.js?v=admin-exports-20261123" defer></script>
     <script src="admin-report-pdf.js?v=admin-exports-20261123" defer></script>
-    <script src="admin-report-ui.js?v=admin-exports-20261123" defer></script>
+    <script src="admin-report-ui.js?v=reports-design-20261123" defer></script>
 </head>
 <body class="pb-20">
 
@@ -383,6 +384,7 @@
                 </div>
             </div>
             <div id="production-actions" class="flex gap-2 flex-wrap justify-end">
+                <button id="reports-open" type="button" aria-label="Informes y administración" title="Informes y administración" aria-haspopup="dialog" aria-controls="reports-dialog" aria-expanded="false" class="reports-header-button font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm"><i data-lucide="file-chart-column" aria-hidden="true" class="w-5 h-5"></i><span>Informes</span></button>
                 <button id="repertoire-refresh" type="button" aria-label="Actualizar repertorio" disabled class="repertoire-header-action font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span class="hidden sm:inline">Actualizar repertorio</span></button>
                 <button id="sync-btn" aria-label="Sincronizar" data-bind-click="0" class="hidden bg-emerald-50 text-emerald-600 font-bold px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-all flex items-center gap-2 text-sm">
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i>
@@ -431,17 +433,6 @@
                 </button>
             </div>
             
-            <details class="report-controls"><summary>Informe por grupo y curso</summary><div class="session-filter-fields"><label>Curso<select id="report-course" aria-label="Curso del informe"><option value="all">Todo el histórico</option></select></label><label>Grupo<select id="report-group" aria-label="Grupo del informe"><option value="">Todos los grupos</option></select></label><button id="report-export" type="button">Descargar sesiones CSV</button></div></details>
-            <details class="admin-report-panel" id="admin-report-panel">
-                <summary>Compartir con administración</summary>
-                <p>Genera un PDF con las tablas Total Coles y Bolos Maracuyá y compártelo por WhatsApp.</p>
-                <p>Conservan los filtros de la hoja. Actualízalas tras cambiar cobros o sesiones. Toca una imagen para ampliarla.</p>
-                <button type="button" id="admin-report-prepare">Preparar PDF</button>
-                <div id="admin-report-files" class="admin-report-actions"></div>
-                <p id="admin-report-status" role="status" aria-live="polite"></p>
-                <div id="admin-report-content"></div>
-            </details>
-            <div id="stats-info" aria-live="polite">Cargando datos...</div>
             <div class="session-filters">
                 <div><label for="filter-grupo">Grupo</label><select id="filter-grupo" aria-label="Filtrar sesiones por grupo" data-bind-change="8" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700">
                     <option value="">Todos los grupos</option>
@@ -786,6 +777,46 @@
             </form>
         </div>
     </div>
+
+    <dialog id="reports-dialog" class="reports-dialog" aria-labelledby="reports-title">
+      <div class="reports-shell">
+        <div class="reports-drag" aria-hidden="true"></div>
+        <header class="reports-heading">
+          <div class="reports-heading-copy"><span class="reports-eyebrow">PERCUMANAGER</span><h2 id="reports-title">Informes</h2></div>
+          <button type="button" id="reports-close" class="reports-close" aria-label="Cerrar informes"><i data-lucide="x" aria-hidden="true"></i></button>
+        </header>
+        <div class="reports-tabs" role="tablist" aria-label="Secciones de informes">
+          <button type="button" id="reports-admin-tab" role="tab" aria-controls="reports-admin-panel" aria-selected="true">Administración</button>
+          <button type="button" id="reports-personal-tab" role="tab" aria-controls="reports-personal-panel" aria-selected="false" tabindex="-1">Mi informe</button>
+        </div>
+        <div class="reports-body">
+          <section id="reports-admin-panel" role="tabpanel" aria-labelledby="reports-admin-tab">
+            <div id="admin-report-panel" class="reports-admin-card">
+              <div class="reports-file-icon" aria-hidden="true"><i data-lucide="file-text"></i></div>
+              <h3>Para administración</h3>
+              <p class="reports-description">Las dos tablas juntas en un PDF listo para WhatsApp.</p>
+              <div class="reports-table-list" aria-label="Contenido del PDF">
+                <div><span class="reports-table-icon"><i data-lucide="table-2" aria-hidden="true"></i></span><span>Total Coles</span><i data-lucide="check" class="reports-table-check" aria-hidden="true"></i></div>
+                <div><span class="reports-table-icon reports-table-icon-green"><i data-lucide="table-2" aria-hidden="true"></i></span><span>Bolos Maracuyá</span><i data-lucide="check" class="reports-table-check" aria-hidden="true"></i></div>
+              </div>
+              <p id="admin-report-date" class="reports-date" hidden></p>
+              <div class="reports-delivery">
+                <button type="button" id="admin-report-prepare" class="reports-prepare"><i data-lucide="file-down" aria-hidden="true"></i><span>Preparar PDF</span></button>
+                <div id="admin-report-files" class="reports-file-actions"></div>
+              </div>
+              <p id="admin-report-status" class="reports-status" role="status" aria-live="polite"></p>
+            </div>
+            <details class="reports-preview" id="admin-report-preview" hidden><summary>Vista previa de las tablas</summary><div id="admin-report-content"></div></details>
+          </section>
+          <section id="reports-personal-panel" role="tabpanel" aria-labelledby="reports-personal-tab" hidden>
+            <div class="reports-personal-intro"><h3>Tu resumen económico</h3><p>Consulta los importes por grupo y curso.</p></div>
+            <div class="reports-scope"><label>Curso<select id="report-course" aria-label="Curso del informe"><option value="all">Todo el histórico</option></select></label><label>Grupo<select id="report-group" aria-label="Grupo del informe"><option value="">Todos los grupos</option></select></label></div>
+            <div id="stats-info" aria-live="polite">Cargando datos...</div>
+            <button id="report-export" class="reports-csv" type="button"><i data-lucide="download" aria-hidden="true"></i><span>Descargar sesiones CSV</span></button>
+          </section>
+        </div>
+      </div>
+    </dialog>
 
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
