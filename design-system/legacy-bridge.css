@@ -173,3 +173,9 @@ body { background: var(--pm-surface); color: var(--pm-on-surface); font-family: 
 .action-menu summary { width: var(--pm-touch-target); }
 #calendar .fc-button { min-height: var(--pm-touch-target); min-width: var(--pm-touch-target); }
 .glass-modal label:is([for=ev-bolo], [for=ev-calendar], [for=ev-repite]) { min-height: var(--pm-touch-target); }
+
+/* Direct group filters: no disclosure required on touch devices. */
+.gc-panel .gc-filters { margin: var(--pm-space-4) 0 var(--pm-space-3); }
+.gc-panel .gc-filter-fields { width: 100%; max-width: 600px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--pm-space-3); margin: 0; }
+.gc-panel .gc-filter-fields .gc-field > span { font-size: var(--pm-label-size); color: var(--pm-on-surface-variant); }
+@media (max-width:380px) { .gc-panel .gc-filter-fields { grid-template-columns: minmax(0, 1fr); } }

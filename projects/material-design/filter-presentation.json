@@ -1,0 +1,14 @@
+{
+  "file": "group-courses-ui.js",
+  "reason": "Show existing state and type controls directly; unchanged options, callbacks and transport.",
+  "patches": [
+    {
+      "before": "const details = el('details', { className: 'gc-filters', open: filtersOpen, ontoggle: () => { if (details.isConnected) filtersOpen = details.open; } });",
+      "after": "const details = el('section', { className: 'gc-filters', 'aria-label': 'Filtros de grupos' });"
+    },
+    {
+      "before": "details.append(el('summary', { textContent: 'Filtros · ' + ({ active: 'Activos', inactive: 'Inactivos', all: 'Todos', unclassified: 'Sin clasificar' }[filters.estado]) + ' · ' + ({ habitual: 'Habituales', puntual: 'Puntuales', all: 'Todos los tipos' }[filters.tipo]) }), el('div',",
+      "after": "details.append(el('div',"
+    }
+  ]
+}

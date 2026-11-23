@@ -14,6 +14,7 @@ test('Material foundation leaves domain APIs authentication and queues byte iden
   let source=fs.readFileSync(path.join(root,file));
   if(['group-courses-ui.js','sandbox/repertoire-ui.js','sandbox/preview-production.cjs'].includes(file))source=source.toString('utf8');
   if(['group-courses-ui.js','sandbox/repertoire-ui.js'].includes(file))source=source.replace('design-system/group-courses.css?v=material-foundation-20261123','group-courses.css?v=improvements-20261122');
+  if(file==='group-courses-ui.js')for(const patch of require('../projects/material-design/filter-presentation.json').patches){assert(source.includes(patch.after));source=source.replace(patch.after,patch.before);}
   if(file==='sandbox/preview-production.cjs')source=source.replace("['design-system/tokens.css','design-system/components.css','design-system/legacy-bridge.css','design-system/group-courses.css'].forEach(file=>files.add(file));\n",'');
   assert.equal(hash(source),expected,'Unexpected non-presentation change in '+file);
  }

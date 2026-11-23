@@ -71,3 +71,15 @@ Existing workflows, quotas and state semantics remain the reference.
 Obtain user review of this local result. Update affected pre-existing JS resource cache versions,
 run the required checks, and publish only when authorized. Do not deploy this development branch
 or turn the isolated preview into a production server.
+
+## Mobile filter alternative
+
+The course filters now show their existing Estado and Tipo selects directly, with accessible labels,
+56 px controls and a single column at 380 px or below. Their values, callbacks, cache and transport
+are unchanged. The precise presentation-only replacements are recorded in filter-presentation.json
+and reversed by the integrity guard before comparing the original business source.
+18 focused course and integrity checks pass. Browser checks cover all/unclassified/active filters,
+the disabled type rule and shared repertoire filters at 320 and 390 px. Development only.
+
+Primary mobile reference supplied by the user: Xiaomi 14T Pro. The filter alternative was also
+checked at 412x915 CSS pixels as an Android viewport reference, not a claim of physical-device testing.
