@@ -9,7 +9,7 @@ No remote push, production deployment, real Google access or real data writes.
 baseline.json records 183 source hashes and 224 HTML element contracts (IDs, data attributes,
 form field identifiers, types, methods and ARIA attributes), the source commit, version and four viewport sizes.
 The material-foundation tests enforce the original HTML after removing the added CSS links.
-All existing scripts and application markup remain identical.
+The guard removes the explicitly recorded presentation patches before comparing the original contracts.
 
 ## Phase 2 shared foundation
 
@@ -61,8 +61,8 @@ The review session uses HORAS_PREVIEW_PORT=3014 without changing app configurati
 
 ## Not part of this delivery
 
-Phases 3 to 6 are pending: dedicated redesign of screen layouts, additional presentation semantics,
-full form/review composition, specialized module refinements and removal of duplicated legacy CSS.
+Phases 4 to 6 remain pending: full form/review composition, specialized module refinements
+and removal of duplicated legacy CSS. Phase 3 is documented below.
 No claims of a completed whole-app redesign or production publication.
 Existing workflows, quotas and state semantics remain the reference.
 
@@ -83,3 +83,37 @@ the disabled type rule and shared repertoire filters at 320 and 390 px. Developm
 
 Primary mobile reference supplied by the user: Xiaomi 14T Pro. The filter alternative was also
 checked at 412x915 CSS pixels as an Android viewport reference, not a claim of physical-device testing.
+
+## Phase 3 — shared shell and consultation views
+
+Development-only presentation changes on the same isolated branch. User review is required before publishing.
+
+- screens.css composes the shared header/navigation, session cards, group cards and FullCalendar shell.
+- Mobile header actions now retain icon and text. New session/group uses a 56 px floating button,
+  16 px above the 80 px navigation plus safe area; hidden while a root modal is open.
+- Session cards show existing start/end times, explicit payment state and labeled actions.
+- Calendar titles add the existing payment state as text; event sources, dates, callbacks and options are unchanged.
+- presentation.js reads the existing authentication controls to mirror their connection state.
+  It never reads credentials or calls authentication, storage, transports or APIs.
+- Existing IDs, data actions, handlers, disabled rules, confirmations, filters and business rules remain.
+- phase3-presentation.json enumerates the exact reversible source replacements. The foundation
+  guard reverses them before checking original HTML contracts and business-source hashes.
+- Only the visible create-session label changes in the existing mobile E2E expectation.
+  The browser E2E suite was not run through remote CI, because no branch was pushed or deployed.
+
+Validation: all 318 Node tests passed (3.35 s), including three focused phase-3 tests covering
+rendered session states/escaping, unchanged Calendar options/callbacks and passive connection status.
+Browser review uses synthetic data only at 320x568, 390x844, 412x915, 768x1024 and 1280x900.
+No page/card/calendar horizontal overflow; mobile navigation fixed, tablet/desktop in flow.
+412x915 is a CSS viewport reference for the Xiaomi 14T Pro, not a physical-device test.
+At 320 px, all three header actions stretch equally when a label wraps.
+
+The synthetic payment save retained verification. Session archive review was opened and cancelled;
+new-session and existing Calendar editor were opened and closed without saving sessions.
+Changing session group/payment/performed filters and opening/reopening reports added zero preview
+API requests in the measured sequence. Course organization and alphabetical groups still work.
+Repertoire group hash is retained on selection and cleared on return to Lista.
+No real Sheets, Detalle, session or Calendar data was read or modified.
+
+Before later authorized publication, update cache versions for changed existing JS resources and
+run the required release checks. This delivery changes neither production version nor remote code.
