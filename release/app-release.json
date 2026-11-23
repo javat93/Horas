@@ -1,6 +1,7 @@
 {
-  "version": "1.6.2",
+  "version": "1.7.0",
   "date": "2026-11-23",
   "functionalPhases": 6,
-  "technicalPhases": 1
+  "technicalPhases": 1,
+  "adminTableImages": true
 }

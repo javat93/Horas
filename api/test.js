@@ -7,6 +7,7 @@ const {runLocale}=require('../sandbox/locale-service.cjs');
 const {runGroups}=require('../sandbox/group-service.cjs');
 const {runState}=require('../sandbox/state-service.cjs');
 const {runDaily}=require('../sandbox/daily-service.cjs');
+const {runAdminReports}=require('../sandbox/admin-report-service.cjs');
 
 const {scopedRequest,isReadAction}=require('../sandbox/protected-runtime.cjs');
 function createHandler({profile='test',writeEnabled=profile==='test',automaticEnabled=true,calendarWriteEnabled=false,request=googleRequest}={}){
@@ -32,12 +33,13 @@ function createHandler({profile='test',writeEnabled=profile==='test',automaticEn
   if(profile!=='test'&&(api==='control'||(api==='locale'&&payload.action==='check')))return res.status(403).json({error:'Las pruebas temporales solo están disponibles en la copia de pruebas.'});
   if(!writeEnabled&&!isReadAction(api,payload))return res.status(403).json({error:'Las escrituras protegidas aún no están activadas.'});
   try {
-    if(['control','links','protected','locale','groups','state','daily'].includes(api))validateTarget(payload.spreadsheetId);
+    if(['control','links','protected','locale','groups','state','daily','adminReports'].includes(api))validateTarget(payload.spreadsheetId);
     else validateOperation(api,payload.method,payload.params);
   } catch(error){return res.status(403).json({error:error.message});}
   const token=req.headers.authorization;
   if(!token || !/^Bearer \S+$/.test(token))return res.status(401).json({error:'Conecta Google en la aplicación.'});
   try {
+    if(api==='adminReports')return res.json(await runAdminReports(payload,token,upstream));
     if(api==='control')return res.json(await controlProbe(token));
     if(api==='links')return res.json(await runLinks(payload,token,upstream));
     if(api==='protected')return res.json(await runProtected(payload,token,upstream));

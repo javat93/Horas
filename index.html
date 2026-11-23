@@ -6,7 +6,7 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Horas · PercuManager</title>
-    <script src="app-release.js?v=bolo-clase-20261123"></script>
+    <script src="app-release.js?v=admin-exports-20261123"></script>
     <!-- Tailwind CSS compilado para producción (17KB minificado, sin CDN) -->
 <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.17.0/dist/maplibre-gl.css">
@@ -363,6 +363,10 @@
     <script src="form-drafts.js?v=improvements-20261122" defer></script>
     <script src="report-tools.js?v=improvements-20261122" defer></script>
     <script src="report-ui.js?v=improvements-20261122" defer></script>
+    <link rel="stylesheet" href="admin-report.css?v=admin-exports-20261123">
+    <script src="admin-report-model.js?v=admin-exports-20261123" defer></script>
+    <script src="admin-report-images.js?v=admin-exports-20261123" defer></script>
+    <script src="admin-report-ui.js?v=admin-exports-20261123" defer></script>
 </head>
 <body class="pb-20">
 
@@ -427,6 +431,14 @@
             </div>
             
             <details class="report-controls"><summary>Informe por grupo y curso</summary><div class="session-filter-fields"><label>Curso<select id="report-course" aria-label="Curso del informe"><option value="all">Todo el histórico</option></select></label><label>Grupo<select id="report-group" aria-label="Grupo del informe"><option value="">Todos los grupos</option></select></label><button id="report-export" type="button">Descargar sesiones CSV</button></div></details>
+            <details class="admin-report-panel" id="admin-report-panel">
+                <summary>Compartir con administración</summary>
+                <p>Genera las tablas Total Coles y Bolos Maracuyá como imágenes y compártelas por WhatsApp.</p>
+                <p>Conservan los filtros de la hoja. Actualízalas tras cambiar cobros o sesiones. Toca una imagen para ampliarla.</p>
+                <button type="button" id="admin-report-prepare">Preparar tablas</button>
+                <p id="admin-report-status" role="status" aria-live="polite"></p>
+                <div id="admin-report-content"></div>
+            </details>
             <div id="stats-info" aria-live="polite">Cargando datos...</div>
             <div class="session-filters">
                 <div><label for="filter-grupo">Grupo</label><select id="filter-grupo" aria-label="Filtrar sesiones por grupo" data-bind-change="8" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-3 py-2 font-medium text-slate-700">

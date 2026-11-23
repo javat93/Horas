@@ -25,6 +25,6 @@ function releaseSettings(env){
   if(env.HORAS_CALENDAR_WRITES==='enabled'&&profile==='production'&&settings.writeEnabled)settings.calendarWriteEnabled=true;
   return settings;
 }
-const readActions={links:['audit','candidates'],protected:['preview'],locale:['data','audit','numbersAudit'],groups:['audit','preview'],daily:['preview','trash','pending'],state:['getPayment']};
+const readActions={adminReports:['preview'],links:['audit','candidates'],protected:['preview'],locale:['data','audit','numbersAudit'],groups:['audit','preview'],daily:['preview','trash','pending'],state:['getPayment']};
 function isReadAction(api,payload){return api==='sheets'||api==='calendar'||readActions[api]?.includes(payload.action)===true;}
 module.exports={scopedRequest,releaseSettings,isReadAction};
