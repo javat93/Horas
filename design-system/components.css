@@ -1,0 +1,111 @@
+/* Shared component primitives. Existing names remain valid during migration. */
+:where(body, .repertoire-integrated, .gc-panel, .gc-dialog) {
+  font-family: var(--pm-font-family);
+  color: var(--pm-on-surface);
+}
+:is(.pm-button, .button, .gc-button, .review-primary,
+  .reports-prepare, .reports-file-action, .reports-csv, .reports-close,
+  .icon-button, .map-trigger, .archive-link,
+  #production-actions button, .app-section-heading > button, .app-form-actions button,
+  .glass-modal button, dialog button,
+  #map-close, #map-search-button, #map-locate, #map-retry, #map-confirm) {
+  min-height: var(--pm-touch-target) !important;
+  font-family: var(--pm-font-family) !important;
+  font-size: var(--pm-label-size);
+  font-weight: var(--pm-weight-medium);
+  line-height: 1.4;
+  border-radius: var(--pm-radius-field) !important;
+  border-color: var(--pm-action-border, var(--pm-outline-variant)) !important;
+  background: var(--pm-action-container, var(--pm-surface-container-lowest)) !important;
+  color: var(--pm-action-content, var(--pm-primary)) !important;
+  box-shadow: var(--pm-action-elevation, var(--pm-elevation-0)) !important;
+  transition: background-color var(--pm-duration-short) var(--pm-easing-standard),
+    box-shadow var(--pm-duration-short) var(--pm-easing-standard);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+:is(.pm-button, .button, .gc-button, .reports-file-action, .app-form-actions button):active:not(:disabled) {
+  box-shadow: inset 0 0 0 100px var(--pm-state-pressed) !important;
+}
+:is(.pm-field, .input-modern, .control, .group-picker,
+  .session-filters select, .reports-scope select, .gc-field select, .gc-dialog input[type=search],
+  .glass-modal input:not([type=checkbox]):not([type=hidden]), .glass-modal select, .glass-modal textarea,
+  dialog input:not([type=checkbox]):not([type=hidden]), dialog select, dialog textarea,
+  #search-grupos, #map-search) {
+  min-height: var(--pm-field-height) !important;
+  min-width: 0;
+  font-family: var(--pm-font-family) !important;
+  font-size: var(--pm-body-size) !important;
+  line-height: var(--pm-body-line-height);
+  border: var(--pm-border-width) solid var(--pm-outline) !important;
+  border-radius: var(--pm-radius-field) !important;
+  background: var(--pm-surface-container-lowest) !important;
+  color: var(--pm-on-surface) !important;
+  box-shadow: none !important;
+}
+:is(.pm-field, .input-modern, .control, .group-picker,
+  .gc-field select, #search-grupos, #map-search):focus {
+  border-color: var(--pm-primary) !important;
+}
+:is(.pm-surface, .card-modern, .song, .stat, .gc-panel,
+  .gc-editor-row, .review-record, .reports-admin-card, .reports-preview, .financial-card) {
+  border-color: var(--pm-outline-variant) !important;
+  border-radius: var(--pm-radius-card) !important;
+  background: var(--pm-panel-container, var(--pm-surface-container-lowest)) !important;
+  color: var(--pm-panel-content, var(--pm-on-surface)) !important;
+  box-shadow: var(--pm-elevation-0) !important;
+}
+:is(.pm-dialog, dialog, .glass-modal > div, #protected-review-dialog > div) {
+  font-family: var(--pm-font-family) !important;
+  color: var(--pm-on-surface) !important;
+  background: var(--pm-surface-container-lowest) !important;
+  border-color: var(--pm-outline-variant) !important;
+  border-radius: var(--pm-radius-dialog) !important;
+  box-shadow: var(--pm-elevation-2) !important;
+}
+dialog::backdrop, .glass-modal { background: var(--pm-scrim) !important; }
+:where(button, a, input, select, textarea, summary, [role=button]):focus-visible {
+  outline: 3px solid var(--pm-focus) !important;
+  outline-offset: 3px;
+}
+:is(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+}
+:is(button, .button, .gc-button):disabled {
+  --pm-action-content: var(--pm-disabled-content) !important;
+  --pm-action-container: var(--pm-disabled-container) !important;
+  --pm-action-border: var(--pm-outline-variant) !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+}
+input[type=checkbox] {
+  accent-color: var(--pm-primary);
+  width: var(--pm-checkbox-size);
+  height: var(--pm-checkbox-size);
+  flex-shrink: 0;
+}
+:is(.check-label, .session-all-groups, .gc-group-choice) {
+  min-height: var(--pm-touch-target);
+  font-family: var(--pm-font-family);
+}
+:is(.pm-tabs, .tabs, .reports-tabs) button {
+  font-family: var(--pm-font-family);
+  min-height: var(--pm-touch-target);
+}
+@media (hover:hover) {
+  :is(.pm-button, .button, .gc-button, .reports-file-action):hover:not(:disabled) {
+    box-shadow: inset 0 0 0 100px var(--pm-state-hover) !important;
+  }
+}
+@media (max-width:760px) {
+  :is(dialog, .glass-modal > div, #protected-review-dialog > div) {
+    border-radius: var(--pm-radius-dialog) var(--pm-radius-dialog) 0 0 !important;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  :where(*, *::before, *::after) {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

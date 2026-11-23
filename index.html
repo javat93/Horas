@@ -8,6 +8,7 @@
     <title>Horas · PercuManager</title>
     <script src="app-release.js?v=manual-done-20261123"></script>
     <!-- Tailwind CSS compilado para producción (17KB minificado, sin CDN) -->
+    <link rel="stylesheet" href="design-system/tokens.css?v=material-foundation-20261123">
 <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.17.0/dist/maplibre-gl.css">
     <link rel="stylesheet" href="map-picker.css?v=20261111-open-map">
@@ -369,6 +370,8 @@
     <script src="admin-report-images.js?v=admin-exports-20261123" defer></script>
     <script src="admin-report-pdf.js?v=admin-exports-20261123" defer></script>
     <script src="admin-report-ui.js?v=reports-design-20261123" defer></script>
+    <link rel="stylesheet" href="design-system/components.css?v=material-foundation-20261123">
+    <link rel="stylesheet" href="design-system/legacy-bridge.css?v=material-foundation-20261123">
 </head>
 <body class="pb-20">
 
@@ -478,7 +481,7 @@
         </div>
         <section id="tab-repertorio" class="hidden" aria-label="Repertorio"></section>
     </main>
-    <template id="repertoire-template"><link rel="stylesheet" href="sandbox/repertoire.css?v=improvements-20261122"><link rel="stylesheet" href="repertoire-integrated.css?v=improvements-20261122"><div class="repertoire-integrated"><div hidden><span id="mode-badge"></span><span id="connection-label"></span><button id="connect">Conectar Google</button><button id="disconnect">Desconectar</button></div><main class="shell"><div class="page-heading"><div><p class="eyebrow">TEMAS Y GRUPOS</p><h2>Repertorio por grupo</h2><p class="intro">Lo que ya habéis aprendido y lo que toca repasar.</p></div><a id="copy-link" class="text-link" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60/edit">Abrir hoja de cálculo ↗</a></div>
+    <template id="repertoire-template"><link rel="stylesheet" href="design-system/tokens.css?v=material-foundation-20261123"><link rel="stylesheet" href="sandbox/repertoire.css?v=improvements-20261122"><link rel="stylesheet" href="repertoire-integrated.css?v=improvements-20261122"><link rel="stylesheet" href="design-system/components.css?v=material-foundation-20261123"><link rel="stylesheet" href="design-system/legacy-bridge.css?v=material-foundation-20261123"><div class="repertoire-integrated"><div hidden><span id="mode-badge"></span><span id="connection-label"></span><button id="connect">Conectar Google</button><button id="disconnect">Desconectar</button></div><main class="shell"><div class="page-heading"><div><p class="eyebrow">TEMAS Y GRUPOS</p><h2>Repertorio por grupo</h2><p class="intro">Lo que ya habéis aprendido y lo que toca repasar.</p></div><a id="copy-link" class="text-link" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60/edit">Abrir hoja de cálculo ↗</a></div>
 <nav class="tabs" aria-label="Secciones de repertorio"><button data-tab="repertoire" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13M9 9l12-2"/><ellipse cx="6" cy="18" rx="3" ry="3"/><ellipse cx="18" cy="16" rx="3" ry="3"/></svg><span>Por grupo</span></button><button data-tab="catalog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span>Catálogo</span></button><button data-tab="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-4-5"/></svg><span>Resumen</span></button></nav>
 <div id="status" class="status" role="status" aria-live="polite" hidden></div><div id="issue-panel" class="issues" hidden></div><section id="workspace" aria-busy="false"><div class="empty"><span class="empty-symbol" aria-hidden="true">♫</span><h2>Todo tu repertorio en un lugar</h2><p>Conecta Google para consultar el repertorio de tus grupos.</p></div></section></main>
 <dialog id="editor" aria-labelledby="dialog-title"><form id="editor-form"><div class="dialog-heading"><div><p id="dialog-kicker" class="eyebrow"></p><h2 id="dialog-title"></h2></div><button id="close-dialog" type="button" class="icon-button" aria-label="Cerrar formulario">×</button></div><div id="dialog-body"></div><p id="dialog-error" class="form-error" role="alert" hidden></p><div class="dialog-footer"><span id="dirty-label" class="muted"></span><button id="cancel-dialog" type="button" class="button">Cancelar</button><button id="save-dialog" type="submit" class="button primary">Guardar</button></div></form></dialog>
