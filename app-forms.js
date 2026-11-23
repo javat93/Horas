@@ -5,6 +5,9 @@
             for(const id of ['ev-hora-inicio','ev-hora-fin'])document.getElementById(id).required=true;
             document.getElementById('modal-evento-title').innerText = "Nueva clase";
             document.getElementById('form-evento').reset();
+            document.getElementById('session-performed-control').hidden = true;
+            document.getElementById('ev-realizado').disabled = true;
+            document.getElementById('ev-realizado').checked = false;
             document.getElementById('ev-calendar').checked=true;
             document.getElementById('ev-rowIdx').value = "";
             document.getElementById('sync-calendar-wrapper').classList.remove('hidden');
@@ -36,6 +39,10 @@
             if(!ev.fechaObj){showErrorModal('Sesión incompleta',`La fila ${rowIdx} no tiene una fecha válida. Revísala en la hoja antes de editarla.`,'warning');return;}
             document.getElementById('modal-evento-title').innerText = "Editar Sesión";
             document.getElementById('ev-rowIdx').value = ev.rowIdx;
+            document.getElementById('session-performed-control').hidden = window.horasCalendarWritesEnabled !== true;
+            document.getElementById('ev-realizado').checked = !!ev.realizado;
+            document.getElementById('ev-realizado').disabled = !!ev.realizado;
+            document.getElementById('session-performed-hint').textContent = ev.realizado ? 'Esta sesión ya está marcada como realizada.' : 'Márcala si ya has terminado esta sesión.';
             document.getElementById('ev-grupo').value = GroupIdentity.resolve(grupos,ev.grupo)?.nombre || ev.grupo;
             document.getElementById('ev-grupo-search').value = sessionGroupName(ev);
 

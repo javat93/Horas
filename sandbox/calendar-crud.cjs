@@ -51,7 +51,8 @@ async function prepare(p,snap,meta,token,request){
   }
   if(p.kind==='session'||p.kind==='edit'){
     if(typeof input.calendar!=='boolean')throw Error('Indica si quieres guardar también en Calendar.');
-    const {calendar,rowIdx:rowInput,...fields}=input;
+    const {calendar,rowIdx:rowInput,performed,...fields}=input;
+    if(performed!==undefined&&(p.kind!=='edit'||performed!==true))throw Error('Solo se permite marcar como realizada una sesión existente.');
     if(p.kind==='session'&&rowInput!==undefined||p.kind==='edit'&&(!Number.isInteger(rowInput)||rowInput<2||fields.repeat))throw Error('Sesión no válida. La edición afecta solo a una sesión.');
     const groups=snap.groups.slice(1).map(r=>({nombre:String(D.value(r?.[0]))})),s=S.session(fields,groups);
     if(p.kind==='session'){
@@ -71,7 +72,9 @@ async function prepare(p,snap,meta,token,request){
       rowIdx=rowInput;const row=snap.rows[rowIdx-1];if(!row||!D.value(row[8]))throw Error('La sesión ya no está disponible.');
       before=await S.rawRow(rowIdx,token,request);if(S.hash(S.values(before))!==S.hash(S.values(row)))throw Error('La fila cambió al preparar la edición.');
       const old=descriptor(row);s.calendarId=old.calendarId;
-      if(calendar){
+      const performedOnly=performed===true&&G.same(old.group,s.group)&&['date','start','end','price','total','district','address','gig'].every(k=>old[k]===s[k]);
+      if(performed===true){if(before[1]?.userEnteredValue?.formulaValue)throw Error('El estado realizado procede de una fórmula. Revísala antes de sustituirla.');const rule=before[1]?.dataValidation?.condition;if(rule&&(rule.type!=='BOOLEAN'||rule.values?.length&&rule.values[0]?.userEnteredValue!=='X'))throw Error('La casilla Realizado tiene una validación no reconocida.');s.performed=true;}
+      if(calendar&&!performedOnly){
         let event=await linked(row,rowIdx,snap,token,request,warnings);
         if(!warnings.length){
           if(!event){event=chooseEvent(s,await workEvents([s.date]));if(event)s.calendarId=event.id;}
@@ -85,8 +88,10 @@ async function prepare(p,snap,meta,token,request){
       after=copy(before);const desired=S.rowFor(s),changedSchedule=['group','date','start','end','district','address'].some(k=>old[k]!==s[k]);
       const formula=row[6]?.userEnteredValue?.formulaValue,safe=new RegExp('^=\\s*\\$?E\\$?'+rowIdx+'\\s*\\*\\s*\\$?H\\$?'+rowIdx+'\\s*$','i');
       if(changedSchedule&&s.price===old.price&&s.total===old.total&&(row[4]?.userEnteredValue?.formulaValue||(formula&&!safe.test(formula))))throw Error('El importe depende de una fórmula especial. Revisa el importe antes de cambiar los datos de esta sesión.');
-      const columns={2:old.gig!==s.gig,3:old.gig!==s.gig||(s.gig&&(['X',true].includes(D.value(before[3]))!==s.classMarked)),4:old.price!==s.price,5:old.date!==s.date,6:old.total!==s.total,8:!G.same(old.group,s.group),9:old.district!==s.district,10:old.calendarId!==s.calendarId,11:old.address!==s.address,12:old.start!==s.start,13:old.end!==s.end};
+      if(performedOnly)s.classMarked=['X',true].includes(D.value(row[3]));
+      const columns=performedOnly?{}:{2:old.gig!==s.gig,3:old.gig!==s.gig||(s.gig&&(['X',true].includes(D.value(before[3]))!==s.classMarked)),4:old.price!==s.price,5:old.date!==s.date,6:old.total!==s.total,8:!G.same(old.group,s.group),9:old.district!==s.district,10:old.calendarId!==s.calendarId,11:old.address!==s.address,12:old.start!==s.start,13:old.end!==s.end};
       for(const [column,change]of Object.entries(columns))if(change){const i=Number(column);after[i].userEnteredValue=desired[i].userEnteredValue;if([5,12,13].includes(i))after[i].userEnteredFormat={...after[i].userEnteredFormat,numberFormat:desired[i].userEnteredFormat.numberFormat};}
+      if(performed===true){const rule=before[1]?.dataValidation?.condition,raw=before[1]?.userEnteredValue?.boolValue??D.value(before[1]);if(!['X',true].includes(raw))after[1].userEnteredValue=rule?.type==='BOOLEAN'?(rule.values?.length?{stringValue:'X'}:{boolValue:true}):typeof raw==='boolean'?{boolValue:true}:{stringValue:'X'};}
       summary.push(s);
     }
   }else if(p.kind==='delete'){

@@ -23,6 +23,7 @@
       const changes=[];
       const text=(label,before,after,format=value=>String(value??''),same=(a,b)=>String(a??'').trim()===String(b??'').trim())=>{if(!same(before,after))changes.push(`${label}: ${format(before)} → ${format(after)}`);};
       const number=(a,b)=>{const left=LocaleData.numeric(a),right=LocaleData.numeric(b);return left===right;};
+      if(s.performed===true)text('Realizado',!!current?.realizado,true,value=>value?'Sí':'No');
       text('Tipo',current?.boloCole==='X','gig' in s?!!s.gig:!!input.gig,value=>value?'Bolo':'Clase');
       if(typeof s.classMarked==='boolean')text('Casilla Clase',['X',true].includes(current?.clase),s.classMarked,value=>value?'Marcada':'Sin marcar');
       text('Grupo',current?.grupo,s.group,value=>GroupIdentity.label(value,s.date),(a,b)=>GroupIdentity.id(a)===GroupIdentity.id(b));
@@ -73,7 +74,7 @@
     if(document.getElementById('ev-repite').checked)input.repeat={frequency:value('ev-freq'),interval:Number(value('ev-interval')),until:value('ev-until')};
     return review('session',input);
   };
-  window.reviewCalendarSessionForm=()=>review('edit',{rowIdx:Number(value('ev-rowIdx')),group:value('ev-grupo'),date:value('ev-fecha'),start:value('ev-hora-inicio'),end:value('ev-hora-fin'),price:value('ev-precio'),total:value('ev-total'),district:value('ev-barrio'),address:value('ev-sitio'),gig:document.getElementById('ev-bolo').checked,calendar:document.getElementById('ev-calendar').checked});
+  window.reviewCalendarSessionForm=()=>review('edit',{rowIdx:Number(value('ev-rowIdx')),group:value('ev-grupo'),date:value('ev-fecha'),start:value('ev-hora-inicio'),end:value('ev-hora-fin'),price:value('ev-precio'),total:value('ev-total'),district:value('ev-barrio'),address:value('ev-sitio'),gig:document.getElementById('ev-bolo').checked,calendar:document.getElementById('ev-calendar').checked,...(document.getElementById('ev-realizado')?.checked&&!eventos.find(e=>e.rowIdx===Number(value('ev-rowIdx')))?.realizado?{performed:true}:{})});
   window.reviewNewGroupForm=()=>review('group',{name:value('gr-nombre'),price:value('gr-precio'),gigPrice:value('gr-precio-bolo'),address:value('gr-sitio'),district:value('gr-ubicacion')});
   window.reviewFutureImport=()=>review('import',{month:value('future-year')+'-'+value('future-month').padStart(2,'0')});
   window.previewCalendarImport=month=>api({action:'preview',kind:'sync',input:{month}});

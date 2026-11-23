@@ -6,7 +6,7 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Horas · PercuManager</title>
-    <script src="app-release.js?v=reports-design-20261123"></script>
+    <script src="app-release.js?v=manual-done-20261123"></script>
     <!-- Tailwind CSS compilado para producción (17KB minificado, sin CDN) -->
 <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.17.0/dist/maplibre-gl.css">
@@ -28,7 +28,7 @@
     <script src="group-identity.js?v=fase6-20261029"></script>
     <script src="calendar-linking.js?v=enlaces-20261029"></script>
     <script src="protected-review.js?v=fase7-20261029"></script>
-    <script src="sandbox/daily-editor.js?v=bolo-clase-20261123" defer></script>
+    <script src="sandbox/daily-editor.js?v=manual-done-20261123" defer></script>
     <script src="sandbox/panel.js?v=calendar-crud-20261105" defer></script>
     <script src="sandbox/performed-editor.js?v=productiva-20261102" defer></script>
     <script src="sandbox/identity-review.js?v=fase6-20261029" defer></script>
@@ -349,7 +349,7 @@
         }
     </style>
     <link rel="stylesheet" href="review-ui.css?v=reports-design-20261123">
-    <link rel="stylesheet" href="app-ui.css?v=reports-design-20261123">
+    <link rel="stylesheet" href="app-ui.css?v=manual-done-20261123">
     <script src="app-ui.js?v=improvements-20261122" defer></script>
     <script src="repertoire-model.js" defer></script>
     <script src="repertoire-templates.js?v=improvements-20261122" defer></script>
@@ -496,6 +496,7 @@
                 <button type="button" data-bind-click="13" aria-label="Cerrar formulario" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
             </div>
             <form id="form-evento" class="space-y-4">
+                <label id="session-performed-control" class="session-performed-control" hidden><input type="checkbox" id="ev-realizado" aria-label="Sesión realizada" aria-describedby="session-performed-hint" disabled><span><strong>Sesión realizada</strong><small id="session-performed-hint">Márcala si ya has terminado esta sesión.</small></span></label>
                 <input type="hidden" id="ev-rowIdx">
                 
                 <div>
@@ -830,7 +831,7 @@
 
     <script src="app-main.js?v=google-startup-20261122"></script>
 <script src="app-views.js?v=improvements-20261122"></script>
-<script src="app-forms.js?v=improvements-20261122"></script>
+<script src="app-forms.js?v=manual-done-20261123"></script>
 <script src="group-options.js?v=improvements-20261122"></script>
 <script src="legacy-bindings.js?v=improvements-20261122" defer></script>
 </body>
