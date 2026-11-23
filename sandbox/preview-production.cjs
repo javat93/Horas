@@ -39,7 +39,7 @@ files.add('condiciones.html');
 for (const file of ['repertoire-model.js', 'repertoire-client.js', 'repertoire-integration.js', 'repertoire-integrated.css', 'sandbox/repertoire-ui.js', 'sandbox/repertoire.css', 'repertorio.html']) files.add(file);
 for (const file of ['group-courses.js', 'group-courses-ui.js', 'group-courses.css']) files.add(file);
 ["config-bootstrap.js","repertoire-nav-init.js","app-main.js","app-views.js","app-forms.js","group-options.js","legacy-bindings.js","safe-html.js","app-release.js","google-requests.js","draft-vault.js","form-drafts.js","report-tools.js","report-ui.js","repertoire-templates.js","vendor/lucide.js","vendor/fullcalendar.js"].forEach(file=>files.add(file));
-['admin-report.css','admin-report-model.js','admin-report-images.js','admin-report-ui.js'].forEach(file=>files.add(file));
+['admin-report.css','admin-report-model.js','admin-report-images.js','admin-report-pdf.js','admin-report-ui.js','vendor/pdf-lib.min.js'].forEach(file=>files.add(file));
 const server=http.createServer(async(req,res)=>{
   try{
     if(![`localhost:${port}`,`127.0.0.1:${port}`].includes(req.headers.host)){res.writeHead(403);return res.end();}

@@ -366,6 +366,7 @@
     <link rel="stylesheet" href="admin-report.css?v=admin-exports-20261123">
     <script src="admin-report-model.js?v=admin-exports-20261123" defer></script>
     <script src="admin-report-images.js?v=admin-exports-20261123" defer></script>
+    <script src="admin-report-pdf.js?v=admin-exports-20261123" defer></script>
     <script src="admin-report-ui.js?v=admin-exports-20261123" defer></script>
 </head>
 <body class="pb-20">
@@ -433,9 +434,10 @@
             <details class="report-controls"><summary>Informe por grupo y curso</summary><div class="session-filter-fields"><label>Curso<select id="report-course" aria-label="Curso del informe"><option value="all">Todo el histórico</option></select></label><label>Grupo<select id="report-group" aria-label="Grupo del informe"><option value="">Todos los grupos</option></select></label><button id="report-export" type="button">Descargar sesiones CSV</button></div></details>
             <details class="admin-report-panel" id="admin-report-panel">
                 <summary>Compartir con administración</summary>
-                <p>Genera las tablas Total Coles y Bolos Maracuyá como imágenes y compártelas por WhatsApp.</p>
+                <p>Genera un PDF con las tablas Total Coles y Bolos Maracuyá y compártelo por WhatsApp.</p>
                 <p>Conservan los filtros de la hoja. Actualízalas tras cambiar cobros o sesiones. Toca una imagen para ampliarla.</p>
-                <button type="button" id="admin-report-prepare">Preparar tablas</button>
+                <button type="button" id="admin-report-prepare">Preparar PDF</button>
+                <div id="admin-report-files" class="admin-report-actions"></div>
                 <p id="admin-report-status" role="status" aria-live="polite"></p>
                 <div id="admin-report-content"></div>
             </details>

@@ -3,6 +3,8 @@
   "fullcalendar": "6.1.10",
   "sources": [
     "https://registry.npmjs.org/lucide",
-    "https://www.npmjs.com/package/fullcalendar"
-  ]
+    "https://www.npmjs.com/package/fullcalendar",
+    "https://registry.npmjs.org/pdf-lib/1.17.1"
+  ],
+  "pdf-lib": "1.17.1"
 }
