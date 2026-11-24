@@ -1,0 +1,181 @@
+/* Temporary bridge. No DOM, data, authentication or operation changes.
+   Specific !important declarations only override the existing mixed cascade.
+   Remove each mapping once its legacy component is migrated. */
+:root, :host {
+  --brand-blue: var(--pm-primary);
+  --brand-dark: var(--pm-on-primary-container);
+  --brand-light: var(--pm-primary-container);
+  --bg-main: var(--pm-surface);
+  --app-line: var(--pm-outline-variant);
+  --app-muted: var(--pm-on-surface-variant);
+  --blue: var(--pm-primary);
+  --line: var(--pm-outline-variant);
+  --muted: var(--pm-on-surface-variant);
+  --green: var(--pm-success);
+  --amber: var(--pm-warning);
+}
+body { background: var(--pm-surface); color: var(--pm-on-surface); font-family: var(--pm-font-family); }
+:host { font-family: var(--pm-font-family); color: var(--pm-on-surface); }
+:where(.button.primary, .gc-primary, button.review-primary,
+  .reports-prepare, .reports-file-action-primary, .app-section-heading > button,
+  .app-form-actions button, #map-search-button, #map-confirm) {
+  --pm-action-container: var(--pm-primary);
+  --pm-action-content: var(--pm-on-primary);
+  --pm-action-border: var(--pm-primary);
+}
+#production-actions :is(#auth-btn, #reports-open),
+.action-menu[open] summary, .filter-toggle[aria-expanded=true] {
+  --pm-action-container: var(--pm-primary-container);
+  --pm-action-content: var(--pm-on-primary-container);
+  --pm-action-border: var(--pm-primary-container);
+}
+:is(.button.subtle, .archive-link, .map-trigger) {
+  --pm-action-container: transparent;
+  --pm-action-border: transparent;
+}
+:is(.button.danger) { --pm-action-content: var(--pm-error); }
+.reports-ready .reports-prepare {
+  --pm-action-container: transparent;
+  --pm-action-content: var(--pm-primary);
+  --pm-action-border: transparent;
+}
+#production-actions button, .icon-button, .reports-close,
+.glass-modal button[aria-label^=Cerrar], #map-close {
+  min-width: var(--pm-touch-target);
+}
+.app-section-heading > button { width: auto; flex-shrink: 0; }
+.app-form-actions, .gc-dialog-footer, .dialog-footer, .map-footer,
+.header-modern, .reports-dialog, .reports-heading {
+  background: var(--pm-surface-container-lowest);
+  border-color: var(--pm-outline-variant);
+}
+:is(.app-nav, .tabs, .reports-tabs) {
+  background: var(--pm-surface-container);
+  border-color: var(--pm-outline-variant);
+}
+:is(.app-nav .tab-active, .tabs button[aria-current=page], .reports-tabs [aria-selected=true]) {
+  --pm-action-container: var(--pm-primary-container);
+  --pm-action-content: var(--pm-on-primary-container);
+  --pm-action-elevation: inset 0 -2px 0 var(--pm-primary);
+  font-weight: var(--pm-weight-strong) !important;
+  background: var(--pm-primary-container) !important;
+  color: var(--pm-on-primary-container) !important;
+  box-shadow: none !important;
+}
+:is(.session-filters, .advanced-filters, #protected-session-fields, .gc-onboarding, .draft-recovery) {
+  background: var(--pm-surface-container-low);
+  border-color: var(--pm-outline-variant);
+  border-radius: var(--pm-radius-card);
+  color: var(--pm-on-surface-variant);
+}
+.session-filter-details summary, .gc-management > summary,
+.action-menu summary {
+  min-height: var(--pm-touch-target);
+  border-radius: var(--pm-radius-field);
+  background: var(--pm-surface-container);
+  color: var(--pm-on-surface-variant);
+}
+.session-card-title, .song-title, .financial-card strong, .group-card-main h4 {
+  color: var(--pm-on-surface);
+}
+.session-type-label, .tag, .gc-badge {
+  border-radius: var(--pm-radius-pill);
+  background: var(--pm-primary-container);
+  color: var(--pm-on-primary-container);
+}
+.session-card--bolo .session-type-label {
+  background: var(--pm-warning-container);
+  color: var(--pm-on-warning-container);
+}
+.stat[aria-pressed=true], .financial-card-main {
+  --pm-panel-container: var(--pm-primary-container);
+  --pm-panel-content: var(--pm-on-primary-container);
+  border-color: var(--pm-primary) !important;
+}
+.stat-done[aria-pressed=true] {
+  --pm-panel-container: var(--pm-success-container);
+  --pm-panel-content: var(--pm-on-success-container);
+}
+.stat-review[aria-pressed=true] {
+  --pm-panel-container: var(--pm-warning-container);
+  --pm-panel-content: var(--pm-on-warning-container);
+}
+.song.is-learned { border-left-color: var(--pm-success) !important; }
+.song.is-reviewing { border-left-color: var(--pm-warning) !important; }
+.song-checks .check-label {
+  border-radius: var(--pm-radius-field);
+  background: var(--pm-surface-container-low);
+  border-color: var(--pm-outline-variant);
+}
+.song-checks .check-label:first-child.is-checked, #session-performed-control {
+  background: var(--pm-success-container);
+  border-color: var(--pm-success);
+  color: var(--pm-on-success-container);
+}
+.song-checks .check-label:last-child.is-checked {
+  background: var(--pm-warning-container);
+  border-color: var(--pm-warning);
+  color: var(--pm-on-warning-container);
+}
+.song-checks .check-label:first-child input { accent-color: var(--pm-success); }
+.song-checks .check-label:last-child input { accent-color: var(--pm-warning); }
+.status, .readonly-note, .selection-bar,
+#auth-status:not(:empty), #google-quota-status:not(:empty) {
+  color: var(--pm-on-primary-container);
+  background: var(--pm-primary-container);
+  border-color: var(--pm-outline-variant);
+  border-radius: var(--pm-radius-field);
+}
+#auth-status:not(:empty), #google-quota-status:not(:empty) {
+  padding: var(--pm-space-3) var(--pm-space-4);
+  margin: var(--pm-space-3) auto;
+}
+.status.error, .form-error, .issues, [role=alert]:not(:empty),
+.reports-status[role=alert] {
+  color: var(--pm-on-error-container);
+  background: var(--pm-error-container);
+  border-color: var(--pm-error);
+}
+.menu-items, .gc-management-actions {
+  background: var(--pm-surface-container-lowest);
+  border-color: var(--pm-outline-variant);
+  border-radius: var(--pm-radius-card);
+  box-shadow: var(--pm-elevation-2);
+}
+.menu-items .button { --pm-action-content: var(--pm-on-surface); }
+.reports-tabs button { border-radius: var(--pm-radius-field) !important; }
+#calendar {
+  --fc-button-bg-color: var(--pm-primary);
+  --fc-button-border-color: var(--pm-primary);
+  --fc-button-text-color: var(--pm-on-primary);
+  --fc-button-hover-bg-color: var(--pm-on-primary-container);
+  --fc-button-hover-border-color: var(--pm-on-primary-container);
+  --fc-button-active-bg-color: var(--pm-on-primary-container);
+  --fc-button-active-border-color: var(--pm-on-primary-container);
+  background: var(--pm-surface-container-lowest);
+  border-color: var(--pm-outline-variant);
+  border-radius: var(--pm-radius-card) !important;
+}
+@media (max-width:760px) {
+  .app-nav { min-height: calc(var(--pm-nav-height) + env(safe-area-inset-bottom, 0px)); }
+  body.pb-20 { padding-bottom: calc(var(--pm-nav-height) + env(safe-area-inset-bottom, 0px) + var(--pm-space-6)); }
+  .repertoire-integrated .selection-bar, .selection-bar {
+    bottom: calc(var(--pm-nav-height) + env(safe-area-inset-bottom, 0px) + var(--pm-space-2));
+  }
+  .repertoire-integrated .tabs { min-height: 0; }
+  .gc-top > .gc-field { flex: 1; min-width: 0; }
+  .gc-management > summary { padding-inline: var(--pm-space-3); }
+  #production-actions button { width: var(--pm-touch-target); padding: var(--pm-space-3) !important; }
+}
+
+/* Icon controls retain a full touch target without changing their actions. */
+.action-menu summary, .toolbar-actions > .button, .map-trigger { min-width: var(--pm-touch-target); }
+.action-menu summary { width: var(--pm-touch-target); }
+#calendar .fc-button { min-height: var(--pm-touch-target); min-width: var(--pm-touch-target); }
+.glass-modal label:is([for=ev-bolo], [for=ev-calendar], [for=ev-repite]) { min-height: var(--pm-touch-target); }
+
+/* Direct group filters: no disclosure required on touch devices. */
+.gc-panel .gc-filters { margin: var(--pm-space-4) 0 var(--pm-space-3); }
+.gc-panel .gc-filter-fields { width: 100%; max-width: 600px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--pm-space-3); margin: 0; }
+.gc-panel .gc-filter-fields .gc-field > span { font-size: var(--pm-label-size); color: var(--pm-on-surface-variant); }
+@media (max-width:380px) { .gc-panel .gc-filter-fields { grid-template-columns: minmax(0, 1fr); } }

@@ -1,0 +1,67 @@
+/* PercuManager Material foundation. Presentation tokens only. */
+:root, :host {
+  --pm-primary: #285ce4;
+  --pm-on-primary: #ffffff;
+  --pm-primary-container: #edf2ff;
+  --pm-on-primary-container: #173d96;
+  --pm-surface: #f8f9ff;
+  --pm-surface-container-lowest: #ffffff;
+  --pm-surface-container-low: #f2f4fa;
+  --pm-surface-container: #eceff6;
+  --pm-surface-container-high: #e5e9f2;
+  --pm-on-surface: #1a1c21;
+  --pm-on-surface-variant: #44474f;
+  --pm-outline: #74777f;
+  --pm-outline-variant: #dde2ec;
+  --pm-success: #146c43;
+  --pm-success-container: #d9f4e5;
+  --pm-on-success-container: #145c3b;
+  --pm-warning: #875f00;
+  --pm-warning-container: #fff0cf;
+  --pm-on-warning-container: #684b00;
+  --pm-error: #ba1a1a;
+  --pm-error-container: #ffdad6;
+  --pm-on-error-container: #410002;
+  --pm-scrim: rgb(26 28 33 / .48);
+  --pm-focus: #285ce4;
+  --pm-disabled-content: rgb(26 28 33 / .48);
+  --pm-disabled-container: rgb(26 28 33 / .08);
+  --pm-state-hover: rgb(40 92 228 / .08);
+  --pm-state-pressed: rgb(40 92 228 / .12);
+  --pm-font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pm-body-size: 1rem;
+  --pm-body-line-height: 1.5;
+  --pm-label-size: .875rem;
+  --pm-supporting-size: .875rem;
+  --pm-title-size: 1.5rem;
+  --pm-weight-regular: 400;
+  --pm-weight-medium: 600;
+  --pm-weight-strong: 700;
+  --pm-space-1: 4px;
+  --pm-space-2: 8px;
+  --pm-space-3: 12px;
+  --pm-space-4: 16px;
+  --pm-space-6: 24px;
+  --pm-space-8: 32px;
+  --pm-radius-field: 12px;
+  --pm-radius-card: 16px;
+  --pm-radius-dialog: 24px;
+  --pm-radius-pill: 999px;
+  --pm-touch-target: 48px;
+  --pm-field-height: 56px;
+  --pm-icon-size: 24px;
+  --pm-checkbox-size: 22px;
+  --pm-border-width: 1px;
+  --pm-page-gutter: 16px;
+  --pm-content-max: 1180px;
+  --pm-nav-height: 80px;
+  --pm-elevation-0: none;
+  --pm-elevation-1: 0 1px 3px rgb(26 28 33 / .10), 0 1px 2px rgb(26 28 33 / .06);
+  --pm-elevation-2: 0 6px 20px rgb(26 28 33 / .14), 0 2px 6px rgb(26 28 33 / .08);
+  --pm-duration-short: 120ms;
+  --pm-duration-medium: 200ms;
+  --pm-easing-standard: cubic-bezier(.2, 0, 0, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root, :host { --pm-duration-short: 0ms; --pm-duration-medium: 0ms; }
+}

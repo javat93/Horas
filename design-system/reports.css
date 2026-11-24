@@ -1,0 +1,69 @@
+/* Phase 5: one reports surface; calculations and PDF lifecycle remain owned by existing code. */
+#reports-dialog { width: min(720px,calc(100vw - 48px)); max-width: calc(100vw - 48px); max-height: calc(100dvh - 48px); border: 1px solid var(--pm-outline-variant); padding: 0; }
+#reports-dialog .reports-drag { display: none; }
+#reports-dialog .reports-heading { padding: 24px 24px 20px; gap: 16px; }
+#reports-dialog .reports-eyebrow { font-size: 11px; letter-spacing: .05em; color: var(--pm-on-surface-variant); }
+#reports-dialog .reports-heading h2 { font-size: 28px; font-weight: 750; color: var(--pm-on-surface); margin-top: 4px; }
+#reports-close { --pm-action-container: var(--pm-surface-container-low); --pm-action-content: var(--pm-on-surface-variant); width: 48px; flex: 0 0 48px; }
+#reports-dialog .reports-tabs { padding: 6px; margin: 0 24px 20px; gap: 6px; border: 0; border-radius: 16px; background: var(--pm-surface-container); }
+#reports-dialog .reports-tabs button { min-height: 52px; font-size: 14px; font-weight: 650; color: var(--pm-on-surface-variant); }
+#reports-dialog .reports-tabs [aria-selected=true] { box-shadow: inset 0 -3px 0 var(--pm-primary) !important; }
+#reports-dialog .reports-body { padding: 0 24px 24px; scroll-padding-block: 20px; }
+#reports-dialog .reports-admin-card { padding: 24px; }
+#reports-dialog .reports-file-icon { width: 48px; height: 48px; margin-bottom: 16px; background: var(--pm-primary-container); color: var(--pm-on-primary-container); border-color: var(--pm-primary-container); border-radius: 14px; }
+#reports-dialog .reports-admin-card h3 { font-size: 24px; font-weight: 750; color: var(--pm-on-surface); line-height: 1.3; }
+#reports-dialog .reports-description { color: var(--pm-on-surface-variant); font-size: 14px; line-height: 1.6; max-width: none; }
+#reports-dialog .reports-table-list { margin: 20px 0; border-color: var(--pm-outline-variant); border-radius: 16px; background: var(--pm-surface-container-low); overflow: hidden; }
+#reports-dialog .reports-table-list > div { min-height: 64px; padding: 14px; font-size: 14px; color: var(--pm-on-surface); gap: 12px; }
+#reports-dialog .reports-table-list > div + div { border-color: var(--pm-outline-variant); }
+#reports-dialog .reports-table-icon { color: var(--pm-on-primary-container); background: var(--pm-primary-container); }
+#reports-dialog .reports-table-icon-green { color: var(--pm-on-success-container); background: var(--pm-success-container); }
+#reports-dialog .reports-table-check { color: var(--pm-success); }
+#reports-dialog .reports-date { font-size: 12px; color: var(--pm-on-surface-variant); margin-bottom: 16px; }
+#reports-dialog .reports-prepare, #reports-dialog .reports-file-action-primary { --pm-touch-target: 56px; --pm-label-size: 15px; }
+#reports-dialog .reports-ready .reports-prepare { --pm-touch-target: 48px; --pm-label-size: 14px; margin-top: 12px; }
+#reports-dialog .reports-file-actions { gap: 12px; }
+#reports-dialog .reports-file-action { white-space: normal; text-align: center; }
+#reports-dialog .reports-status { font-size: 13px; line-height: 1.6; color: var(--pm-on-surface-variant); margin-top: 16px; }
+#reports-dialog .reports-ready .reports-status:not(:empty) { padding: 12px; border-radius: 12px; background: var(--pm-success-container); color: var(--pm-on-success-container); }
+#reports-dialog .reports-status[role=alert]:not(:empty) { background: var(--pm-error-container); color: var(--pm-on-error-container); padding: 12px; border-radius: 12px; }
+#reports-dialog .reports-preview { margin-top: 16px; padding: 0 16px; }
+#reports-dialog .reports-preview summary { min-height: 56px; font-size: 14px; color: var(--pm-on-surface-variant); }
+#reports-dialog .admin-report-card h3 { font-size: 16px; color: var(--pm-on-surface); }
+#reports-dialog .admin-report-card img { border-color: var(--pm-outline-variant); border-radius: 12px; }
+#reports-dialog .reports-personal-intro h3 { font-size: 23px; font-weight: 750; color: var(--pm-on-surface); }
+#reports-dialog .reports-personal-intro p { font-size: 14px; color: var(--pm-on-surface-variant); line-height: 1.6; }
+#reports-dialog .reports-scope { padding: 16px; border: 1px solid var(--pm-outline-variant); background: var(--pm-surface-container-low); border-radius: 16px; gap: 12px; margin-bottom: 20px; }
+#reports-dialog .reports-scope label { font-size: 13px; color: var(--pm-on-surface-variant); gap: 8px; }
+#reports-dialog .reports-scope select { padding: 12px; }
+#reports-dialog .financial-cards { gap: 12px; }
+#reports-dialog .financial-card { padding: 16px; min-height: 112px; }
+#reports-dialog .financial-card span { color: var(--pm-on-surface-variant); font-size: 13px; line-height: 1.5; }
+#reports-dialog .financial-card strong { font-size: 26px; color: var(--pm-on-surface); font-weight: 750; }
+#reports-dialog .financial-card-main strong { color: var(--pm-on-primary-container); }
+#reports-dialog .financial-explanation { padding: 0 16px; border: 1px solid var(--pm-outline-variant); border-radius: 16px; margin-top: 16px; }
+#reports-dialog .financial-explanation summary { min-height: 52px; align-content: center; font-size: 14px; font-weight: 650; color: var(--pm-on-surface-variant); cursor: pointer; }
+#reports-dialog .financial-explanation p { font-size: 13px; line-height: 1.7; padding-bottom: 12px; }
+#reports-dialog .reports-csv { margin-top: 20px; --pm-touch-target: 52px; }
+@media (max-width:760px) {
+ #reports-dialog { width: 100vw; max-width: 100vw; max-height: calc(100dvh - 12px); margin: auto 0 0; border-radius: 24px 24px 0 0 !important; border: 0; }
+ #reports-dialog .reports-heading { padding: 16px 20px; }
+ #reports-dialog .reports-heading h2 { font-size: 24px; }
+ #reports-dialog .reports-tabs { margin: 0 20px 20px; padding: 4px; gap: 4px; }
+ #reports-dialog .reports-tabs button { min-height: 52px; font-size: 13px; }
+ #reports-dialog .reports-body { padding: 0 20px max(20px,env(safe-area-inset-bottom,0px)); }
+ #reports-dialog .reports-admin-card { padding: 20px; }
+ #reports-dialog .reports-admin-card h3 { font-size: 22px; }
+ #reports-dialog .financial-cards { grid-template-columns: minmax(0,1fr); }
+ #reports-dialog .financial-card { flex-direction: row; align-items: center; min-height: 84px; gap: 16px; }
+ #reports-dialog .financial-card span { max-width: 48%; font-size: 13px; }
+ #reports-dialog .financial-card strong { font-size: 26px; }
+}
+@media (max-width:380px) {
+ #reports-dialog .reports-heading, #reports-dialog .reports-body { padding-inline: 16px; }
+ #reports-dialog .reports-tabs { margin-inline: 16px; }
+ #reports-dialog .reports-admin-card { padding: 16px; }
+ #reports-dialog .reports-scope { grid-template-columns: minmax(0,1fr); }
+ #reports-dialog .financial-card { padding: 14px; }
+ #reports-dialog .financial-card strong { font-size: 23px; }
+}

@@ -43,8 +43,8 @@
       const next = +C.currentCourse().slice(0, 4) + 1; years.add(`${next}–${next + 1}`);
       const management = el('details', { className: 'gc-management' }, [el('summary', { textContent: 'Organizar', 'aria-label': 'Opciones de organización del curso' }), el('div', { className: 'gc-management-actions' }, [button('Organizar este curso', openEditor, !eligible(), true), button('Actualizar organización', () => refresh(true), s.busy || blocked || Date.now() < cooldown)])]);
       root.append(el('div', { className: 'gc-top' }, [select('Curso', [...years].sort().reverse().map(y => [y, y]), filters.curso, v => change('curso', v), s.busy), management]));
-      const details = el('details', { className: 'gc-filters', open: filtersOpen, ontoggle: () => { if (details.isConnected) filtersOpen = details.open; } });
-      details.append(el('summary', { textContent: 'Filtros · ' + ({ active: 'Activos', inactive: 'Inactivos', all: 'Todos', unclassified: 'Sin clasificar' }[filters.estado]) + ' · ' + ({ habitual: 'Habituales', puntual: 'Puntuales', all: 'Todos los tipos' }[filters.tipo]) }), el('div', { className: 'gc-filter-fields' }, [select('Estado', [['active', 'Activos'], ['inactive', 'Inactivos'], ['unclassified', 'Sin clasificar'], ['all', 'Todos']], filters.estado, v => { filtersOpen = true; filters = { ...filters, estado: v, ...(v === 'unclassified' ? { tipo: 'all' } : {}) }; emit(); }, s.busy), select('Tipo', [['habitual', 'Habituales'], ['puntual', 'Puntuales'], ['all', 'Todos los tipos']], filters.tipo, v => change('tipo', v), s.busy || filters.estado === 'unclassified')]));
+      const details = el('section', { className: 'gc-filters', 'aria-label': 'Filtros de grupos' });
+      details.append(el('div', { className: 'gc-filter-fields' }, [select('Estado', [['active', 'Activos'], ['inactive', 'Inactivos'], ['unclassified', 'Sin clasificar'], ['all', 'Todos']], filters.estado, v => { filtersOpen = true; filters = { ...filters, estado: v, ...(v === 'unclassified' ? { tipo: 'all' } : {}) }; emit(); }, s.busy), select('Tipo', [['habitual', 'Habituales'], ['puntual', 'Puntuales'], ['all', 'Todos los tipos']], filters.tipo, v => change('tipo', v), s.busy || filters.estado === 'unclassified')]));
       root.append(details);
       if(window.horasDraftVault?.read('course:'+filters.curso)) root.append(button('Revisar selección guardada',()=>openEditor(true),!eligible()));
       if (!session()) root.append(el('p', { className: 'gc-message', textContent: 'Usa la conexión de Google de la aplicación.' }), button('Conectar Google', connect));
@@ -69,7 +69,7 @@
       if (recover === true) { const stored = window.horasDraftVault?.read('course:'+draftCourse); if (Array.isArray(stored)) { try { C.validateUpdates(stored); for(const r of stored) if(data().groups.some(g=>g.id===G.id(r.grupo))) draft.set(G.id(r.grupo),{...r}); } catch {} } }
       const editorData = data(), editData = () => data() || editorData;
       dialog = el('dialog', { className: 'gc-dialog', 'aria-labelledby': 'gc-dialog-title' });
-      dialogHost = el('div'); const shadow = dialogHost.attachShadow({ mode: 'open' }); shadow.append(el('link', { rel: 'stylesheet', href: 'group-courses.css?v=improvements-20261122' }), dialog);
+      dialogHost = el('div'); const shadow = dialogHost.attachShadow({ mode: 'open' }); shadow.append(el('link', { rel: 'stylesheet', href: 'design-system/course-bundle.css?v=material-final-20261124' }), dialog);
       const close = () => { if (saving) return; if (draft.size && !window.confirm('¿Descartar la selección sin guardar?')) return; window.horasDraftVault?.remove('course:'+draftCourse); dialog.close(); dialogHost.remove(); dialog = null; dialogHost = null; draft = null; };
       const heading = el('div', { className: 'gc-dialog-heading' }, [el('div', {}, [el('p', { className: 'gc-kicker', textContent: 'ORGANIZAR ' + draftCourse }), el('h2', { id: 'gc-dialog-title', textContent: 'Tus grupos de este curso' })]), button('Cerrar', close)]);
       const error = el('p', { className: 'gc-message', role: 'alert' }), counter = el('p', { className: 'gc-message', 'aria-live': 'polite' });
@@ -114,7 +114,7 @@
         }
       }, false, true);
       save.setAttribute('data-gc-save', '');
-      dialog.append(heading, el('p', { className: 'gc-message', textContent: 'Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), el('p',{className:'gc-message',textContent:'Selecciona, clasifica y guarda. También puedes ajustar cada grupo.'}), presets, copy, list, error, reload, el('div', { className: 'gc-dialog-footer' }, [counter, save]));
+      dialog.append(heading, el('div', { className: 'gc-dialog-body' }, [el('p', { className: 'gc-message', textContent: 'Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), el('p',{className:'gc-message',textContent:'Selecciona, clasifica y guarda. También puedes ajustar cada grupo.'}), presets, copy, list, error, reload]), el('div', { className: 'gc-dialog-footer' }, [counter, save]));
       dialog.addEventListener('cancel', e => { e.preventDefault(); close(); }); document.body.append(dialogHost); draw(); dialog.showModal(); search.focus();
     }
     window.addEventListener('beforeunload', e => { if (saving || draft?.size) { e.preventDefault(); e.returnValue = ''; } });

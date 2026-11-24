@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "inputs": {
+    "design-system/app-entry.css": "db258f9fc9d75d4c08e93ef954775b3a1ef2936f8b9473c67c59243442ac5513",
+    "map-picker.css": "2359af73db3352d1d3d4c8bd5bc013b47dc07281219c5d6e2611fbe09180ba2c",
+    "design-system/legacy-page.css": "69e6892f4800e697cd411084b5a70824e7c3169c6a374754b99b58b37329b851",
+    "review-ui.css": "0e384863b69b8d8c14abb991bfbf574dd91f8c240ae74c4364dfef8df200edf5",
+    "app-ui.css": "fa837c31a95e1f6eb12cb9fe2a7f2661cbb808fd6aa88c3046d178147e08ff37",
+    "group-courses.css": "f97566cdcaa8a30d89ce5736dc638c10ea6f5f0dab683c21f70b424aad1fad58",
+    "admin-report.css": "fb646b80e5327586fddc6896f03f1a81d59d09273c5cf2d044082cd9d9d7dd72",
+    "design-system/components.css": "afaaa4cbc74f4287899521321adddf11c3ad850d370e752e5cbe62f63ce1dac8",
+    "design-system/legacy-bridge.css": "517a74930de53bd0e1a74cabe18e9bc8a1e177437a88fa6e582c99f7da9f07db",
+    "design-system/screens.css": "4bd62a42e0c6b0e2a3dab0b546bba70b4c2c393ff64a11c9da31be26ae273afe",
+    "design-system/forms.css": "ec3572c67bcc1e03e82dd204cf9ca2a54f9b2ab704b70a19a5f277ed4cb19ca4",
+    "design-system/courses.css": "a7f437ae45d0ea8e65171f537f0d816e3982a1b610f82051531c7440a1c2abae",
+    "design-system/reports.css": "7d0a32c14f3156bc254902338e05c4ef20c0a5b63cbf2feffc9e0938a2571b16",
+    "design-system/repertoire-entry.css": "f467f0f8f4f8811e2bf164adabd339e50ab039f1ff1b128b774cd6c426a15de8",
+    "design-system/tokens.css": "bc40be8fedf70e1c1a7980a722c884f5d7ab1a5bd8df5d238aeb1d03d5e0f78a",
+    "sandbox/repertoire.css": "faadef0adc3f87a80326f041e51ac2c3e9a1db9f992cf0273be63eea12c3e44d",
+    "repertoire-integrated.css": "2d61d51a107ed67a2aec871e557641d4e8d43b4efc42ae731c64b931b8e8378e",
+    "design-system/repertoire.css": "bfa6646656dad17db680887f4633b4bfc8101a77bbeb316c7055ad7c54276408",
+    "design-system/group-courses.css": "ab45062e18062f705b1336daff0679fe1501eaa0532615802ab6579edaad8d22",
+    "design-system/build-styles.cjs": "c382a410c1eef3fba2e9db980067957ead74bb1f1144795fcd617c296b47514f"
+  },
+  "outputs": {
+    "design-system/app.css": {
+      "entry": "design-system/app-entry.css",
+      "sha256": "5e0104e868c5ac7871be0d98d439134d2db3655f6c24a9c984bcf4c79918f196",
+      "inputBytes": 100807,
+      "outputBytes": 100595,
+      "inputDeclarations": 2642,
+      "removedDeclarations": 17
+    },
+    "design-system/repertoire-bundle.css": {
+      "entry": "design-system/repertoire-entry.css",
+      "sha256": "7da7c35ee3f7044bb4396d586a7facc792497b0af5331d3646b700fd08744a34",
+      "inputBytes": 74235,
+      "outputBytes": 59405,
+      "inputDeclarations": 1949,
+      "removedDeclarations": 254
+    },
+    "design-system/course-bundle.css": {
+      "entry": "design-system/group-courses.css",
+      "sha256": "e33e32b000d6631422229b646f6e4a4ac3a09b808a16e2e55221e2a8e09a950c",
+      "inputBytes": 25864,
+      "outputBytes": 25891,
+      "inputDeclarations": 606,
+      "removedDeclarations": 4
+    }
+  }
+}

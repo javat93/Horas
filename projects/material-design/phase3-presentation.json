@@ -1,0 +1,77 @@
+{
+  "base": "3c377aa94ec69c7ad8c57475c91e1baf04a2b0ca",
+  "files": {
+    "index.html": [
+      {
+        "before": "            <div id=\"production-actions\"",
+        "after": "            <span id=\"pm-google-state\" class=\"pm-connection-badge\" role=\"status\" aria-live=\"polite\" aria-atomic=\"true\">Preparando Google</span>\n            <div id=\"production-actions\""
+      },
+      {
+        "before": "</head>",
+        "after": "    <link rel=\"stylesheet\" href=\"design-system/screens.css?v=material-phase3-20261123\">\n    <script src=\"design-system/presentation.js?v=material-phase3-20261123\" defer></script>\n</head>"
+      },
+      {
+        "before": "<h2 class=\"text-2xl font-extrabold text-slate-900\">Clases</h2>",
+        "after": "<h2 class=\"text-2xl font-extrabold text-slate-900\">Sesiones</h2>"
+      },
+      {
+        "before": "</i> Nueva Clase",
+        "after": "</i> Nueva sesión"
+      },
+      {
+        "before": "<span class=\"hidden sm:inline\">Añadir eventos futuros</span>",
+        "after": "<span class=\"hidden sm:inline\">Eventos futuros</span>"
+      }
+    ],
+    "e2e/mobile.spec.cjs": [
+      {
+        "before": "name:'Nueva Clase'",
+        "after": "name:'Nueva sesión'"
+      }
+    ],
+    "app-views.js": [
+      {
+        "before": "                                <span class=\"text-xs font-bold text-slate-500 flex items-center gap-1\"><i data-lucide=\"calendar\" class=\"w-3 h-3\"></i> ${SafeHTML.escape(ev.fechaStr||'Fecha pendiente')}${ev.dateWarning ? ' · Revisar fecha' : ''}${ev.paymentSaving?' · Guardando pago…':ev.paymentError?' · Pago no guardado; vuelve a intentarlo':''}</span>",
+        "after": "                                <span class=\"text-xs font-bold text-slate-500 flex items-center gap-1\"><i data-lucide=\"calendar\" class=\"w-3 h-3\"></i> ${SafeHTML.escape(ev.fechaStr||'Fecha pendiente')}${ev.dateWarning ? ' · Revisar fecha' : ''}${ev.paymentSaving?' · Guardando pago…':ev.paymentError?' · Pago no guardado; vuelve a intentarlo':''}</span>\r\n                                <span class=\"pm-session-time\"><i data-lucide=\"clock-3\" class=\"w-3 h-3\" aria-hidden=\"true\"></i> ${ev.horaInicio && ev.horaFin ? SafeHTML.escape(ev.horaInicio + ' – ' + ev.horaFin) : 'Horario sin indicar'}</span>"
+      },
+      {
+        "before": "class=\"card-modern p-5 flex flex-wrap",
+        "after": "class=\"card-modern pm-session-card p-5 flex flex-wrap"
+      },
+      {
+        "before": "class=\"card-modern p-5 flex justify-between",
+        "after": "class=\"card-modern pm-group-card p-5 flex justify-between"
+      },
+      {
+        "before": "<p class=\"text-lg font-black text-slate-800\">${ev.amountWarning ? 'Revisar importe' : LocaleData.currency(ev.total)}</p>",
+        "after": "<p class=\"text-lg font-black text-slate-800\">${ev.amountWarning ? 'Revisar importe' : LocaleData.currency(ev.total)}</p><span class=\"pm-payment-state ${ev.pagado ? 'is-paid' : 'is-unpaid'}\">${ev.pagado ? 'Cobrado' : 'Pendiente de cobro'}</span>"
+      },
+      {
+        "before": "<button aria-label=\"Cambiar estado de pago, fila ${ev.rowIdx}\"",
+        "after": "<button aria-label=\"Cambiar estado de pago, fila ${ev.rowIdx}\" aria-pressed=\"${ev.pagado}\""
+      },
+      {
+        "before": "<i data-lucide=\"euro\" class=\"w-5 h-5\"></i>",
+        "after": "<i data-lucide=\"euro\" class=\"w-5 h-5\" aria-hidden=\"true\"></i><span>${ev.paymentSaving ? 'Guardando…' : ev.pagado ? 'Marcar pendiente' : 'Marcar cobrado'}</span>"
+      },
+      {
+        "before": "<i data-lucide=\"trash-2\" class=\"w-5 h-5\"></i>",
+        "after": "<i data-lucide=\"archive\" class=\"w-5 h-5\" aria-hidden=\"true\"></i><span>Archivar</span>"
+      },
+      {
+        "before": ">Precio Base</p>",
+        "after": ">Precio sesión</p>"
+      },
+      {
+        "before": "title: eventTitle,",
+        "after": "title: eventTitle + '\\n' + (e.pagado ? 'Cobrado' : 'Pendiente de cobro'),"
+      }
+    ],
+    "sandbox/preview-production.cjs": [
+      {
+        "before": "['design-system/tokens.css','design-system/components.css','design-system/legacy-bridge.css','design-system/group-courses.css'].forEach(file=>files.add(file));",
+        "after": "['design-system/tokens.css','design-system/components.css','design-system/legacy-bridge.css','design-system/group-courses.css','design-system/screens.css','design-system/presentation.js'].forEach(file=>files.add(file));"
+      }
+    ]
+  }
+}

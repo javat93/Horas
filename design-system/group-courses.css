@@ -1,0 +1,6 @@
+/* Same course stylesheet, plus the shared foundation in isolated roots. */
+@import url("../group-courses.css");
+@import url("./tokens.css");
+@import url("./components.css");
+@import url("./legacy-bridge.css");
+@import url("./courses.css");

@@ -1,0 +1,31 @@
+{
+  "base": "8143b5fa90b8cca635c600c8582ddc5700681332",
+  "files": {
+    "index.html": [
+      {
+        "before": "</head>",
+        "after": "    <link rel=\"stylesheet\" href=\"design-system/courses.css?v=material-phase5-20261124\">\n    <link rel=\"stylesheet\" href=\"design-system/reports.css?v=material-phase5-20261124\">\n</head>"
+      },
+      {
+        "before": "<link rel=\"stylesheet\" href=\"design-system/legacy-bridge.css?v=material-foundation-20261123\"><div class=\"repertoire-integrated\">",
+        "after": "<link rel=\"stylesheet\" href=\"design-system/legacy-bridge.css?v=material-foundation-20261123\"><link rel=\"stylesheet\" href=\"design-system/repertoire.css?v=material-phase5-20261124\"><div class=\"repertoire-integrated\">"
+      },
+      {
+        "before": "<div id=\"dialog-body\"></div><p id=\"dialog-error\" class=\"form-error\" role=\"alert\" hidden></p>",
+        "after": "<div class=\"pm-repertoire-form-body\"><div id=\"dialog-body\"></div><p id=\"dialog-error\" class=\"form-error\" role=\"alert\" hidden></p></div>"
+      }
+    ],
+    "group-courses-ui.js": [
+      {
+        "before": "      dialog.append(heading, el('p', { className: 'gc-message', textContent: 'Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), el('p',{className:'gc-message',textContent:'Selecciona, clasifica y guarda. También puedes ajustar cada grupo.'}), presets, copy, list, error, reload, el('div', { className: 'gc-dialog-footer' }, [counter, save]));\r",
+        "after": "      dialog.append(heading, el('div', { className: 'gc-dialog-body' }, [el('p', { className: 'gc-message', textContent: 'Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), el('p',{className:'gc-message',textContent:'Selecciona, clasifica y guarda. También puedes ajustar cada grupo.'}), presets, copy, list, error, reload]), el('div', { className: 'gc-dialog-footer' }, [counter, save]));\r"
+      }
+    ],
+    "sandbox/preview-production.cjs": [
+      {
+        "before": "'design-system/presentation.js','design-system/forms.css'",
+        "after": "'design-system/presentation.js','design-system/forms.css','design-system/courses.css','design-system/reports.css','design-system/repertoire.css'"
+      }
+    ]
+  }
+}

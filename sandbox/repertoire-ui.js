@@ -374,7 +374,7 @@
     controls();
   }).catch(error => say(error.message, true));
   let courseSubscribed = false;
-  const subscribeCourses = () => { const courses = host?.groupCourses?.(); if (courses && !courseSubscribed) { courseSubscribed = true; const style = el('link', { rel: 'stylesheet', href: 'group-courses.css?v=improvements-20261122' }); root.append(style); courses.subscribe(render); render(); } };
+  const subscribeCourses = () => { const courses = host?.groupCourses?.(); if (courses && !courseSubscribed) { courseSubscribed = true; courses.subscribe(render); render(); } };
   if (host?.groupCourses) { subscribeCourses(); window.addEventListener('group-courses-ready', subscribeCourses); }
   return { ready, refreshSession, refreshData: () => reload(true), groupId: () => groupId };
   };

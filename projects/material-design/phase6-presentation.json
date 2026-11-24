@@ -1,0 +1,118 @@
+{
+  "base": "3b1ea4b2d1cecafedb54bb9c920baae7b41367ea",
+  "files": {
+    "index.html": [
+      {
+        "before": "    <style>\n        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');\n        :root { --brand-blue: #2563eb; --brand-dark: #1e40af; --brand-light: #eff6ff; --bg-main: #f8fafc; \n\t\t/* FullCalendar Google Style Overrides */\n            --fc-border-color: #e2e8f0;\n            --fc-button-bg-color: #ffffff;\n            --fc-button-border-color: #e2e8f0;\n            --fc-button-text-color: #475569;\n            --fc-button-active-bg-color: #f1f5f9;\n            --fc-today-bg-color: transparent !important;\n            --fc-event-bg-color: #2563eb;\n            --fc-event-border-color: transparent;}\n        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: #1e293b; }\n        \n        .tab-active { background: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); color: var(--brand-blue) !important; }\n        \n        /* FullCalendar Custom CSS */\n        #calendar {\n            background: white;\n            padding: 20px;\n            border-radius: 16px;\n            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);\n        }\n\n        .fc .fc-toolbar-title {\n            font-size: 1.25rem !important;\n            font-weight: 700;\n            color: #1e293b;\n        }\n\n        .fc .fc-button {\n            border-radius: 8px !important;\n            font-weight: 600 !important;\n            font-size: 0.875rem !important;\n            padding: 8px 16px !important;\n            text-transform: capitalize !important;\n            transition: all 0.2s;\n        }\n\n        .fc .fc-button-primary {\n            background-color: white !important;\n            border: 1px solid #e2e8f0 !important;\n            color: #475569 !important;\n        }\n\n        .fc .fc-button-primary:hover {\n            background-color: #f8fafc !important;\n            color: var(--brand-blue) !important;\n        }\n\n        .fc .fc-button-primary:not(:disabled).fc-button-active {\n            background-color: #f1f5f9 !important;\n            border-color: #cbd5e1 !important;\n            color: var(--brand-blue) !important;\n        }\n\n        /* Indicador de hoy estilo Google */\n        .fc .fc-day-today {\n            background-color: transparent !important;\n        }\n\n        .fc .fc-day-today .fc-daygrid-day-number {\n            background-color: var(--brand-blue);\n            color: white !important;\n            border-radius: 9999px;\n            width: 28px;\n            height: 28px;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            margin: 4px;\n        }\n\n        .fc .fc-daygrid-day-number {\n            font-size: 0.85rem;\n            font-weight: 500;\n            color: #64748b;\n            padding: 8px !important;\n        }\n\n        /* Estilo de los eventos */\n        .fc-event {\n            border-radius: 6px !important;\n            padding: 3px 6px !important;\n            font-size: 0.75rem !important;\n            font-weight: 500 !important;\n            margin-bottom: 2px !important;\n            border: none !important;\n            box-shadow: 0 1px 2px rgba(0,0,0,0.05);\n        }\n\n        .fc-col-header-cell {\n            padding-bottom: 12px !important;\n            border: none !important;\n        }\n\n        .fc-col-header-cell-cushion {\n            font-size: 0.75rem;\n            text-transform: uppercase;\n            letter-spacing: 0.05em;\n            color: #94a3b8;\n            font-weight: 700;\n            text-decoration: none !important;\n        }\n\n        .fc-theme-standard td, .fc-theme-standard th {\n            border-color: #f1f5f9 !important;\n        }\n\n        .fc-scrollgrid {\n            border-radius: 12px;\n            overflow: hidden;\n            border: 1px solid #f1f5f9 !important;\n        }\n        .header-modern { background: white; border-bottom: 1px solid #e2e8f0; }\n        .tab-active { color: var(--brand-blue); background-color: var(--brand-light); font-weight: 700; }\n        .card-modern { background: white; border-radius: 1.25rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.2s; }\n        .card-modern:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }\n        .session-card--typed {\n            --session-type-bg: #dbeafe;\n            --session-type-text: #1e40af;\n        }\n        .session-card--bolo {\n            --session-type-bg: #fef3c7;\n            --session-type-text: #92400e;\n        }\n        .session-card--typed .session-card-main,\n        .session-card--typed .session-card-details { min-width: 0; }\n        .session-card--typed .session-card-title {\n            display: flex;\n            flex-wrap: wrap;\n            align-items: center;\n            gap: .25rem .5rem;\n            overflow-wrap: anywhere;\n        }\n        .session-card--typed .session-card-icon { flex-shrink: 0; }\n        .session-card--typed .session-type-label {\n            flex-shrink: 0;\n            background-color: var(--session-type-bg);\n            color: var(--session-type-text);\n        }\n        .session-type-label {\n            padding: .125rem .5rem;\n            border-radius: 999px;\n            font-size: .6875rem;\n            font-weight: 700;\n            line-height: 1rem;\n        }\n        .session-card--typed .session-card-meta { flex-wrap: wrap; row-gap: .25rem; }\n        @media (max-width: 639px) {\n            .session-card--typed .session-card-main { flex-basis: 100%; }\n        }\n        .btn-blue { background-color: var(--brand-blue); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }\n        .input-modern { border: 2px solid #f1f5f9; background-color: #f8fafc; transition: all 0.2s; }\n        .input-modern:focus { border-color: var(--brand-blue); background-color: white; outline: none; }\n        .glass-modal { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }\n        .pac-container { border-radius: 1rem; border: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); font-family: inherit; z-index: 9999 !important; }\n    /* Estilos específicos para móviles - Vista Lista */\n        @media (max-width: 768px) {\n            #calendar {\n                padding: 10px !important;\n                border-radius: 12px !important;\n            }\n\n            .fc .fc-toolbar-title {\n                font-size: 1.1rem !important;\n                font-weight: 700 !important;\n            }\n\n            .fc .fc-button {\n                font-size: 0.75rem !important;\n                padding: 6px 12px !important;\n                border-radius: 6px !important;\n            }\n\n            /* Toolbar compacto */\n            .fc .fc-toolbar {\n                margin-bottom: 12px !important;\n                flex-wrap: wrap !important;\n                gap: 8px !important;\n            }\n\n            .fc .fc-toolbar-chunk {\n                margin-bottom: 4px !important;\n            }\n\n            /* Ocultar botones de vista en móvil */\n            .fc .fc-dayGridMonth-button,\n            .fc .fc-timeGridWeek-button,\n            .fc .fc-timeGridDay-button {\n                display: none !important;\n            }\n\n            /* ===== VISTA LISTA - estilos ===== */\n            .fc-list {\n                border: none !important;\n            }\n\n            .fc-list-day-cushion {\n                background: linear-gradient(135deg, #eff6ff, #dbeafe) !important;\n                padding: 10px 14px !important;\n                border-radius: 10px !important;\n                margin-bottom: 4px !important;\n            }\n\n            .fc-list-day-text,\n            .fc-list-day-side-text {\n                font-size: 0.85rem !important;\n                font-weight: 700 !important;\n                color: #2563eb !important;\n                text-decoration: none !important;\n            }\n\n            /* Resaltar hoy en vista lista móvil - Estilo sutil y limpio */\n            .fc-list-day.fc-day.fc-day-today .fc-list-day-cushion.fc-cell-shaded {\n                background: #c4e46d !important;\n                background-color: #c4e46d !important;\n                border: none !important;\n                box-shadow: 0 2px 8px rgba(196, 228, 109, 0.3) !important;\n                position: relative !important;\n                margin: 6px 0 !important;\n                transform: scale(1.01) !important;\n            }\n\n            .fc-list-day.fc-day.fc-day-today .fc-list-day-text,\n            .fc-list-day.fc-day.fc-day-today .fc-list-day-side-text {\n                color: #2563eb !important;\n                font-weight: 700 !important;\n                font-size: 0.95rem !important;\n                text-shadow: none !important;\n            }\n\n            \n            \n            .fc-list-event {\n                border-radius: 10px !important;\n                margin-bottom: 6px !important;\n                cursor: pointer !important;\n                transition: background 0.15s !important;\n            }\n\n            .fc-list-event:hover td {\n                background-color: #f1f5f9 !important;\n            }\n\n            .fc-list-event td {\n                padding: 10px 12px !important;\n                border: none !important;\n                border-bottom: 1px solid #f1f5f9 !important;\n            }\n\n            .fc-list-event-dot {\n                border-width: 8px !important;\n                border-radius: 50% !important;\n            }\n\n            .fc-list-event-time {\n                font-size: 0.78rem !important;\n                font-weight: 600 !important;\n                color: #64748b !important;\n                white-space: nowrap !important;\n            }\n\n            .fc-list-event-title a {\n                font-size: 0.95rem !important;\n                font-weight: 700 !important;\n                color: #1e293b !important;\n                text-decoration: none !important;\n            }\n\n            .fc-list-empty {\n                background: white !important;\n            }\n\n            .fc-list-empty-cushion {\n                font-size: 0.9rem !important;\n                color: #94a3b8 !important;\n                padding: 40px 20px !important;\n                text-align: center !important;\n            }\n\n            /* Scrollgrid en móvil */\n            .fc-scrollgrid {\n                border: none !important;\n            }\n        }\n\n        /* Mejoras adicionales para tablets */\n        @media (max-width: 1024px) and (min-width: 769px) {\n            .fc-event {\n                font-size: 0.8rem !important;\n                padding: 3px 7px !important;\n            }\n        }\n    </style>",
+        "after": "    <link rel=\"stylesheet\" href=\"design-system/app.css?v=material-final-20261124\">",
+        "offset": 4467
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"map-picker.css?v=20261111-open-map\">\n",
+        "after": "",
+        "offset": 1659
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"review-ui.css?v=reports-design-20261123\">\n",
+        "after": "",
+        "offset": 4480
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"app-ui.css?v=manual-done-20261123\">\n",
+        "after": "",
+        "offset": 4480
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"group-courses.css?v=improvements-20261122\">\n",
+        "after": "",
+        "offset": 4838
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"admin-report.css?v=reports-design-20261123\">\n",
+        "after": "",
+        "offset": 5452
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"design-system/components.css?v=material-foundation-20261123\">\n",
+        "after": "",
+        "offset": 5773
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"design-system/legacy-bridge.css?v=material-foundation-20261123\">\n",
+        "after": "",
+        "offset": 5773
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"design-system/screens.css?v=material-phase3-20261123\">\n",
+        "after": "",
+        "offset": 5773
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"design-system/forms.css?v=material-phase4-20261123\">\n",
+        "after": "",
+        "offset": 5864
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"design-system/courses.css?v=material-phase5-20261124\">\n",
+        "after": "",
+        "offset": 5864
+      },
+      {
+        "before": "    <link rel=\"stylesheet\" href=\"design-system/reports.css?v=material-phase5-20261124\">\n",
+        "after": "",
+        "offset": 5864
+      },
+      {
+        "before": "<template id=\"repertoire-template\"><link rel=\"stylesheet\" href=\"design-system/tokens.css?v=material-foundation-20261123\"><link rel=\"stylesheet\" href=\"sandbox/repertoire.css?v=improvements-20261122\"><link rel=\"stylesheet\" href=\"repertoire-integrated.css?v=improvements-20261122\"><link rel=\"stylesheet\" href=\"design-system/components.css?v=material-foundation-20261123\"><link rel=\"stylesheet\" href=\"design-system/legacy-bridge.css?v=material-foundation-20261123\"><link rel=\"stylesheet\" href=\"design-system/repertoire.css?v=material-phase5-20261124\"><div class=\"repertoire-integrated\">",
+        "after": "<template id=\"repertoire-template\"><link rel=\"stylesheet\" href=\"design-system/repertoire-bundle.css?v=material-final-20261124\"><div class=\"repertoire-integrated\">",
+        "offset": 121100
+      },
+      {
+        "before": "src=\"map-picker.js?v=20261111-open-map\"",
+        "after": "src=\"map-picker.js?v=material-final-20261124\"",
+        "offset": 1671
+      },
+      {
+        "before": "src=\"sandbox/repertoire-ui.js?v=improvements-20261122\"",
+        "after": "src=\"sandbox/repertoire-ui.js?v=material-final-20261124\"",
+        "offset": 4856
+      },
+      {
+        "before": "src=\"group-courses-ui.js?v=improvements-20261122\"",
+        "after": "src=\"group-courses-ui.js?v=material-final-20261124\"",
+        "offset": 5025
+      },
+      {
+        "before": "src=\"app-views.js?v=improvements-20261122\"",
+        "after": "src=\"app-views.js?v=material-final-20261124\"",
+        "offset": 147966
+      },
+      {
+        "before": "src=\"design-system/presentation.js?v=material-phase3-20261123\"",
+        "after": "src=\"design-system/presentation.js?v=material-final-20261124\"",
+        "offset": 5795
+      }
+    ],
+    "sandbox/repertoire-ui.js": [
+      {
+        "before": "const style = el('link', { rel: 'stylesheet', href: 'design-system/group-courses.css?v=material-foundation-20261123' }); root.append(style); ",
+        "after": "",
+        "offset": 44610
+      }
+    ],
+    "group-courses-ui.js": [
+      {
+        "before": "design-system/group-courses.css?v=material-foundation-20261123",
+        "after": "design-system/course-bundle.css?v=material-final-20261124",
+        "offset": 8861
+      }
+    ],
+    "sandbox/preview-production.cjs": [
+      {
+        "before": "'design-system/reports.css','design-system/repertoire.css'",
+        "after": "'design-system/reports.css','design-system/repertoire.css','design-system/app.css','design-system/repertoire-bundle.css','design-system/course-bundle.css'",
+        "offset": 5661
+      }
+    ]
+  }
+}

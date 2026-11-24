@@ -1,0 +1,2715 @@
+{
+  "version": "1.7.2",
+  "commit": "91d9b51e6060bbe24960aecef8f639b71df6d659",
+  "date": "2026-11-23",
+  "files": {
+    "admin-report-images.js": "56ae7c086189fe9124bcff3484fa3c0e81f1082f573a64a715884edc3de701e7",
+    "admin-report-model.js": "42b607b2548de5517e4e4c8f913900c31b3e565ee436d3cc7ff356d7fa271096",
+    "admin-report-pdf.js": "e67ca4d0baf04b77f41c609a3d49f87d1ac3df2bd2941b7e865f75ce9804dd30",
+    "admin-report-ui.js": "cbb5b8b0d0a16aae4a803015a6b606584910b37ab8341463aea8011128d24a7f",
+    "admin-report.css": "710d9e69948e30a66804c8bc87c011ff59907ced6e05987463cf0649419b088f",
+    "api/calendar.js": "4f6d9d44216184ebf19ffc687e673a390a1a79284c2581b72a1f7ffb33319502",
+    "api/grupos-curso.js": "5184df342e18cfbe3d439470178da65bc4ac119152e3d2242619858599f2283b",
+    "api/health.js": "f38aade1260041f29a4802c88105b2bad1f8f139b064218107c0616540326232",
+    "api/maps.js": "84c232a067ddcb9ed4f5bf9991540b3d7a8e4925574979ad8e61e8a1d0dc31a6",
+    "api/oauth-config.js": "b3e619a399245028e15288d699c546d80db55fa8ecb1250fc5ec1d9b86e6eb86",
+    "api/plantillas.js": "2d10132a1bdbeca7549ac9381c67e00d7ddc8825bfea5e1760f70632dc0f8cd9",
+    "api/production.js": "b868d729618b0b7885813701e43ebd81422923be08d272c212c346caf3efa8cf",
+    "api/rehearsal.js": "b429f471e50d714bcadda339504fc18207286f2c1ea722098a33f94316a2a5b6",
+    "api/repertorio-test.js": "f75d3be7d74dcea92c389988929aa12af35dc92d7d219cb484b891e2416a23d1",
+    "api/repertorio.js": "a59d73a095609bcc89d7c1885a33804d77a6406058a1e76e75eeef650d8e0979",
+    "api/sheets.js": "fb2deee75fe07da7d81026c9dc701d88130776cceb055a4a45b7cf1d1ab6656d",
+    "api/test.js": "3241766ecd11f57a5ff075e710aeff7f2af969f6773a0399ee6a75654bbfaa00",
+    "app-data.js": "87a78ce5f833bfcc8e2ce1f2d981f95569203903d52c17bbf4f64fb5390531b1",
+    "app-forms.js": "8514690d895d96b4ed5f7453abe501eab6fdbb4642e53b092251865d36d4234d",
+    "app-main.js": "01a7993aecd12e142f5f1c8ccb20d970e64c8d5cf19f0e9fd664439181c20054",
+    "app-release.js": "462202c08cae755e3ba4dfe95154d19ccc71e046e8f7d08a2222a0e741112b5c",
+    "app-ui.css": "c1bd90dc63ba7b487df9348c54c89cfcbc2e3124b15f307795af8257f39b1e3f",
+    "app-ui.js": "6d33bcf366ff3fa912ce081f20927be6de5d0f2e72690f1bf5f1a92bef861854",
+    "app-version.js": "4cc006149ff1f88ada41a5f416f5f9a64a7698ee02dd73947466fe401313d629",
+    "app-views.js": "62003db16c49f95bd89409ba5f023c9e484f0b31ce27685cfd21726bc5de31c1",
+    "auth-session.js": "176aeaf755a83e9bb2ef780a1b352f286ea377f8d77a79858e0363ccff579e72",
+    "calendar-linking.js": "f5a827258dbe8f6b29efa918fc561740cc60fd59adec73f49244676c2d3bc587",
+    "condiciones.html": "72e9387c763cf71e84d96f3604a630ba8b392c10ac3edb4688e8784949fd49b2",
+    "config-bootstrap.js": "d69fc4581640348c4c51983c5cb0276ee60a647ba4400a4b2788d675930ae730",
+    "config.production.js": "e249615b0e592d989b3c6624a74ae2f738b0094361eec6688a36ccc1f4bb4e66",
+    "draft-vault.js": "f8bfed580b320388de03f0ff542aa9b33d27bc20b51ea6a31f156293fc936c72",
+    "e2e/admin-reports.spec.cjs": "245cb25cdcab508e9ad81014aed7564b20b4149d9730208a914486ce0e8d3d97",
+    "e2e/google-init.spec.cjs": "ec4c904b134473e52288746aeb576b236a4fc339db3ed73fca40cd1e7d2c3457",
+    "e2e/mobile.spec.cjs": "e07ec3a5d24a294d460626c8d230a745d8a9ec7a192c7c5152dd552c1fca8703",
+    "form-drafts.js": "55f81a7a1d99946647b377e9e465f75035caacd568c6d96b9d9ad1b17f576a11",
+    "google-requests.js": "1a7c513dea194f48f990246161bc70b0ba15d6b4a39a007f1a2a9fa0f524ed50",
+    "google5a253576ed8c8967.html": "fd13ca35286267cf783509c7cfc460742951c45dca4e3a88f513caac94753be8",
+    "group-courses-ui.js": "322f1d88a537accd685280f0012430f75b1797166627d4b2ffbc4e58611352b1",
+    "group-courses.css": "dac78b122ced6850bafbb810a78e30cd438009f61197ec56f62762f91803ddc2",
+    "group-courses.js": "e90cb23323dfd6f2910b06f6d9c328ba99121c2aff7843cf5fedb8f27ac54a7d",
+    "group-identity.js": "f42a47ed6a601729cd21cc9812b0ed4085fd58e054ed621d2482d85c2a0021f2",
+    "group-options.js": "8c02804c20eda7b9c5ff95ef76f5702912c373640296dd29b58b6fc9c9d2becc",
+    "index.html": "059a7728722581319578fdf335621eac6210ca874ed4077168f0a389d6e8cba3",
+    "informacion.css": "d540c25fc0f4a3b610f015333529becc7d556a59882b87671c90fd6a54439552",
+    "inicio.html": "5c169e7520309a5b478130d0343bd5f676b99fb33b156c44a671f3aac1fb8912",
+    "legacy-bindings.js": "716bf2ff66fcb96d1669aa79e16e5fae38b4a1355b098e4f84b91c2a40b180ab",
+    "locale-data.js": "dd0ec6c4e07e7ac731055a4a949691cec0bba21932172ae5cb66ab3c117c3f3e",
+    "manifest.json": "d789abbb8503987e44c3f5144c21757ab59b9b8f34fbad792fad6e7d9c475cda",
+    "map-picker.css": "bc0724ef7febdc3d19f0b562c486c96842bcc2d024c2aabbcdc43031fc4904af",
+    "map-picker.js": "7b42701b635d09debe57ea297e0f9246830060590881c8d6442095cbfa9be662",
+    "map_functions.js": "3d9ac70d77d62d1cedd78bfa485acdec543e30860b5315634db6cdd6aa4b1062",
+    "package.json": "ed205e963d36c9d3e3ace0f8ac09bedc334aed17a82f4b831d716b01e0ec4f19",
+    "playwright.config.cjs": "d73311e237f2066601d111add77f90c44ad4d30f01b46dbc91c8fee999a14049",
+    "playwright.google.config.cjs": "6fbd62695572aafa2b953c359422f6df427e59d217d60eb2f497c40a50d9f776",
+    "postcss.config.js": "54a758307a2ce79551eac8e5a0646f6a291b4e5e81e498b07a5d89329c5dd068",
+    "privacidad.html": "a1667800501393296e44b3c0977ab9fd1a32f412e8b9b9026936c2a89b586592",
+    "projects/mobile-app/evidence.json": "4ec32e245bb4d2f5f12f9485d8a5c62868473c7be66e781a82003c4f19d3050a",
+    "projects/repertorio/bootstrap-copy.requests.json": "c426b2ac6d1308c9c2ca2cbadafff629a743afbf5524a33ce62d3ad3c99de81b",
+    "projects/repertorio/catalogue-initial.json": "6e1532ec2385509e6786603614a93e52176b25fc5304d9ac0fca6f605784460c",
+    "projects/repertorio/evidence/integration.json": "636f1376b300a6289563982b4193497eab1ecf32bc6bd0951668c5593661588c",
+    "projects/repertorio/evidence/phase2-live.json": "f9a1ef57e4d9d71ba68a21a8340264a3eaf6479bce9e2529d1fba6461ac0ff72",
+    "projects/repertorio/evidence/phase2.json": "bd79b3388ef9f5511fec0851dcb6a48a66ebae61bf110522005e4c2a62a82298",
+    "projects/repertorio/evidence/phase3.json": "a95e32378851192d109bf6246bd2f0a7528ce70c8076502c84cf93c697f4dfd6",
+    "projects/repertorio/evidence/phase4-migration-plan.json": "4f5c579e2b2f96f542f3d8ec3357e144159c4ba0af13f99fb7bc31d38503cd3b",
+    "projects/repertorio/evidence/phase4-migration.json": "44d619c0022ec50d057a67964352006438d45bc73a378087ffc928d1e5a5a658",
+    "projects/repertorio/evidence/phase4.json": "5077fe0ec1f8eef71b15adfc8bbe3decf674201456e32eef3fa7a045a369155c",
+    "projects/repertorio/evidence/phase5-bootstrap.json": "ddd97ff6142acf592808d5c425a4212edcd0d221a9f6d2d9369d891ac104995d",
+    "projects/repertorio/evidence/phase5-dry-run.json": "42029e5b8383249a40fdc63e4896bf4151375025230d43494d1429ea8789e038",
+    "projects/repertorio/evidence/phase5-migration-plan.json": "765155490496084f93bd5f2052382f4662b715d19540ac5968cc9428d65ed60b",
+    "projects/repertorio/evidence/phase5-migration.json": "547c85cc706e0f36a1c8288a1d238118f99be902cba821f1df558f9064ae0acf",
+    "projects/repertorio/evidence/phase5.json": "76ef2293ce75b9afeef31b75d320f704e2e3d67da0735e8ec9a9065935789170",
+    "projects/repertorio/evidence/phase6.json": "0aa3db7bbf2259d10b17e1d25a21d2017c8217c9be6a52eddf4f92384fc0e2be",
+    "projects/repertorio/evidence/preparation.json": "ab27f26c75174e574f00a1f20baea82e5e204d61a59e4639bce91b91ebb5fdc9",
+    "projects/repertorio/evidence/quota.json": "c71c4e178fd72a1b211dd06c4011770b5a288fd386ff7a76ac08d73ce9af6527",
+    "projects/repertorio/production.json": "034fddcb003312069abb02fb655687f300af05e6f29ebe8ada720e51f234d923",
+    "projects/repertorio/project.json": "5be2dd3ad1f394965c922927f64a6f7170e574785f582fc2cb64ce8f113cdd49",
+    "projects/repertorio/rehearsal.json": "d1f96dc072fa3cfb4498d65b6b62a15db905a28e9400e1a4c69bb5632c33b6f2",
+    "projects/repertorio/schema.json": "fab28777494252696704d52344e24f839b34b33efc615c2496105a108b85ea87",
+    "protected-config.js": "55f76e3ac70a2b6cc977754c793cf53a56f5c80520918ceb375073a55fb0d6d4",
+    "protected-review.js": "d6936e4427d2366820fc9a3f8996682af6cba15143d1a586bd2703f7bdaf2dce",
+    "release/activation.json": "c271d319d7434405ec61fbf175174873ffe96956c4e0c05354795526e5e0ce14",
+    "release/app-release.json": "a6351f8eae5126dec955d1a80bb00f1a7977be14d20a98d3dcf7c0d5b1dc022f",
+    "release/config.production.candidate.js": "ac7b00ef5c40b2584074b9aade0089345858ab665859d561b38a35c2b12ae39c",
+    "release/config.rehearsal.candidate.js": "2289a3778148d842295281da27c68dc7b85c57e532ec9a9443870ab19bfe34c1",
+    "release/config.test.candidate.js": "e88c44b1e5e11c7d9cbd75051f5f9171984c09004d92b7cd4f60f6a3e973118b",
+    "release/repertoire-activation.json": "afa07f6bebb6acef4e9e13db690d3324445fff0e3c52c31dd56eeab9bcefa890",
+    "repertoire-client.js": "37807052993e41068b6561f7334ea4520d41f5daeb951fdffe5a9f2c8790c1ab",
+    "repertoire-integrated.css": "06c6194f05c1ab7df59da172f4508502c1133a98907de6a638c048c354d8f096",
+    "repertoire-integration.js": "4403a1c4e78ab88a408541fb8ee89ba8ed828dd4514afa88fc8feb2cfe1443db",
+    "repertoire-model.js": "b37fba29707594e363e6e5a6a28b8e4986d7e88842a3cd2cc24de3840a232c3b",
+    "repertoire-nav-init.js": "f2b6ef7b32a37ab23af8cb3c7785959805186957d99a04d1d8e1dc2e2e837239",
+    "repertoire-templates.js": "bb1b96ba4aba581030c6966197f8af254937e831376ecdee3adf71b32145aee3",
+    "repertorio.html": "1da97838a4f86293b2b80ec69800db545575b605664927b70f4cbdffcd1ad064",
+    "report-tools.js": "e7d91af7d2736fe6864afbb46c5c59005981f8203e85c61df7a00ff36bab0a65",
+    "report-ui.js": "45ad44c774d13194ddcc9653111273e864981bcc4fe208aa609c57fc002d4cb0",
+    "reports-dialog.js": "b5d71a739b24349329f8e881b1289c49941752a3e3aa7fbd5cc782b487ca80f3",
+    "review-ui.css": "fe1e351db28922a9c747385f2fa673464ac6df8095c4738027132e33b47d1417",
+    "safe-html.js": "806202fe6ca5905ed0a981e83eda4aa7bfe008aaa6bbe5876ce5bd769f5f8ce1",
+    "sandbox/admin-report-service.cjs": "1adda9a228283fa6761c4dce82e73acf59389b57b24f958c8e56a8bc4ff986d2",
+    "sandbox/admin-reports.test.cjs": "a5522395ef0b1cba186409f18e9c7ab480cb80a341a4d7e092cbcb5c3cb5faa9",
+    "sandbox/application-source.cjs": "d1aeaf7b0a53ad364061910c0192aa8535f965ebc2f32421fde3dfad5f640df6",
+    "sandbox/auth-startup-server.cjs": "33b45ae1083e17ca624417a3dbd00716c1d33aa6e48c33a6080e103e88d7b9f3",
+    "sandbox/auth.test.cjs": "68be39ac212b8ad13b1fa6debe09a41b82ea381cd775a7040cede80375b47d29",
+    "sandbox/calendar-crud.cjs": "ed25471cdadcd1e84ce0735740e0de9c54a2979e0ef0e4cab04a16c6490fce51",
+    "sandbox/calendar-crud.test.cjs": "ca378d06c2e0b1671ab3f72059698da74e6673b0822dd688cc7fdeb8e76e560c",
+    "sandbox/calendar-history.json": "d8da3b5709b8fc292d1d7eaad9fa9fbe120be9eb0e377c938efc01e842389c44",
+    "sandbox/calendar-review.js": "5c8017b304cb1bf79ce5b00e62aa5c34abc82e5dd9dbbe4fd5e966ca73670c6c",
+    "sandbox/calendar-sync.cjs": "39942dbf1d44a91bd799fea764cdb285370c0ee66b767c64370f64c73f1b7a85",
+    "sandbox/calendar-sync.test.cjs": "b1239a69c396e7d2352733d4c018f822f487846355ab2e70583ad3cf067cff85",
+    "sandbox/concurrent-repertoire.test.cjs": "2183d8e88ec05ff91095578e0d44c60b226aef865477ebefc4598352fbaf9359",
+    "sandbox/daily-editor.js": "c7be1a3ea1d3cccbf62dd96b6df05d14b6ca17138cd2085efa85a9bf8d745cb6",
+    "sandbox/daily-service.cjs": "6aac6fd3e9f9210ddef2783bf5c3b0a4cbdc6c296824b5919f41faae3dd0b53e",
+    "sandbox/daily-ui.test.cjs": "157c532b92be58345b41d232895c8e7ad089bf99e12a60f2b5cabd70bf2dd04e",
+    "sandbox/daily.test.cjs": "22c4a9d22d4d00a3e7219db6c459dfc9028d4333cf948d23412d21beaff7399a",
+    "sandbox/drafts.test.cjs": "310ffa22f4f280be6a31cb5b5e90740f148779f38d92b534ea42398ca0ce84a6",
+    "sandbox/fixtures/admin-reports.cjs": "c1044083abd6d552f5a9d07db8c43db0bd0bcfc8dccebedf75930c34273b7669",
+    "sandbox/fixtures/daily.cjs": "3c69e42aca7175a81249e94a122e7253f7f102c2e9c6301a738208b99a26687e",
+    "sandbox/fixtures/group-courses.cjs": "2039287e597c80aee476119cf140288509a51d7eff0e935b0f96036fced5075b",
+    "sandbox/fixtures/repertoire.cjs": "4ed2f376b755b093670278eddc3e461edb987b1994308648b9cb51a818705a60",
+    "sandbox/gig-classification.test.cjs": "4d9c29f167209d8ee5a14b11b71855f2798d100ccb77359e9c87424bb5bbafd5",
+    "sandbox/google-requests.test.cjs": "48a9d82fd0dca402cdeabb019c953be353c4277a3b5f28613c222d9cdda5f645",
+    "sandbox/group-courses-service.cjs": "d558af4995277b603cd55822a706136d621b04fcc6fa5493f7cacf2c5877e57c",
+    "sandbox/group-courses.test.cjs": "41a4e7d49a52e540f549640106c75310cc42e747cec7d007eed6440c1284c7cf",
+    "sandbox/group-editor.js": "a1e24e7147f6735b3465d0b37209fb12a789ac3baaa7d747da63afba33fbdd7b",
+    "sandbox/group-service.cjs": "e2ead1c9de858845568d74fd92abeba1fa7fae9b86a67904215037eff40fcb87",
+    "sandbox/group-ui.test.cjs": "ab2b44de59ac97dc5f4bbcac9990299e6d00d1a4f5a154a38664d5bf5f10cc5a",
+    "sandbox/group.test.cjs": "d356b59c3730463f6419bc753dfd774ed49254e0f81370e94156b72d1f5dbcc4",
+    "sandbox/identity-review.js": "a9a42587a763a830e8f621d72b2deb2ee569d44b196cd8567751251f6a14066a",
+    "sandbox/identity.test.cjs": "618650746182f4ef65530e84b585608b214225b0701a7b85a2fe46ad6b3fa41a",
+    "sandbox/isolation.test.cjs": "23fec34559bd9c9b9fb56b651f4f248c2c3d21849bac79c9ddfc5b89edaa8ff1",
+    "sandbox/link-service.cjs": "0cc25ebcf464da5befe6588a498d699f4d62eedbe81336dc24ef24c484803e9e",
+    "sandbox/linking.test.cjs": "b05adf624e36d58d67e21856a142316eea2f5b3cf8d6c1688aee15bb4980a2aa",
+    "sandbox/locale-editor.js": "cc0d18af01dcb45c874f7050a64ca48cba12ff1b29a0d174f9a8a1a46d74ccbb",
+    "sandbox/locale-service.cjs": "3c392366ecc256fb88afa5beda06d8b7f771765f1f0fe858e5338fbb86aa30db",
+    "sandbox/locale.test.cjs": "d00ec471ea171cb962fe7818d2f176c32e174d181d4b526feeed08a89de9b1c6",
+    "sandbox/manual-performed.test.cjs": "478f56179e624f310b478316938e92063578c80bc43016bd1f3f81ef273870fa",
+    "sandbox/panel.js": "320ed4f38a3919b1039d2f5150c2a3833e4d60f1525b456cc90a672327d87ed2",
+    "sandbox/payment-ui.test.cjs": "92da73fb2f59cc652c587e9739de950fd9891efb86cc70e52938b5762c1235f8",
+    "sandbox/performed-editor.js": "9446315c88ec7b9ea1abc523948c4252f33ad6ef1d6ec3b43721c2dd59808c89",
+    "sandbox/performed-service.cjs": "d16d6836ba6bcf36857ac3db0eb36f4bbc6021b3a6d137ca2017a5fef7d8ba96",
+    "sandbox/performed.test.cjs": "7924596fd20cf0a8fc162830aa7ce4614b1e692d882a2b1be14d502828fd2a0e",
+    "sandbox/policy.cjs": "14f3e15804e3a2dbe479eb7bfe70b0c0a46cd887b64d3dcb8b18241e722f5e7f",
+    "sandbox/preview-production.cjs": "3a0748656ef0fd6310d8e1a5611461ace8208186e478c79826ecf39c09a8afc5",
+    "sandbox/production-ui.test.cjs": "015795f77d0bf5358d4493447c372acc698d8de431a90c54f70cf6b5403dbc3c",
+    "sandbox/production.test.cjs": "9fe2b5257f8ec37f21da7d732dd648022bc1e59b892a39a3d50fa3ecbcf43a93",
+    "sandbox/protected-editor.js": "171d4ae21d540e7bfb1c31d2dcf81979576e6357aa318f2c1466d5c1bade63ae",
+    "sandbox/protected-runtime.cjs": "b6f1bd82e02e54aa692e34192d827dbe9c607099edd40f045f53ab20aebfde6f",
+    "sandbox/protected-service.cjs": "b4e0b6d2bc04c85a30cccdd5fc0c14cdce9c9fb63c8ff9c61a7478d1b081129b",
+    "sandbox/protected.test.cjs": "dee3b358afc57b94162f22e18f928cbcccc652e4092a866c315c1c4cf5b7c4c4",
+    "sandbox/reliability.test.cjs": "b6d74c8955076d2e4e7c1e607795bff9bedb877bfd2512c113cd00984cd3cc6a",
+    "sandbox/repertoire-api.test.cjs": "6673661af8e11d0b90e99c01bcae689f33438d8622c0667897d57fe95d3c76bf",
+    "sandbox/repertoire-client.test.cjs": "ee38571c7fe4bca0ada1afe1fcab58316e2ff43bb2418a7582c6d8832a37c128",
+    "sandbox/repertoire-development.html": "5a803cb1a62bfe60a696cd39187254de1e2a6e5be29af1d5d5c274630b6effa7",
+    "sandbox/repertoire-integration.test.cjs": "8224cb6333b553b9c6b92d66e3cfd35cd21aa669184ab5a54acfdbd1762d2dec",
+    "sandbox/repertoire-live-probe.cjs": "a73e1660200678798ca7daf292a48cb3154248641b7faceea673f427a57e5b89",
+    "sandbox/repertoire-migration-probe.cjs": "cc2a82ebbe9872c077aaff611e2f4bc77e50be1a0fccff3f132beb2074784dcf",
+    "sandbox/repertoire-migration.cjs": "29e409338fbcd054372c20c962828bbf884688d6a288aa349ae02ba413f790d2",
+    "sandbox/repertoire-migration.test.cjs": "1f366cf2a73a77e4852e40e3e853f9a3be3cff7a617050f14b27e8df57730f98",
+    "sandbox/repertoire-policy.cjs": "f76ce466bae78baa4da053c13c41214f214b7cfc8495bea90e5db75b9238cd3f",
+    "sandbox/repertoire-preview.cjs": "250bc40d58b04ee44c8e08e5f2d30bf526437de0522e9ee4c727554d874a18a7",
+    "sandbox/repertoire-production-bootstrap.cjs": "5181f329e0820278311d9c6469abe465c316aa82feb49d27fc0799ae4a2b2c15",
+    "sandbox/repertoire-production.test.cjs": "19a587ca495f53303d5b2f0438f50da8298296ffb3eb4289ba9841ecfd530c98",
+    "sandbox/repertoire-quota.test.cjs": "d0db2a248ff2ee3e226af15cdf57c831e10b2ed70e1d55f814c3ce98f6ae087a",
+    "sandbox/repertoire-server.cjs": "fbb036d170237948737896b96deeaed376a02cea4a09de9b871c5a54b6bfc9ee",
+    "sandbox/repertoire-service.cjs": "40ea2a4e364eaa54c39a06b24d11b9e72912320374b65bb734bc50d9724ad877",
+    "sandbox/repertoire-technical.html": "d1fdb7878643f8d2ea116e2b89bc5bf2eaa0b28fd9cd4b417a18a5c4e9547a3b",
+    "sandbox/repertoire-ui.js": "a566b956feb723fa44a63414b48dddf8538d0d6f5d222bd43a0614c10ef1a542",
+    "sandbox/repertoire.css": "66c1886f0f296765924ca877f34d0b8671e06fc9b9580819d8acef2cc6b42e02",
+    "sandbox/repertoire.test.cjs": "14847c06115b995f63ef9b0c2bdcab1e4ff0528df0c259cb80747431a1064f5a",
+    "sandbox/reports.test.cjs": "28ba213972640c241ca1ba52336c56cc38d954c46a34806f53622499239f7a71",
+    "sandbox/security-presentation.test.cjs": "f4b8203a14770f864c0aa0cc10f6abc0ed68277a176d99196c827487aca522ce",
+    "sandbox/server.cjs": "506da08359712ac8bc45e8d44166c95e275331b5483a37113360ef5d98adf5ac",
+    "sandbox/session-groups.test.cjs": "2d880f06384ba3a9c9ae2f9b28de93d2fe2da3fc0967dbdec38f559927d0e0fe",
+    "sandbox/sheet-patches.cjs": "713bb104b45a27812139c5c88f20d8fa8497cb7283b973993a7cebc61318b222",
+    "sandbox/state-service.cjs": "ad73e91aa4e36bba45437d8b4417b115b630d1ac86d222eaf65376fe3f475e3f",
+    "sandbox/sync-ui.test.cjs": "9d81f1ef942821258fa700f77118f8a7dcdc1edc7860c611a73cf6734e9da609",
+    "sandbox/template-service.cjs": "0aaa6a6e8b9f2b752198b354e0cbecea298f1a95495e8d13e32fc1726843a8e2",
+    "sandbox/templates.test.cjs": "8a0ab42203cfb2c389106cb93fcf59ec27ecc2a4c545e18e592d38058dc05c7c",
+    "security-headers.json": "34a48ec33ef38d5e67c5c86321a88f2fb58a82f7ed3b0d5eddd1173962cf4026",
+    "src/input.css": "12e2ade46e19df3946fc14aa1837f597c15f592ce9c829102ad5d98e52becd2a",
+    "styles.css": "24f438d6c92cf554d8769cf971618c12de92ebb830e60258b004b333aa614cc7",
+    "tailwind.config.js": "bc78aa108f4f07e3ada73143d24611211c1c20c1791ad3123e2cbc92c06d1589",
+    "vercel.json": "b7bf3c9956d122318b18a9e0406dffa7a0878aea0b28ebfdf0704874607145ea"
+  },
+  "indexContract": [
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "referrer"
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "viewport"
+        ]
+      ]
+    },
+    {
+      "tag": "link",
+      "attributes": [
+        [
+          "type",
+          "image/png"
+        ]
+      ]
+    },
+    {
+      "tag": "link",
+      "attributes": [
+        [
+          "type",
+          "image/png"
+        ]
+      ]
+    },
+    {
+      "tag": "link",
+      "attributes": [
+        [
+          "type",
+          "image/png"
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "theme-color"
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "mobile-web-app-capable"
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "application-name"
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "msapplication-TileColor"
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "msapplication-TileImage"
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "apple-mobile-web-app-capable"
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "apple-mobile-web-app-status-bar-style"
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "attributes": [
+        [
+          "name",
+          "apple-mobile-web-app-title"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "production-actions"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "reports-open"
+        ],
+        [
+          "type",
+          "button"
+        ],
+        [
+          "aria-label",
+          "Informes y administración"
+        ],
+        [
+          "aria-haspopup",
+          "dialog"
+        ],
+        [
+          "aria-controls",
+          "reports-dialog"
+        ],
+        [
+          "aria-expanded",
+          "false"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "file-chart-column"
+        ],
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "repertoire-refresh"
+        ],
+        [
+          "type",
+          "button"
+        ],
+        [
+          "aria-label",
+          "Actualizar repertorio"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "refresh-cw"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "sync-btn"
+        ],
+        [
+          "aria-label",
+          "Sincronizar"
+        ],
+        [
+          "data-bind-click",
+          "0"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "refresh-cw"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "add-future-events-btn"
+        ],
+        [
+          "aria-label",
+          "Añadir eventos futuros"
+        ],
+        [
+          "data-bind-click",
+          "1"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "calendar-plus"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "auth-btn"
+        ],
+        [
+          "aria-label",
+          "Conectar Google"
+        ],
+        [
+          "data-bind-click",
+          "2"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "log-in"
+        ]
+      ]
+    },
+    {
+      "tag": "span",
+      "attributes": [
+        [
+          "id",
+          "auth-text"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "auth-status"
+        ],
+        [
+          "aria-live",
+          "polite"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "production-notices"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "google-permissions-review"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "review-google-permissions"
+        ],
+        [
+          "type",
+          "button"
+        ],
+        [
+          "data-bind-click",
+          "3"
+        ]
+      ]
+    },
+    {
+      "tag": "nav",
+      "attributes": [
+        [
+          "id",
+          "app-navigation"
+        ],
+        [
+          "aria-label",
+          "Secciones de PercuManager"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-bind-click",
+          "4"
+        ],
+        [
+          "id",
+          "btn-eventos"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "layout-list"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-bind-click",
+          "5"
+        ],
+        [
+          "id",
+          "btn-calendario"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "calendar"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-bind-click",
+          "6"
+        ],
+        [
+          "id",
+          "btn-maestros"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "users"
+        ]
+      ]
+    },
+    {
+      "tag": "a",
+      "attributes": [
+        [
+          "id",
+          "repertoire-entry"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "music"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "tab-eventos"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-bind-click",
+          "7"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "plus"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "filter-grupo"
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "attributes": [
+        [
+          "id",
+          "filter-grupo"
+        ],
+        [
+          "aria-label",
+          "Filtrar sesiones por grupo"
+        ],
+        [
+          "data-bind-change",
+          "8"
+        ]
+      ]
+    },
+    {
+      "tag": "summary",
+      "attributes": [
+        [
+          "id",
+          "session-filter-summary"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "filter-cobrados"
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "attributes": [
+        [
+          "id",
+          "filter-cobrados"
+        ],
+        [
+          "aria-label",
+          "Filtrar sesiones por cobro"
+        ],
+        [
+          "data-bind-change",
+          "9"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "filter-realizados"
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "attributes": [
+        [
+          "id",
+          "filter-realizados"
+        ],
+        [
+          "aria-label",
+          "Filtrar sesiones por realización"
+        ],
+        [
+          "data-bind-change",
+          "10"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "lista-eventos"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "tab-calendario"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "calendar"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "tab-maestros"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-bind-click",
+          "11"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "plus"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "search"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "search-grupos"
+        ],
+        [
+          "aria-label",
+          "Buscar grupo por nombre o ubicación"
+        ],
+        [
+          "data-bind-input",
+          "12"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "group-course-controls"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "lista-maestros"
+        ]
+      ]
+    },
+    {
+      "tag": "section",
+      "attributes": [
+        [
+          "id",
+          "tab-repertorio"
+        ],
+        [
+          "aria-label",
+          "Repertorio"
+        ]
+      ]
+    },
+    {
+      "tag": "template",
+      "attributes": [
+        [
+          "id",
+          "repertoire-template"
+        ]
+      ]
+    },
+    {
+      "tag": "span",
+      "attributes": [
+        [
+          "id",
+          "mode-badge"
+        ]
+      ]
+    },
+    {
+      "tag": "span",
+      "attributes": [
+        [
+          "id",
+          "connection-label"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "connect"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "disconnect"
+        ]
+      ]
+    },
+    {
+      "tag": "a",
+      "attributes": [
+        [
+          "id",
+          "copy-link"
+        ]
+      ]
+    },
+    {
+      "tag": "nav",
+      "attributes": [
+        [
+          "aria-label",
+          "Secciones de repertorio"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-tab",
+          "repertoire"
+        ],
+        [
+          "aria-current",
+          "page"
+        ]
+      ]
+    },
+    {
+      "tag": "svg",
+      "attributes": [
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-tab",
+          "catalog"
+        ]
+      ]
+    },
+    {
+      "tag": "svg",
+      "attributes": [
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-tab",
+          "groups"
+        ]
+      ]
+    },
+    {
+      "tag": "svg",
+      "attributes": [
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "status"
+        ],
+        [
+          "aria-live",
+          "polite"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "issue-panel"
+        ]
+      ]
+    },
+    {
+      "tag": "section",
+      "attributes": [
+        [
+          "id",
+          "workspace"
+        ],
+        [
+          "aria-busy",
+          "false"
+        ]
+      ]
+    },
+    {
+      "tag": "span",
+      "attributes": [
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "dialog",
+      "attributes": [
+        [
+          "id",
+          "editor"
+        ],
+        [
+          "aria-labelledby",
+          "dialog-title"
+        ]
+      ]
+    },
+    {
+      "tag": "form",
+      "attributes": [
+        [
+          "id",
+          "editor-form"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "dialog-kicker"
+        ]
+      ]
+    },
+    {
+      "tag": "h2",
+      "attributes": [
+        [
+          "id",
+          "dialog-title"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "close-dialog"
+        ],
+        [
+          "type",
+          "button"
+        ],
+        [
+          "aria-label",
+          "Cerrar formulario"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "dialog-body"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "dialog-error"
+        ]
+      ]
+    },
+    {
+      "tag": "span",
+      "attributes": [
+        [
+          "id",
+          "dirty-label"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "cancel-dialog"
+        ],
+        [
+          "type",
+          "button"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "save-dialog"
+        ],
+        [
+          "type",
+          "submit"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "session-archive-actions"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "modal-evento"
+        ],
+        [
+          "aria-modal",
+          "true"
+        ],
+        [
+          "aria-label",
+          "Datos de la sesión"
+        ]
+      ]
+    },
+    {
+      "tag": "h3",
+      "attributes": [
+        [
+          "id",
+          "modal-evento-title"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "data-bind-click",
+          "13"
+        ],
+        [
+          "aria-label",
+          "Cerrar formulario"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "x"
+        ]
+      ]
+    },
+    {
+      "tag": "form",
+      "attributes": [
+        [
+          "id",
+          "form-evento"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "id",
+          "session-performed-control"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "checkbox"
+        ],
+        [
+          "id",
+          "ev-realizado"
+        ],
+        [
+          "aria-label",
+          "Sesión realizada"
+        ],
+        [
+          "aria-describedby",
+          "session-performed-hint"
+        ]
+      ]
+    },
+    {
+      "tag": "small",
+      "attributes": [
+        [
+          "id",
+          "session-performed-hint"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "hidden"
+        ],
+        [
+          "id",
+          "ev-rowIdx"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "checkbox"
+        ],
+        [
+          "id",
+          "ev-all-groups"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-grupo-search"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "ev-grupo-search"
+        ],
+        [
+          "data-bind-input",
+          "14"
+        ],
+        [
+          "data-bind-focus",
+          "15"
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "attributes": [
+        [
+          "id",
+          "ev-grupo"
+        ],
+        [
+          "data-bind-change",
+          "16"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "grupo-dropdown"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "grupo-options"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-fecha"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "date"
+        ],
+        [
+          "id",
+          "ev-fecha"
+        ],
+        [
+          "data-bind-change",
+          "17"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-hora-inicio"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "time"
+        ],
+        [
+          "id",
+          "ev-hora-inicio"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-hora-fin"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "time"
+        ],
+        [
+          "id",
+          "ev-hora-fin"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-precio"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "number"
+        ],
+        [
+          "id",
+          "ev-precio"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "protected-session-fields"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-total"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "ev-total"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-barrio"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "ev-barrio"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "checkbox"
+        ],
+        [
+          "id",
+          "ev-bolo"
+        ],
+        [
+          "data-bind-change",
+          "18"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-bolo"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-sitio"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "ev-sitio"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "maracuya-gps-hint"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "map"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "data-map-target",
+          "ev-sitio"
+        ],
+        [
+          "aria-label",
+          "Buscar dirección en el mapa"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "map-pin"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "sync-calendar-wrapper"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "calendar-write-option"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "checkbox"
+        ],
+        [
+          "id",
+          "ev-calendar"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-calendar"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "recurrence-panel"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "checkbox"
+        ],
+        [
+          "id",
+          "ev-repite"
+        ],
+        [
+          "data-bind-change",
+          "19"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "ev-repite"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "recurrence-options"
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "attributes": [
+        [
+          "id",
+          "ev-freq"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "date"
+        ],
+        [
+          "id",
+          "ev-until"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "number"
+        ],
+        [
+          "id",
+          "ev-interval"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "submit"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "modal-grupo"
+        ],
+        [
+          "aria-modal",
+          "true"
+        ],
+        [
+          "aria-label",
+          "Datos del grupo"
+        ]
+      ]
+    },
+    {
+      "tag": "h3",
+      "attributes": [
+        [
+          "id",
+          "modal-grupo-title"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "data-bind-click",
+          "20"
+        ],
+        [
+          "aria-label",
+          "Cerrar formulario"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "x"
+        ]
+      ]
+    },
+    {
+      "tag": "form",
+      "attributes": [
+        [
+          "id",
+          "form-grupo"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "hidden"
+        ],
+        [
+          "id",
+          "gr-rowIdx"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "gr-nombre"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "gr-nombre"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "gr-name-info"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "gr-precio"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "gr-precio"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "gr-precio-bolo"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "gr-precio-bolo"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "gr-ubicacion"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "gr-ubicacion"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "gr-sitio"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "type",
+          "text"
+        ],
+        [
+          "id",
+          "gr-sitio"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "data-map-target",
+          "gr-sitio"
+        ],
+        [
+          "aria-label",
+          "Buscar dirección en el mapa"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "map-pin"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "submit"
+        ]
+      ]
+    },
+    {
+      "tag": "dialog",
+      "attributes": [
+        [
+          "id",
+          "modal-mapa"
+        ],
+        [
+          "aria-labelledby",
+          "map-title"
+        ]
+      ]
+    },
+    {
+      "tag": "h3",
+      "attributes": [
+        [
+          "id",
+          "map-title"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "map-close"
+        ],
+        [
+          "type",
+          "button"
+        ],
+        [
+          "aria-label",
+          "Cerrar selector de ubicación"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "x"
+        ]
+      ]
+    },
+    {
+      "tag": "form",
+      "attributes": [
+        [
+          "id",
+          "map-search-form"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "map-search"
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "attributes": [
+        [
+          "id",
+          "map-search"
+        ],
+        [
+          "type",
+          "text"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "map-search-button"
+        ],
+        [
+          "type",
+          "submit"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "map-locate"
+        ],
+        [
+          "type",
+          "button"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "map-status"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "map-container"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "map-unavailable"
+        ]
+      ]
+    },
+    {
+      "tag": "a",
+      "attributes": [
+        [
+          "id",
+          "map-external"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "map-retry"
+        ],
+        [
+          "type",
+          "button"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "map-confirm"
+        ],
+        [
+          "type",
+          "button"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "modal-confirm"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "trash-2"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "confirm-message"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-bind-click",
+          "21"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-bind-click",
+          "22"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "modal-error"
+        ],
+        [
+          "aria-modal",
+          "true"
+        ],
+        [
+          "aria-labelledby",
+          "error-title"
+        ],
+        [
+          "aria-describedby",
+          "error-message"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "error-icon"
+        ]
+      ]
+    },
+    {
+      "tag": "h3",
+      "attributes": [
+        [
+          "id",
+          "error-title"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "error-message"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "data-bind-click",
+          "23"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "error-action-btn"
+        ],
+        [
+          "data-bind-click",
+          "24"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "modal-future-events"
+        ],
+        [
+          "aria-modal",
+          "true"
+        ],
+        [
+          "aria-label",
+          "Añadir eventos futuros"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "data-bind-click",
+          "25"
+        ],
+        [
+          "aria-label",
+          "Cerrar formulario"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "x"
+        ]
+      ]
+    },
+    {
+      "tag": "form",
+      "attributes": [
+        [
+          "id",
+          "form-future-events"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "future-month"
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "attributes": [
+        [
+          "id",
+          "future-month"
+        ]
+      ]
+    },
+    {
+      "tag": "label",
+      "attributes": [
+        [
+          "for",
+          "future-year"
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "attributes": [
+        [
+          "id",
+          "future-year"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "submit"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "download"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "data-bind-click",
+          "26"
+        ]
+      ]
+    },
+    {
+      "tag": "dialog",
+      "attributes": [
+        [
+          "id",
+          "reports-dialog"
+        ],
+        [
+          "aria-labelledby",
+          "reports-title"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "h2",
+      "attributes": [
+        [
+          "id",
+          "reports-title"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "id",
+          "reports-close"
+        ],
+        [
+          "aria-label",
+          "Cerrar informes"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "x"
+        ],
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "aria-label",
+          "Secciones de informes"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "id",
+          "reports-admin-tab"
+        ],
+        [
+          "aria-controls",
+          "reports-admin-panel"
+        ],
+        [
+          "aria-selected",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "id",
+          "reports-personal-tab"
+        ],
+        [
+          "aria-controls",
+          "reports-personal-panel"
+        ],
+        [
+          "aria-selected",
+          "false"
+        ]
+      ]
+    },
+    {
+      "tag": "section",
+      "attributes": [
+        [
+          "id",
+          "reports-admin-panel"
+        ],
+        [
+          "aria-labelledby",
+          "reports-admin-tab"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "admin-report-panel"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "file-text"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "aria-label",
+          "Contenido del PDF"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "table-2"
+        ],
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "check"
+        ],
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "table-2"
+        ],
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "check"
+        ],
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "admin-report-date"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "type",
+          "button"
+        ],
+        [
+          "id",
+          "admin-report-prepare"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "file-down"
+        ],
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "admin-report-files"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "admin-report-status"
+        ],
+        [
+          "aria-live",
+          "polite"
+        ]
+      ]
+    },
+    {
+      "tag": "details",
+      "attributes": [
+        [
+          "id",
+          "admin-report-preview"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "admin-report-content"
+        ]
+      ]
+    },
+    {
+      "tag": "section",
+      "attributes": [
+        [
+          "id",
+          "reports-personal-panel"
+        ],
+        [
+          "aria-labelledby",
+          "reports-personal-tab"
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "attributes": [
+        [
+          "id",
+          "report-course"
+        ],
+        [
+          "aria-label",
+          "Curso del informe"
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "attributes": [
+        [
+          "id",
+          "report-group"
+        ],
+        [
+          "aria-label",
+          "Grupo del informe"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "stats-info"
+        ],
+        [
+          "aria-live",
+          "polite"
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "attributes": [
+        [
+          "id",
+          "report-export"
+        ],
+        [
+          "type",
+          "button"
+        ]
+      ]
+    },
+    {
+      "tag": "i",
+      "attributes": [
+        [
+          "data-lucide",
+          "download"
+        ],
+        [
+          "aria-hidden",
+          "true"
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "attributes": [
+        [
+          "id",
+          "loading-overlay"
+        ]
+      ]
+    },
+    {
+      "tag": "p",
+      "attributes": [
+        [
+          "id",
+          "loading-message"
+        ]
+      ]
+    }
+  ],
+  "viewports": [
+    {
+      "width": 320,
+      "height": 568
+    },
+    {
+      "width": 390,
+      "height": 844
+    },
+    {
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "width": 1280,
+      "height": 900
+    }
+  ],
+  "indexNormalizedHash": "5a1200846bade9d7b3038341cbfa951928e558aa77318bf2981a0436f7e9125a"
+}

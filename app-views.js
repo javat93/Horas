@@ -38,7 +38,7 @@
                 const icon = ev.realizado ? 'check-circle' : 'clock';
                 const iconColor = ev.realizado ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600';
                 return `
-                <div class="card-modern p-5 flex flex-wrap md:flex-nowrap justify-between items-center gap-4 ${ev.realizado ? 'bg-emerald-50/30' : ''} ${typeClass}">
+                <div class="card-modern pm-session-card p-5 flex flex-wrap md:flex-nowrap justify-between items-center gap-4 ${ev.realizado ? 'bg-emerald-50/30' : ''} ${typeClass}">
                     <div role="button" tabindex="0" aria-label="Editar sesión" class="session-card-main flex items-center gap-4 cursor-pointer flex-1" data-ui-action="edit-session" data-row="${ev.rowIdx}">
                         <div class="session-card-icon w-12 h-12 rounded-2xl flex items-center justify-center ${iconColor}" aria-hidden="true">
                             <i data-lucide="${icon}"></i>
@@ -47,6 +47,7 @@
                             <h4 class="session-card-title font-extrabold text-slate-900"><span>${SafeHTML.escape(sessionGroupName(ev))}</span>${SHOW_SESSION_TYPES ? `<span class="session-type-label">${isBolo ? 'Bolo' : 'Clase'}</span>` : ''}</h4>
                             <div class="session-card-meta flex gap-3 mt-1">
                                 <span class="text-xs font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3"></i> ${SafeHTML.escape(ev.fechaStr||'Fecha pendiente')}${ev.dateWarning ? ' · Revisar fecha' : ''}${ev.paymentSaving?' · Guardando pago…':ev.paymentError?' · Pago no guardado; vuelve a intentarlo':''}</span>
+                                <span class="pm-session-time"><i data-lucide="clock-3" class="w-3 h-3" aria-hidden="true"></i> ${ev.horaInicio && ev.horaFin ? SafeHTML.escape(ev.horaInicio + ' – ' + ev.horaFin) : 'Horario sin indicar'}</span>
                                 <span class="text-xs font-bold ${ev.realizado ? 'text-blue-500' : 'text-slate-400'} flex items-center gap-1">
                                     <i data-lucide="${ev.realizado ? 'flag' : 'hourglass'}" class="w-3 h-3"></i>
                                     ${ev.realizado ? 'Realizado' : 'Pendiente'}
@@ -57,14 +58,14 @@
                     <div class="session-card-actions flex items-center gap-6">
                         <div class="text-right">
                             <p class="text-[10px] font-bold text-slate-400 uppercase">Total</p>
-                            <p class="text-lg font-black text-slate-800">${ev.amountWarning ? 'Revisar importe' : LocaleData.currency(ev.total)}</p>
+                            <p class="text-lg font-black text-slate-800">${ev.amountWarning ? 'Revisar importe' : LocaleData.currency(ev.total)}</p><span class="pm-payment-state ${ev.pagado ? 'is-paid' : 'is-unpaid'}">${ev.pagado ? 'Cobrado' : 'Pendiente de cobro'}</span>
                         </div>
                         <div class="flex gap-1">
-                            <button aria-label="Cambiar estado de pago, fila ${ev.rowIdx}" ${ev.paymentSaving||!ev.fechaObj||!ev.grupo?.trim()?'disabled':''} data-ui-action="payment" data-row="${ev.rowIdx}" data-state="${!ev.pagado}" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800' : 'bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600'} hover:scale-110 transition-all">
-                                <i data-lucide="euro" class="w-5 h-5"></i>
+                            <button aria-label="Cambiar estado de pago, fila ${ev.rowIdx}" aria-pressed="${ev.pagado}" ${ev.paymentSaving||!ev.fechaObj||!ev.grupo?.trim()?'disabled':''} data-ui-action="payment" data-row="${ev.rowIdx}" data-state="${!ev.pagado}" class="p-2.5 rounded-xl ${ev.pagado ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800' : 'bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600'} hover:scale-110 transition-all">
+                                <i data-lucide="euro" class="w-5 h-5" aria-hidden="true"></i><span>${ev.paymentSaving ? 'Guardando…' : ev.pagado ? 'Marcar pendiente' : 'Marcar cobrado'}</span>
                             </button>
                             <button aria-label="Archivar sesión, fila ${ev.rowIdx}" data-ui-action="archive-session" data-row="${ev.rowIdx}" class="p-2.5 rounded-xl bg-slate-100 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
-                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                <i data-lucide="archive" class="w-5 h-5" aria-hidden="true"></i><span>Archivar</span>
                             </button>
                         </div>
                     </div>
@@ -88,7 +89,7 @@
             }
 
             container.innerHTML = filtered.map(g => `
-                <div class="card-modern p-5 flex justify-between items-center gap-4">
+                <div class="card-modern pm-group-card p-5 flex justify-between items-center gap-4">
                     <div role="button" tabindex="0" aria-label="Editar grupo" class="group-card-main flex items-center gap-4 cursor-pointer flex-1" data-ui-action="edit-group" data-row="${g.rowIdx}">
                         <div class="bg-slate-900 text-white p-3 rounded-xl"><i data-lucide="users"></i></div>
                         <div>
@@ -98,7 +99,7 @@
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Precio Base</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Precio sesión</p>
                         <p class="font-bold text-slate-700">${g.precio === null ? 'Sin tarifa' : LocaleData.currency(g.precio)}</p>
                     </div>
                 </div>`).join('');
@@ -153,7 +154,7 @@
                 }
 
                 return {
-                    title: eventTitle,
+                    title: eventTitle + '\n' + (e.pagado ? 'Cobrado' : 'Pendiente de cobro'),
                     start: startDateTime,
                     end: endDateTime,
                     color: e.pagado ? '#10b981' : '#2563eb',

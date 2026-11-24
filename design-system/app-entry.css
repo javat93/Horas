@@ -1,0 +1,13 @@
+/* Main page, in the approved cascade order. Tokens and vendor CSS stay in the head. */
+@import url("../map-picker.css");
+@import url("./legacy-page.css");
+@import url("../review-ui.css");
+@import url("../app-ui.css");
+@import url("../group-courses.css");
+@import url("../admin-report.css");
+@import url("./components.css");
+@import url("./legacy-bridge.css");
+@import url("./screens.css");
+@import url("./forms.css");
+@import url("./courses.css");
+@import url("./reports.css");
