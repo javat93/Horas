@@ -1,8 +1,8 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const root=path.join(__dirname,'..'),base=require('../projects/material-design/baseline.json');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8'),hash=s=>crypto.createHash('sha256').update(s).digest('hex');
-const phase3=require('../projects/material-design/phase3-presentation.json'),phase4=require('../projects/material-design/phase4-presentation.json');
-function beforePhase3(file,source){for(const patch of [...(phase4.files[file]||[])].reverse()){assert(source.includes(patch.after),'Missing phase 4 presentation patch in '+file);source=source.replace(patch.after,patch.before);}for(const patch of [...(phase3.files[file]||[])].reverse()){assert(source.includes(patch.after),'Missing presentation patch in '+file);source=source.replace(patch.after,patch.before);}return source;}
+const phase3=require('../projects/material-design/phase3-presentation.json'),phase4=require('../projects/material-design/phase4-presentation.json'),phase5=require('../projects/material-design/phase5-presentation.json');
+function beforePhase3(file,source){for(const patch of [...(phase5.files[file]||[])].reverse()){assert(source.includes(patch.after),'Missing phase 5 presentation patch in '+file);source=source.replace(patch.after,patch.before);}for(const patch of [...(phase4.files[file]||[])].reverse()){assert(source.includes(patch.after),'Missing phase 4 presentation patch in '+file);source=source.replace(patch.after,patch.before);}for(const patch of [...(phase3.files[file]||[])].reverse()){assert(source.includes(patch.after),'Missing presentation patch in '+file);source=source.replace(patch.after,patch.before);}return source;}
 const contract=html=>[...html.matchAll(/<([a-z][\w:-]*)\b([^>]*)>/g)].map(m=>({tag:m[1],attributes:[...m[2].matchAll(/\b(id|data-[\w-]+|name|type|action|method|for|aria-[\w-]+)="([^"]*)"/g)].map(a=>[a[1],a[2]])})).filter(e=>e.attributes.length);
 test('Material foundation preserves every existing DOM contract and script',()=>{
  const html=beforePhase3('index.html',read('index.html'));assert.deepEqual(contract(html),base.indexContract);
@@ -14,7 +14,7 @@ test('Material foundation leaves domain APIs authentication and queues byte iden
  for(const [file,expected]of Object.entries(base.files)){
   if(file==='index.html')continue;
   let source=fs.readFileSync(path.join(root,file));
-  if(['group-courses-ui.js','sandbox/repertoire-ui.js','sandbox/preview-production.cjs',...Object.keys(phase3.files),...Object.keys(phase4.files)].includes(file))source=beforePhase3(file,source.toString('utf8'));
+  if(['group-courses-ui.js','sandbox/repertoire-ui.js','sandbox/preview-production.cjs',...Object.keys(phase3.files),...Object.keys(phase4.files),...Object.keys(phase5.files)].includes(file))source=beforePhase3(file,source.toString('utf8'));
   if(['group-courses-ui.js','sandbox/repertoire-ui.js'].includes(file))source=source.replace('design-system/group-courses.css?v=material-foundation-20261123','group-courses.css?v=improvements-20261122');
   if(file==='group-courses-ui.js')for(const patch of require('../projects/material-design/filter-presentation.json').patches){assert(source.includes(patch.after));source=source.replace(patch.after,patch.before);}
   if(file==='sandbox/preview-production.cjs')source=source.replace("['design-system/tokens.css','design-system/components.css','design-system/legacy-bridge.css','design-system/group-courses.css'].forEach(file=>files.add(file));\n",'');
@@ -28,7 +28,7 @@ test('Material foundation reaches the page and both isolated roots using local C
   assert(template.includes('design-system/'+file));
  }
  for(const file of ['group-courses-ui.js','sandbox/repertoire-ui.js'])assert(read(file).includes('design-system/group-courses.css?v=material-foundation-20261123'));
- for(const file of ['tokens.css','components.css','legacy-bridge.css','group-courses.css']){
+ for(const file of ['tokens.css','components.css','legacy-bridge.css','group-courses.css','forms.css','screens.css','courses.css','repertoire.css','reports.css']){
   const css=read('design-system/'+file);
   assert(!/https?:|javascript:|expression\s*\(/i.test(css));
   for(const m of css.matchAll(/@import url\("([^"]+)"\)/g))assert(fs.existsSync(path.resolve(root,'design-system',m[1])));

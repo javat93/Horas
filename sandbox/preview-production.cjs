@@ -40,7 +40,7 @@ for (const file of ['repertoire-model.js', 'repertoire-client.js', 'repertoire-i
 for (const file of ['group-courses.js', 'group-courses-ui.js', 'group-courses.css']) files.add(file);
 ["config-bootstrap.js","repertoire-nav-init.js","app-main.js","app-views.js","app-forms.js","group-options.js","legacy-bindings.js","safe-html.js","app-release.js","google-requests.js","draft-vault.js","form-drafts.js","report-tools.js","report-ui.js","repertoire-templates.js","vendor/lucide.js","vendor/fullcalendar.js"].forEach(file=>files.add(file));
 ['reports-dialog.js','admin-report.css','admin-report-model.js','admin-report-images.js','admin-report-pdf.js','admin-report-ui.js','vendor/pdf-lib.min.js'].forEach(file=>files.add(file));
-['design-system/tokens.css','design-system/components.css','design-system/legacy-bridge.css','design-system/group-courses.css','design-system/screens.css','design-system/presentation.js','design-system/forms.css'].forEach(file=>files.add(file));
+['design-system/tokens.css','design-system/components.css','design-system/legacy-bridge.css','design-system/group-courses.css','design-system/screens.css','design-system/presentation.js','design-system/forms.css','design-system/courses.css','design-system/reports.css','design-system/repertoire.css'].forEach(file=>files.add(file));
 const server=http.createServer(async(req,res)=>{
   try{
     if(![`localhost:${port}`,`127.0.0.1:${port}`].includes(req.headers.host)){res.writeHead(403);return res.end();}

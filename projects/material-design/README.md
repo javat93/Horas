@@ -1,4 +1,4 @@
-# PercuManager Material foundation phases 1 and 2
+# PercuManager Material visual migration
 
 Development only. Based on PercuManager 1.7.2 at 91d9b51e6060bbe24960aecef8f639b71df6d659.
 Date: 2026-11-23 Europe/Madrid. Branch: feature/material-foundation.
@@ -61,8 +61,8 @@ The review session uses HORAS_PREVIEW_PORT=3014 without changing app configurati
 
 ## Not part of this delivery
 
-Phases 5 and 6 remain pending: specialized module refinements and removal of duplicated legacy CSS.
-Phases 3 and 4 are documented below.
+Phase 6 remains pending: remove duplicated legacy styles, complete final regression review
+and prepare an authorized publication. Phases 3 to 5 are documented below.
 No claims of a completed whole-app redesign or production publication.
 Existing workflows, quotas and state semantics remain the reference.
 
@@ -162,3 +162,53 @@ Synthetic preview workflow checks:
 No remote push, release version change, deployment, real Detalle/session/Sheets writes, Calendar
 operation or Google authentication occurred. Before any later authorized publication, update
 existing changed JS cache versions (including map-picker.js) and perform the release checks.
+
+## Phase 5 — repertoire, courses and reports
+
+Date: 2026-11-24 Europe/Madrid. Development only, pending user review.
+
+- repertoire.css is loaded inside the existing repertoire template ShadowRoot. The three internal
+  views stay in the normal flow; only the existing four-section global navigation is fixed on mobile.
+- Readable song cards retain independent learned/reviewing controls, explicit state copy, filters,
+  archive actions and existing quota-aware queue. Add themes now has its text label visible on mobile.
+- The mobile group toolbar remains sticky. Selection actions are fixed 8 px above the existing
+  navigation/safe-area token; extra content space allows the last song to scroll clear of the bar.
+  bottomInset(), selection handlers, hash navigation and shared authentication are unchanged.
+- The existing repertoire form gets one presentation wrapper around dialog-body and dialog-error.
+  All IDs, controls and FormData remain in editor-form. Header and footer stay outside the scrolling body.
+- courses.css is loaded in the main page and via the existing CSS-only course aggregator in isolated roots.
+  The course dialog append gains one gc-dialog-body wrapper. All state, references, callbacks, inputs,
+  selection recovery, batch save and verification are unchanged. State/type labels now remain visible.
+- reports.css styles the existing two-tab dialog, prepared PDF actions and personal financial cards.
+  No changes to report inputs, calculations, PDF/images, cache lifecycle or share/download handlers.
+- phase5-presentation.json records the exact changes to existing application sources. The original
+  hash/DOM guards reverse phase 5, phase 4 and phase 3 before checking the 1.7.2 baseline.
+- No legacy styles are deleted in this phase; their migration cleanup belongs to phase 6.
+
+Validation: all 318 Node tests pass (3.11 s). Final contract/local-style checks pass. Browser checks
+cover repertoire Por grupo/Catálogo/Resumen at 320, 390, 412, 768 and 1280 px; course and theme editors
+and both report tabs also cover a short 412x500 viewport. No page/card/dialog horizontal overflow.
+56 px save, learned/reviewing and share targets remain visible; form ownership and navigation positions
+are checked. 412x915 is a Xiaomi 14T Pro viewport reference, not a physical-device or virtual-keyboard test.
+
+Synthetic browser workflows:
+- Search preserves two selected course groups; their classification saves and verifies in the fake book.
+- Learned + reviewing both true on the same assignment, with pending copy then verified save.
+- A fake Propio theme can reuse order 1 from Galeta/Slap and be assigned without copying existing states.
+- Expanded template controls fit at 320 px. New form controls remain in their original form.
+- Multi-selection opens/clears correctly; its bottom gap is 8 px at 320 and 412 px, with no overflow.
+- Hash updates on group selection and clears on returning to Lista.
+- The simulated PDF prepares, exposes Compartir/Ver/Descargar and downloads successfully. It is never sent.
+  The same blob URL survives close/reopen and tab changes. The downloaded QA file is clearly named
+  INFORME_DE_SIMULACION_NO_ENVIAR.pdf in the external artifact folder.
+- Mi informe keeps 72.00 gross, 25.20 estimated IRPF (35%) and 46.80 after IRPF for the sample rows.
+- Traffic observation uses a persistent reference and an explicit Actualizar PDF positive control.
+  Changing report tabs/scope and reopening adds zero API requests in the measured sequence; navigating
+  repertoire views, changing group and searching also adds zero API requests in its measured sequence.
+  The existing independent periodic performed check remains unchanged.
+
+No real Google/Sheets/Calendar access or writes, permission changes, new connections, code push,
+release version change or deployment. All browser mutations affect synthetic in-memory fixtures only.
+Native sharing to WhatsApp and physical Xiaomi testing remain for user review.
+Before publication, phase 6 must update changed existing JS/CSS resource versions and complete
+release checks. Publication still requires the user's authorization.

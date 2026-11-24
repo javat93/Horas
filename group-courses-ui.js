@@ -114,7 +114,7 @@
         }
       }, false, true);
       save.setAttribute('data-gc-save', '');
-      dialog.append(heading, el('p', { className: 'gc-message', textContent: 'Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), el('p',{className:'gc-message',textContent:'Selecciona, clasifica y guarda. También puedes ajustar cada grupo.'}), presets, copy, list, error, reload, el('div', { className: 'gc-dialog-footer' }, [counter, save]));
+      dialog.append(heading, el('div', { className: 'gc-dialog-body' }, [el('p', { className: 'gc-message', textContent: 'Cada curso conserva su propia organización.' }), search, el('div', { className: 'gc-bulk-actions' }, [pickVisible, clear]), el('p',{className:'gc-message',textContent:'Selecciona, clasifica y guarda. También puedes ajustar cada grupo.'}), presets, copy, list, error, reload]), el('div', { className: 'gc-dialog-footer' }, [counter, save]));
       dialog.addEventListener('cancel', e => { e.preventDefault(); close(); }); document.body.append(dialogHost); draw(); dialog.showModal(); search.focus();
     }
     window.addEventListener('beforeunload', e => { if (saving || draft?.size) { e.preventDefault(); e.returnValue = ''; } });
