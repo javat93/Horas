@@ -1,7 +1,7 @@
 # PercuManager Material visual migration
 
 Development only. Based on PercuManager 1.7.2 at 91d9b51e6060bbe24960aecef8f639b71df6d659.
-Updated: 2026-11-24 Europe/Madrid. Phases 1–6 completed locally; awaiting user review before publication.
+Updated: 2026-11-24 Europe/Madrid. Phases 1–6 approved by the user; publication authorized on 2026-11-24.
 Branch: feature/material-foundation.
 No remote push, production deployment, real Google access or real data writes.
 
@@ -266,4 +266,20 @@ Mi informe still shows 72.00 gross, 25.20 estimated IRPF and 46.80 after IRPF fo
 
 No real Google access, data/session/Detalle writes, Calendar operations, permission changes,
 remote push or deployment. Synthetic fixture changes exist only in the local preview process.
-Next step: user review on the Xiaomi; publication is a separate explicitly authorized action.
+The user approved this development result and authorized publication on 2026-11-24.
+
+
+## Authorized publication preparation — 2026-11-24
+
+The approved feature/material-foundation tree is released from publish-material-20261124.
+Production rollback code is preserved at backup/before-material-20261124 (91d9b51), plus a local Git bundle.
+No Sheets backup/migration, data changes or Calendar operations are needed for this visual release.
+
+A clean LF checkout exposed an integrity-test portability issue: presentation patches recorded on
+Windows contained CRLF boundaries. The test now normalizes line endings and compares reconstructed
+original files with hashes generated directly from the 91d9b51 Git objects in source-lf-hashes.json.
+Binary bytes are preserved through latin1; only CRLF pairs normalize. Application source is unchanged
+by this correction. All original DOM contracts, APIs, auth and quota code remain protected.
+
+Publication uses the existing GitHub Pages / Vercel repository integration and current configuration.
+No Sites hosting, OAuth origin/scope, credential, CSP, backend route or sharing setting is changed.
