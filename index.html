@@ -374,6 +374,7 @@
     <link rel="stylesheet" href="design-system/legacy-bridge.css?v=material-foundation-20261123">
     <link rel="stylesheet" href="design-system/screens.css?v=material-phase3-20261123">
     <script src="design-system/presentation.js?v=material-phase3-20261123" defer></script>
+    <link rel="stylesheet" href="design-system/forms.css?v=material-phase4-20261123">
 </head>
 <body class="pb-20">
 
@@ -502,6 +503,7 @@
                 <button type="button" data-bind-click="13" aria-label="Cerrar formulario" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
             </div>
             <form id="form-evento" class="space-y-4">
+                <div class="pm-form-body">
                 <label id="session-performed-control" class="session-performed-control" hidden><input type="checkbox" id="ev-realizado" aria-label="Sesión realizada" aria-describedby="session-performed-hint" disabled><span><strong>Sesión realizada</strong><small id="session-performed-hint">Márcala si ya has terminado esta sesión.</small></span></label>
                 <input type="hidden" id="ev-rowIdx">
                 
@@ -530,6 +532,7 @@
                     </div>
                 </div>
                 
+                <p class="pm-form-section-label">Horario e importe</p>
                 <div>
                     <label for="ev-fecha" class="block text-xs font-bold text-slate-400 uppercase mb-2">Fecha</label>
                     <input type="date" id="ev-fecha" data-bind-change="17" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
@@ -614,6 +617,7 @@
                     </div>
                 </div>
 
+                </div>
                 <div class="app-form-actions flex gap-4 pt-4">
                     <button type="submit" class="flex-1 btn-blue py-4 rounded-2xl font-bold text-lg shadow-lg">Guardar Cambios</button>
                 </div>
@@ -628,6 +632,7 @@
                 <button type="button" data-bind-click="20" aria-label="Cerrar formulario" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
             </div>
             <form id="form-grupo" class="space-y-4">
+                <div class="pm-form-body">
                 <input type="hidden" id="gr-rowIdx">
                 <div>
                     <label for="gr-nombre" class="block text-xs font-bold text-slate-400 uppercase mb-2">Nombre del Grupo</label>
@@ -654,6 +659,7 @@
     <i data-lucide="map-pin" class="w-5 h-5"></i>
 </button>
                     </div>
+                </div>
                 </div>
                 <div class="app-form-actions flex gap-4 pt-4">
                     <button type="submit" class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-lg">Guardar Grupo</button>
@@ -748,6 +754,7 @@
                 <button type="button" data-bind-click="25" aria-label="Cerrar formulario" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
             </div>
             <form id="form-future-events" class="space-y-4">
+                <div class="pm-form-body">
                 <div>
                     <label for="future-month" class="block text-xs font-bold text-slate-400 uppercase mb-2">Seleccionar Mes</label>
                     <select id="future-month" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
@@ -771,6 +778,7 @@
                     <select id="future-year" class="w-full rounded-2xl p-4 input-modern text-sm font-medium" required>
                         <option value="">Selecciona un año...</option>
                     </select>
+                </div>
                 </div>
                 <div class="app-form-actions flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-2">

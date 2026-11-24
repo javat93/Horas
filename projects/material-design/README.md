@@ -61,8 +61,8 @@ The review session uses HORAS_PREVIEW_PORT=3014 without changing app configurati
 
 ## Not part of this delivery
 
-Phases 4 to 6 remain pending: full form/review composition, specialized module refinements
-and removal of duplicated legacy CSS. Phase 3 is documented below.
+Phases 5 and 6 remain pending: specialized module refinements and removal of duplicated legacy CSS.
+Phases 3 and 4 are documented below.
 No claims of a completed whole-app redesign or production publication.
 Existing workflows, quotas and state semantics remain the reference.
 
@@ -117,3 +117,48 @@ No real Sheets, Detalle, session or Calendar data was read or modified.
 
 Before later authorized publication, update cache versions for changed existing JS resources and
 run the required release checks. This delivery changes neither production version nor remote code.
+
+## Phase 4 — forms, reviews, drafts and location
+
+Local development only. Existing business JS, auth, APIs, quotas, field values and Google data are unchanged.
+
+- forms.css owns the presentation of session/group/future-event forms and existing reviews.
+- Three static forms gain only a pm-form-body wrapper; all fields remain in their original form,
+  order, IDs and bindings. A noninteractive Horario e importe label separates the session fields.
+- Header and submit area stay outside the scrolling fields. Submit targets are 56 px.
+  Mobile uses a bottom sheet and safe-area padding; desktop uses a centered 600 px form.
+- Root native reviews and protected-review retain their content and actions; mobile uses the full
+  width, 52 px or larger actions, legible decisions and internal scrolling. Background scrolling
+  is locked while a native dialog or the existing protected review is open.
+- Realizado uses a neutral pending surface and a success surface when checked. Checked and disabled
+  remain controlled exclusively by existing logic. Disabled fields keep readable text and a distinct surface.
+- Recurrence, Bolo, Calendar option and location controls share semantic roles and spacing.
+- Recovery remains explicit. Drafts are never auto-restored or submitted by this presentation.
+- Location fallback, disabled controls, error messages and confirmation semantics are preserved.
+- map-picker.js changes only 13 existing user-visible strings to repair broken accents.
+  phase4-presentation.json records every exact replacement; the integrity guard reverses both
+  phase 4 and phase 3 before hashing original source and comparing original DOM contracts.
+- Preview server changes only its local static asset allowlist; no API routing or fixture is changed.
+
+Final validation: all 318 existing Node tests pass (3.72 s), including integrity guards. No
+implementation-mirroring CSS unit tests were added. Browser checks cover 320x568, 390x844,
+412x915, 768x1024, 1280x900 and a short 412x500 viewport. No form/body horizontal overflow;
+submit area remains visible, controls retain form ownership, and review actions fit the viewport.
+The short viewport verifies available layout height, not a real Android virtual keyboard.
+412x915 is a reference for the user's Xiaomi 14T Pro, not physical-device QA.
+
+Synthetic preview workflow checks:
+- Manual Realizado preview explicitly reports Calendar unchanged; confirmed only in the fake book,
+  then reopened after reload to verify checked and disabled state. No real data was accessed.
+- Group tariff review keeps Conservar actual/Usar propuesta and cancels without applying.
+- Draft recovered explicitly; manual address transfer stays in the form until save. Reopening
+  after discarding the draft retains the original simulated address. Test drafts were discarded.
+- Map could not load in this environment; the manual fallback and close/return flow work.
+  Live map tile rendering and physical geolocation were not validated or requested.
+- Invalid amount is blocked and the warning preserves the form.
+- Future import and protected synchronization were previewed and cancelled without applying.
+- Screenshots and a self-contained review gallery are stored outside the repository.
+
+No remote push, release version change, deployment, real Detalle/session/Sheets writes, Calendar
+operation or Google authentication occurred. Before any later authorized publication, update
+existing changed JS cache versions (including map-picker.js) and perform the release checks.

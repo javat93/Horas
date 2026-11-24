@@ -3,7 +3,7 @@
     const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
     const NOMINATIM_URL = 'https://nominatim.openstreetmap.org';
     const defaultCenter = { lat: 41.3874, lng: 2.1686 };
-    const manualMessage = 'Puedes escribir la direcci�n y confirmarla manualmente.';
+    const manualMessage = 'Puedes escribir la dirección y confirmarla manualmente.';
 
     const byId = id => document.getElementById(id);
     const dialog = byId('modal-mapa');
@@ -97,7 +97,7 @@
 
     async function searchAddress(query, request) {
         if (!isCurrent(request)) return;
-        status.textContent = 'Buscando direcci�n.';
+        status.textContent = 'Buscando dirección.';
 
         const url = new URL('/search', NOMINATIM_URL);
         url.searchParams.set('format', 'jsonv2');
@@ -112,17 +112,17 @@
             if (!isCurrent(request)) return;
             const result = results?.[0];
             if (!result) {
-                status.textContent = 'No se encontr� la direcci�n. Prueba a�adiendo el municipio.';
+                status.textContent = 'No se encontró la dirección. Prueba añadiendo el municipio.';
                 return;
             }
 
             const location = { lat: Number(result.lat), lng: Number(result.lon) };
             setAddress(result.display_name);
             placeMarker(location, true);
-            status.textContent = 'Direcci�n encontrada. Puedes corregirla antes de confirmar.';
+            status.textContent = 'Dirección encontrada. Puedes corregirla antes de confirmar.';
         } catch (error) {
             if (isCurrent(request)) {
-                status.textContent = 'No se pudo buscar la direcci�n. ' + manualMessage;
+                status.textContent = 'No se pudo buscar la dirección. ' + manualMessage;
             }
         }
     }
@@ -130,7 +130,7 @@
     async function reverseGeocode(location, request) {
         if (!isCurrent(request)) return;
         placeMarker(location);
-        status.textContent = 'Obteniendo direcci�n.';
+        status.textContent = 'Obteniendo dirección.';
 
         const url = new URL('/reverse', NOMINATIM_URL);
         url.searchParams.set('format', 'jsonv2');
@@ -145,13 +145,13 @@
             if (!isCurrent(request)) return;
             if (result?.display_name) {
                 setAddress(result.display_name);
-                status.textContent = 'Ubicaci�n seleccionada. Puedes corregir la direcci�n antes de confirmar.';
+                status.textContent = 'Ubicación seleccionada. Puedes corregir la dirección antes de confirmar.';
             } else {
-                status.textContent = 'No se encontr� una direcci�n para este punto. ' + manualMessage;
+                status.textContent = 'No se encontró una dirección para este punto. ' + manualMessage;
             }
         } catch (error) {
             if (isCurrent(request)) {
-                status.textContent = 'No se pudo obtener la direcci�n. ' + manualMessage;
+                status.textContent = 'No se pudo obtener la dirección. ' + manualMessage;
             }
         }
     }
@@ -199,7 +199,7 @@
             map.resize();
             searchButton.disabled = false;
             locateButton.disabled = !navigator.geolocation;
-            status.textContent = 'Busca una direcci�n o toca un punto en el mapa.';
+            status.textContent = 'Busca una dirección o toca un punto en el mapa.';
         } catch (error) {
             map?.remove();
             map = undefined;
@@ -224,7 +224,7 @@
         revision++;
         updateExternalLink();
         confirmButton.disabled = !address.value.trim();
-        status.textContent = 'Busca o confirma la direcci�n escrita.';
+        status.textContent = 'Busca o confirma la dirección escrita.';
     });
 
     byId('map-search-form').addEventListener('submit', event => {
@@ -235,7 +235,7 @@
 
     locateButton.addEventListener('click', () => {
         const request = ++revision;
-        status.textContent = 'Obteniendo tu ubicaci�n.';
+        status.textContent = 'Obteniendo tu ubicación.';
         navigator.geolocation.getCurrentPosition(position => {
             if (!isCurrent(request)) return;
             const point = { lat: position.coords.latitude, lng: position.coords.longitude };
@@ -243,7 +243,7 @@
             reverseGeocode(point, request);
         }, () => {
             if (isCurrent(request)) {
-                status.textContent = 'No se pudo obtener tu ubicaci�n. Busca una direcci�n o elige un punto.';
+                status.textContent = 'No se pudo obtener tu ubicación. Busca una dirección o elige un punto.';
             }
         }, { timeout: 8000 });
     });
