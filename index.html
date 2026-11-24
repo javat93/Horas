@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="design-system/tokens.css?v=material-foundation-20261123">
 <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.17.0/dist/maplibre-gl.css">
-    <link rel="stylesheet" href="map-picker.css?v=20261111-open-map">
-    <script src="map-picker.js?v=20261111-open-map" defer></script>
+    <script src="map-picker.js?v=material-final-20261124" defer></script>
     <script src="vendor/lucide.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js"></script>
@@ -54,329 +53,25 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="PercuManager">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        :root { --brand-blue: #2563eb; --brand-dark: #1e40af; --brand-light: #eff6ff; --bg-main: #f8fafc; 
-		/* FullCalendar Google Style Overrides */
-            --fc-border-color: #e2e8f0;
-            --fc-button-bg-color: #ffffff;
-            --fc-button-border-color: #e2e8f0;
-            --fc-button-text-color: #475569;
-            --fc-button-active-bg-color: #f1f5f9;
-            --fc-today-bg-color: transparent !important;
-            --fc-event-bg-color: #2563eb;
-            --fc-event-border-color: transparent;}
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-main); color: #1e293b; }
-        
-        .tab-active { background: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); color: var(--brand-blue) !important; }
-        
-        /* FullCalendar Custom CSS */
-        #calendar {
-            background: white;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-        }
-
-        .fc .fc-toolbar-title {
-            font-size: 1.25rem !important;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .fc .fc-button {
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            font-size: 0.875rem !important;
-            padding: 8px 16px !important;
-            text-transform: capitalize !important;
-            transition: all 0.2s;
-        }
-
-        .fc .fc-button-primary {
-            background-color: white !important;
-            border: 1px solid #e2e8f0 !important;
-            color: #475569 !important;
-        }
-
-        .fc .fc-button-primary:hover {
-            background-color: #f8fafc !important;
-            color: var(--brand-blue) !important;
-        }
-
-        .fc .fc-button-primary:not(:disabled).fc-button-active {
-            background-color: #f1f5f9 !important;
-            border-color: #cbd5e1 !important;
-            color: var(--brand-blue) !important;
-        }
-
-        /* Indicador de hoy estilo Google */
-        .fc .fc-day-today {
-            background-color: transparent !important;
-        }
-
-        .fc .fc-day-today .fc-daygrid-day-number {
-            background-color: var(--brand-blue);
-            color: white !important;
-            border-radius: 9999px;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 4px;
-        }
-
-        .fc .fc-daygrid-day-number {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #64748b;
-            padding: 8px !important;
-        }
-
-        /* Estilo de los eventos */
-        .fc-event {
-            border-radius: 6px !important;
-            padding: 3px 6px !important;
-            font-size: 0.75rem !important;
-            font-weight: 500 !important;
-            margin-bottom: 2px !important;
-            border: none !important;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        .fc-col-header-cell {
-            padding-bottom: 12px !important;
-            border: none !important;
-        }
-
-        .fc-col-header-cell-cushion {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #94a3b8;
-            font-weight: 700;
-            text-decoration: none !important;
-        }
-
-        .fc-theme-standard td, .fc-theme-standard th {
-            border-color: #f1f5f9 !important;
-        }
-
-        .fc-scrollgrid {
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #f1f5f9 !important;
-        }
-        .header-modern { background: white; border-bottom: 1px solid #e2e8f0; }
-        .tab-active { color: var(--brand-blue); background-color: var(--brand-light); font-weight: 700; }
-        .card-modern { background: white; border-radius: 1.25rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02); transition: all 0.2s; }
-        .card-modern:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
-        .session-card--typed {
-            --session-type-bg: #dbeafe;
-            --session-type-text: #1e40af;
-        }
-        .session-card--bolo {
-            --session-type-bg: #fef3c7;
-            --session-type-text: #92400e;
-        }
-        .session-card--typed .session-card-main,
-        .session-card--typed .session-card-details { min-width: 0; }
-        .session-card--typed .session-card-title {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: .25rem .5rem;
-            overflow-wrap: anywhere;
-        }
-        .session-card--typed .session-card-icon { flex-shrink: 0; }
-        .session-card--typed .session-type-label {
-            flex-shrink: 0;
-            background-color: var(--session-type-bg);
-            color: var(--session-type-text);
-        }
-        .session-type-label {
-            padding: .125rem .5rem;
-            border-radius: 999px;
-            font-size: .6875rem;
-            font-weight: 700;
-            line-height: 1rem;
-        }
-        .session-card--typed .session-card-meta { flex-wrap: wrap; row-gap: .25rem; }
-        @media (max-width: 639px) {
-            .session-card--typed .session-card-main { flex-basis: 100%; }
-        }
-        .btn-blue { background-color: var(--brand-blue); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
-        .input-modern { border: 2px solid #f1f5f9; background-color: #f8fafc; transition: all 0.2s; }
-        .input-modern:focus { border-color: var(--brand-blue); background-color: white; outline: none; }
-        .glass-modal { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
-        .pac-container { border-radius: 1rem; border: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); font-family: inherit; z-index: 9999 !important; }
-    /* Estilos específicos para móviles - Vista Lista */
-        @media (max-width: 768px) {
-            #calendar {
-                padding: 10px !important;
-                border-radius: 12px !important;
-            }
-
-            .fc .fc-toolbar-title {
-                font-size: 1.1rem !important;
-                font-weight: 700 !important;
-            }
-
-            .fc .fc-button {
-                font-size: 0.75rem !important;
-                padding: 6px 12px !important;
-                border-radius: 6px !important;
-            }
-
-            /* Toolbar compacto */
-            .fc .fc-toolbar {
-                margin-bottom: 12px !important;
-                flex-wrap: wrap !important;
-                gap: 8px !important;
-            }
-
-            .fc .fc-toolbar-chunk {
-                margin-bottom: 4px !important;
-            }
-
-            /* Ocultar botones de vista en móvil */
-            .fc .fc-dayGridMonth-button,
-            .fc .fc-timeGridWeek-button,
-            .fc .fc-timeGridDay-button {
-                display: none !important;
-            }
-
-            /* ===== VISTA LISTA - estilos ===== */
-            .fc-list {
-                border: none !important;
-            }
-
-            .fc-list-day-cushion {
-                background: linear-gradient(135deg, #eff6ff, #dbeafe) !important;
-                padding: 10px 14px !important;
-                border-radius: 10px !important;
-                margin-bottom: 4px !important;
-            }
-
-            .fc-list-day-text,
-            .fc-list-day-side-text {
-                font-size: 0.85rem !important;
-                font-weight: 700 !important;
-                color: #2563eb !important;
-                text-decoration: none !important;
-            }
-
-            /* Resaltar hoy en vista lista móvil - Estilo sutil y limpio */
-            .fc-list-day.fc-day.fc-day-today .fc-list-day-cushion.fc-cell-shaded {
-                background: #c4e46d !important;
-                background-color: #c4e46d !important;
-                border: none !important;
-                box-shadow: 0 2px 8px rgba(196, 228, 109, 0.3) !important;
-                position: relative !important;
-                margin: 6px 0 !important;
-                transform: scale(1.01) !important;
-            }
-
-            .fc-list-day.fc-day.fc-day-today .fc-list-day-text,
-            .fc-list-day.fc-day.fc-day-today .fc-list-day-side-text {
-                color: #2563eb !important;
-                font-weight: 700 !important;
-                font-size: 0.95rem !important;
-                text-shadow: none !important;
-            }
-
-            
-            
-            .fc-list-event {
-                border-radius: 10px !important;
-                margin-bottom: 6px !important;
-                cursor: pointer !important;
-                transition: background 0.15s !important;
-            }
-
-            .fc-list-event:hover td {
-                background-color: #f1f5f9 !important;
-            }
-
-            .fc-list-event td {
-                padding: 10px 12px !important;
-                border: none !important;
-                border-bottom: 1px solid #f1f5f9 !important;
-            }
-
-            .fc-list-event-dot {
-                border-width: 8px !important;
-                border-radius: 50% !important;
-            }
-
-            .fc-list-event-time {
-                font-size: 0.78rem !important;
-                font-weight: 600 !important;
-                color: #64748b !important;
-                white-space: nowrap !important;
-            }
-
-            .fc-list-event-title a {
-                font-size: 0.95rem !important;
-                font-weight: 700 !important;
-                color: #1e293b !important;
-                text-decoration: none !important;
-            }
-
-            .fc-list-empty {
-                background: white !important;
-            }
-
-            .fc-list-empty-cushion {
-                font-size: 0.9rem !important;
-                color: #94a3b8 !important;
-                padding: 40px 20px !important;
-                text-align: center !important;
-            }
-
-            /* Scrollgrid en móvil */
-            .fc-scrollgrid {
-                border: none !important;
-            }
-        }
-
-        /* Mejoras adicionales para tablets */
-        @media (max-width: 1024px) and (min-width: 769px) {
-            .fc-event {
-                font-size: 0.8rem !important;
-                padding: 3px 7px !important;
-            }
-        }
-    </style>
-    <link rel="stylesheet" href="review-ui.css?v=reports-design-20261123">
-    <link rel="stylesheet" href="app-ui.css?v=manual-done-20261123">
+    <link rel="stylesheet" href="design-system/app.css?v=material-final-20261124">
     <script src="app-ui.js?v=improvements-20261122" defer></script>
     <script src="repertoire-model.js" defer></script>
     <script src="repertoire-templates.js?v=improvements-20261122" defer></script>
     <script src="repertoire-client.js?v=improvements-20261122" defer></script>
     <script src="group-courses.js?v=improvements-20261122" defer></script>
-    <link rel="stylesheet" href="group-courses.css?v=improvements-20261122">
-    <script src="sandbox/repertoire-ui.js?v=improvements-20261122" defer></script>
+    <script src="sandbox/repertoire-ui.js?v=material-final-20261124" defer></script>
     <script src="repertoire-integration.js?v=improvements-20261122" defer></script>
-    <script src="group-courses-ui.js?v=improvements-20261122" defer></script>
+    <script src="group-courses-ui.js?v=material-final-20261124" defer></script>
     <script src="draft-vault.js?v=improvements-20261122" defer></script>
     <script src="form-drafts.js?v=improvements-20261122" defer></script>
     <script src="report-tools.js?v=improvements-20261122" defer></script>
     <script src="report-ui.js?v=improvements-20261122" defer></script>
     <script src="reports-dialog.js?v=reports-design-20261123" defer></script>
-    <link rel="stylesheet" href="admin-report.css?v=reports-design-20261123">
     <script src="admin-report-model.js?v=admin-exports-20261123" defer></script>
     <script src="admin-report-images.js?v=admin-exports-20261123" defer></script>
     <script src="admin-report-pdf.js?v=admin-exports-20261123" defer></script>
     <script src="admin-report-ui.js?v=reports-design-20261123" defer></script>
-    <link rel="stylesheet" href="design-system/components.css?v=material-foundation-20261123">
-    <link rel="stylesheet" href="design-system/legacy-bridge.css?v=material-foundation-20261123">
-    <link rel="stylesheet" href="design-system/screens.css?v=material-phase3-20261123">
-    <script src="design-system/presentation.js?v=material-phase3-20261123" defer></script>
-    <link rel="stylesheet" href="design-system/forms.css?v=material-phase4-20261123">
-    <link rel="stylesheet" href="design-system/courses.css?v=material-phase5-20261124">
-    <link rel="stylesheet" href="design-system/reports.css?v=material-phase5-20261124">
+    <script src="design-system/presentation.js?v=material-final-20261124" defer></script>
 </head>
 <body class="pb-20">
 
@@ -487,7 +182,7 @@
         </div>
         <section id="tab-repertorio" class="hidden" aria-label="Repertorio"></section>
     </main>
-    <template id="repertoire-template"><link rel="stylesheet" href="design-system/tokens.css?v=material-foundation-20261123"><link rel="stylesheet" href="sandbox/repertoire.css?v=improvements-20261122"><link rel="stylesheet" href="repertoire-integrated.css?v=improvements-20261122"><link rel="stylesheet" href="design-system/components.css?v=material-foundation-20261123"><link rel="stylesheet" href="design-system/legacy-bridge.css?v=material-foundation-20261123"><link rel="stylesheet" href="design-system/repertoire.css?v=material-phase5-20261124"><div class="repertoire-integrated"><div hidden><span id="mode-badge"></span><span id="connection-label"></span><button id="connect">Conectar Google</button><button id="disconnect">Desconectar</button></div><main class="shell"><div class="page-heading"><div><p class="eyebrow">TEMAS Y GRUPOS</p><h2>Repertorio por grupo</h2><p class="intro">Lo que ya habéis aprendido y lo que toca repasar.</p></div><a id="copy-link" class="text-link" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60/edit">Abrir hoja de cálculo ↗</a></div>
+    <template id="repertoire-template"><link rel="stylesheet" href="design-system/repertoire-bundle.css?v=material-final-20261124"><div class="repertoire-integrated"><div hidden><span id="mode-badge"></span><span id="connection-label"></span><button id="connect">Conectar Google</button><button id="disconnect">Desconectar</button></div><main class="shell"><div class="page-heading"><div><p class="eyebrow">TEMAS Y GRUPOS</p><h2>Repertorio por grupo</h2><p class="intro">Lo que ya habéis aprendido y lo que toca repasar.</p></div><a id="copy-link" class="text-link" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/1sjXj8LYRWHNCp9X43nl-Cn5LSFLcFy42j2QB24Zxh60/edit">Abrir hoja de cálculo ↗</a></div>
 <nav class="tabs" aria-label="Secciones de repertorio"><button data-tab="repertoire" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13M9 9l12-2"/><ellipse cx="6" cy="18" rx="3" ry="3"/><ellipse cx="18" cy="16" rx="3" ry="3"/></svg><span>Por grupo</span></button><button data-tab="catalog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span>Catálogo</span></button><button data-tab="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-4-5"/></svg><span>Resumen</span></button></nav>
 <div id="status" class="status" role="status" aria-live="polite" hidden></div><div id="issue-panel" class="issues" hidden></div><section id="workspace" aria-busy="false"><div class="empty"><span class="empty-symbol" aria-hidden="true">♫</span><h2>Todo tu repertorio en un lugar</h2><p>Conecta Google para consultar el repertorio de tus grupos.</p></div></section></main>
 <dialog id="editor" aria-labelledby="dialog-title"><form id="editor-form"><div class="dialog-heading"><div><p id="dialog-kicker" class="eyebrow"></p><h2 id="dialog-title"></h2></div><button id="close-dialog" type="button" class="icon-button" aria-label="Cerrar formulario">×</button></div><div class="pm-repertoire-form-body"><div id="dialog-body"></div><p id="dialog-error" class="form-error" role="alert" hidden></p></div><div class="dialog-footer"><span id="dirty-label" class="muted"></span><button id="cancel-dialog" type="button" class="button">Cancelar</button><button id="save-dialog" type="submit" class="button primary">Guardar</button></div></form></dialog>
@@ -846,7 +541,7 @@
     </div>
 
     <script src="app-main.js?v=google-startup-20261122"></script>
-<script src="app-views.js?v=improvements-20261122"></script>
+<script src="app-views.js?v=material-final-20261124"></script>
 <script src="app-forms.js?v=manual-done-20261123"></script>
 <script src="group-options.js?v=improvements-20261122"></script>
 <script src="legacy-bindings.js?v=improvements-20261122" defer></script>

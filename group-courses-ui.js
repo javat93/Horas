@@ -69,7 +69,7 @@
       if (recover === true) { const stored = window.horasDraftVault?.read('course:'+draftCourse); if (Array.isArray(stored)) { try { C.validateUpdates(stored); for(const r of stored) if(data().groups.some(g=>g.id===G.id(r.grupo))) draft.set(G.id(r.grupo),{...r}); } catch {} } }
       const editorData = data(), editData = () => data() || editorData;
       dialog = el('dialog', { className: 'gc-dialog', 'aria-labelledby': 'gc-dialog-title' });
-      dialogHost = el('div'); const shadow = dialogHost.attachShadow({ mode: 'open' }); shadow.append(el('link', { rel: 'stylesheet', href: 'design-system/group-courses.css?v=material-foundation-20261123' }), dialog);
+      dialogHost = el('div'); const shadow = dialogHost.attachShadow({ mode: 'open' }); shadow.append(el('link', { rel: 'stylesheet', href: 'design-system/course-bundle.css?v=material-final-20261124' }), dialog);
       const close = () => { if (saving) return; if (draft.size && !window.confirm('¿Descartar la selección sin guardar?')) return; window.horasDraftVault?.remove('course:'+draftCourse); dialog.close(); dialogHost.remove(); dialog = null; dialogHost = null; draft = null; };
       const heading = el('div', { className: 'gc-dialog-heading' }, [el('div', {}, [el('p', { className: 'gc-kicker', textContent: 'ORGANIZAR ' + draftCourse }), el('h2', { id: 'gc-dialog-title', textContent: 'Tus grupos de este curso' })]), button('Cerrar', close)]);
       const error = el('p', { className: 'gc-message', role: 'alert' }), counter = el('p', { className: 'gc-message', 'aria-live': 'polite' });

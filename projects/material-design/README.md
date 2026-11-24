@@ -1,7 +1,8 @@
 # PercuManager Material visual migration
 
 Development only. Based on PercuManager 1.7.2 at 91d9b51e6060bbe24960aecef8f639b71df6d659.
-Date: 2026-11-23 Europe/Madrid. Branch: feature/material-foundation.
+Updated: 2026-11-24 Europe/Madrid. Phases 1–6 completed locally; awaiting user review before publication.
+Branch: feature/material-foundation.
 No remote push, production deployment, real Google access or real data writes.
 
 ## Phase 1 baseline
@@ -34,8 +35,8 @@ Legacy index styles, app-ui.css, review-ui.css, course/repertoire/report/map sty
 The new primitives use targeted !important declarations where the existing cascade already uses
 inline or important styles. Roles are supplied through custom properties so selected, secondary
 and disabled states can override base appearance consistently. No cascade layers are introduced.
-Remove compatibility selectors and importance progressively in the later cleanup phase, after
-their old consumers have been migrated.
+Phase 6 consolidates the served cascade and removes exact duplicate declarations. Compatibility
+selectors and differing fallbacks remain as build sources, preserving existing consumers.
 
 ## Validation
 
@@ -212,3 +213,57 @@ release version change or deployment. All browser mutations affect synthetic in-
 Native sharing to WhatsApp and physical Xiaomi testing remain for user review.
 Before publication, phase 6 must update changed existing JS/CSS resource versions and complete
 release checks. Publication still requires the user's authorization.
+
+
+## Phase 6 — consolidate, clean and verify
+
+Date: 2026-11-24 Europe/Madrid. Development only; not published.
+
+The approved appearance is preserved. One compiled application entry, one repertoire ShadowRoot
+entry and one course-dialog entry replace dispersed runtime imports. tokens.css remains an early
+page foundation; the existing Tailwind and vendor MapLibre assets remain in their original order.
+The extracted legacy-page.css replaces the old index style block. Its unused remote font import
+is removed; the system font from the approved tokens is unchanged. No CSP/header change.
+
+Build ownership:
+- Edit tokens.css/components.css and the existing screen/form/course/report/repertoire sources.
+- app-entry.css and repertoire-entry.css record cascade order; group-courses.css owns the dialog source.
+- Run node design-system/build-styles.cjs with the existing declared PostCSS development dependency.
+- Commit app.css, repertoire-bundle.css, course-bundle.css and build-manifest.json together.
+- Run node design-system/build-styles.cjs --check to reject stale output.
+- Builds normalize Windows line endings and never fetch remote CSS or execute browser code.
+- Do not hand-edit generated bundles. Old CSS files remain source/fallback files, not parallel live overrides.
+
+The compiler removes only earlier identical selector/property/value/importance declarations within
+the same media/supports conditions. It keeps different-value fallbacks and skips other at-rule
+scopes. Removed 275 exact duplicate declarations: app 17, repertoire 254, course dialog 4.
+The repertoire no longer appends a second course stylesheet at runtime. All subscriptions, callbacks,
+controls, IDs, data attributes, form ownership and module mounts are preserved.
+Changed presentation JS/CSS resource URLs are versioned material-final-20261124. App version stays 1.7.2.
+
+Validation:
+- All 318 existing Node tests pass: 3.49 s final run; no extra CSS implementation tests added.
+- Existing contract guard still covers 183 original files and 224 original DOM contracts.
+  phase6-presentation.json records reversible presentation changes. Text line-ending variants are
+  accepted by the source guard; invalid-UTF8 legacy files still require their exact byte hash.
+- The build --check passes and manifest hashes cover all compiler/CSS inputs and generated outputs.
+- Computed styles and dimensions match phase 5 in 33 contexts: 11 views at 320, 412 and 1280 px.
+  Calendar comparison starts at 1280 px on both versions, because existing titles depend on the
+  viewport at calendar creation. No Calendar logic was altered to normalize this existing behavior.
+- Additional checks at 390, 768 and short 412x500: no page/form/report horizontal overflow; editor
+  scrolling and visible save area, independent states, shared navigation and hash cleanup preserved.
+- 412x915 is the Xiaomi 14T Pro viewport reference; physical hardware, Android keyboard, native
+  WhatsApp sharing, live maps/geolocation and real Google connectivity are not tested in this phase.
+- Browser console returned no captured errors. Screenshots, style comparison and review gallery
+  are stored outside Git in material-fase-6.
+
+Synthetic workflows: two repertoire booleans combine in one queued API operation and show
+Marcados guardados y verificados. Changing group, searching and visiting internal repertoire views
+adds zero API requests in the measured sequence. The report positive control performs one explicit
+adminReports request. Tab changes and close/reopen preserve its exact PDF blob without another
+adminReports request; a separate protected state refresh was observed and remains unchanged.
+Mi informe still shows 72.00 gross, 25.20 estimated IRPF and 46.80 after IRPF for sample rows.
+
+No real Google access, data/session/Detalle writes, Calendar operations, permission changes,
+remote push or deployment. Synthetic fixture changes exist only in the local preview process.
+Next step: user review on the Xiaomi; publication is a separate explicitly authorized action.
